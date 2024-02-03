@@ -1,6 +1,8 @@
 
 part of localbooru_api;
 
+const int IMAGE_LIMIT_SIZE = 30;
+
 class Booru {
     Booru(this.path);
     
@@ -38,7 +40,7 @@ class Booru {
 
     Future<List<BooruImage>> getImagesFromRange(List list, {required int from, required int to}) async {
         final List rangedList = list.getRange(from, to).toList();
-        debugPrint("rangedList: $rangedList");
+        // debugPrint("rangedList: $rangedList");
 
         List<BooruImage> mappedList = [];
         for (Map item in rangedList) {
@@ -47,11 +49,11 @@ class Booru {
         return mappedList.reversed.toList();
     }
 
-    Future<List<BooruImage>> getImagesFromIndex(List list, {int index = 0, int size = 50}) async {
+    Future<List<BooruImage>> getImagesFromIndex(List list, {int index = 0, int size = IMAGE_LIMIT_SIZE}) async {
         final int length = list.length;
 
-        int from = length - (50 * (index + 1));
-        int to = length - (50 * index);
+        int from = length - (IMAGE_LIMIT_SIZE * (index + 1));
+        int to = length - (IMAGE_LIMIT_SIZE * index);
         if(from < 0) from = 0;
         if(to < 0) to = length;
 
@@ -62,14 +64,22 @@ class Booru {
 
     Future<List<BooruImage>> getRecentImages() async => await getImagesFromIndex((await getRawInfo())["files"]);
 
-    Future<List<BooruImage>> searchByTags(String tags, {int index = 0}) async {
+    Future<List> _doTagFiltering(String tags) async {
         final tagList = tags.split(" ");
         final List files = (await getRawInfo())["files"];
         final List filteredFiles = files.where((file) {
             return tagList.any((tag) => file["tags"].toLowerCase().contains(tag));
         }).toList();
 
-        return await getImagesFromIndex(filteredFiles);
+        return filteredFiles;
+    }
+
+    Future<List<BooruImage>> searchByTags(String tags, {int index = 0}) async => await getImagesFromIndex(await _doTagFiltering(tags), index: index);
+
+    Future<int> getIndexNumberLength(tags, {int size = IMAGE_LIMIT_SIZE}) async {
+        final list = await _doTagFiltering(tags);
+
+        return (list.length / size).ceil();
     }
 }
 

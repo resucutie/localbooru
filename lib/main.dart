@@ -1,33 +1,70 @@
-import 'package:file_picker/file_picker.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:localbooru/components/image-display.dart';
+import 'package:localbooru/api/index.dart';
+import 'package:localbooru/browse.dart';
+import 'package:localbooru/setbooru.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:localbooru/permissions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import "api/index.dart";
+Future<bool> hasExternalStoragePerms() async{
+    if (Platform.isAndroid || Platform.isIOS) return await Permission.manageExternalStorage.status.isGranted;
+    return true;
+}
 
 final _router = GoRouter(
-    initialLocation: '/',
+    initialLocation: '/home',
     routes: [
         GoRoute(path: '/',
             redirect: (context, GoRouterState state) async {
-                final status = await Permission.manageExternalStorage.status;
-                debugPrint(status.isGranted.toString());
-                if (status.isGranted) {
-                    return "/posts";
+                final hasPerms = await hasExternalStoragePerms();
+                final prefs = await SharedPreferences.getInstance();
+                
+                if (!hasPerms) {
+                    return "/permissions";
                 }
-                return "/permissions";
+
+                debugPrint(prefs.getString("booruPath"));
+                
+                if (prefs.getString("booruPath") == null) return "/setbooru";
+
+                return null;
             },
             routes: [
-                GoRoute(path: "posts",
-                    builder: (context, state) {
-                        return const HomeScreen(title: 'Posts');
-                    },
+                ShellRoute(
+                    builder: (context, state, child) => HomeScreen(child: child),
+                    routes: [
+                        GoRoute(path: "home",
+                            builder: (context, state) => const SearchTagView(),
+                        ),
+                        GoRoute(path: "search",
+                            builder: (context, state)  {
+                                final String? tags = state.uri.queryParameters["tag"];
+                                debugPrint("queryParams $tags");
+                                debugPrint("fullPath ${state.fullPath}");
+                                return BooruLoader(
+                                    builder: (context, booru) => GalleryViewer(
+                                        booru: booru,
+                                        tags: state.uri.queryParameters["tag"] ?? "",
+                                        index: int.parse(state.uri.queryParameters["index"] ?? "0"),
+                                        routeNavigation: true,
+                                    ),
+                                );
+                            }
+                        ),
+                        GoRoute(path: "recent",
+                            redirect: (_, __) => '/search/',
+                        )
+                    ]
                 ),
                 GoRoute(path: "permissions",
                     builder: (context, state) => const PermissionsScreen(),
+                ),
+                GoRoute(path: "setbooru",
+                    builder: (context, state) => const SetBooruScreen(),
                 )
             ]
         ),
@@ -57,96 +94,42 @@ class MyApp extends StatelessWidget {
     }
 }
 
-class HomeScreen extends StatefulWidget {
-    const HomeScreen({super.key, required this.title});
+class HomeScreen extends StatelessWidget {
+    const HomeScreen({super.key, required this.child});
 
-    final String title;
-
-    @override
-    State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-    String _dir = "";
-    List<BooruImage> _files = [];
-
-    void _load () async {
-        Booru boorurepo = Booru(_dir);
-
-        List<BooruImage> images = await boorurepo.searchByTags("upper_body");
-        debugPrint("List: $images");
-        setState(() {
-            _files = images;
-        });
-    }
+    final Widget child;
 
     @override
     Widget build(BuildContext context) {
         return Scaffold(
             appBar: AppBar(
                 backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-                title: Text(widget.title),
+                title: const Text("LocalBooru"),
             ),
-            body: Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                        const Text(
-                            'Current Path:',
-                        ),
-                        Text(
-                            _dir == "" ? "None" : _dir,
-                        ),
-                        RepoGrid(images: _files)
-                    ],
-                ),
-            ),
-            floatingActionButton: Wrap(
-              direction: Axis.vertical,
-              spacing: 16,
-              children: [
-                 FloatingActionButton(
-                    heroTag: "open",
-                    onPressed: () async {
-                        debugPrint("_dir: $_dir");
-                        String? output = await FilePicker.platform.getDirectoryPath();
-                        if(output == null) return;
-                        debugPrint(output);
-                        setState(() {
-                            _dir = output;
-                        });
-                        _load();
-                    },
-                    tooltip: 'Open File',
-                    child: const Icon(Icons.folder),
-                ),
-                // FloatingActionButton(
-                //     heroTag: "load",
-                //     onPressed: () async {
-                //         Booru thebooru = Booru(_dir);
-                //         Map booruconfig = await thebooru.getRawInfo();
-                //         // debugPrint("$booruconfig");
-                //     },
-                //     tooltip: 'Write File',
-                //     child: const Icon(Icons.note_add),
-                // ), 
-                // FloatingActionButton(
-                //     heroTag: "test",
-                //     onPressed: _load,
-                //     tooltip: 'Test',
-                //     child: const Icon(Icons.science),
-                // ),
-              ],
-            ), // This trailing comma makes auto-formatting nicer for build methods.
+            body: child
         );
     }
 }
 
-// int incrementThree (int num, {int add = 3, List<int> addConsecutive = const []}) {
-//     int res = num + add;
-//     // for (num in addConsecutive) {
-//     //     res = res + num;
-//     // }
-//     addConsecutive.forEach((num) => res = res + num);
-//     return res;
-// }
+typedef BooruLoaderWidgetBuilder = Widget Function(BuildContext context, Booru booru);
+class BooruLoader extends StatelessWidget {
+    const BooruLoader({super.key, required this.builder});
+
+    final BooruLoaderWidgetBuilder builder;
+    
+    @override
+    Widget build(BuildContext context) {
+        return FutureBuilder<Booru>(
+            future: getCurrentBooru(),
+            builder: (context, AsyncSnapshot<Booru> snapshot) {
+                if(snapshot.hasData) {
+                    return builder(context, snapshot.data!);
+                } else if(snapshot.hasError) {
+                    throw snapshot.error!;
+                }
+                return const Center(child: CircularProgressIndicator());
+            }
+        );
+    }
+    
+}

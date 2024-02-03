@@ -25,15 +25,17 @@ class RepoGrid extends StatelessWidget {
         if(images.isEmpty) {
             return const SizedBox.shrink();
         } else {
-            return Expanded(child: GridView.count(
-                crossAxisCount: 3,
-                children: images.map((image) {
+            return SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                ),
+                delegate: SliverChildListDelegate(images.map((image) {
                     return Padding(
                         padding: const EdgeInsets.all(5.0),
                         child: ExternalImage(image: image, onPressed: onPressed),
                     );
-                }).toList(),
-            ));
+                }).toList()),
+            );
         }
     }
 }
