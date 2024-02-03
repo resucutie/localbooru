@@ -76,6 +76,8 @@ class _SearchTagState extends State<SearchTag> {
 
     @override
     void initState() {
+        super.initState();
+
         _isEmpty = widget.controller!.text.isEmpty;
     }
 
