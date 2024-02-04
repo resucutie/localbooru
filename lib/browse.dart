@@ -142,13 +142,13 @@ class _GalleryViewerState extends State<GalleryViewer> {
 
         return Column(
             children: [
-                Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SearchTag(
-                            onSearch: (_) => _onSearch(),
-                            controller: _searchController,
-                    ),
-                ),
+                // Padding(
+                //     padding: const EdgeInsets.all(8.0),
+                //     child: SearchTag(
+                //             onSearch: (_) => _onSearch(),
+                //             controller: _searchController,
+                //     ),
+                // ),
                 Expanded(
                     child: FutureBuilder<Map>(
                         future: _obtainResults(),
@@ -171,6 +171,10 @@ class _GalleryViewerState extends State<GalleryViewer> {
 
                                 return CustomScrollView(
                                     slivers: [
+                                        SliverPersistentHeader(
+                                            delegate: SearchBarHeaderDelegate(onSearch: (_) => _onSearch(), searchController: _searchController),
+                                            pinned: true,
+                                        ),
                                         SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
                                         RepoGrid(images: snapshot.data!["images"]),
                                         SliverToBoxAdapter(
@@ -221,4 +225,34 @@ class _GalleryViewerState extends State<GalleryViewer> {
             ],
         );
     }
+}
+
+
+class SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
+    final double height;
+    Function(String value) onSearch;
+    final TextEditingController searchController;
+
+
+    SearchBarHeaderDelegate({required this.onSearch, required this.searchController, this.height = 56.0});
+
+    @override
+    Widget build(context, double shrinkOffset, bool overlapsContent) {
+        return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SearchTag(
+                    onSearch: onSearch,
+                    controller: searchController,
+            ),
+        );
+    }
+
+    @override
+    double get maxExtent => height;
+
+    @override
+    double get minExtent => height;
+
+    @override
+    bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) => false;
 }

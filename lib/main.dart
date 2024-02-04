@@ -35,7 +35,7 @@ final _router = GoRouter(
             },
             routes: [
                 ShellRoute(
-                    builder: (context, state, child) => HomeScreen(child: child),
+                    builder: (context, state, child) => BrowseScreen(uri: state.uri, child: child),
                     routes: [
                         GoRoute(path: "home",
                             builder: (context, state) => const SearchTagView(),
@@ -94,17 +94,62 @@ class MyApp extends StatelessWidget {
     }
 }
 
-class HomeScreen extends StatelessWidget {
-    const HomeScreen({super.key, required this.child});
+class BrowseScreen extends StatelessWidget {
+    BrowseScreen({super.key, required this.child, required this.uri});
 
     final Widget child;
+    final Uri uri;
+
+    bool _isHome() => uri.path == "/home";
+    String _getTitle(Uri uri) {
+        // Uri.parse(url).queryParameters["tag"].isEmpty();
+        final String? tags = uri.queryParameters["tag"];
+        if(uri.path.contains("/search")) {
+            if(tags != null && tags.isNotEmpty) return "Browse";
+            else return "Recent";
+        }
+        return "Home";
+    }
+    String? _getSubtitle(Uri uri) {
+        final String? index = uri.queryParameters["index"];
+        if(uri.path.contains("/search")) {
+            final int page = index == null ? 1 : int.parse(index) + 1;
+            return "Page $page";
+        }
+        return null;
+    }
+
 
     @override
     Widget build(BuildContext context) {
         return Scaffold(
             appBar: AppBar(
                 backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-                title: const Text("LocalBooru"),
+                title: Builder(
+                    builder: (builder) {
+                        final String title = _getTitle(uri);
+                        final String? subtitle = _getSubtitle(uri);
+                        return ListTile(
+                            title: Text(title, style: const TextStyle(fontSize: 20.0)),
+                            subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 14.0)) : null,
+                            contentPadding: EdgeInsets.zero,
+                        );
+                    }
+                ),
+                leading: !_isHome() ? IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                        if(context.canPop()) context.pop();
+                    },
+                ) : null,
+            ),
+            drawer: Drawer(
+                child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: const <Widget>[
+                        Text("hi")
+                    ],
+                ),
             ),
             body: child
         );
