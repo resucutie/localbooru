@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/browse.dart';
 import 'package:localbooru/setbooru.dart';
+import 'package:localbooru/utils/platformTools.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 
@@ -73,6 +75,16 @@ final _router = GoRouter(
 
 void main() async {
     runApp(const MyApp());
+
+    if(isDestkop()) {
+        doWhenWindowReady(() {
+            const initialSize = Size(1280, 720);
+            appWindow.minSize = initialSize;
+            appWindow.size = initialSize;
+            appWindow.alignment = Alignment.center;
+            appWindow.show();
+        });
+    }
 }
 
 class MyApp extends StatelessWidget {
@@ -83,8 +95,8 @@ class MyApp extends StatelessWidget {
     Widget build(BuildContext context) {
         return MaterialApp.router(
             theme: ThemeData(
-                primaryColor: Colors.blue,
-                // colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
+                // primaryColor: Colors.blue,
+                colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
                 useMaterial3: true,
             ),
             darkTheme: ThemeData.dark(),
@@ -95,7 +107,7 @@ class MyApp extends StatelessWidget {
 }
 
 class BrowseScreen extends StatelessWidget {
-    BrowseScreen({super.key, required this.child, required this.uri});
+    const BrowseScreen({super.key, required this.child, required this.uri});
 
     final Widget child;
     final Uri uri;
@@ -123,26 +135,28 @@ class BrowseScreen extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
         return Scaffold(
-            appBar: AppBar(
-                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-                title: Builder(
-                    builder: (builder) {
-                        final String title = _getTitle(uri);
-                        final String? subtitle = _getSubtitle(uri);
-                        return ListTile(
-                            title: Text(title, style: const TextStyle(fontSize: 20.0)),
-                            subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 14.0)) : null,
-                            contentPadding: EdgeInsets.zero,
-                        );
-                    }
+            appBar: WindowFrameAppBar(
+                appBar: AppBar(
+                    backgroundColor: Colors.transparent,
+                    title: Builder(
+                        builder: (builder) {
+                            final String title = _getTitle(uri);
+                            final String? subtitle = _getSubtitle(uri);
+                            return ListTile(
+                                title: Text(title, style: const TextStyle(fontSize: 20.0)),
+                                subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 14.0)) : null,
+                                contentPadding: EdgeInsets.zero,
+                            );
+                        }
+                    ),
+                    leading: !_isHome() ? IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () {
+                            if(context.canPop()) context.pop();
+                        },
+                    ) : null,
                 ),
-                leading: !_isHome() ? IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                        if(context.canPop()) context.pop();
-                    },
-                ) : null,
-            ),
+            ) ,
             drawer: Drawer(
                 child: ListView(
                     padding: EdgeInsets.zero,
@@ -175,6 +189,71 @@ class BooruLoader extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
             }
         );
+    }   
+}
+
+class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final double height;
+  final AppBar appBar;
+
+  const WindowFrameAppBar({super.key, this.height = 32.0, required this.appBar});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isDestkop()) return appBar;
+    return Column(
+        children: [
+            WindowTitleBarBox(
+                child: Row(
+                    children: [
+                        Expanded(
+                            child: MoveWindow(
+                                child: const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 6.00, horizontal: 16.00),
+                                    child: Text("LocalBooru")
+                                ),
+                            )
+                        ),
+                        const WindowButtons()
+                    ],
+                )
+            ),
+            appBar,
+        ],
+    );
+  }
+
+  @override
+  Size get preferredSize => Size.fromHeight(AppBar().preferredSize.height + (isDestkop() ? height : 0));
+}
+
+class WindowButtons extends StatelessWidget {
+    const WindowButtons({super.key});
+
+
+
+    @override
+    Widget build(BuildContext context) {
+        final buttonColors = WindowButtonColors(
+            iconNormal: Theme.of(context).colorScheme.inverseSurface,
+            mouseOver: Theme.of(context).colorScheme.primary,
+            mouseDown: Theme.of(context).colorScheme.primaryContainer,
+            iconMouseOver: Theme.of(context).colorScheme.onPrimary,
+            iconMouseDown: Theme.of(context).colorScheme.onPrimaryContainer
+        );
+        final closeButtonColors = WindowButtonColors(
+            iconNormal: Theme.of(context).colorScheme.inverseSurface,
+            mouseOver: Theme.of(context).colorScheme.error,
+            mouseDown: Theme.of(context).colorScheme.errorContainer,
+            iconMouseOver: Theme.of(context).colorScheme.onError,
+            iconMouseDown: Theme.of(context).colorScheme.onErrorContainer
+        );
+        return Wrap(
+            children: [
+                MinimizeWindowButton(colors: buttonColors),
+                MaximizeWindowButton(colors: buttonColors),
+                CloseWindowButton(colors: closeButtonColors)
+            ],
+        );
     }
-    
 }
