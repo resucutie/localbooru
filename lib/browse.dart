@@ -86,13 +86,23 @@ class _SearchTagState extends State<SearchTag> {
         return SearchBar(
             controller: widget.controller,
             hintText: "Type a tag",
-            hintStyle: MaterialStateProperty.all(const TextStyle(color: Colors.grey)),
+            hintStyle: MaterialStateProperty.all(TextStyle(color: Colors.grey)),
+            backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.surfaceVariant),
+            shadowColor: MaterialStateProperty.all(Colors.transparent),
+            textStyle: MaterialStateProperty.all(
+                TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)
+            ),
             onSubmitted: widget.onSearch,
             onChanged: (text) => setState(() {
                 _isEmpty = text.isEmpty;
             }),
             trailing: [
-                IconButton(onPressed: _isEmpty ? null : () => widget.onSearch(widget.controller!.text), icon: const Icon(Icons.search))
+                IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: _isEmpty ? null : () => widget.onSearch(widget.controller!.text),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    // disabledColor: Colors.grey,
+                )
             ]
         );
     }
