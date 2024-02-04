@@ -13,7 +13,7 @@ import 'package:localbooru/permissions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<bool> hasExternalStoragePerms() async{
-    if (Platform.isAndroid || Platform.isIOS) return await Permission.manageExternalStorage.status.isGranted;
+    if (isMobile()) return await Permission.manageExternalStorage.status.isGranted;
     return true;
 }
 
@@ -25,12 +25,7 @@ final _router = GoRouter(
                 final hasPerms = await hasExternalStoragePerms();
                 final prefs = await SharedPreferences.getInstance();
                 
-                if (!hasPerms) {
-                    return "/permissions";
-                }
-
-                debugPrint(prefs.getString("booruPath"));
-                
+                if (!hasPerms) return "/permissions";
                 if (prefs.getString("booruPath") == null) return "/setbooru";
 
                 return null;
@@ -78,8 +73,8 @@ void main() async {
 
     if(isDestkop()) {
         doWhenWindowReady(() {
-            const initialSize = Size(1280, 720);
-            appWindow.minSize = initialSize;
+            const initialSize = Size(260, 260);
+            appWindow.minSize = const Size(1280, 720);
             appWindow.size = initialSize;
             appWindow.alignment = Alignment.center;
             appWindow.show();
@@ -95,8 +90,8 @@ class MyApp extends StatelessWidget {
     Widget build(BuildContext context) {
         return MaterialApp.router(
             theme: ThemeData(
-                // primaryColor: Colors.blue,
-                colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
+                primaryColor: Colors.blue,
+                // colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
                 useMaterial3: true,
             ),
             darkTheme: ThemeData.dark(),
@@ -137,7 +132,7 @@ class BrowseScreen extends StatelessWidget {
         return Scaffold(
             appBar: WindowFrameAppBar(
                 appBar: AppBar(
-                    backgroundColor: Colors.transparent,
+                    // backgroundColor: Colors.transparent,
                     title: Builder(
                         builder: (builder) {
                             final String title = _getTitle(uri);
@@ -195,8 +190,9 @@ class BooruLoader extends StatelessWidget {
 class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double height;
   final AppBar appBar;
+  final String title;
 
-  const WindowFrameAppBar({super.key, this.height = 32.0, required this.appBar});
+  const WindowFrameAppBar({super.key, this.height = 32.0, required this.appBar, this.title = "LocalBooru"});
 
   @override
   Widget build(BuildContext context) {
@@ -208,9 +204,9 @@ class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
                     children: [
                         Expanded(
                             child: MoveWindow(
-                                child: const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 6.00, horizontal: 16.00),
-                                    child: Text("LocalBooru")
+                                child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 6.00, horizontal: 16.00),
+                                    child: Text(title)
                                 ),
                             )
                         ),

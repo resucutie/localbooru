@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/main.dart';
 
 class SetBooruScreen extends StatefulWidget{
     const SetBooruScreen({super.key});
@@ -14,9 +15,11 @@ class _SetBooruScreenState extends State<SetBooruScreen>{
     @override
     Widget build(BuildContext context) {
         return Scaffold (
-            appBar: AppBar(
-                // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-                title: const Text("Set booru path"),
+            appBar: WindowFrameAppBar(
+                title: "Configuration",
+                appBar: AppBar(
+                    title: const Text("Set Booru Path"),
+                )
             ),
             body: Center(
                 child: Padding(

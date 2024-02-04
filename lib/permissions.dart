@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localbooru/main.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionsScreen extends StatefulWidget{
@@ -13,9 +14,11 @@ class _PermissionsScreenState extends State<PermissionsScreen>{
     @override
     Widget build(BuildContext context) {
         return Scaffold (
-            appBar: AppBar(
-                // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-                title: const Text("Permissions"),
+            appBar: WindowFrameAppBar(
+                title: "Configuration",
+                appBar: AppBar(
+                    title: const Text("Permissions"),
+                )
             ),
             body: Center(
                 child: Padding(
