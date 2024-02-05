@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
-part "class.dart";
+part 'readable.dart';
+part 'writable.dart';
 
 Booru? currentBooru;
 
@@ -35,15 +36,19 @@ class BooruLoader extends StatelessWidget {
     
     @override
     Widget build(BuildContext context) {
-        return FutureBuilder<Booru>(
-            future: getCurrentBooru(),
-            builder: (context, AsyncSnapshot<Booru> snapshot) {
-                if(snapshot.hasData) {
-                    return builder(context, snapshot.data!);
-                } else if(snapshot.hasError) {
-                    throw snapshot.error!;
-                }
-                return const Center(child: CircularProgressIndicator());
+        return ListenableBuilder(listenable: booruUpdateListener,
+            builder: (_, __) {
+                return FutureBuilder<Booru>(
+                    future: getCurrentBooru(),
+                    builder: (context, AsyncSnapshot<Booru> snapshot) {
+                        if(snapshot.hasData) {
+                            return builder(context, snapshot.data!);
+                        } else if(snapshot.hasError) {
+                            throw snapshot.error!;
+                        }
+                        return const Center(child: CircularProgressIndicator());
+                    }
+                );
             }
         );
     }   
@@ -60,10 +65,11 @@ class BooruImageLoader extends StatelessWidget {
     
     @override
     Widget build(BuildContext context) {
-        return FutureBuilder<BooruImage>(
+        return FutureBuilder<BooruImage?>(
             future: booru.getImage(id),
-            builder: (context, AsyncSnapshot<BooruImage> snapshot) {
+            builder: (context, AsyncSnapshot<BooruImage?> snapshot) {
                 if(snapshot.hasData) {
+                    if(snapshot.data == null) return const Text("File does not exist");
                     return builder(context, snapshot.data!);
                 } else if(snapshot.hasError) {
                     throw snapshot.error!;

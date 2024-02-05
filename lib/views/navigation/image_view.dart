@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/main.dart';
-import 'package:path/path.dart';
+import 'package:localbooru/components/window_frame.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ImageView extends StatelessWidget {
@@ -106,7 +104,7 @@ class ImageViewProprieties extends StatelessWidget {
     Widget build(BuildContext context) {
         final TextStyle linkText = TextStyle(color: Theme.of(context).colorScheme.primary, decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.primary);
         
-        debugPrint("sources ${image.source}");
+        // debugPrint("sources ${image.source}");
         return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(

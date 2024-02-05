@@ -1,12 +1,13 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/utils/dialogPage.dart';
-import 'package:localbooru/views/home.dart';
-import 'package:localbooru/views/imageview.dart';
-import 'package:localbooru/views/tagbrowse.dart';
-import 'package:localbooru/views/setbooru.dart';
-import 'package:localbooru/utils/platformTools.dart';
+import 'package:localbooru/utils/dialog_page.dart';
+import 'package:localbooru/views/navigation/home.dart';
+import 'package:localbooru/views/navigation/image_view.dart';
+import 'package:localbooru/views/navigation/index.dart';
+import 'package:localbooru/views/navigation/tag_browse.dart';
+import 'package:localbooru/views/set_booru.dart';
+import 'package:localbooru/utils/platform_tools.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 
@@ -87,8 +88,8 @@ final _router = GoRouter(
                                         booru: booru,
                                         id: id,
                                         builder: (context, image) => ImageViewZoom(image),
-                                    )
-                                ));
+                                    ))
+                                );
                             }
                         )
                     ]
@@ -131,171 +132,84 @@ class MyApp extends StatelessWidget {
     }
 }
 
-class BrowseScreen extends StatelessWidget {
-    const BrowseScreen({super.key, required this.child, required this.uri});
+// class BrowseScreen extends StatelessWidget {
+//     const BrowseScreen({super.key, required this.child, required this.uri});
 
-    final Widget child;
-    final Uri uri;
+//     final Widget child;
+//     final Uri uri;
 
-    bool _isHome() => uri.path == "/home";
-    String _getTitle(Uri uri) {
-        // Uri.parse(url).queryParameters["tag"].isEmpty();
-        final String? tags = uri.queryParameters["tag"];
-        if(uri.path.contains("/search")) {
-            if(tags != null && tags.isNotEmpty) return "Browse";
-            else return "Recent";
-        }
-        if(uri.path.contains("/view")) return "Image";
-        return "Home";
-    }
-    String? _getSubtitle(Uri uri) {
-        final String? index = uri.queryParameters["index"];
-        if(uri.path.contains("/search")) {
-            final int page = index == null ? 1 : int.parse(index) + 1;
-            return "Page $page";
-        }
-        if(uri.path.contains("/view")) {
-            final String id = uri.pathSegments[1];
-            return "No. ${int.parse(id) + 1}";
-        }
-        return null;
-    }
+//     bool _isHome() => uri.path == "/home";
+//     String _getTitle(Uri uri) {
+//         // Uri.parse(url).queryParameters["tag"].isEmpty();
+//         final String? tags = uri.queryParameters["tag"];
+//         if(uri.path.contains("/search")) {
+//             if(tags != null && tags.isNotEmpty) return "Browse";
+//             else return "Recent";
+//         }
+//         if(uri.path.contains("/view")) return "Image";
+//         return "Home";
+//     }
+//     String? _getSubtitle(Uri uri) {
+//         final String? index = uri.queryParameters["index"];
+//         if(uri.path.contains("/search")) {
+//             final int page = index == null ? 1 : int.parse(index) + 1;
+//             return "Page $page";
+//         }
+//         if(uri.path.contains("/view")) {
+//             final String id = uri.pathSegments[1];
+//             return "No. ${int.parse(id) + 1}";
+//         }
+//         return null;
+//     }
 
 
-    @override
-    Widget build(BuildContext context) {
-        return Scaffold(
-            appBar: WindowFrameAppBar(
-                appBar: AppBar(
-                    // backgroundColor: Colors.transparent,
-                    title: Builder(
-                        builder: (builder) {
-                            final String title = _getTitle(uri);
-                            final String? subtitle = _getSubtitle(uri);
-                            return ListTile(
-                                title: Text(title, style: const TextStyle(fontSize: 20.0)),
-                                subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 14.0)) : null,
-                                contentPadding: EdgeInsets.zero,
-                            );
-                        }
-                    ),
-                    leading: !_isHome() ? IconButton(
-                        icon: const Icon(Icons.arrow_back),
-                        onPressed: () {
-                            if(context.canPop()) context.pop();
-                        },
-                    ) : null,
-                ),
-            ) ,
-            drawer: Drawer(
-                child: Builder(
-                    builder: (context) => ListView(
-                        padding: EdgeInsets.zero,
-                        children: <Widget>[
-                            FilledButton(onPressed: () {
-                                Scaffold.of(context).closeDrawer();
-                                context.push("/permissions");
-                            }, child: const Text("Go to permissions")),
-                            FilledButton(onPressed: () {
-                                Scaffold.of(context).closeDrawer();
-                                context.push("/setbooru");
-                            }, child: const Text("Go to set booru"))
-                        ],
-                    ),
-                ),
-            ),
-            body: child
-        );
-    }
-}
-
-// typedef BooruLoaderWidgetBuilder = Widget Function(BuildContext context, Booru booru);
-// class BooruLoader extends StatelessWidget {
-//     const BooruLoader({super.key, required this.builder});
-
-//     final BooruLoaderWidgetBuilder builder;
-    
 //     @override
 //     Widget build(BuildContext context) {
-//         return FutureBuilder<Booru>(
-//             future: getCurrentBooru(),
-//             builder: (context, AsyncSnapshot<Booru> snapshot) {
-//                 if(snapshot.hasData) {
-//                     return builder(context, snapshot.data!);
-//                 } else if(snapshot.hasError) {
-//                     throw snapshot.error!;
-//                 }
-//                 return const Center(child: CircularProgressIndicator());
-//             }
+//         return Scaffold(
+//             appBar: WindowFrameAppBar(
+//                 appBar: AppBar(
+//                     // backgroundColor: Colors.transparent,
+//                     title: Builder(
+//                         builder: (builder) {
+//                             final String title = _getTitle(uri);
+//                             final String? subtitle = _getSubtitle(uri);
+//                             return ListTile(
+//                                 title: Text(title, style: const TextStyle(fontSize: 20.0)),
+//                                 subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 14.0)) : null,
+//                                 contentPadding: EdgeInsets.zero,
+//                             );
+//                         }
+//                     ),
+//                     leading: !_isHome() ? IconButton(
+//                         icon: const Icon(Icons.arrow_back),
+//                         onPressed: () {
+//                             if(context.canPop()) context.pop();
+//                         },
+//                     ) : null,
+//                 ),
+//             ) ,
+//             drawer: Drawer(
+//                 child: Builder(
+//                     builder: (context) => ListView(
+//                         padding: EdgeInsets.zero,
+//                         children: <Widget>[
+//                             FilledButton(onPressed: () {
+//                                 Scaffold.of(context).closeDrawer();
+//                                 context.push("/permissions");
+//                             }, child: const Text("Go to permissions")),
+//                             FilledButton(onPressed: () {
+//                                 Scaffold.of(context).closeDrawer();
+//                                 context.push("/setbooru");
+//                             }, child: const Text("Go to set booru"))
+//                         ],
+//                     ),
+//                 ),
+//             ),
+//             body: child,
+//             floatingActionButton: FloatingActionButton(
+//                 onPressed: () => booruUpdateListener.update(),
+//                 child: const Icon(Icons.add)
+//             ),
 //         );
-//     }   
+//     }
 // }
-
-class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final double height;
-  final AppBar appBar;
-  final String title;
-  final Color? backgroundColor;
-
-  const WindowFrameAppBar({super.key, this.height = 32.0, required this.appBar, this.title = "LocalBooru", this.backgroundColor});
-
-  @override
-  Widget build(BuildContext context) {
-    if (!isDestkop()) return appBar;
-    return Column(
-        children: [
-            WindowTitleBarBox(
-                child: Container(
-                    color: backgroundColor,
-                    child: Row(
-                        children: [
-                            Expanded(
-                                child: MoveWindow(
-                                    child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 6.00, horizontal: 16.00),
-                                        child: Text(title)
-                                    ),
-                                )
-                            ),
-                            const WindowButtons()
-                        ],
-                    ),
-                )
-            ),
-            appBar,
-        ],
-    );
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(AppBar().preferredSize.height + (isDestkop() ? height : 0));
-}
-
-class WindowButtons extends StatelessWidget {
-    const WindowButtons({super.key});
-
-    @override
-    Widget build(BuildContext context) {
-        final buttonColors = WindowButtonColors(
-            iconNormal: Theme.of(context).colorScheme.inverseSurface,
-            mouseOver: Theme.of(context).colorScheme.primary,
-            mouseDown: Theme.of(context).colorScheme.primaryContainer,
-            iconMouseOver: Theme.of(context).colorScheme.onPrimary,
-            iconMouseDown: Theme.of(context).colorScheme.onPrimaryContainer
-        );
-        final closeButtonColors = WindowButtonColors(
-            iconNormal: Theme.of(context).colorScheme.inverseSurface,
-            mouseOver: Theme.of(context).colorScheme.error,
-            mouseDown: Theme.of(context).colorScheme.errorContainer,
-            iconMouseOver: Theme.of(context).colorScheme.onError,
-            iconMouseDown: Theme.of(context).colorScheme.onErrorContainer
-        );
-        return Wrap(
-            children: [
-                MinimizeWindowButton(colors: buttonColors),
-                MaximizeWindowButton(colors: buttonColors),
-                CloseWindowButton(colors: closeButtonColors)
-            ],
-        );
-    }
-}

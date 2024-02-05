@@ -16,13 +16,13 @@ class Booru {
         return json;
     }
 
-    Future<BooruImage> getImage(String id) async {
+    Future<BooruImage?> getImage(String id) async {
         final List files = (await getRawInfo())["files"];
         
         //check if metadata exists
         // if(!files.asMap().containsKey(id)) throw "File of index $id does not exist";
-        var fileToCheck = files.firstWhere((file) => file["id"] == id);
-        if(fileToCheck == null) throw "File  $id does not exist";
+        var fileToCheck = files.firstWhere((file) => file["id"] == id, orElse: () => null);
+        if(fileToCheck == null) return null;
         if(fileToCheck is! Map) throw "File  $id doesn't contain valid metadata";
         
         //cehck if metadata is valid
@@ -45,7 +45,7 @@ class Booru {
 
         List<BooruImage> mappedList = [];
         for (Map item in rangedList) {
-            mappedList.add(await getImage(item["id"]));
+            mappedList.add((await getImage(item["id"]))!);
         }
         return mappedList.reversed.toList();
     }

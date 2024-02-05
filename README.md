@@ -16,3 +16,4 @@ This is a cross platform local booru collection that exclusively works on your l
 - [ ] Auto tag generation
 - [ ] Auto-import from other booru websites (and Twitter)
 - [ ] Multi booru supports
+- [ ] Tag classification (separate by author, character...)

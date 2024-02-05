@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:localbooru/views/tagbrowse.dart';
+import 'package:localbooru/views/navigation/tag_browse.dart';
 
 class SearchTagView extends StatefulWidget {
     const SearchTagView({super.key});
@@ -36,12 +36,7 @@ class _SearchTagViewState extends State<SearchTagView> {
                                     onPressed: () => context.push("/recent"),
                                     label: const Text("Recent posts"),
                                     icon: const Icon(Icons.history)
-                                ),
-                                // FilledButton.icon(
-                                //     onPressed: () => _onSearch(),
-                                //     label: const Text("Search"),
-                                //     icon: const Icon(Icons.search)
-                                // )
+                                )
                             ],
                         )
                     ],

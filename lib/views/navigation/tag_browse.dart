@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/components/imagedisplay.dart';
+import 'package:localbooru/components/image_display.dart';
 
 // class SearchTagView extends StatefulWidget {
 //     const SearchTagView({super.key});
@@ -134,7 +134,6 @@ class _GalleryViewerState extends State<GalleryViewer> {
     // }
 
     Future<Map> _obtainResults() async {
-        debugPrint("tags: ${widget.tags}");
         _searchController.text = widget.tags;
         
         int indexLength = await widget.booru.getIndexNumberLength(widget.tags);
@@ -155,7 +154,6 @@ class _GalleryViewerState extends State<GalleryViewer> {
                         future: _obtainResults(),
                         builder: (context, snapshot) {
                             if(snapshot.hasData) {
-                                debugPrint("meow ${widget.index}");
                                 int pages = snapshot.data!["indexLength"];
 
                                 if (pages == 0) return const Center(child: Text("nothing to see here!"));

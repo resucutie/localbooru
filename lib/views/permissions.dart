@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:localbooru/main.dart';
+import 'package:localbooru/components/window_frame.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionsScreen extends StatefulWidget{
