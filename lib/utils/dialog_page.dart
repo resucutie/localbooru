@@ -18,13 +18,10 @@ class DialogPage extends Page {
     @override
     Route createRoute(BuildContext context) {
         return DialogRoute(
-            builder: (context) => Material(
-                color: Colors.transparent,
-                child: Builder(builder: builder)
-            ),
+            builder: builder,
             context: context,
             settings: this,
-            barrierColor: barrierColor,
+            barrierColor: barrierColor ?? Colors.black54,
             anchorPoint: anchorPoint,
             barrierDismissible: barrierDismissible,
             barrierLabel: barrierLabel,

@@ -59,12 +59,12 @@ class ImageViewDisplay extends StatelessWidget {
             child: Listener(
                 child: Image.file(image.getImage(), fit: BoxFit.contain),
                 onPointerDown: (PointerDownEvent event) async {
-                    if(event.buttons == kPrimaryMouseButton) context.push("/dialogs/zoomImage/${image.id}");
+                    if(event.buttons == kPrimaryMouseButton) context.push("/dialogs/zoom_image/${image.id}");
                     if(event.buttons == kSecondaryMouseButton) {
                         await showMenu(
                             context: context,
                             position: RelativeRect.fromSize(event.position & const Size(48.0, 48.0), (Overlay.of(context).context.findRenderObject() as RenderBox).size),
-                            items: imageTransferItems(image)
+                            items: imageShareItems(image)
                         );
                     }
                 },

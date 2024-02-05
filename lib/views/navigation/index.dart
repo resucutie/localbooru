@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
@@ -5,6 +7,7 @@ import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pasteboard/pasteboard.dart';
+import 'package:path/path.dart';
 import 'package:share_plus/share_plus.dart';
 
 class BrowseScreen extends StatelessWidget {
@@ -129,7 +132,9 @@ class BrowseScreenPopupMenuButton extends StatelessWidget {
                 final List<PopupMenuEntry> filteredList = generalItems();
                 if(image != null) {
                     filteredList.add(const PopupMenuDivider());
-                    filteredList.addAll(imageTransferItems(image!));
+                    filteredList.addAll(imageShareItems(image!));
+                    filteredList.add(const PopupMenuDivider());
+                    filteredList.addAll(imageManagementItems(image!, context: context));
                 };
                 return filteredList;
             }
@@ -145,7 +150,7 @@ List<PopupMenuEntry> generalItems() {
         )
     ];
 }
-List<PopupMenuEntry> imageTransferItems(BooruImage image) {
+List<PopupMenuEntry> imageShareItems(BooruImage image) {
     List<PopupMenuEntry> list = [
         PopupMenuItem(
             child: const Text("Open image"),
@@ -153,7 +158,7 @@ List<PopupMenuEntry> imageTransferItems(BooruImage image) {
         ),
         PopupMenuItem(
             enabled: !isMobile(),
-            child: const Text("Copy image"),
+            child: const Text("Copy image to clipboard"),
             onTap: () => Pasteboard.writeFiles([image.path]),
         ),
         PopupMenuItem(
@@ -163,4 +168,13 @@ List<PopupMenuEntry> imageTransferItems(BooruImage image) {
     ];
     if(isMobile()) list.removeAt(1);
     return list;
+}
+
+List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildContext context}) {
+    return [
+        PopupMenuItem(
+            child: const Text("Delete image"),
+            onTap: () => context.push("/dialogs/delete_confirmation/${image.id}")
+        ),
+    ];
 }

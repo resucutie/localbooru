@@ -78,7 +78,7 @@ final _router = GoRouter(
                 GoRoute(path: "dialogs",
                     redirect: (context, state) => null,
                     routes: [
-                        GoRoute(path: "zoomImage/:id",
+                        GoRoute(path: "zoom_image/:id",
                             pageBuilder: (context, state) {
                                 final String? id = state.pathParameters["id"];
                                 if (id == null) return DialogPage(builder: (_) => Text("Invalid ID $id"));
@@ -89,6 +89,30 @@ final _router = GoRouter(
                                         id: id,
                                         builder: (context, image) => ImageViewZoom(image),
                                     ))
+                                );
+                            }
+                        ),
+                        GoRoute(path: "delete_image_confirmation/:id",
+                            pageBuilder: (context, state) {
+                                final String? id = state.pathParameters["id"];
+                                if (id == null) return DialogPage(builder: (_) => Text("Invalid ID $id"));
+                                return DialogPage(
+                                    barrierDismissible: true,
+                                    builder: (context) => AlertDialog(
+                                        title: const Text("Delete image"),
+                                        content: const Text("Are you sure that you want to delete this image? This action will be irreversible"),
+                                        actions: [
+                                            ElevatedButton(onPressed: context.pop, child: const Text("No")),
+                                            TextButton(
+                                                child: const Text("Yes"), 
+                                                onPressed: () async {
+                                                    context.pop(); //first to close menu
+                                                    context.pop(); //second to close viewer
+                                                    await removeImage(id);
+                                                }
+                                            ),
+                                        ],
+                                    )
                                 );
                             }
                         )
@@ -131,85 +155,3 @@ class MyApp extends StatelessWidget {
         );
     }
 }
-
-// class BrowseScreen extends StatelessWidget {
-//     const BrowseScreen({super.key, required this.child, required this.uri});
-
-//     final Widget child;
-//     final Uri uri;
-
-//     bool _isHome() => uri.path == "/home";
-//     String _getTitle(Uri uri) {
-//         // Uri.parse(url).queryParameters["tag"].isEmpty();
-//         final String? tags = uri.queryParameters["tag"];
-//         if(uri.path.contains("/search")) {
-//             if(tags != null && tags.isNotEmpty) return "Browse";
-//             else return "Recent";
-//         }
-//         if(uri.path.contains("/view")) return "Image";
-//         return "Home";
-//     }
-//     String? _getSubtitle(Uri uri) {
-//         final String? index = uri.queryParameters["index"];
-//         if(uri.path.contains("/search")) {
-//             final int page = index == null ? 1 : int.parse(index) + 1;
-//             return "Page $page";
-//         }
-//         if(uri.path.contains("/view")) {
-//             final String id = uri.pathSegments[1];
-//             return "No. ${int.parse(id) + 1}";
-//         }
-//         return null;
-//     }
-
-
-//     @override
-//     Widget build(BuildContext context) {
-//         return Scaffold(
-//             appBar: WindowFrameAppBar(
-//                 appBar: AppBar(
-//                     // backgroundColor: Colors.transparent,
-//                     title: Builder(
-//                         builder: (builder) {
-//                             final String title = _getTitle(uri);
-//                             final String? subtitle = _getSubtitle(uri);
-//                             return ListTile(
-//                                 title: Text(title, style: const TextStyle(fontSize: 20.0)),
-//                                 subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 14.0)) : null,
-//                                 contentPadding: EdgeInsets.zero,
-//                             );
-//                         }
-//                     ),
-//                     leading: !_isHome() ? IconButton(
-//                         icon: const Icon(Icons.arrow_back),
-//                         onPressed: () {
-//                             if(context.canPop()) context.pop();
-//                         },
-//                     ) : null,
-//                 ),
-//             ) ,
-//             drawer: Drawer(
-//                 child: Builder(
-//                     builder: (context) => ListView(
-//                         padding: EdgeInsets.zero,
-//                         children: <Widget>[
-//                             FilledButton(onPressed: () {
-//                                 Scaffold.of(context).closeDrawer();
-//                                 context.push("/permissions");
-//                             }, child: const Text("Go to permissions")),
-//                             FilledButton(onPressed: () {
-//                                 Scaffold.of(context).closeDrawer();
-//                                 context.push("/setbooru");
-//                             }, child: const Text("Go to set booru"))
-//                         ],
-//                     ),
-//                 ),
-//             ),
-//             body: child,
-//             floatingActionButton: FloatingActionButton(
-//                 onPressed: () => booruUpdateListener.update(),
-//                 child: const Icon(Icons.add)
-//             ),
-//         );
-//     }
-// }
