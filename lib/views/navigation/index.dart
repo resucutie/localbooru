@@ -1,10 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/window_frame.dart';
-import 'package:path/path.dart';
+import 'package:localbooru/utils/platform_tools.dart';
+import 'package:open_file/open_file.dart';
+import 'package:pasteboard/pasteboard.dart';
+import 'package:share_plus/share_plus.dart';
 
 class BrowseScreen extends StatelessWidget {
     const BrowseScreen({super.key, required this.child, required this.uri});
@@ -60,8 +61,18 @@ class BrowseScreen extends StatelessWidget {
                             if(context.canPop()) context.pop();
                         },
                     ) : null,
-                    actions: const [
-                        BrowseScreenPopupMenuButton()
+                    actions: [
+                        Builder(builder: (context) {
+                            if(uri.path.contains("/view")) {
+                                final String id = uri.pathSegments[1];
+                                return BooruLoader(builder: (_, booru) => BooruImageLoader(
+                                    booru: booru,
+                                    id: id,
+                                    builder: (context, image) => BrowseScreenPopupMenuButton(image: image),
+                                ));
+                            }
+                            return const BrowseScreenPopupMenuButton();
+                        })
                     ],
                 ),
             ) ,
@@ -107,24 +118,49 @@ class BrowseScreen extends StatelessWidget {
 }
 
 class BrowseScreenPopupMenuButton extends StatelessWidget {
-    const BrowseScreenPopupMenuButton({super.key});
+    const BrowseScreenPopupMenuButton({super.key, this.image});
 
-    List<PopupMenuEntry> generalItems() {
-        return [
-            PopupMenuItem(
-                child: const Text("Refresh"),
-                onTap: () => booruUpdateListener.update(),
-            )
-        ];
-    }
+    final BooruImage? image;
 
     @override
     Widget build(context) {
         return PopupMenuButton(
             itemBuilder: (context) {
                 final List<PopupMenuEntry> filteredList = generalItems();
+                if(image != null) {
+                    filteredList.add(const PopupMenuDivider());
+                    filteredList.addAll(imageTransferItems(image!));
+                };
                 return filteredList;
             }
         );
     }
+}
+
+List<PopupMenuEntry> generalItems() {
+    return [
+        PopupMenuItem(
+            child: const Text("Refresh"),
+            onTap: () => booruUpdateListener.update(),
+        )
+    ];
+}
+List<PopupMenuEntry> imageTransferItems(BooruImage image) {
+    List<PopupMenuEntry> list = [
+        PopupMenuItem(
+            child: const Text("Open image"),
+            onTap: () => OpenFile.open(image.path),
+        ),
+        PopupMenuItem(
+            enabled: !isMobile(),
+            child: const Text("Copy image"),
+            onTap: () => Pasteboard.writeFiles([image.path]),
+        ),
+        PopupMenuItem(
+            child: const Text("Share image"),
+            onTap: () async => await Share.shareXFiles([XFile(image.path)]),
+        )
+    ];
+    if(isMobile()) list.removeAt(1);
+    return list;
 }

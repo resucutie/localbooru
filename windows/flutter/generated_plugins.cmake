@@ -4,7 +4,9 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_windows
+  pasteboard
   permission_handler_windows
+  share_plus
   url_launcher_windows
 )
 

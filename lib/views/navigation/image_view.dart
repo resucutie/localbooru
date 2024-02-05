@@ -1,7 +1,11 @@
+import 'dart:ui';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/window_frame.dart';
+import 'package:localbooru/views/navigation/index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ImageView extends StatelessWidget {
@@ -52,9 +56,18 @@ class ImageViewDisplay extends StatelessWidget {
     Widget build(BuildContext context) {
         return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: GestureDetector(
+            child: Listener(
                 child: Image.file(image.getImage(), fit: BoxFit.contain),
-                onTap: () => context.push("/dialogs/zoomImage/${image.id}"),
+                onPointerDown: (PointerDownEvent event) async {
+                    if(event.buttons == kPrimaryMouseButton) context.push("/dialogs/zoomImage/${image.id}");
+                    if(event.buttons == kSecondaryMouseButton) {
+                        await showMenu(
+                            context: context,
+                            position: RelativeRect.fromSize(event.position & const Size(48.0, 48.0), (Overlay.of(context).context.findRenderObject() as RenderBox).size),
+                            items: imageTransferItems(image)
+                        );
+                    }
+                },
             ),
         );
     }
