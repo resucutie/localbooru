@@ -12,6 +12,7 @@ This is a cross platform local booru collection that exclusively works on your l
 - [ ] Step 6: Check app cross UI compatibility
 
 ## Post basics to-do
+- [ ] Organize alphabetically the tag list
 - [ ] Auto tag generation
 - [ ] Auto-import from other booru websites (and Twitter)
 - [ ] Multi booru supports

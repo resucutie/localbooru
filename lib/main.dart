@@ -1,6 +1,7 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/utils/dialogPage.dart';
 import 'package:localbooru/views/home.dart';
 import 'package:localbooru/views/imageview.dart';
 import 'package:localbooru/views/tagbrowse.dart';
@@ -56,15 +57,13 @@ final _router = GoRouter(
                             builder: (context, state)  {
                                 final String? id = state.pathParameters["id"];
                                 if (id == null) return Text("Invalid ID $id");
-                                return BooruLoader(
-                                    builder: (_, booru) => BooruImageLoader(
-                                        booru: booru,
-                                        id: id,
-                                        builder: (context, image) {
-                                            return ImageView(image: image);
-                                        }
-                                    )
-                                );
+                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                    booru: booru,
+                                    id: id,
+                                    builder: (context, image) {
+                                        return ImageView(image: image);
+                                    }
+                                ));
                             }
                         ),
                     ]
@@ -74,6 +73,25 @@ final _router = GoRouter(
                 ),
                 GoRoute(path: "setbooru",
                     builder: (context, state) => const SetBooruScreen(),
+                ),
+                GoRoute(path: "dialogs",
+                    redirect: (context, state) => null,
+                    routes: [
+                        GoRoute(path: "zoomImage/:id",
+                            pageBuilder: (context, state) {
+                                final String? id = state.pathParameters["id"];
+                                if (id == null) return DialogPage(builder: (_) => Text("Invalid ID $id"));
+                                return DialogPage(
+                                    barrierColor: Colors.black,
+                                    builder: (context) => BooruLoader(builder: (_, booru) => BooruImageLoader(
+                                        booru: booru,
+                                        id: id,
+                                        builder: (context, image) => ImageViewZoom(image),
+                                    )
+                                ));
+                            }
+                        )
+                    ]
                 )
             ]
         ),
@@ -217,8 +235,9 @@ class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double height;
   final AppBar appBar;
   final String title;
+  final Color? backgroundColor;
 
-  const WindowFrameAppBar({super.key, this.height = 32.0, required this.appBar, this.title = "LocalBooru"});
+  const WindowFrameAppBar({super.key, this.height = 32.0, required this.appBar, this.title = "LocalBooru", this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {
@@ -226,18 +245,21 @@ class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Column(
         children: [
             WindowTitleBarBox(
-                child: Row(
-                    children: [
-                        Expanded(
-                            child: MoveWindow(
-                                child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 6.00, horizontal: 16.00),
-                                    child: Text(title)
-                                ),
-                            )
-                        ),
-                        const WindowButtons()
-                    ],
+                child: Container(
+                    color: backgroundColor,
+                    child: Row(
+                        children: [
+                            Expanded(
+                                child: MoveWindow(
+                                    child: Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 6.00, horizontal: 16.00),
+                                        child: Text(title)
+                                    ),
+                                )
+                            ),
+                            const WindowButtons()
+                        ],
+                    ),
                 )
             ),
             appBar,
@@ -251,8 +273,6 @@ class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 class WindowButtons extends StatelessWidget {
     const WindowButtons({super.key});
-
-
 
     @override
     Widget build(BuildContext context) {

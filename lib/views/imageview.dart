@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/main.dart';
 import 'package:path/path.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -16,10 +18,7 @@ class ImageView extends StatelessWidget {
                 if(orientation == Orientation.portrait) {
                     return ListView(
                         children: [
-                            Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Image.file(image.getImage(), fit: BoxFit.contain),
-                            ),
+                            ImageViewDisplay(image),
                             ImageViewProprieties(image)
                         ],
                     );
@@ -27,10 +26,7 @@ class ImageView extends StatelessWidget {
                     return Row(
                         children: [
                             Expanded(
-                                child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Image.file(image.getImage(), fit: BoxFit.contain),
-                                )
+                                child: ImageViewDisplay(image)
                             ),
                             ConstrainedBox(
                                 constraints: const BoxConstraints(maxWidth: 400.0),
@@ -49,6 +45,56 @@ class ImageView extends StatelessWidget {
     }
 }
 
+class ImageViewDisplay extends StatelessWidget {
+    const ImageViewDisplay(this.image, {super.key});
+
+    final BooruImage image;
+
+    @override
+    Widget build(BuildContext context) {
+        return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GestureDetector(
+                child: Image.file(image.getImage(), fit: BoxFit.contain),
+                onTap: () => context.push("/dialogs/zoomImage/${image.id}"),
+            ),
+        );
+    }
+}
+
+class ImageViewZoom extends StatelessWidget {
+    const ImageViewZoom(this.image, {super.key});
+
+    final BooruImage image;
+
+    final Color _appBarColor = const Color.fromARGB(150, 0, 0, 0);
+
+    @override
+    Widget build(BuildContext context) {
+        return Scaffold(
+            extendBodyBehindAppBar: true,
+            backgroundColor: Colors.transparent,
+            appBar: WindowFrameAppBar(
+                title: "Zoom",
+                backgroundColor: _appBarColor,
+                appBar: AppBar(
+                    // systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+                    backgroundColor: _appBarColor,
+                    elevation: 0,
+                    title: Text(image.filename),
+                ),
+            ),
+            body: InteractiveViewer(
+                minScale: 0.1,
+                maxScale: double.infinity,
+                boundaryMargin: EdgeInsets.all((MediaQuery.of(context).size.width + MediaQuery.of(context).size.height) / 4),
+                child: Center(
+                    child: Image.file(image.getImage())
+                )
+            ),
+        );
+    }
+}
 
 class ImageViewProprieties extends StatelessWidget {
     const ImageViewProprieties(this.image, {super.key});
