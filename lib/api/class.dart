@@ -1,7 +1,8 @@
 
 part of localbooru_api;
 
-const int IMAGE_LIMIT_SIZE = 30;
+// ignore: constant_identifier_names
+const int INDEX_IMAGE_LIMIT = 30;
 
 class Booru {
     Booru(this.path);
@@ -34,7 +35,7 @@ class Booru {
             id: id,
             path: p.join(path, "files", fileToCheck["filename"]),
             tags: fileToCheck["tags"],
-            source: fileToCheck["source"]
+            source: List<String>.from(fileToCheck["source"] ?? []) 
         );
     }
 
@@ -49,11 +50,11 @@ class Booru {
         return mappedList.reversed.toList();
     }
 
-    Future<List<BooruImage>> getImagesFromIndex(List list, {int index = 0, int size = IMAGE_LIMIT_SIZE}) async {
+    Future<List<BooruImage>> getImagesFromIndex(List list, {int index = 0, int size = INDEX_IMAGE_LIMIT}) async {
         final int length = list.length;
 
-        int from = length - (IMAGE_LIMIT_SIZE * (index + 1));
-        int to = length - (IMAGE_LIMIT_SIZE * index);
+        int from = length - (INDEX_IMAGE_LIMIT * (index + 1));
+        int to = length - (INDEX_IMAGE_LIMIT * index);
         if(from < 0) from = 0;
         if(to < 0) to = length;
 
@@ -76,7 +77,7 @@ class Booru {
 
     Future<List<BooruImage>> searchByTags(String tags, {int index = 0}) async => await getImagesFromIndex(await _doTagFiltering(tags), index: index);
 
-    Future<int> getIndexNumberLength(tags, {int size = IMAGE_LIMIT_SIZE}) async {
+    Future<int> getIndexNumberLength(tags, {int size = INDEX_IMAGE_LIMIT}) async {
         final list = await _doTagFiltering(tags);
 
         return (list.length / size).ceil();
@@ -92,7 +93,7 @@ class BooruImage {
     String path;
     String filename = "";
     String tags;
-    String? source;
+    List<String>? source;
 
     File getImage() => File(path);
 }

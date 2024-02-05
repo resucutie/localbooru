@@ -1,13 +1,15 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/browse.dart';
-import 'package:localbooru/setbooru.dart';
+import 'package:localbooru/views/home.dart';
+import 'package:localbooru/views/imageview.dart';
+import 'package:localbooru/views/tagbrowse.dart';
+import 'package:localbooru/views/setbooru.dart';
 import 'package:localbooru/utils/platformTools.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:localbooru/permissions.dart';
+import 'package:localbooru/views/permissions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<bool> hasExternalStoragePerms() async{
@@ -38,21 +40,33 @@ final _router = GoRouter(
                         GoRoute(path: "search",
                             builder: (context, state)  {
                                 final String? tags = state.uri.queryParameters["tag"];
-                                debugPrint("queryParams $tags");
-                                debugPrint("fullPath ${state.fullPath}");
+                                final String? index = state.uri.queryParameters["index"];
                                 return BooruLoader(
                                     builder: (context, booru) => GalleryViewer(
                                         booru: booru,
-                                        tags: state.uri.queryParameters["tag"] ?? "",
-                                        index: int.parse(state.uri.queryParameters["index"] ?? "0"),
+                                        tags: tags ?? "",
+                                        index: int.parse(index ?? "0"),
                                         routeNavigation: true,
                                     ),
                                 );
                             }
                         ),
-                        GoRoute(path: "recent",
-                            redirect: (_, __) => '/search/',
-                        )
+                        GoRoute(path: "recent", redirect: (_, __) => '/search/',),
+                        GoRoute(path: "view/:id",
+                            builder: (context, state)  {
+                                final String? id = state.pathParameters["id"];
+                                if (id == null) return Text("Invalid ID $id");
+                                return BooruLoader(
+                                    builder: (_, booru) => BooruImageLoader(
+                                        booru: booru,
+                                        id: id,
+                                        builder: (context, image) {
+                                            return ImageView(image: image);
+                                        }
+                                    )
+                                );
+                            }
+                        ),
                     ]
                 ),
                 GoRoute(path: "permissions",
@@ -71,9 +85,9 @@ void main() async {
 
     if(isDestkop()) {
         doWhenWindowReady(() {
-            const initialSize = Size(260, 260);
-            appWindow.minSize = const Size(1280, 720);
-            appWindow.size = initialSize;
+            const initialSize = Size(420, 260);
+            appWindow.minSize = initialSize;
+            appWindow.size = const Size(1280, 720);
             appWindow.alignment = Alignment.center;
             appWindow.show();
         });
@@ -113,6 +127,7 @@ class BrowseScreen extends StatelessWidget {
             if(tags != null && tags.isNotEmpty) return "Browse";
             else return "Recent";
         }
+        if(uri.path.contains("/view")) return "Image";
         return "Home";
     }
     String? _getSubtitle(Uri uri) {
@@ -120,6 +135,10 @@ class BrowseScreen extends StatelessWidget {
         if(uri.path.contains("/search")) {
             final int page = index == null ? 1 : int.parse(index) + 1;
             return "Page $page";
+        }
+        if(uri.path.contains("/view")) {
+            final String id = uri.pathSegments[1];
+            return "No. ${int.parse(id) + 1}";
         }
         return null;
     }
@@ -151,11 +170,20 @@ class BrowseScreen extends StatelessWidget {
                 ),
             ) ,
             drawer: Drawer(
-                child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: const <Widget>[
-                        Text("hi")
-                    ],
+                child: Builder(
+                    builder: (context) => ListView(
+                        padding: EdgeInsets.zero,
+                        children: <Widget>[
+                            FilledButton(onPressed: () {
+                                Scaffold.of(context).closeDrawer();
+                                context.push("/permissions");
+                            }, child: const Text("Go to permissions")),
+                            FilledButton(onPressed: () {
+                                Scaffold.of(context).closeDrawer();
+                                context.push("/setbooru");
+                            }, child: const Text("Go to set booru"))
+                        ],
+                    ),
                 ),
             ),
             body: child
@@ -163,27 +191,27 @@ class BrowseScreen extends StatelessWidget {
     }
 }
 
-typedef BooruLoaderWidgetBuilder = Widget Function(BuildContext context, Booru booru);
-class BooruLoader extends StatelessWidget {
-    const BooruLoader({super.key, required this.builder});
+// typedef BooruLoaderWidgetBuilder = Widget Function(BuildContext context, Booru booru);
+// class BooruLoader extends StatelessWidget {
+//     const BooruLoader({super.key, required this.builder});
 
-    final BooruLoaderWidgetBuilder builder;
+//     final BooruLoaderWidgetBuilder builder;
     
-    @override
-    Widget build(BuildContext context) {
-        return FutureBuilder<Booru>(
-            future: getCurrentBooru(),
-            builder: (context, AsyncSnapshot<Booru> snapshot) {
-                if(snapshot.hasData) {
-                    return builder(context, snapshot.data!);
-                } else if(snapshot.hasError) {
-                    throw snapshot.error!;
-                }
-                return const Center(child: CircularProgressIndicator());
-            }
-        );
-    }   
-}
+//     @override
+//     Widget build(BuildContext context) {
+//         return FutureBuilder<Booru>(
+//             future: getCurrentBooru(),
+//             builder: (context, AsyncSnapshot<Booru> snapshot) {
+//                 if(snapshot.hasData) {
+//                     return builder(context, snapshot.data!);
+//                 } else if(snapshot.hasError) {
+//                     throw snapshot.error!;
+//                 }
+//                 return const Center(child: CircularProgressIndicator());
+//             }
+//         );
+//     }   
+// }
 
 class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double height;

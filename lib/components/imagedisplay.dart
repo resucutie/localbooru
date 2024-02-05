@@ -1,24 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 
-class ExternalImage extends StatelessWidget {
-  final BooruImage image;
-  final VoidCallback? onPressed;
-  const ExternalImage({super.key, required this.image, this.onPressed});
-  
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        //padding: const EdgeInsets.all(8),
-        child: Image.file(image.getImage(), fit: BoxFit.cover),
-    );
-  }
-}
-
-class RepoGrid extends StatelessWidget {
+class SilverRepoGrid extends StatelessWidget {
     final List<BooruImage> images;
     final VoidCallback? onPressed;
-    const RepoGrid({super.key, required this.images, this.onPressed});
+    const SilverRepoGrid({super.key, required this.images, this.onPressed});
   
     @override
     Widget build(BuildContext context) {
@@ -32,7 +19,12 @@ class RepoGrid extends StatelessWidget {
                 delegate: SliverChildListDelegate(images.map((image) {
                     return Padding(
                         padding: const EdgeInsets.all(5.0),
-                        child: ExternalImage(image: image, onPressed: onPressed),
+                        child: GestureDetector(
+                            onTap: () => {
+                                context.push("/view/${image.id}")
+                            },
+                            child: Image.file(image.getImage(), fit: BoxFit.cover)
+                        ),
                     );
                 }).toList()),
             );
