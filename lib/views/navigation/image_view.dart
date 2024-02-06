@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/header.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/views/navigation/index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -128,8 +129,8 @@ class ImageViewProprieties extends StatelessWidget {
                     Wrap(children: image.tags.split(" ").map((e) => Tag(e)).toList()),
 
                     const Header("Sources"),
-                    image.source == null || image.source!.isEmpty ? const Text("None") : Column(
-                        children: image.source!.map((e) => MouseRegion(
+                    image.sources == null || image.sources!.isEmpty ? const Text("None") : Column(
+                        children: image.sources!.map((e) => MouseRegion(
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
                                 onTap: () => launchUrlString(e),
@@ -142,23 +143,6 @@ class ImageViewProprieties extends StatelessWidget {
                     SelectableText("Path: ${image.path}")
                 ],
             ),
-        );
-    }
-}
-
-class Header extends StatelessWidget {
-    const Header(this.title, {super.key});
-
-    final String title;
-
-    @override
-    Widget build(BuildContext context) {
-        return Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: Text(title, style: const TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.bold
-            )),
         );
     }
 }

@@ -65,12 +65,17 @@ class BrowseScreen extends StatelessWidget {
                         },
                     ) : null,
                     actions: [
+                        IconButton(
+                            icon: const Icon(Icons.add),
+                            tooltip: "Add image",
+                            onPressed: () {
+                                context.push("/add");
+                            },
+                        ),
                         Builder(builder: (context) {
                             if(uri.path.contains("/view")) {
                                 final String id = uri.pathSegments[1];
-                                return BooruLoader(builder: (_, booru) => BooruImageLoader(
-                                    booru: booru,
-                                    id: id,
+                                return BooruLoader(builder: (_, booru) => BooruImageLoader(booru: booru, id: id,
                                     builder: (context, image) => BrowseScreenPopupMenuButton(image: image),
                                 ));
                             }
@@ -151,12 +156,12 @@ List<PopupMenuEntry> generalItems() {
     ];
 }
 List<PopupMenuEntry> imageShareItems(BooruImage image) {
-    List<PopupMenuEntry> list = [
+    return [
         PopupMenuItem(
             child: const Text("Open image"),
             onTap: () => OpenFile.open(image.path),
         ),
-        PopupMenuItem(
+        if(isMobile()) PopupMenuItem(
             enabled: !isMobile(),
             child: const Text("Copy image to clipboard"),
             onTap: () => Pasteboard.writeFiles([image.path]),
@@ -166,15 +171,38 @@ List<PopupMenuEntry> imageShareItems(BooruImage image) {
             onTap: () async => await Share.shareXFiles([XFile(image.path)]),
         )
     ];
-    if(isMobile()) list.removeAt(1);
-    return list;
 }
 
 List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildContext context}) {
     return [
         PopupMenuItem(
             child: const Text("Delete image"),
-            onTap: () => context.push("/dialogs/delete_confirmation/${image.id}")
+            onTap: () => context.push("/dialogs/delete_image_confirmation/${image.id}")
         ),
     ];
+}
+
+class DeleteImageDialogue extends StatelessWidget {
+    const DeleteImageDialogue({super.key, required this.id});
+
+    final String id;
+
+    @override
+    Widget build(BuildContext context) {
+        return AlertDialog(
+            title: const Text("Delete image"),
+            content: const Text("Are you sure that you want to delete this image? This action will be irreversible"),
+            actions: [
+                TextButton(onPressed: context.pop, child: const Text("No")),
+                TextButton(
+                    child: const Text("Yes"), 
+                    onPressed: () async {
+                        context.pop(); //first to close menu
+                        context.pop(); //second to close viewer
+                        await removeImage(id);
+                    }
+                ),
+            ],
+        );
+    }
 }

@@ -25,6 +25,7 @@ As the "hotfix" solution for Android users, you can use [an share to clipboard a
 
 ## Post basics to-do
 - [ ] Organize alphabetically the tag list
+- [ ] Tag suggestion
 - [ ] Auto tag generation
 - [ ] Auto-import from other booru websites (and Twitter)
 - [ ] Multi booru supports

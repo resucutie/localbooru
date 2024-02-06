@@ -35,7 +35,7 @@ class Booru {
             id: id,
             path: p.join(path, "files", fileToCheck["filename"]),
             tags: fileToCheck["tags"],
-            source: List<String>.from(fileToCheck["source"] ?? []) 
+            sources: List<String>.from(fileToCheck["sources"] ?? []) 
         );
     }
 
@@ -85,7 +85,7 @@ class Booru {
 }
 
 class BooruImage {
-    BooruImage({required this.id, required this.path, required this.tags, this.source}) {
+    BooruImage({required this.id, required this.path, required this.tags, this.sources}) {
         filename = p.basename(path);
     }
 
@@ -93,7 +93,7 @@ class BooruImage {
     String path;
     String filename = "";
     String tags;
-    List<String>? source;
+    List<String>? sources;
 
     File getImage() => File(path);
 }

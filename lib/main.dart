@@ -2,6 +2,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/utils/dialog_page.dart';
+import 'package:localbooru/views/add_image.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
 import 'package:localbooru/views/navigation/index.dart';
@@ -33,6 +34,7 @@ final _router = GoRouter(
                 return null;
             },
             routes: [
+                // navigation
                 ShellRoute(
                     builder: (context, state, child) => BrowseScreen(uri: state.uri, child: child),
                     routes: [
@@ -69,12 +71,8 @@ final _router = GoRouter(
                         ),
                     ]
                 ),
-                GoRoute(path: "permissions",
-                    builder: (context, state) => const PermissionsScreen(),
-                ),
-                GoRoute(path: "setbooru",
-                    builder: (context, state) => const SetBooruScreen(),
-                ),
+
+                // dialogs
                 GoRoute(path: "dialogs",
                     redirect: (context, state) => null,
                     routes: [
@@ -98,26 +96,25 @@ final _router = GoRouter(
                                 if (id == null) return DialogPage(builder: (_) => Text("Invalid ID $id"));
                                 return DialogPage(
                                     barrierDismissible: true,
-                                    builder: (context) => AlertDialog(
-                                        title: const Text("Delete image"),
-                                        content: const Text("Are you sure that you want to delete this image? This action will be irreversible"),
-                                        actions: [
-                                            ElevatedButton(onPressed: context.pop, child: const Text("No")),
-                                            TextButton(
-                                                child: const Text("Yes"), 
-                                                onPressed: () async {
-                                                    context.pop(); //first to close menu
-                                                    context.pop(); //second to close viewer
-                                                    await removeImage(id);
-                                                }
-                                            ),
-                                        ],
-                                    )
+                                    builder: (context) => DeleteImageDialogue(id: id,)
                                 );
                             }
                         )
                     ]
-                )
+                ),
+
+                // image add
+                GoRoute(path: "add",
+                    builder: (context, state) => const AddImageView(),
+                ),
+
+                // initial setup stuff
+                GoRoute(path: "permissions",
+                    builder: (context, state) => const PermissionsScreen(),
+                ),
+                GoRoute(path: "setbooru",
+                    builder: (context, state) => const SetBooruScreen(),
+                ),
             ]
         ),
     ]
