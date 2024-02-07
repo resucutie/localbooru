@@ -2,7 +2,7 @@
 part of localbooru_api;
 
 // ignore: constant_identifier_names
-const int INDEX_IMAGE_LIMIT = 30;
+final int INDEX_IMAGE_LIMIT = settingsDefaults["page_size"];
 
 class Booru {
     Booru(this.path);
@@ -50,11 +50,13 @@ class Booru {
         return mappedList.reversed.toList();
     }
 
-    Future<List<BooruImage>> getImagesFromIndex(List list, {int index = 0, int size = INDEX_IMAGE_LIMIT}) async {
+    Future<List<BooruImage>> getImagesFromIndex(List list, {int index = 0, int? size}) async {
+        size = INDEX_IMAGE_LIMIT;
+
         final int length = list.length;
 
-        int from = length - (INDEX_IMAGE_LIMIT * (index + 1));
-        int to = length - (INDEX_IMAGE_LIMIT * index);
+        int from = length - (size * (index + 1));
+        int to = length - (size * index);
         if(from < 0) from = 0;
         if(to < 0) to = length;
 
@@ -77,7 +79,9 @@ class Booru {
 
     Future<List<BooruImage>> searchByTags(String tags, {int index = 0}) async => await getImagesFromIndex(await _doTagFiltering(tags), index: index);
 
-    Future<int> getIndexNumberLength(tags, {int size = INDEX_IMAGE_LIMIT}) async {
+    Future<int> getIndexNumberLength(tags, {int? size}) async {
+        size = INDEX_IMAGE_LIMIT;
+
         final list = await _doTagFiltering(tags);
 
         return (list.length / size).ceil();

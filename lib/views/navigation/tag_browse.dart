@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/image_display.dart';
+import 'package:localbooru/utils/defaults.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchTag extends StatefulWidget {
     const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.hasShadows = false});
@@ -86,9 +88,11 @@ class _GalleryViewerState extends State<GalleryViewer> {
     Future<Map> _obtainResults() async {
         int indexLength = await widget.booru.getIndexNumberLength(widget.tags);
         List<BooruImage> images = await widget.booru.searchByTags(widget.tags, index: _currentIndex);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
         return {
             "images": images,
             "indexLength": indexLength,
+            "sharedPrefs": prefs
         };
     }
 
@@ -103,6 +107,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                         builder: (context, snapshot) {
                             if(snapshot.hasData) {
                                 int pages = snapshot.data!["indexLength"];
+                                SharedPreferences prefs = snapshot.data!["sharedPrefs"];
 
                                 if (pages == 0) return const Center(child: Text("nothing to see here!"));
 
@@ -113,7 +118,11 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                             pinned: true,
                                         ),
                                         SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
-                                        SilverRepoGrid(images: snapshot.data!["images"]),
+                                        SilverRepoGrid(
+                                            images: snapshot.data!["images"],
+                                            onPressed: (image) => context.push("/view/${image.id}"),
+                                            autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
+                                        ),
                                         SliverToBoxAdapter(
                                             child: SizedBox(
                                                 height: 48.0,

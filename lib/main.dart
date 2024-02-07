@@ -2,6 +2,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/utils/dialog_page.dart';
+import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/views/image_manager.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
@@ -9,6 +10,8 @@ import 'package:localbooru/views/navigation/index.dart';
 import 'package:localbooru/views/navigation/tag_browse.dart';
 import 'package:localbooru/views/set_booru.dart';
 import 'package:localbooru/utils/platform_tools.dart';
+import 'package:localbooru/views/settings/index.dart';
+import 'package:localbooru/views/settings/overallSettings.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 
@@ -124,6 +127,21 @@ final _router = GoRouter(
                                     }
                                 ));
                             },
+                        )
+                    ]
+                ),
+
+                // settings
+                ShellRoute(
+                    builder: (context, state, child) => SettingsShell(child: child),
+                    routes: [
+                        GoRoute(path: "settings",
+                            builder: (context, state) => const SettingsHome(),
+                            routes: [
+                                GoRoute(path: "overall_settings",
+                                    builder: (context, state) => SharedPreferencesBuilder(builder: (context, prefs) => OverallSettings(prefs: prefs)),
+                                )
+                            ]
                         )
                     ]
                 ),

@@ -3,6 +3,7 @@ library localbooru_api;
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:localbooru/utils/defaults.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,11 +29,10 @@ void setBooru(String path) async {
     debugPrint(prefs.getString("booruPath"));
 }
 
-typedef BooruWidgetBuilder = Widget Function(BuildContext context, Booru booru);
 class BooruLoader extends StatelessWidget {
     const BooruLoader({super.key, required this.builder});
 
-    final BooruWidgetBuilder builder;
+    final Widget Function(BuildContext context, Booru booru) builder;
     
     @override
     Widget build(BuildContext context) {

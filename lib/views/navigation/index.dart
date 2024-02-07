@@ -113,6 +113,14 @@ class BrowseScreen extends StatelessWidget {
                                     context.push("/manage_image");
                                 },
                             ),
+                            ListTile(
+                                title: const Text("Settings"),
+                                leading: const Icon(Icons.settings),
+                                onTap: () {
+                                    Scaffold.of(context).closeDrawer();
+                                    context.push("/settings");
+                                },
+                            ),
 
                             if(kDebugMode) ...[
                                 const Divider(),
