@@ -41,6 +41,7 @@ class _OverallSettingsState extends State<OverallSettings> {
                             )
                         ],
                     ),
+                    leading: const Icon(Icons.grid_3x3),
                     subtitle: Wrap(
                         children: [
                             const Text("Set how many columns should be displayed dynamically"),
@@ -71,9 +72,10 @@ class _OverallSettingsState extends State<OverallSettings> {
                             )
                         ],
                     ),
+                    leading: const Icon(Icons.visibility),
                     subtitle: Wrap(
                         children: [
-                            const Text("How many elements per page should be displayed"),
+                            const Text("How many images per page should be displayed"),
                             Form(
                                 key: _pageSizeValidator,
                                 child: TextFormField(
