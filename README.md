@@ -21,7 +21,7 @@ As the "hotfix" solution for Android users, you can use [an share to clipboard a
 - [x] Step 3: Create an easy to use route system
 - [x] Step 4: Create view to view image
 - [x] Step 5: Write the write functionality of the internal API
-- [ ] Step 6: Check app cross UI compatibility
+- [x] Step 6: Check app cross UI compatibility
 
 ## Post basics to-do
 - [ ] Organize alphabetically the tag list
