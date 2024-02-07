@@ -4,16 +4,15 @@
 import 'package:flutter/material.dart';
 
 class DialogPage extends Page {
+    const DialogPage({required this.builder, this.barrierColor, this.barrierDismissible = true, this.barrierLabel, this.useSafeArea = true, this.anchorPoint, this.traversalEdgeBehavior});
+    
     final WidgetBuilder builder;
-
-    DialogPage({required this.builder, this.barrierColor, this.barrierDismissible = true, this.barrierLabel, this.useSafeArea = true, this.anchorPoint, this.traversalEdgeBehavior});
-
-    Color? barrierColor = Colors.black54;
-    bool barrierDismissible = true;
-    String? barrierLabel;
-    bool useSafeArea = true;
-    Offset? anchorPoint;
-    TraversalEdgeBehavior? traversalEdgeBehavior;
+    final Color? barrierColor;
+    final bool barrierDismissible;
+    final String? barrierLabel;
+    final bool useSafeArea;
+    final Offset? anchorPoint;
+    final TraversalEdgeBehavior? traversalEdgeBehavior;
 
     @override
     Route createRoute(BuildContext context) {

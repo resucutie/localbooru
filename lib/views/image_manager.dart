@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/header.dart';
 import 'package:localbooru/components/window_frame.dart';
+import 'package:localbooru/utils/tags.dart';
 
 class ImageManagerView extends StatefulWidget {
     const ImageManagerView({super.key, this.image});
@@ -23,6 +25,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     final tagController = TextEditingController();
 
     bool isEditing = false;
+    bool isGeneratingTags = false;
 
     List<String> urlList = [];
     String loadedImage = "";
@@ -40,7 +43,6 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     }
 
     void _submit() {
-        debugPrint("$urlList");
         addImage(
             imageFile: File(loadedImage),
             tags: tagController.text,
@@ -89,8 +91,26 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                         ),
                         TextFormField(
                             controller: tagController,
-                            decoration: const InputDecoration(
-                                labelText: "Tags (very lame way of putting tags yea)"
+                            decoration: InputDecoration(
+                                labelText: "Tags",
+                                suffixIcon: TextButton(
+                                    onPressed: (loadedImage.isEmpty || isGeneratingTags) ? null : () {
+                                        setState(() => isGeneratingTags = true);
+                                        autoTag(File(loadedImage)).then((tags) {
+                                            final moreAccurateTags = filterAccurateResults(tags, 0.15);
+                                            tagController.text = moreAccurateTags.keys.join(" ");
+                                        }).catchError((error, stackTrace) {
+                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                                content: Text('Could not obtain tag information, ${error.toString()}'),
+                                            ));
+                                            throw error;
+                                            // debugPrintStack(label: error.toString(), stackTrace: stackTrace);
+                                        }).whenComplete(() {
+                                            setState(() => isGeneratingTags = false);
+                                        });
+                                    }, 
+                                    child: isGeneratingTags ? const Text("Generating...") : const Icon(CupertinoIcons.sparkles)
+                                )
                             ),
                             validator: (value) {
                                 if (value == null || value.isEmpty) return 'Please enter tags';

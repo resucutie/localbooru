@@ -20,13 +20,14 @@ As the "hotfix" solution for Android users, you can use [an share to clipboard a
 - [x] Step 2: Write the read functionality of the internal API
 - [x] Step 3: Create an easy to use route system
 - [x] Step 4: Create view to view image
-- [ ] Step 5: Write the write functionality of the internal API
+- [x] Step 5: Write the write functionality of the internal API
 - [ ] Step 6: Check app cross UI compatibility
 
 ## Post basics to-do
 - [ ] Organize alphabetically the tag list
+- [ ] Material You
 - [ ] Tag suggestion
-- [ ] Auto tag generation
+- [x] Auto tag generation
 - [ ] Auto-import from other booru websites (and Twitter)
-- [ ] Multi booru supports
+- [ ] Multi booru support
 - [ ] Tag classification (separate by author, character...)
