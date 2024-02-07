@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
@@ -97,14 +98,43 @@ class BrowseScreen extends StatelessWidget {
                     builder: (context) => ListView(
                         padding: EdgeInsets.zero,
                         children: <Widget>[
-                            FilledButton(onPressed: () {
-                                Scaffold.of(context).closeDrawer();
-                                context.push("/permissions");
-                            }, child: const Text("Go to permissions")),
-                            FilledButton(onPressed: () {
-                                Scaffold.of(context).closeDrawer();
-                                context.push("/setbooru");
-                            }, child: const Text("Go to set booru"))
+                            const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Text("LocalBooru", style: TextStyle(
+                                    fontSize: 20.0
+                                )),
+                            ),
+
+                            ListTile(
+                                title: const Text("Add image"),
+                                leading: const Icon(Icons.add),
+                                onTap: () {
+                                    Scaffold.of(context).closeDrawer();
+                                    context.push("/manage_image");
+                                },
+                            ),
+
+                            if(kDebugMode) ...[
+                                const Divider(),
+                                const Padding(
+                                    padding: EdgeInsets.only(left: 16.0, top: 16.0),
+                                    child: Text("Dev mode"),
+                                ),
+                                ListTile(
+                                    title: const Text("Go to permissions screen"),
+                                    onTap: () {
+                                        Scaffold.of(context).closeDrawer();
+                                        context.push("/permissions");
+                                    },
+                                ),
+                                ListTile(
+                                    title: const Text("Go to set booru screen"),
+                                    onTap: () {
+                                        Scaffold.of(context).closeDrawer();
+                                        context.push("/setbooru");
+                                    },
+                                )
+                            ]
                         ],
                     ),
                 ),
