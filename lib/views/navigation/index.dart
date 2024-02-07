@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +6,6 @@ import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:open_file/open_file.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:path/path.dart';
 import 'package:share_plus/share_plus.dart';
 
 class BrowseScreen extends StatelessWidget {
@@ -98,8 +95,9 @@ class BrowseScreen extends StatelessWidget {
                     builder: (context) => ListView(
                         padding: EdgeInsets.zero,
                         children: <Widget>[
+                            SizedBox(height: MediaQuery.of(context).viewPadding.top),
                             const Padding(
-                                padding: EdgeInsets.all(16.0),
+                                padding: EdgeInsets.all(16),
                                 child: Text("LocalBooru", style: TextStyle(
                                     fontSize: 20.0
                                 )),

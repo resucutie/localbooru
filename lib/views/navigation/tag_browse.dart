@@ -86,9 +86,11 @@ class _GalleryViewerState extends State<GalleryViewer> {
     // }
 
     Future<Map> _obtainResults() async {
-        int indexLength = await widget.booru.getIndexNumberLength(widget.tags);
-        List<BooruImage> images = await widget.booru.searchByTags(widget.tags, index: _currentIndex);
         SharedPreferences prefs = await SharedPreferences.getInstance();
+        int indexSize = prefs.getInt("page_size") ?? settingsDefaults["page_size"];
+
+        int indexLength = await widget.booru.getIndexNumberLength(widget.tags, size: indexSize);
+        List<BooruImage> images = await widget.booru.searchByTags(widget.tags, index: _currentIndex, size: indexSize);
         return {
             "images": images,
             "indexLength": indexLength,

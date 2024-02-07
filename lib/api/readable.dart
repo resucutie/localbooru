@@ -51,7 +51,7 @@ class Booru {
     }
 
     Future<List<BooruImage>> getImagesFromIndex(List list, {int index = 0, int? size}) async {
-        size = INDEX_IMAGE_LIMIT;
+        size ??= INDEX_IMAGE_LIMIT;
 
         final int length = list.length;
 
@@ -77,10 +77,10 @@ class Booru {
         return filteredFiles;
     }
 
-    Future<List<BooruImage>> searchByTags(String tags, {int index = 0}) async => await getImagesFromIndex(await _doTagFiltering(tags), index: index);
+    Future<List<BooruImage>> searchByTags(String tags, {int index = 0, int? size}) async => await getImagesFromIndex(await _doTagFiltering(tags), index: index, size: size);
 
     Future<int> getIndexNumberLength(tags, {int? size}) async {
-        size = INDEX_IMAGE_LIMIT;
+        size ??= INDEX_IMAGE_LIMIT;
 
         final list = await _doTagFiltering(tags);
 

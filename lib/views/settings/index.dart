@@ -30,9 +30,7 @@ class SettingsHome extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
-        return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
+        return ListView(
             children: [
                 ListTile(
                     title: const Text("Overall settings"),
