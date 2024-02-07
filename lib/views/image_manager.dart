@@ -97,7 +97,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                     onPressed: (loadedImage.isEmpty || isGeneratingTags) ? null : () {
                                         setState(() => isGeneratingTags = true);
                                         autoTag(File(loadedImage)).then((tags) {
-                                            final moreAccurateTags = filterAccurateResults(tags, 0.15);
+                                            final moreAccurateTags = filterAccurateResults(tags, 0.1);
                                             tagController.text = moreAccurateTags.keys.join(" ");
                                         }).catchError((error, stackTrace) {
                                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
