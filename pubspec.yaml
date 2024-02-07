@@ -47,6 +47,7 @@ dependencies:
   pasteboard: ^0.2.0
   dotted_border: ^2.1.0
   http: ^1.2.0
+  titlebar_buttons: ^1.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/utils/platform_tools.dart';
+import 'package:titlebar_buttons/titlebar_buttons.dart';
 
 class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double height;
@@ -20,6 +23,7 @@ class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
                     color: backgroundColor,
                     child: Row(
                         children: [
+                            if(Platform.isMacOS) const WindowButtons(),
                             Expanded(
                                 child: MoveWindow(
                                     child: Padding(
@@ -28,7 +32,7 @@ class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
                                     ),
                                 )
                             ),
-                            const WindowButtons()
+                            if(!Platform.isMacOS) const WindowButtons()
                         ],
                     ),
                 )
@@ -47,6 +51,12 @@ class WindowButtons extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
+        final osxButtons = [
+            DecoratedCloseButton(type: ThemeType.osxArc, onPressed: () => appWindow.close()),
+            DecoratedMinimizeButton(type: ThemeType.osxArc, onPressed: () => appWindow.minimize()),
+            DecoratedMaximizeButton(type: ThemeType.osxArc, onPressed: () => appWindow.maximizeOrRestore()),
+        ];
+
         final buttonColors = WindowButtonColors(
             iconNormal: Theme.of(context).colorScheme.inverseSurface,
             mouseOver: Theme.of(context).colorScheme.primary,
@@ -61,12 +71,14 @@ class WindowButtons extends StatelessWidget {
             iconMouseOver: Theme.of(context).colorScheme.onError,
             iconMouseDown: Theme.of(context).colorScheme.onErrorContainer
         );
+        final anyPlatformButtons = [
+            MinimizeWindowButton(colors: buttonColors),
+            MaximizeWindowButton(colors: buttonColors),
+            CloseWindowButton(colors: closeButtonColors)
+        ];
+
         return Wrap(
-            children: [
-                MinimizeWindowButton(colors: buttonColors),
-                MaximizeWindowButton(colors: buttonColors),
-                CloseWindowButton(colors: closeButtonColors)
-            ],
+            children: Platform.isMacOS ? osxButtons : anyPlatformButtons
         );
     }
 }
