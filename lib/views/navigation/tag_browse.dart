@@ -3,101 +3,44 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/image_display.dart';
 
-// class SearchTagView extends StatefulWidget {
-//     const SearchTagView({super.key});
-
-//     @override
-//     State<SearchTagView> createState() => _SearchTagViewState();
-// }
-
-// class _SearchTagViewState extends State<SearchTagView> {
-//     void _onSearch () => context.push("/search?tag=${_searchController.text}");
-//     final TextEditingController _searchController = TextEditingController();
-
-
-//     @override
-//     Widget build(BuildContext context) {
-//         return Center(
-//             child: Padding(
-//                 padding: const EdgeInsets.all(8.0),
-//                 child: Column(
-//                     mainAxisAlignment: MainAxisAlignment.center,
-//                     crossAxisAlignment: CrossAxisAlignment.center,
-//                     children: [
-//                         SearchTag(
-//                             onSearch: (_) => _onSearch(),
-//                             controller: _searchController,
-//                         ),
-//                         const SizedBox(height: 16.0),
-//                         Wrap(
-//                             direction: Axis.horizontal,
-//                             spacing: 8.0,
-//                             children: [
-//                                 OutlinedButton.icon(
-//                                     onPressed: () => context.push("/recent"),
-//                                     label: const Text("Recent posts"),
-//                                     icon: const Icon(Icons.history)
-//                                 ),
-//                                 // FilledButton.icon(
-//                                 //     onPressed: () => _onSearch(),
-//                                 //     label: const Text("Search"),
-//                                 //     icon: const Icon(Icons.search)
-//                                 // )
-//                             ],
-//                         )
-//                     ],
-//                 ),
-//             )
-//         );
-//     }
-// }
-
 class SearchTag extends StatefulWidget {
-    SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller});
+    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.hasShadows = false});
 
-    String defaultText = "";
-    TextEditingController? controller = TextEditingController();
-    Function(String value) onSearch;
+    final String defaultText;
+    final Function(String value) onSearch;
+    final TextEditingController? controller;
+    final bool hasShadows;
 
     @override
     State<SearchTag> createState() => _SearchTagState();
 }
 
 class _SearchTagState extends State<SearchTag> {
-    // SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller});
-
-    // String defaultText = "";
-    // TextEditingController? controller = TextEditingController();
-    // Function(String value) onSearch;
-
-    bool _isEmpty = true;
+    TextEditingController _controller = TextEditingController();
 
     @override
     void initState() {
         super.initState();
 
-        _isEmpty = widget.controller!.text.isEmpty;
+        if(widget.controller != null) _controller = widget.controller!;
     }
 
     @override
     Widget build(BuildContext context) {
         return SearchBar(
-            controller: widget.controller,
+            controller: _controller,
             hintText: "Type a tag",
             hintStyle: MaterialStateProperty.all(const TextStyle(color: Colors.grey)),
             backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.surfaceVariant),
-            shadowColor: MaterialStateProperty.all(Colors.transparent),
+            shadowColor: !widget.hasShadows ? MaterialStateProperty.all(Colors.transparent) : null,
             textStyle: MaterialStateProperty.all(
                 TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)
             ),
             onSubmitted: widget.onSearch,
-            onChanged: (text) => setState(() {
-                _isEmpty = text.isEmpty;
-            }),
             trailing: [
                 IconButton(
                     icon: const Icon(Icons.search),
-                    onPressed: _isEmpty ? null : () => widget.onSearch(widget.controller!.text),
+                    onPressed: _controller.text.isEmpty ? null : () => widget.onSearch(_controller.text),
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                     // disabledColor: Colors.grey,
                 )
@@ -107,12 +50,12 @@ class _SearchTagState extends State<SearchTag> {
 }
 
 class GalleryViewer extends StatefulWidget {
-    GalleryViewer({super.key, required this.booru, this.tags = "", this.index = 0, this.routeNavigation = false});
+    const GalleryViewer({super.key, required this.booru, this.tags = "", this.index = 0, this.routeNavigation = false});
 
     final Booru booru;
-    String tags = "";
-    int index = 0;
-    bool routeNavigation = false;
+    final String tags;
+    final int index;
+    final bool routeNavigation;
 
     @override
     State<GalleryViewer> createState() => _GalleryViewerState();
@@ -124,7 +67,14 @@ class _GalleryViewerState extends State<GalleryViewer> {
 
     final scrollToTop = GlobalKey();
     
-    // late int _currentIndex = widget.index;
+    late int _currentIndex;
+
+    @override
+    void initState() {
+        super.initState();
+        _currentIndex = widget.index;
+        _searchController.text = widget.tags;
+    }
 
     // @override
     // void initState() {
@@ -134,10 +84,8 @@ class _GalleryViewerState extends State<GalleryViewer> {
     // }
 
     Future<Map> _obtainResults() async {
-        _searchController.text = widget.tags;
-        
         int indexLength = await widget.booru.getIndexNumberLength(widget.tags);
-        List<BooruImage> images = await widget.booru.searchByTags(widget.tags, index: widget.index);
+        List<BooruImage> images = await widget.booru.searchByTags(widget.tags, index: _currentIndex);
         return {
             "images": images,
             "indexLength": indexLength,
@@ -187,7 +135,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                             if(widget.routeNavigation) {
                                                                 context.push("/search?tag=${widget.tags}&index=$index");
                                                             } else {
-                                                                setState(() => widget.index = index);
+                                                                setState(() => _currentIndex = index);
                                                                 Scrollable.ensureVisible(scrollToTop.currentContext!);
                                                             }
                                                         }
@@ -223,11 +171,15 @@ class SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
 
     @override
     Widget build(context, double shrinkOffset, bool overlapsContent) {
-        return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SearchTag(
+        return Center(
+            child: Container(
+                padding: const EdgeInsets.all(8.0),
+                constraints: const BoxConstraints(maxWidth: 1080),
+                child: SearchTag(
                     onSearch: onSearch,
                     controller: searchController,
+                    hasShadows: true,
+                ),
             ),
         );
     }

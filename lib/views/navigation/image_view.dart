@@ -58,9 +58,14 @@ class ImageViewDisplay extends StatelessWidget {
         return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Listener(
-                child: Image.file(image.getImage(), fit: BoxFit.contain),
+                child: GestureDetector(
+                    onTap: () => {
+                        context.push("/dialogs/zoom_image/${image.id}")
+                    },
+                    child: Image.file(image.getImage(), fit: BoxFit.contain),
+                ),
                 onPointerDown: (PointerDownEvent event) async {
-                    if(event.buttons == kPrimaryMouseButton) context.push("/dialogs/zoom_image/${image.id}");
+                    if(event.kind != PointerDeviceKind.mouse) return;
                     if(event.buttons == kSecondaryMouseButton) {
                         await showMenu(
                             context: context,

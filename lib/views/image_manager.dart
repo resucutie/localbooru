@@ -3,36 +3,52 @@ import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/header.dart';
 import 'package:localbooru/components/window_frame.dart';
 
-class AddImageView extends StatefulWidget {
-    const AddImageView({super.key});
+class ImageManagerView extends StatefulWidget {
+    const ImageManagerView({super.key, this.image});
+
+    final BooruImage? image;
 
     @override
-    State<AddImageView> createState() => _AddImageViewState();
+    State<ImageManagerView> createState() => _ImageManagerViewState();
 }
 
-class _AddImageViewState extends State<AddImageView> {
+class _ImageManagerViewState extends State<ImageManagerView> {
     final _formKey = GlobalKey<FormState>();
 
     final tagController = TextEditingController();
 
+    bool isEditing = false;
+
     List<String> urlList = [];
-    String image = "";
+    String loadedImage = "";
+
+    @override
+    void initState() {
+        super.initState();
+        isEditing = widget.image != null;
+        if(widget.image != null) {
+            final image = widget.image!;
+            tagController.text = image.tags;
+            loadedImage = image.path;
+            if(image.sources != null) urlList = image.sources!;
+        }
+    }
 
     void _submit() {
         debugPrint("$urlList");
         addImage(
-            imageFile: File(image),
+            imageFile: File(loadedImage),
             tags: tagController.text,
-            sources: urlList
+            sources: urlList,
+            id: widget.image?.id
         );
         context.pop();
-        context.push("/recent");
+        if(!isEditing) context.push("/recent");
     }
 
     @override
@@ -45,9 +61,9 @@ class _AddImageViewState extends State<AddImageView> {
     Widget build(BuildContext context) {
         return Scaffold(
             appBar: WindowFrameAppBar(
-                title: "Add image",
+                title: "Image manager",
                 appBar: AppBar(
-                    title: const Text("Add an image"),
+                    title: Text("${isEditing ? "Edit" : "Add"} image"),
                     actions: [
                         IconButton(
                             icon: const Icon(Icons.done),
@@ -64,11 +80,12 @@ class _AddImageViewState extends State<AddImageView> {
                     padding: const EdgeInsets.all(16.0),
                     children: [
                         ImageUploadForm(
-                            onChanged: (value) => setState(() => image = value),
+                            onChanged: (value) => setState(() => loadedImage = value),
                             validator: (value) {
                                 if (value == null || value.isEmpty) return 'Please select an image';
                                 return null;
                             },
+                            currentValue: loadedImage,
                         ),
                         TextFormField(
                             controller: tagController,
@@ -84,6 +101,7 @@ class _AddImageViewState extends State<AddImageView> {
                         ListStringTextInput(
                             onChanged: (list) => setState(() => urlList = list),
                             canBeEmpty: true,
+                            defaultValue: urlList,
                             formValidator: (value) {
                                 if(value == null || value.isEmpty) return "Please either remove the URL or fill this field";
                                 return null;
@@ -97,11 +115,11 @@ class _AddImageViewState extends State<AddImageView> {
 }
 
 class ImageUploadForm extends StatelessWidget {
-    ImageUploadForm({super.key, required this.onChanged, required this.validator, this.currentValue = ""});
+    const ImageUploadForm({super.key, required this.onChanged, required this.validator, this.currentValue = ""});
     
-    ValueChanged<String> onChanged;
-    FormFieldValidator<String> validator;
-    String currentValue = "";
+    final ValueChanged<String> onChanged;
+    final FormFieldValidator<String> validator;
+    final String currentValue;
     
     @override
     Widget build(BuildContext context) {
@@ -154,12 +172,12 @@ class ImageUploadForm extends StatelessWidget {
 }
 
 class ListStringTextInput extends StatefulWidget {
-    ListStringTextInput({super.key, required this.onChanged, this.defaultValue = const [], this.canBeEmpty = false, this.formValidator});
+    const ListStringTextInput({super.key, required this.onChanged, this.defaultValue = const [], this.canBeEmpty = false, this.formValidator});
 
-    Function(List<String>) onChanged;
-    List<String> defaultValue;
-    FormFieldValidator<String>? formValidator;
-    bool canBeEmpty;
+    final Function(List<String>) onChanged;
+    final List<String> defaultValue;
+    final FormFieldValidator<String>? formValidator;
+    final bool canBeEmpty;
 
     @override
     State<ListStringTextInput> createState() => _ListStringTextInputState();

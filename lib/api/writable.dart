@@ -19,7 +19,12 @@ Future<BooruImage> addImage({required File imageFile,
     final Booru booru = await getCurrentBooru();
 
     //copy image
-    File copiedFile = await imageFile.copy(p.join(booru.path, "files", p.basename(imageFile.path)));
+    File copiedFile;
+    if(p.dirname(imageFile.path) == p.join(booru.path, "files")) {
+        copiedFile = imageFile;
+    } else {
+        copiedFile = await imageFile.copy(p.join(booru.path, "files", p.basename(imageFile.path)));
+    }
 
     // add to json
     Map raw = await booru.getRawInfo();

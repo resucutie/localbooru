@@ -17,23 +17,25 @@ class BrowseScreen extends StatelessWidget {
     final Uri uri;
 
     bool _isHome() => uri.path == "/home";
+    bool isOnSearch() => uri.path.contains("/search");
+    bool isOnView() => uri.path.contains("/view");
     String _getTitle(Uri uri) {
         // Uri.parse(url).queryParameters["tag"].isEmpty();
         final String? tags = uri.queryParameters["tag"];
-        if(uri.path.contains("/search")) {
+        if(isOnSearch()) {
             if(tags != null && tags.isNotEmpty) return "Browse";
             return "Recent";
         }
-        if(uri.path.contains("/view")) return "Image";
+        if(isOnView()) return "Image";
         return "Home";
     }
     String? _getSubtitle(Uri uri) {
         final String? index = uri.queryParameters["index"];
-        if(uri.path.contains("/search")) {
+        if(isOnSearch()) {
             final int page = index == null ? 1 : int.parse(index) + 1;
             return "Page $page";
         }
-        if(uri.path.contains("/view")) {
+        if(isOnView()) {
             final String id = uri.pathSegments[1];
             return "No. ${int.parse(id) + 1}";
         }
@@ -66,10 +68,16 @@ class BrowseScreen extends StatelessWidget {
                     ) : null,
                     actions: [
                         IconButton(
-                            icon: const Icon(Icons.add),
-                            tooltip: "Add image",
+                            icon: isOnView() ? const Icon(Icons.edit) : const Icon(Icons.add),
+                            tooltip: "${isOnView() ? "Edit" : "Add"} image",
                             onPressed: () {
-                                context.push("/add");
+                                if(isOnView()) {
+                                    final String id = uri.pathSegments[1];
+                                    debugPrint("/manage_image/$id");
+                                    context.push("/manage_image/$id");
+                                } else {
+                                    context.push("/manage_image");
+                                }
                             },
                         ),
                         Builder(builder: (context) {
@@ -175,6 +183,10 @@ List<PopupMenuEntry> imageShareItems(BooruImage image) {
 
 List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildContext context}) {
     return [
+        PopupMenuItem(
+            child: const Text("Edit image metadata"),
+            onTap: () => context.push("/manage_image/${image.id}")
+        ),
         PopupMenuItem(
             child: const Text("Delete image"),
             onTap: () => context.push("/dialogs/delete_image_confirmation/${image.id}")

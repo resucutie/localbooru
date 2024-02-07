@@ -2,7 +2,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/utils/dialog_page.dart';
-import 'package:localbooru/views/add_image.dart';
+import 'package:localbooru/views/image_manager.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
 import 'package:localbooru/views/navigation/index.dart';
@@ -42,7 +42,7 @@ final _router = GoRouter(
                             builder: (context, state) => const SearchTagView(),
                         ),
                         GoRoute(path: "search",
-                            builder: (context, state)  {
+                            builder: (context, state) {
                                 final String? tags = state.uri.queryParameters["tag"];
                                 final String? index = state.uri.queryParameters["index"];
                                 return BooruLoader(
@@ -104,8 +104,28 @@ final _router = GoRouter(
                 ),
 
                 // image add
-                GoRoute(path: "add",
-                    builder: (context, state) => const AddImageView(),
+                GoRoute(path: "manage_image",
+                    builder: (context, state) {
+                        return const ImageManagerView();
+                    },
+                    routes: [
+                        GoRoute(path: ":id",
+                            builder: (context, state) {
+                                debugPrint("mow");
+                                final String? id = state.pathParameters["id"];
+                                if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
+                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                    booru: booru,
+                                    id: id,
+                                    builder: (context, image) {
+                                        return ImageManagerView(
+                                            image: image,
+                                        );
+                                    }
+                                ));
+                            },
+                        )
+                    ]
                 ),
 
                 // initial setup stuff
