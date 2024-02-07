@@ -169,7 +169,7 @@ List<PopupMenuEntry> imageShareItems(BooruImage image) {
             child: const Text("Open image"),
             onTap: () => OpenFile.open(image.path),
         ),
-        if(isMobile()) PopupMenuItem(
+        if(!isMobile()) PopupMenuItem(
             enabled: !isMobile(),
             child: const Text("Copy image to clipboard"),
             onTap: () => Pasteboard.writeFiles([image.path]),
