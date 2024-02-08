@@ -26,7 +26,13 @@ Future<Booru> getCurrentBooru() async {
 void setBooru(String path) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setString("booruPath", path);
-    debugPrint(prefs.getString("booruPath"));
+}
+
+void createDefaultBooruModel(String folderPath) async {
+    File repoinfoFile = await File(p.join(folderPath, "repoinfo.json")).create(recursive: true);
+    repoinfoFile.writeAsString("{\"files\": []}");
+    await Directory(p.join(folderPath, "files")).create(recursive: true);
+    // setBooru(folderPath);
 }
 
 class BooruLoader extends StatelessWidget {

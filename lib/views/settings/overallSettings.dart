@@ -49,16 +49,22 @@ class _OverallSettingsState extends State<OverallSettings> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [Text("Less elements"), Text("More elements")]
                             ),
-                            Slider(
-                                value: _gridSizeSliderValue,
-                                min: 1,
-                                max: 10,
-                                divisions: 9,
-                                onChanged: (value) async {
-                                    setState(() => _gridSizeSliderValue = value);
-                                    widget.prefs.setInt("grid_size", _gridSizeSliderValue.ceil());
-                                },
-                            ),
+                            Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                child: SliderTheme(
+                                    data: SliderThemeData(overlayShape: SliderComponentShape.noOverlay),
+                                    child: Slider(
+                                        value: _gridSizeSliderValue,
+                                        min: 1,
+                                        max: 10,
+                                        divisions: 9,
+                                        onChanged: (value) async {
+                                            setState(() => _gridSizeSliderValue = value);
+                                            widget.prefs.setInt("grid_size", _gridSizeSliderValue.ceil());
+                                        },
+                                    ),
+                                ),
+                            )
                         ],
                     )
                 ),

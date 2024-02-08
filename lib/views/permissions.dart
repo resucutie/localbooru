@@ -15,7 +15,7 @@ class _PermissionsScreenState extends State<PermissionsScreen>{
     Widget build(BuildContext context) {
         return Scaffold (
             appBar: WindowFrameAppBar(
-                title: "Configuration",
+                title: "Setup",
                 appBar: AppBar(
                     title: const Text("Permissions"),
                 )
@@ -31,15 +31,6 @@ class _PermissionsScreenState extends State<PermissionsScreen>{
                             FilledButton.icon(
                                 label: const Text("Give storage permissions"),
                                 icon: const Icon(Icons.folder),
-                                // child: const Wrap(
-                                //     direction: Axis.horizontal,
-                                //     spacing: 8,
-                                //     alignment: WrapAlignment.center,
-                                //     children: [
-                                //         FilledButton.icon(Icons.folder),
-                                //         Text("Give storage permissions")
-                                //     ]
-                                // ),
                                 onPressed: () async {
                                     final status = await Permission.manageExternalStorage.request();
                                     if (status.isDenied || status.isPermanentlyDenied || status.isRestricted) {

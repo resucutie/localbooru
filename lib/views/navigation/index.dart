@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -138,6 +140,12 @@ class BrowseScreen extends StatelessWidget {
                                     onTap: () {
                                         Scaffold.of(context).closeDrawer();
                                         context.push("/setbooru");
+                                    },
+                                ),
+                                ListTile(
+                                    title: Text("Nuke app data (Linux, borken)", style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                                    onTap: () async {
+                                        Directory(r"~/.local/share/com.example.localbooru").delete(recursive: true);
                                     },
                                 )
                             ]
