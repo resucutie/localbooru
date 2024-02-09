@@ -1,11 +1,5 @@
 part of localbooru_api;
 
-class BooruUpdateListener with ChangeNotifier {
-    void update() {
-        notifyListeners();
-    }
-}
-
 Future writeSettings(Booru booru, Map raw) async {
     await File(p.join(booru.path, "repoinfo.json")).writeAsString(const JsonEncoder.withIndent('  ').convert(raw));
     booruUpdateListener.update();
@@ -89,5 +83,3 @@ Future removeImage(String id) async {
     // rebase to update ids
     await rebase();
 }
-
-BooruUpdateListener booruUpdateListener = BooruUpdateListener();

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:localbooru/utils/defaults.dart';
+import 'package:localbooru/utils/listeners.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,7 +33,7 @@ void createDefaultBooruModel(String folderPath) async {
     File repoinfoFile = await File(p.join(folderPath, "repoinfo.json")).create(recursive: true);
     repoinfoFile.writeAsString("{\"files\": []}");
     await Directory(p.join(folderPath, "files")).create(recursive: true);
-    // setBooru(folderPath);
+    setBooru(folderPath);
 }
 
 class BooruLoader extends StatelessWidget {

@@ -1,7 +1,10 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/utils/defaults.dart';
 import 'package:localbooru/utils/dialog_page.dart';
+import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/views/image_manager.dart';
 import 'package:localbooru/views/navigation/home.dart';
@@ -178,15 +181,52 @@ class MyApp extends StatelessWidget {
     // This widget is the root of your application.
     @override
     Widget build(BuildContext context) {
-        return MaterialApp.router(
-            theme: ThemeData(
-                primaryColor: Colors.blue,
-                // colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
-                useMaterial3: true,
-            ),
-            darkTheme: ThemeData.dark(),
-            themeMode: ThemeMode.system, 
-            routerConfig: _router,
+        return SharedPreferencesBuilder(
+            builder: (_, prefs) => ListenableBuilder(
+                listenable: themeListener,
+                builder: (context, _) => DynamicColorBuilder(
+                    builder: (lightDynamic, darkDynamic) {
+                        var theme = generateTheme(
+                            darkDynamic: darkDynamic,
+                            lightDynamic: lightDynamic,
+                            monet: prefs.getBool("monet") ?? settingsDefaults["monet"]
+                        );
+
+                        return MaterialApp.router(
+                            theme: theme["light"],
+                            darkTheme: theme["dark"],
+                            themeMode: ThemeMode.system, 
+                            routerConfig: _router,
+                        );
+                    }
+                )
+            )
         );
+    }
+
+    final Color _brandColor = Colors.deepPurple;
+
+    Map<String, ThemeData> generateTheme({ColorScheme? lightDynamic, ColorScheme? darkDynamic, bool monet = true}) {
+        ColorScheme lightColorScheme;
+        ColorScheme darkColorScheme;
+
+        if (monet && lightDynamic != null && darkDynamic != null) {
+            lightColorScheme = lightDynamic.harmonized();
+            darkColorScheme = darkDynamic.harmonized();
+        } else {
+            // Otherwise, use fallback schemes.
+            lightColorScheme = ColorScheme.fromSeed(
+                seedColor: _brandColor
+            );
+            darkColorScheme = ColorScheme.fromSeed(
+                seedColor: _brandColor,
+                brightness: Brightness.dark,
+            );
+        }
+
+        return {
+            "light": ThemeData.from(colorScheme: lightColorScheme),
+            "dark": ThemeData.from(colorScheme: darkColorScheme),
+        };
     }
 }

@@ -49,6 +49,7 @@ dependencies:
   http: ^1.2.0
   titlebar_buttons: ^1.0.0
   path_provider: ^2.1.2
+  dynamic_color: ^1.6.9
 
 dev_dependencies:
   flutter_test:

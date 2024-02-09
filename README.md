@@ -4,14 +4,14 @@ Your personal booru collection
 This is a cross platform local booru collection that exclusively works on your local storage, without selfhosting. Will require importing
 
 ## Targetted platforms
-- Android
+- Android (F-droid)
 - Linux
 - Windows
 - macOS
 - iOS (Sideloading)
 
 ## FAQ
-### Why the copy 
+### Why the copy button is only avaiable on desktop?
 No. The clipboard manager that I use, [pasteboard](https://pub.dev/packages/pasteboard), cannot copy images on mobile devices, only on desktop ones. If anyone has any replacement for it that can actually copy images (i am looking at you [super_clipboard](https://pub.dev/packages/super_clipboard)) for at least any of the mobile platforms I will happily include. For now mobile users are limited to opening and sharing files.  
 As the "hotfix" solution for Android users, you can use [an share to clipboard app](https://f-droid.org/en/packages/com.kpstv.xclipper/)
 
@@ -25,7 +25,7 @@ As the "hotfix" solution for Android users, you can use [an share to clipboard a
 
 ## Post basics to-do
 - [ ] Organize alphabetically the tag list
-- [ ] Material You
+- [x] Material You
 - [ ] Tag suggestion
 - [x] Auto tag generation
 - [ ] Auto-import from other booru websites (and Twitter)
