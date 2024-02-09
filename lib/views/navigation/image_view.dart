@@ -131,7 +131,7 @@ class ImageViewProprieties extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                     const Header("Tags"),
-                    Wrap(children: image.tags.split(" ").map((e) => Tag(e)).toList()),
+                    Wrap(children: List.from(image.tags.split(" ")..sort()).map((e) => Tag(e)).toList()),
 
                     const Header("Sources"),
                     image.sources == null || image.sources!.isEmpty ? const Text("None") : Column(

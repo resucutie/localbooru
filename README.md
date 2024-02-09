@@ -24,7 +24,7 @@ As the "hotfix" solution for Android users, you can use [an share to clipboard a
 - [x] Step 6: Check app cross UI compatibility
 
 ## Post basics to-do
-- [ ] Organize alphabetically the tag list
+- [x] Organize alphabetically the tag list
 - [x] Material You
 - [ ] Tag suggestion
 - [x] Auto tag generation
