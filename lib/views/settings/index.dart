@@ -33,6 +33,13 @@ class SettingsHome extends StatelessWidget {
         return ListView(
             children: [
                 ListTile(
+                    title: const Text("Change booru"),
+                    subtitle: const Text("If you want to create or open another booru"),
+                    leading: const Icon(Icons.folder),
+                    onTap: () => context.push("/setbooru"),
+                ),
+                const Divider(),
+                ListTile(
                     title: const Text("Overall settings"),
                     subtitle: const Text("Options to configure this program"),
                     leading: const Icon(Icons.settings),
