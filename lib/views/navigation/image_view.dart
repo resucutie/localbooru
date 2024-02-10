@@ -4,7 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/components/header.dart';
+import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/views/navigation/index.dart';
 import 'package:url_launcher/url_launcher_string.dart';

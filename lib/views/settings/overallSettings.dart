@@ -1,5 +1,9 @@
+import 'dart:math';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/utils/defaults.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,6 +22,7 @@ class _OverallSettingsState extends State<OverallSettings> {
     final _pageSizeController = TextEditingController();
 
     double _gridSizeSliderValue = settingsDefaults["grid_size"].toDouble();
+    double _autotagAccuracy = settingsDefaults["autotag_accuracy"];
     bool _monetTheme = settingsDefaults["monet"];
 
     bool isSettingModified(String setting) {
@@ -37,12 +42,14 @@ class _OverallSettingsState extends State<OverallSettings> {
         _gridSizeSliderValue = (widget.prefs.getInt("grid_size") ?? settingsDefaults["grid_size"]).toDouble();
         _pageSizeController.text = (widget.prefs.getInt("page_size") ?? settingsDefaults["page_size"]).toString();
         _monetTheme = widget.prefs.getBool("monet") ?? settingsDefaults["monet"];
+        _autotagAccuracy = widget.prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"];
     }
 
     @override
     Widget build(BuildContext context) {
         return ListView(
             children: [
+                const SmallThemedHeader("Browsing"),
                 ListTile(
                     title: Row(
                         children: [
@@ -72,7 +79,7 @@ class _OverallSettingsState extends State<OverallSettings> {
                                         divisions: 9,
                                         onChanged: (value) async {
                                             setState(() => _gridSizeSliderValue = value);
-                                            widget.prefs.setInt("grid_size", _gridSizeSliderValue.ceil());
+                                            widget.prefs.setInt("grid_size", value.ceil());
                                         },
                                     ),
                                 ),
@@ -116,6 +123,46 @@ class _OverallSettingsState extends State<OverallSettings> {
                         ],
                     )
                 ),
+                const SmallThemedHeader("Tags"),
+                ListTile(
+                    title: Row(
+                        children: [
+                            const Text("Autotag accuracy"),
+                            if(isSettingModified("autotag_accuracy")) IconButton(
+                                onPressed: () => resetProp("autotag_accuracy", modifier: (v) => _autotagAccuracy = v.toDouble()),
+                                icon: const Icon(Icons.restart_alt)
+                            )
+                        ],
+                    ),
+                    leading: const Icon(CupertinoIcons.sparkles),
+                    subtitle: Wrap(
+                        children: [
+                            const Text("How accurate should be the results of the autotagger"),
+                            const Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [Text("Less accurate"), Text("More accurate")]
+                            ),
+                            Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                child: SliderTheme(
+                                    data: SliderThemeData(overlayShape: SliderComponentShape.noOverlay, showValueIndicator: ShowValueIndicator.always),
+                                    child: Slider(
+                                        //TODO: Make this slider go in an exponential curve
+                                        value: _autotagAccuracy,
+                                        min: 0,
+                                        max: 1,
+                                        label: "${(_autotagAccuracy*100).round()}%",
+                                        onChanged: (value) async {
+                                            setState(() => _autotagAccuracy = value);
+                                            widget.prefs.setDouble("autotag_accuracy", value);
+                                        },
+                                    ),
+                                ),
+                            )
+                        ],
+                    )
+                ),
+                const SmallThemedHeader("Appearence"),
                 SwitchListTile(
                     title: Row(
                         children: [
@@ -134,7 +181,7 @@ class _OverallSettingsState extends State<OverallSettings> {
                         themeListener.update();
                         setState(() => _monetTheme = value);
                     }
-                )
+                ),
             ],
         );
     }

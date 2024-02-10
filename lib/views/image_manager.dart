@@ -6,9 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/components/header.dart';
+import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
+import 'package:localbooru/utils/defaults.dart';
 import 'package:localbooru/utils/tags.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageManagerView extends StatefulWidget {
     const ImageManagerView({super.key, this.image});
@@ -94,10 +96,11 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                             decoration: InputDecoration(
                                 labelText: "Tags",
                                 suffixIcon: TextButton(
-                                    onPressed: (loadedImage.isEmpty || isGeneratingTags) ? null : () {
+                                    onPressed: (loadedImage.isEmpty || isGeneratingTags) ? null : () async {
+                                        final prefs = await SharedPreferences.getInstance();
                                         setState(() => isGeneratingTags = true);
                                         autoTag(File(loadedImage)).then((tags) {
-                                            final moreAccurateTags = filterAccurateResults(tags, 0.15);
+                                            final moreAccurateTags = filterAccurateResults(tags, prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"]);
                                             tagController.text = moreAccurateTags.keys.join(" ");
                                         }).catchError((error, stackTrace) {
                                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
