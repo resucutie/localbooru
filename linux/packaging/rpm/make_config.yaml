@@ -1,0 +1,24 @@
+icon: assets/brand/rounded-icon.png
+summary: Cross platform local booru collection that exclusively works on local storage, without selfhosting
+group: Application/Accessories
+vendor: A user
+packager: A user
+packagerEmail: resucutie@proton.me
+license: None
+url: https://github.com/resucutie/localbooru
+
+display_name: LocalBooru
+
+keywords:
+  - Local
+  - Booru
+  - Download
+  - File
+
+generic_name: LocalBooru
+
+categories:
+  - Cool
+  - Awesome
+
+startup_notify: true

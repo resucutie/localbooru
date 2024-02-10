@@ -13,7 +13,7 @@ linuxpkgbuild/
 .fuse_hidden*
 
 # previous attempt
-packaging/
+/packaging
 
 # IntelliJ related
 *.iml

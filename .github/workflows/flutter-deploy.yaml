@@ -19,11 +19,11 @@ jobs:
         run: flutter pub get
       - name: Enable linux building
         run: flutter config --enable-linux-desktop
-      - name: istg that the file exists
-        run: |
-          git checkout
-          cat mow
-          tree -d linux
+      # - name: istg that the file exists
+      #   run: |
+      #     git checkout
+      #     cat mow
+      #     tree -d linux
       # - name: Build artifacts
       #   run: flutter build linux --release
       # - name: Upload artifact
