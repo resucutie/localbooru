@@ -28,6 +28,8 @@ jobs:
       #     path: build/linux/x64/release/bundle
       - name: Install flutter_distributor
         run: flutter pub global activate flutter_distributor
+      - name: istg that the file exists
+        run: ls linux/packaging/rpm/make_config.yaml
       - name: Attempt at checking if building for linux using flutter_distributor works
         run: flutter_distributor package --platform linux --targets rpm
 
