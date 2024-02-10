@@ -35,6 +35,11 @@ jobs:
         run: flutter pub global activate flutter_distributor
       - name: Attempt at checking if building for linux using flutter_distributor works
         run: flutter_distributor package --platform linux --targets rpm
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: localbooru-linux-packages
+          path: dist/1.0.0+1
 
   # build-windows:
   #   runs-on: windows-latest
