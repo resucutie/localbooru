@@ -20,7 +20,10 @@ jobs:
       - name: Enable linux building
         run: flutter config --enable-linux-desktop
       - name: istg that the file exists
-        run: ls linux/packaging/rpm/make_config.yaml
+        run: |
+          git checkout
+          cat mow
+          ls linux/packaging/rpm/make_config.yaml
       # - name: Build artifacts
       #   run: flutter build linux --release
       # - name: Upload artifact
