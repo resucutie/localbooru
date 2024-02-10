@@ -23,7 +23,7 @@ jobs:
         run: |
           git checkout
           cat mow
-          ls linux
+          tree -d linux
       # - name: Build artifacts
       #   run: flutter build linux --release
       # - name: Upload artifact
