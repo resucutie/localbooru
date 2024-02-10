@@ -17,68 +17,72 @@ jobs:
         run: flutter pub get
       - name: Enable linux building
         run: flutter config --enable-linux-desktop
-      - name: Build artifacts
-        run: flutter build linux --release
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: localbooru-linux
-          path: build/linux/x64/release/bundle
+      # - name: Build artifacts
+      #   run: flutter build linux --release
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: localbooru-linux
+      #     path: build/linux/x64/release/bundle
+      - name: Install flutter_distributor
+        run: flutter pub global activate flutter_distributor
+      - name: Attempt at checking if building for linux using flutter_distributor works
+        run: flutter_distributor package --platform linux --targets rpm
 
-  build-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version: '3.16.9'
-      - name: Install project dependencies
-        run: flutter pub get
-      - name: Enable windows building
-        run: flutter config --enable-windows-desktop
-      - name: Build artifacts
-        run: flutter build windows --release
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: localbooru-windows
-          path: build/windows/x64/runner/Release
+  # build-windows:
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: 'stable'
+  #         flutter-version: '3.16.9'
+  #     - name: Install project dependencies
+  #       run: flutter pub get
+  #     - name: Enable windows building
+  #       run: flutter config --enable-windows-desktop
+  #     - name: Build artifacts
+  #       run: flutter build windows --release
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: localbooru-windows
+  #         path: build/windows/x64/runner/Release
 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version: '3.16.9'
-      - name: Install project dependencies
-        run: flutter pub get
-      - name: Enable macOS building
-        run: flutter config --enable-macos-desktop
-      - name: Build artifacts
-        run: flutter build macos --release
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: localbooru-macos
-          path: build/macos/Build/Products/Release
+  # build-macos:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: 'stable'
+  #         flutter-version: '3.16.9'
+  #     - name: Install project dependencies
+  #       run: flutter pub get
+  #     - name: Enable macOS building
+  #       run: flutter config --enable-macos-desktop
+  #     - name: Build artifacts
+  #       run: flutter build macos --release
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: localbooru-macos
+  #         path: build/macos/Build/Products/Release
 
-  build-android:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version: '3.16.9'
-      - name: Install project dependencies
-        run: flutter pub get
-      - name: Build artifacts
-        run: flutter build apk --release
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: localbooru-android
-          path: build/app/outputs/flutter-apk/app-release.apk
+  # build-android:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: 'stable'
+  #         flutter-version: '3.16.9'
+  #     - name: Install project dependencies
+  #       run: flutter pub get
+  #     - name: Build artifacts
+  #       run: flutter build apk --release
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: localbooru-android
+  #         path: build/app/outputs/flutter-apk/app-release.apk
