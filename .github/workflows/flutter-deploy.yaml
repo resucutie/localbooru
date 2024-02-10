@@ -23,7 +23,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: localbooru-linux
-          directory: build/linux/x64/release/bundle
+          path: build/linux/x64/release/bundle
 
   build-windows:
     runs-on: windows-latest
@@ -43,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: localbooru-windows
-          directory: build/windows/x64/runner/Release
+          path: build/windows/x64/runner/Release
 
   build-macos:
     runs-on: macos-latest
@@ -63,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: localbooru-macos
-          directory: build/macos/Build/Products/Release
+          path: build/macos/Build/Products/Release
 
   build-android:
     runs-on: ubuntu-latest
@@ -81,4 +81,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: localbooru-android.apk
-          directory: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
