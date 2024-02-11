@@ -34,9 +34,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: localbooru-linux-distro-specific-packages
-          path: |
-            dist/1.0.0+1/locaiumlbooru-1.0.0+1-linux.deb
-            dist/1.0.0+1/localbooru-1.0.0+1-linux.rpm
+          path: dist
 
   build-windows:
     runs-on: windows-latest
