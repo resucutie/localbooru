@@ -31,7 +31,7 @@ jobs:
       - name: Install flutter_distributor
         run: flutter pub global activate flutter_distributor
       - name: Build packages
-        run: flutter_distributor package --platform linux
+        run: flutter_distributor package --platform linux --target rpm,deb
       - name: Upload raw build artifacts
         uses: actions/upload-artifact@v4
         with:
