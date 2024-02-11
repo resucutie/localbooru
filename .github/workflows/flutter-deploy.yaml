@@ -35,8 +35,8 @@ jobs:
         with:
           name: localbooru-linux-distro-specific-packages
           path: |
-            dist/*/locaiumlbooru-1.0.0+1-linux.deb
-            dist/*/localbooru-1.0.0+1-linux.rpm
+            dist/1.0.0+1/locaiumlbooru-1.0.0+1-linux.deb
+            dist/1.0.0+1/localbooru-1.0.0+1-linux.rpm
 
   build-windows:
     runs-on: windows-latest
