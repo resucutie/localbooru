@@ -17,8 +17,8 @@ As the "hotfix" solution for Android users, you can use [an share to clipboard a
 
 ## To-do
 - [ ] Packaging stuff
-    - [ ] RPM
-    - [ ] DEB
+    - [x] RPM
+    - [x] DEB
     - [ ] Flatpak support
     - [ ] Change iOS and macOS icons
     - [ ] F-droid
