@@ -30,14 +30,17 @@ jobs:
       #     path: build/linux/x64/release/bundle
       - name: Install flutter_distributor
         run: flutter pub global activate flutter_distributor
-      - name: Attempt at checking if building for linux using flutter_distributor works
-        run: flutter_distributor package --platform linux --targets rpm deb
-      - name: check file dirs
-        run: tree -d build
-      - name: Upload artifact
+      - name: Build packages
+        run: flutter_distributor package --platform linux
+      - name: Upload raw build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: localbooru-linux-packages
+          name: localbooru-linux-raw
+          path: build/linux/x64/release/bundle
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: localbooru-linux-packaged
           path: dist/1.0.0+1
 
   # build-windows:
