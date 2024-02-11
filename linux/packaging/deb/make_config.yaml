@@ -1,0 +1,23 @@
+display_name: LocalBooru
+package_name: localbooru
+maintainer:
+  name: A user
+  email: resucutie@proton.me
+priority: optional
+section: wayland
+installed_size: 6604
+essential: false
+icon: assets/brand/rounded-icon.png
+
+keywords:
+  - Local
+  - Booru
+  - Download
+  - File
+
+generic_name: Image downloader
+
+categories:
+  - Accessories
+
+startup_notify: true

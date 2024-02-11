@@ -9,6 +9,11 @@
 .history
 .svn/
 migrate_working_dir/
+linuxpkgbuild/
+.fuse_hidden*
+
+# previous attempt
+/packaging
 
 # IntelliJ related
 *.iml

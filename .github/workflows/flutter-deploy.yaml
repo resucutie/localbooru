@@ -1,12 +1,16 @@
 name: Flutter CI
 
-on: push
+on:
+  push:
+  workflow_dispatch:
 
 jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: 
+          ref: 'linux-packaging'
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
@@ -17,13 +21,20 @@ jobs:
         run: flutter pub get
       - name: Enable linux building
         run: flutter config --enable-linux-desktop
+      - name: Install flutter_distributor
+        run: flutter pub global activate flutter_distributor
       - name: Build artifacts
-        run: flutter build linux --release
-      - name: Upload artifact
+        run: flutter_distributor package --platform linux --target rpm,deb
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: localbooru-linux
+          name: localbooru-linux-binaries
           path: build/linux/x64/release/bundle
+      - name: Upload distro specific package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: localbooru-linux-distro-specific-packages
+          path: dist
 
   build-windows:
     runs-on: windows-latest
@@ -80,5 +91,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: localbooru-android.apk
+          name: localbooru-android
           path: build/app/outputs/flutter-apk/app-release.apk

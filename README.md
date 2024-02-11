@@ -16,12 +16,18 @@ No. The clipboard manager that I use, [pasteboard](https://pub.dev/packages/past
 As the "hotfix" solution for Android users, you can use [an share to clipboard app](https://f-droid.org/en/packages/com.kpstv.xclipper/)
 
 ## To-do
-- [ ] Flatpak support
-- [ ] Change iOS and macOS icons
+- [ ] Packaging stuff
+    - [x] RPM
+    - [x] DEB
+    - [ ] Flatpak support
+    - [ ] Change iOS and macOS icons
+    - [ ] F-droid
+    - [ ] AltStore (maybe)
 - [x] Organize alphabetically the tag list
-- [x] Material You
-- [ ] Tag suggestion
 - [x] Auto tag generation
 - [ ] Auto-import from other booru websites (and Twitter)
-- [ ] Multi booru support
 - [ ] Tag classification (separate by author, character...)
+- [ ] Tag suggestion
+- [x] Material You
+- [ ] Update checker for the app
+- [ ] Multi booru support
