@@ -146,7 +146,7 @@ class BrowseScreen extends StatelessWidget {
                                 ListTile(
                                     title: Text("Nuke app data (Linux, borken)", style: TextStyle(color: Theme.of(context).colorScheme.error)),
                                     onTap: () async {
-                                        Directory(r"~/.local/share/com.example.localbooru").delete(recursive: true);
+                                        Directory(r"~/.local/share/com.auser.localbooru").delete(recursive: true);
                                     },
                                 )
                             ]
