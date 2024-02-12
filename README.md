@@ -44,7 +44,7 @@ Not so easily. Creating
     - [ ] AltStore (maybe)
 - [x] Organize alphabetically the tag list
 - [x] Auto tag generation
-- [ ] Update checker for the app
+- [x] Update checker for the app
 - [ ] Tag classification (separate by author, character...)
 - [ ] Auto-import from other booru websites (and Twitter)
 - [ ] Auto import from local repos
