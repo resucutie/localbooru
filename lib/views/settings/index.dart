@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/components/window_frame.dart';
-import 'package:localbooru/main.dart';
+import 'package:localbooru/utils/update_checker.dart';
 
 class SettingsShell extends StatelessWidget {
     const SettingsShell({super.key, required this.child,});
@@ -50,7 +50,14 @@ class SettingsHome extends StatelessWidget {
                 ListTile(
                     title: const Text("Check for updates"),
                     leading: const Icon(Icons.refresh),
-                    onTap: () => openUpdaterOnUpdate(),
+                    onTap: () async {
+                        final ver = await checkForUpdates();
+                        if(!(await ver.isCurrentLatest())) {
+                            context.push("/dialogs/update?ver=${ver.version}");
+                        } else {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("You're on the latest version")));
+                        }
+                    },
                 )
             ],
         );

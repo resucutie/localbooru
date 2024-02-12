@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -18,8 +19,8 @@ class VersionResponse {
 }
 
 Future<VersionResponse> checkForUpdates() async {
-    final http.Response res = await http.get(Uri.https("https://api.github.com/repos/resucutie/localbooru/releases"));
-    final List<Map> releases = jsonDecode(res.body);
+    final http.Response res = await http.get(Uri.https("api.github.com", "/repos/resucutie/localbooru/releases"));
+    final List<dynamic> releases = jsonDecode(res.body);
     final latestRelease = releases.firstWhere((release) => release["prerelease"] == false && release["draft"] == false);
     return VersionResponse(latestRelease);
 }

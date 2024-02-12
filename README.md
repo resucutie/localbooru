@@ -47,7 +47,7 @@ Not so easily. Creating
 - [x] Update checker for the app
 - [ ] Tag classification (separate by author, character...)
 - [ ] Auto-import from other booru websites (and Twitter)
-- [ ] Auto import from local repos
+- [ ] Auto import from local image collections
 - [ ] Tag suggestion
 - [x] Material You
 - [ ] Multi booru support

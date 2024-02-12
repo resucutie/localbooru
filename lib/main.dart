@@ -232,7 +232,10 @@ class _AppState extends State<App> {
     @override
     void initState() {
         super.initState();
-        openUpdaterOnUpdate();
+        checkForUpdates().then((ver) async {
+            await Future.delayed(const Duration(seconds: 1));
+            if(!(await ver.isCurrentLatest())) _router.routerDelegate.navigatorKey.currentContext?.push("/dialogs/update?ver=${ver.version}");
+        }).catchError((err) {debugPrint(err);});
     }
 
     final Color _brandColor = Colors.deepPurple;
@@ -260,11 +263,4 @@ class _AppState extends State<App> {
             "dark": ThemeData.from(colorScheme: darkColorScheme),
         };
     }
-}
-
-void openUpdaterOnUpdate() {
-    checkForUpdates().then((ver) async {
-        await Future.delayed(const Duration(seconds: 1));
-        if(!(await ver.isCurrentLatest())) _router.routerDelegate.navigatorKey.currentContext?.push("/dialogs/update?ver=${ver.version}");
-    }).catchError((err) {debugPrint(err);});
 }
