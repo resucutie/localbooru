@@ -51,10 +51,17 @@ class SettingsHome extends StatelessWidget {
                     title: const Text("Check for updates"),
                     leading: const Icon(Icons.refresh),
                     onTap: () async {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Checking for updates")));
                         final ver = await checkForUpdates();
+                        if (context.mounted) ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         if(!(await ver.isCurrentLatest())) {
-                            context.push("/dialogs/update?ver=${ver.version}");
+                            if (!context.mounted) return;
+                            showDialog(
+                                context: context,
+                                builder: (context) => UpdateAvaiableDialog(ver: ver,)
+                            );
                         } else {
+                            if (!context.mounted) return;
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("You're on the latest version")));
                         }
                     },

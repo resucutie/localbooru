@@ -234,7 +234,9 @@ List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildConte
         ),
         PopupMenuItem(
             child: const Text("Delete image"),
-            onTap: () => context.push("/dialogs/delete_image_confirmation/${image.id}")
+            onTap: () => showDialog(context: context,
+                builder: (context) => DeleteImageDialogue(id: image.id)
+            )
         ),
     ];
 }
@@ -250,11 +252,11 @@ class DeleteImageDialogue extends StatelessWidget {
             title: const Text("Delete image"),
             content: const Text("Are you sure that you want to delete this image? This action will be irreversible"),
             actions: [
-                TextButton(onPressed: context.pop, child: const Text("No")),
+                TextButton(onPressed: Navigator.of(context).pop, child: const Text("No")),
                 TextButton(
                     child: const Text("Yes"), 
                     onPressed: () async {
-                        context.pop(); //first to close menu
+                        Navigator.of(context).pop(); //first to close menu
                         context.pop(); //second to close viewer
                         await removeImage(id);
                     }

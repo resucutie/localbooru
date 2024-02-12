@@ -182,6 +182,26 @@ class _OverallSettingsState extends State<OverallSettings> {
                         setState(() => _monetTheme = value);
                     }
                 ),
+                ListTile(
+                    title: const Row(
+                        children: [
+                            Text("Theme"),
+                            // if(isSettingModified("monet")) IconButton(
+                            //     onPressed: () {resetProp("monet", modifier: (v) => _monetTheme = v); themeListener.update();},
+                            //     icon: const Icon(Icons.restart_alt)
+                            // )
+                        ],
+                    ),
+                    leading: const Icon(Icons.dark_mode),
+                    subtitle: DropdownButton(
+                        value: "dark",
+                        items: ["dark", "light", "system"].map((String value) =>  DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value.replaceFirst(value[0], value[0].toUpperCase())),
+                        )).toList(),
+                        onChanged: (_) {}
+                    ),
+                ),
             ],
         );
     }
