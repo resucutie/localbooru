@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/image_display.dart';
-import 'package:localbooru/utils/defaults.dart';
+import 'package:localbooru/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SearchTag extends StatefulWidget {

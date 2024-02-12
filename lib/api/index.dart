@@ -3,7 +3,7 @@ library localbooru_api;
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:localbooru/utils/defaults.dart';
+import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';

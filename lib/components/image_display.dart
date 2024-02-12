@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/utils/defaults.dart';
+import 'package:localbooru/utils/constants.dart';
 
 
 class SilverRepoGrid extends StatelessWidget {
