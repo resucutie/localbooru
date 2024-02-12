@@ -55,14 +55,14 @@ class BrowseScreen extends StatelessWidget {
                             final String title = _getTitle(uri);
                             final String? subtitle = _getSubtitle(uri);
                             return ListTile(
-                                title: Text(title, style: const TextStyle(fontSize: 20.0)),
-                                subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 14.0)) : null,
+                                title: Text(title, style: const TextStyle(fontSize: 20.0), textAlign: isApple() ? TextAlign.center : TextAlign.start),
+                                subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 14.0), textAlign: isApple() ? TextAlign.center : TextAlign.start) : null,
                                 contentPadding: EdgeInsets.zero,
                             );
                         }
                     ),
                     leading: !_isHome() ? IconButton(
-                        icon: const Icon(Icons.arrow_back),
+                        icon: Icon(isApple() ? Icons.arrow_back_ios_new : Icons.arrow_back),
                         onPressed: () {
                             if(context.canPop()) context.pop();
                         },

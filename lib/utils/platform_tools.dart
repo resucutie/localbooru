@@ -9,3 +9,7 @@ bool isDestkop () {
 bool isMobile () {
     return Platform.isAndroid || Platform.isIOS;
 }
+
+bool isApple () {
+    return Platform.isMacOS || Platform.isIOS;
+}
