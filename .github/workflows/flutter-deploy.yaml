@@ -74,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: localbooru-macos
-          path: build/macos/Build/Products/Release
+          path: build/macos/Build/Products/*/LocalBooru.app
 
   build-android:
     runs-on: ubuntu-latest
