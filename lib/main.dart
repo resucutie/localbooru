@@ -6,6 +6,7 @@ import 'package:localbooru/utils/defaults.dart';
 import 'package:localbooru/utils/dialog_page.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
+import 'package:localbooru/utils/update_checker.dart';
 import 'package:localbooru/views/image_manager.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
@@ -15,11 +16,13 @@ import 'package:localbooru/views/set_booru.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/settings/index.dart';
 import 'package:localbooru/views/settings/overallSettings.dart';
+import 'package:path/path.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:localbooru/views/permissions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 Future<bool> hasExternalStoragePerms() async{
     if (isMobile()) return await Permission.manageExternalStorage.status.isGranted;
@@ -101,10 +104,27 @@ final _router = GoRouter(
                                 final String? id = state.pathParameters["id"];
                                 if (id == null) return DialogPage(builder: (_) => Text("Invalid ID $id"));
                                 return DialogPage(
-                                    barrierDismissible: true,
                                     builder: (context) => DeleteImageDialogue(id: id,)
                                 );
                             }
+                        ),
+                        GoRoute(path: "update",
+                            pageBuilder: (context, state) {
+                                final String ver = state.uri.queryParameters["ver"] ?? "";
+                                return DialogPage(builder: (context) => AlertDialog(
+                                    title: const Text("Update avaiable"),
+                                    content: Text("A new version is avaiable for download: $ver. Update now?"),
+                                    actions: [
+                                        TextButton(onPressed: context.pop, child: const Text("Later")),
+                                        TextButton(child: const Text("Yes"), 
+                                            onPressed: () {
+                                                launchUrlString("https://github.com/resucutie/localbooru/releases/tag/$ver");
+                                                context.pop();
+                                            }
+                                        ),
+                                    ],
+                                ));
+                            },
                         )
                     ]
                 ),
@@ -162,7 +182,7 @@ final _router = GoRouter(
 );
 
 void main() async {
-    runApp(const MyApp());
+    runApp(const App());
 
     if(isDestkop()) {
         doWhenWindowReady(() {
@@ -175,8 +195,13 @@ void main() async {
     }
 }
 
-class MyApp extends StatelessWidget {
-    const MyApp({super.key});
+class App extends StatefulWidget {
+    const App({super.key});
+
+    State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
 
     // This widget is the root of your application.
     @override
@@ -204,6 +229,12 @@ class MyApp extends StatelessWidget {
         );
     }
 
+    @override
+    void initState() {
+        super.initState();
+        openUpdaterOnUpdate();
+    }
+
     final Color _brandColor = Colors.deepPurple;
 
     Map<String, ThemeData> generateTheme({ColorScheme? lightDynamic, ColorScheme? darkDynamic, bool monet = true}) {
@@ -229,4 +260,11 @@ class MyApp extends StatelessWidget {
             "dark": ThemeData.from(colorScheme: darkColorScheme),
         };
     }
+}
+
+void openUpdaterOnUpdate() {
+    checkForUpdates().then((ver) async {
+        await Future.delayed(const Duration(seconds: 1));
+        if(!(await ver.isCurrentLatest())) _router.routerDelegate.navigatorKey.currentContext?.push("/dialogs/update?ver=${ver.version}");
+    }).catchError((err) {debugPrint(err);});
 }

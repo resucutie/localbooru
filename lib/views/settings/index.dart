@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/components/window_frame.dart';
+import 'package:localbooru/main.dart';
 
 class SettingsShell extends StatelessWidget {
     const SettingsShell({super.key, required this.child,});
@@ -44,6 +45,12 @@ class SettingsHome extends StatelessWidget {
                     subtitle: const Text("Options to configure this program"),
                     leading: const Icon(Icons.settings),
                     onTap: () => context.push("/settings/overall_settings"),
+                ),
+                const Divider(),
+                ListTile(
+                    title: const Text("Check for updates"),
+                    leading: const Icon(Icons.refresh),
+                    onTap: () => openUpdaterOnUpdate(),
                 )
             ],
         );
