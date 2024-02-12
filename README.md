@@ -18,7 +18,7 @@ As the "hotfix" solution for Android users, you can use [an share to clipboard a
 ### How does the versioning work?
 For the number, the first number is fixed to "1" unless the whole program gets rewritten. The second number is the major version, reserved for when new features come out, and the third is the minor, reserved for bug fixes.
 
-For the names, the versions are named based on any artist's name that we deem enough to homenage.  
+For the names, the versions are named based on any artist's name that we deem enough to homenage. For bug fix versions, the name won't be updated  
 Some of the parameters that we choose to homenage are:
 - Good or outstanding art style (always try to be better)
 - Makes inovating and constructive art
