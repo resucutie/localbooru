@@ -88,26 +88,29 @@ class ImageViewZoom extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
-        return Scaffold(
-            extendBodyBehindAppBar: true,
-            backgroundColor: Colors.transparent,
-            appBar: WindowFrameAppBar(
-                title: "Zoom",
-                backgroundColor: _appBarColor,
-                appBar: AppBar(
-                    // systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+        return Theme(
+            data: ThemeData.dark(),
+            child: Scaffold(
+                extendBodyBehindAppBar: true,
+                backgroundColor: Colors.transparent,
+                appBar: WindowFrameAppBar(
+                    title: "Zoom",
                     backgroundColor: _appBarColor,
-                    elevation: 0,
-                    title: Text(image.filename),
+                    appBar: AppBar(
+                        // systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+                        backgroundColor: _appBarColor,
+                        elevation: 0,
+                        title: Text(image.filename),
+                    ),
                 ),
-            ),
-            body: InteractiveViewer(
-                minScale: 0.1,
-                maxScale: double.infinity,
-                boundaryMargin: EdgeInsets.all((MediaQuery.of(context).size.width + MediaQuery.of(context).size.height) / 4),
-                child: Center(
-                    child: Image.file(image.getImage())
-                )
+                body: InteractiveViewer(
+                    minScale: 0.1,
+                    maxScale: double.infinity,
+                    boundaryMargin: EdgeInsets.all((MediaQuery.of(context).size.width + MediaQuery.of(context).size.height) / 4),
+                    child: Center(
+                        child: Image.file(image.getImage())
+                    )
+                ),
             ),
         );
     }
