@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localbooru/components/headers.dart';
-import 'package:localbooru/utils/defaults.dart';
+import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +24,7 @@ class _OverallSettingsState extends State<OverallSettings> {
     double _gridSizeSliderValue = settingsDefaults["grid_size"].toDouble();
     double _autotagAccuracy = settingsDefaults["autotag_accuracy"];
     bool _monetTheme = settingsDefaults["monet"];
+    String _theme = settingsDefaults["theme"];
 
     bool isSettingModified(String setting) {
         return widget.prefs.get(setting) != null && widget.prefs.get(setting) != settingsDefaults[setting];
@@ -43,6 +44,18 @@ class _OverallSettingsState extends State<OverallSettings> {
         _pageSizeController.text = (widget.prefs.getInt("page_size") ?? settingsDefaults["page_size"]).toString();
         _monetTheme = widget.prefs.getBool("monet") ?? settingsDefaults["monet"];
         _autotagAccuracy = widget.prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"];
+        _theme = widget.prefs.getString("theme") ?? settingsDefaults["theme"];
+    }
+
+    Future<void> onChangeTheme() async {
+        final choosenTheme = await showDialog<String>(
+            context: context,
+            builder: (_) => ThemeChangerDialog(theme: widget.prefs.getString("theme") ?? settingsDefaults["theme"])
+        );
+        if(choosenTheme == null) return;
+        widget.prefs.setString("theme", choosenTheme);
+        themeListener.update();
+        setState(() => _theme = choosenTheme);
     }
 
     @override
@@ -163,16 +176,14 @@ class _OverallSettingsState extends State<OverallSettings> {
                     )
                 ),
                 const SmallThemedHeader("Appearence"),
+                ListTile(
+                    title: const Text("Theme"),
+                    subtitle: Text(_theme.replaceFirstMapped(_theme[0], (match) => _theme[0].toUpperCase())),
+                    leading: const Icon(Icons.dark_mode),
+                    onTap: onChangeTheme,
+                ),
                 SwitchListTile(
-                    title: Row(
-                        children: [
-                            const Text("Dynamic colors"),
-                            if(isSettingModified("monet")) IconButton(
-                                onPressed: () {resetProp("monet", modifier: (v) => _monetTheme = v); themeListener.update();},
-                                icon: const Icon(Icons.restart_alt)
-                            )
-                        ],
-                    ),
+                    title: const Text("Dynamic colors"),
                     secondary: const Icon(Icons.palette),
                     subtitle: const Text("For desktop devices: It will apply the current accent color as the dynamic colors"),
                     value: _monetTheme,
@@ -182,26 +193,34 @@ class _OverallSettingsState extends State<OverallSettings> {
                         setState(() => _monetTheme = value);
                     }
                 ),
-                ListTile(
-                    title: const Row(
-                        children: [
-                            Text("Theme"),
-                            // if(isSettingModified("monet")) IconButton(
-                            //     onPressed: () {resetProp("monet", modifier: (v) => _monetTheme = v); themeListener.update();},
-                            //     icon: const Icon(Icons.restart_alt)
-                            // )
-                        ],
+            ],
+        );
+    }
+}
+
+class ThemeChangerDialog extends StatelessWidget {
+    const ThemeChangerDialog({super.key, required this.theme});
+
+    final String theme;
+
+    @override
+    Widget build(BuildContext context) {
+        return AlertDialog(
+            title: const Text("Theme"),
+            contentPadding: const EdgeInsets.only(top: 16.0, bottom: 24.0),
+            content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                    for (final themeMode in ["system", "dark", "light"]) RadioListTile(
+                        groupValue: theme,
+                        value: themeMode,
+                        title: Text(themeMode.replaceFirstMapped(themeMode[0], (match) => themeMode[0].toUpperCase())),
+                        onChanged: (value) => Navigator.of(context).pop(value),
                     ),
-                    leading: const Icon(Icons.dark_mode),
-                    subtitle: DropdownButton(
-                        value: "dark",
-                        items: ["dark", "light", "system"].map((String value) =>  DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value.replaceFirst(value[0], value[0].toUpperCase())),
-                        )).toList(),
-                        onChanged: (_) {}
-                    ),
-                ),
+                ],
+            ),
+            actions: [
+                TextButton(onPressed: Navigator.of(context).pop, child: const Text("Close"))
             ],
         );
     }

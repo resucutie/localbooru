@@ -2,7 +2,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/utils/defaults.dart';
+import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/dialog_page.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
@@ -217,10 +217,12 @@ class _AppState extends State<App> {
                             monet: prefs.getBool("monet") ?? settingsDefaults["monet"]
                         );
 
+                        final int themeModeIndex = ["system", "light", "dark"].indexWhere((theme) => (prefs.getString("theme") ?? settingsDefaults["theme"]) == theme);
+
                         return MaterialApp.router(
                             theme: theme["light"],
                             darkTheme: theme["dark"],
-                            themeMode: ThemeMode.system, 
+                            themeMode: ThemeMode.values[themeModeIndex], 
                             routerConfig: _router,
                         );
                     }
