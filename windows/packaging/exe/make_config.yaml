@@ -1,0 +1,10 @@
+# The value of AppId uniquely identifies this application.
+# Do not use the same AppId value in installers for other applications.
+app_id: Y947JX2A-SCLH-BLAM-4BZY-JS3TY3RQD322 # yes i made this up
+publisher: A user
+publisher_url: https://github.com/resucutie/localbooru
+display_name: LocalBooru
+create_desktop_icon: true
+install_dir_name: LocalBooru
+locales:
+  - en

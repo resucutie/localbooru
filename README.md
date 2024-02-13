@@ -8,7 +8,22 @@ This is a cross platform local booru collection that exclusively works on your l
 - Linux
 - Windows
 - macOS
-- iOS (Sideloading)
+- iOS (Sideloading) (Not avaiable as of now)
+
+## Install
+### Windows
+You will need the [Microsoft Visual C++ Redistributable](https://aka.ms/vs/17/release/vc_redist.x64.exe) installed for using this program.  
+After doing that, go and download the setup wizard file over at [Releases](https://github.com/resucutie/localbooru/releases/latest)
+
+### macOS
+Download `localbooru-macos.zip` over at [Releases](https://github.com/resucutie/localbooru/releases/latest), extract its file contents and grab the LocalBooru.app file
+
+### Linux
+There are prebuilt .deb and .rpm packages over at [Releases](https://github.com/resucutie/localbooru/releases/latest), but you can download the binaries if you want. Flatpak support is planned as of writing
+
+### Android
+Download `localbooru-android.apk` over at [Releases](https://github.com/resucutie/localbooru/releases/latest) and install it by opening the file
+
 
 ## FAQ
 ### Why the copy button is only avaiable on desktop?

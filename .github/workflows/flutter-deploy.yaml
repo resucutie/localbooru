@@ -46,13 +46,20 @@ jobs:
         run: flutter pub get
       - name: Enable windows building
         run: flutter config --enable-windows-desktop
+      - name: Install flutter_distributor
+        run: flutter pub global activate flutter_distributor
       - name: Build artifacts
-        run: flutter build windows --release
-      - name: Upload artifact
+        run: flutter_distributor package --platform windows --target exe
+      - name: Upload portable artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: localbooru-windows
+          name: localbooru-windows-portable
           path: build/windows/x64/runner/Release
+      - name: Upload setup artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: localbooru-windows-setup
+          path: dist
 
   build-macos:
     runs-on: macos-latest
