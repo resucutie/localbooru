@@ -71,7 +71,7 @@ class Booru {
         final tagList = tags.split(" ");
         final List files = (await getRawInfo())["files"];
         final List filteredFiles = files.where((file) {
-            return tagList.any((tag) => file["tags"].toLowerCase().contains(tag));
+            return tagList.every((tag) => file["tags"].toLowerCase().contains(tag));
         }).toList();
 
         return filteredFiles;
