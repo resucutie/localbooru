@@ -52,19 +52,19 @@ final _router = GoRouter(
                         ),
                         GoRoute(path: "search",
                             builder: (context, state) {
-                                final String? tags = state.uri.queryParameters["tag"];
+                                final String tags = Uri.decodeFull(state.uri.queryParameters["tag"] ?? "");
                                 final String? index = state.uri.queryParameters["index"];
                                 return BooruLoader(
                                     builder: (context, booru) => GalleryViewer(
                                         booru: booru,
-                                        tags: tags ?? "",
+                                        tags: tags,
                                         index: int.parse(index ?? "0"),
                                         routeNavigation: true,
                                     ),
                                 );
                             }
                         ),
-                        GoRoute(path: "recent", redirect: (_, __) => '/search/',),
+                        GoRoute(path: "recent", redirect: (_, __) => '/search',),
                         GoRoute(path: "view/:id",
                             builder: (context, state)  {
                                 final String? id = state.pathParameters["id"];

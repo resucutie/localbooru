@@ -47,7 +47,12 @@ A booru is a collection of images that are organized by multiple tags, so you ca
 Easy: it just fetches [Danbooru's autotagger](https://autotagger.donmai.us/). Including the autotagger inside the application is a no-go because it will require installing depedencies such as python on the project, and will increase a lot the application's size. If you want to make it work
 
 ### Can I import my previous image collection?
-Not so easily. Creating
+Not so easily. The main issue is with adding tags, as it fetches a website to do that. You can make it exclusively local by selfhosting the autotagger and pointing
+
+### What are the avaiable search methods?
+`tag` - Exclude every image without that tag  
+`-tag` - Exclude every image with that tag  
+`+tag` - Includes every image with that tag  
 
 ## To-do
 - [ ] Packaging stuff

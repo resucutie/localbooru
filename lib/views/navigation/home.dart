@@ -10,7 +10,9 @@ class SearchTagView extends StatefulWidget {
 }
 
 class _SearchTagViewState extends State<SearchTagView> {
-    void _onSearch () => context.push("/search?tag=${_searchController.text}");
+    void _onSearch () {
+        context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
+    }
     final TextEditingController _searchController = TextEditingController();
 
 

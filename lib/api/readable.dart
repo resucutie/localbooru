@@ -68,10 +68,12 @@ class Booru {
     Future<List<BooruImage>> getRecentImages() async => await getImagesFromIndex((await getRawInfo())["files"]);
 
     Future<List> _doTagFiltering(String tags) async {
-        final tagList = tags.split(" ");
+        final List<String> tagList = tags.split(" ").where((s) => s.isNotEmpty).toList();
         final List files = (await getRawInfo())["files"];
         final List filteredFiles = files.where((file) {
-            return tagList.every((tag) => file["tags"].toLowerCase().contains(tag));
+            final String fileTags = file["tags"].toLowerCase();
+            if(tagList.isEmpty) return true;
+            return shouldBeIncluded(tagList: tagList, fileTags: fileTags);
         }).toList();
 
         return filteredFiles;

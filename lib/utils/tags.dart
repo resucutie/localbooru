@@ -22,3 +22,40 @@ Future<AccuracyTagList> autoTag(File file) async {
 AccuracyTagList filterAccurateResults(AccuracyTagList tags, double filterPercentage) {
     return AccuracyTagList.from(tags)..removeWhere((tag, accuracy) => accuracy < filterPercentage);
 }
+
+final List<String> selectors = ["+", "-"];
+
+class TagSearchParams {
+    const TagSearchParams(this.tagSearch);
+
+    final String tagSearch;
+
+    String get raw {
+        if(obtainSelector() != null) return tagSearch.substring(1);
+        else return tagSearch;
+    }
+
+    String? obtainSelector(){
+        final String firstElement = tagSearch[0];
+        if(selectors.contains(firstElement)) return firstElement;
+        return null;
+    }
+}
+
+bool shouldBeIncluded({required List<String> tagList, required String fileTags}) {
+    return tagList
+    .any((tag) => tag.startsWith("+") ? fileTags.contains(_spaceMatch(tag.substring(1))) : false) || tagList
+    .every((tagSearch) {
+        final tag = TagSearchParams(tagSearch);
+        if(tag.obtainSelector() == "-") {
+            return !fileTags.contains(_spaceMatch(tag.raw));
+        } else if (tag.obtainSelector() == null) {
+            return fileTags.contains(_spaceMatch(tag.raw));
+        }
+        return true; //otherwise adds if every condition fails
+    });
+}
+
+RegExp _spaceMatch(String match) {
+    return RegExp(r"\b" + match + r"\b", caseSensitive: false);
+}

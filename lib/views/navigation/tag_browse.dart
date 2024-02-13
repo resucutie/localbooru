@@ -65,7 +65,7 @@ class GalleryViewer extends StatefulWidget {
 
 class _GalleryViewerState extends State<GalleryViewer> {
     final TextEditingController _searchController = TextEditingController();
-    void _onSearch () => context.push("/search?tag=${_searchController.text}");
+    void _onSearch () => context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
 
     final scrollToTop = GlobalKey();
     
