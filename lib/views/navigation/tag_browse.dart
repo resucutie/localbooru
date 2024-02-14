@@ -3,53 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/image_display.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/views/navigation/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class SearchTag extends StatefulWidget {
-    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.hasShadows = false});
-
-    final String defaultText;
-    final Function(String value) onSearch;
-    final TextEditingController? controller;
-    final bool hasShadows;
-
-    @override
-    State<SearchTag> createState() => _SearchTagState();
-}
-
-class _SearchTagState extends State<SearchTag> {
-    TextEditingController _controller = TextEditingController();
-
-    @override
-    void initState() {
-        super.initState();
-
-        if(widget.controller != null) _controller = widget.controller!;
-    }
-
-    @override
-    Widget build(BuildContext context) {
-        return SearchBar(
-            controller: _controller,
-            hintText: "Type a tag",
-            hintStyle: MaterialStateProperty.all(const TextStyle(color: Colors.grey)),
-            backgroundColor: MaterialStateProperty.all(Theme.of(context).colorScheme.surfaceVariant),
-            shadowColor: !widget.hasShadows ? MaterialStateProperty.all(Colors.transparent) : null,
-            textStyle: MaterialStateProperty.all(
-                TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)
-            ),
-            onSubmitted: widget.onSearch,
-            trailing: [
-                IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: _controller.text.isEmpty ? null : () => widget.onSearch(_controller.text),
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    // disabledColor: Colors.grey,
-                )
-            ]
-        );
-    }
-}
 
 class GalleryViewer extends StatefulWidget {
     const GalleryViewer({super.key, required this.booru, this.tags = "", this.index = 0, this.routeNavigation = false});
@@ -64,7 +19,7 @@ class GalleryViewer extends StatefulWidget {
 }
 
 class _GalleryViewerState extends State<GalleryViewer> {
-    final TextEditingController _searchController = TextEditingController();
+    final SearchController _searchController = SearchController();
     void _onSearch () => context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
 
     final scrollToTop = GlobalKey();
@@ -176,7 +131,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
 class SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
     final double height;
     Function(String value) onSearch;
-    final TextEditingController searchController;
+    final SearchController searchController;
 
     SearchBarHeaderDelegate({required this.onSearch, required this.searchController, this.height = 56.0});
 

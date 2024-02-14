@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localbooru/api/index.dart';
 import 'package:localbooru/views/navigation/tag_browse.dart';
 
-class SearchTagView extends StatefulWidget {
-    const SearchTagView({super.key});
+class HomePage extends StatefulWidget {
+    const HomePage({super.key});
 
     @override
-    State<SearchTagView> createState() => _SearchTagViewState();
+    State<HomePage> createState() => _HomePageState();
 }
 
-class _SearchTagViewState extends State<SearchTagView> {
+class _HomePageState extends State<HomePage> {
     void _onSearch () {
         context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
     }
-    final TextEditingController _searchController = TextEditingController();
+    final SearchController _searchController = SearchController();
 
 
     @override
@@ -44,6 +45,91 @@ class _SearchTagViewState extends State<SearchTagView> {
                     ],
                 ),
             )
+        );
+    }
+}
+
+class SearchTag extends StatefulWidget {
+    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.hasShadows = false});
+
+    final String defaultText;
+    final Function(String value) onSearch;
+    final SearchController? controller;
+    final bool hasShadows;
+
+    @override
+    State<SearchTag> createState() => _SearchTagState();
+}
+
+class _SearchTagState extends State<SearchTag> {
+    SearchController _controller = SearchController();
+
+    @override
+    void initState() {
+        super.initState();
+
+        if(widget.controller != null) _controller = widget.controller!;
+    }
+
+    @override
+    Widget build(BuildContext context) {
+        return SearchAnchor(
+            searchController: _controller,
+            builder: (context, controller) => SearchBar(
+                controller: controller,
+                hintText: "Type a tag",
+                // // shadowColor: !widget.hasShadows ? MaterialStateProperty.all(Colors.transparent) : null,
+                // textStyle: MaterialStateProperty.all(
+                //     TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)
+                // ),
+                padding: const MaterialStatePropertyAll<EdgeInsets>(
+                    EdgeInsets.symmetric(horizontal: 16.0)
+                ),
+                onSubmitted: widget.onSearch,
+                onTap: controller.openView,
+                onChanged: (_) => controller.openView(),
+                leading: const Icon(Icons.search),
+                trailing: [
+                    _SearchButton(controller: controller, onSearch: widget.onSearch,)
+                ]
+            ),
+            suggestionsBuilder: (context, controller) async {
+                Booru booru = await getCurrentBooru();
+                List<String> tags = await booru.getAllTags();
+                final currentTags = List.from(controller.text.split(" "));
+                final displayTags = List.from(tags);
+                displayTags.retainWhere((s){
+                        return s.contains(currentTags.last) && !currentTags.contains(s);
+                });
+                return displayTags.map((tag) => ListTile(
+                    title: Text(tag),
+                    onTap: () {
+                        List endResult = List.from(currentTags);
+                        endResult.removeLast();
+                        endResult.add(tag);
+                        setState(() => controller.closeView("${endResult.join(" ")} "));
+                    },
+                ));
+            },
+            viewTrailing: [
+                IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
+                _SearchButton(controller: _controller, onSearch: widget.onSearch,)
+            ],
+        );
+    }
+}
+
+class _SearchButton extends StatelessWidget {
+    const _SearchButton({super.key, required this.controller, required this.onSearch});
+
+    final SearchController controller;
+    final Function(String) onSearch;
+    
+    @override
+    Widget build(context) {
+        return IconButton(
+            icon: const Icon(Icons.arrow_forward_sharp),
+            onPressed: controller.text.isEmpty ? null : () => onSearch(controller.text),
         );
     }
 }

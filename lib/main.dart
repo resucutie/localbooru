@@ -16,13 +16,11 @@ import 'package:localbooru/views/set_booru.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/settings/index.dart';
 import 'package:localbooru/views/settings/overallSettings.dart';
-import 'package:path/path.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:localbooru/views/permissions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 Future<bool> hasExternalStoragePerms() async{
     if (isMobile()) return await Permission.manageExternalStorage.status.isGranted;
@@ -48,7 +46,7 @@ final _router = GoRouter(
                     builder: (context, state, child) => BrowseScreen(uri: state.uri, child: child),
                     routes: [
                         GoRoute(path: "home",
-                            builder: (context, state) => const SearchTagView(),
+                            builder: (context, state) => const HomePage(),
                         ),
                         GoRoute(path: "search",
                             builder: (context, state) {

@@ -101,7 +101,6 @@ class Booru {
             for (var file in files) {
                 List<String> fileTags = file["tags"].split(" ");
                 for (String tag in fileTags) {
-                debugPrint("woof");
                     if(allTags.isEmpty || !allTags.contains(tag)) allTags.add(tag);
                 }
             }
