@@ -91,7 +91,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                             },
                             currentValue: loadedImage,
                         ),
-                        TextFormField(
+                        TagField(
                             controller: tagController,
                             decoration: InputDecoration(
                                 labelText: "Tags",
@@ -115,6 +115,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                     child: isGeneratingTags ? const Text("Generating...") : const Icon(CupertinoIcons.sparkles)
                                 )
                             ),
+                            style: const TextStyle(color: Colors.blueAccent),
                             validator: (value) {
                                 if (value == null || value.isEmpty) return 'Please enter tags';
                                 return null;
@@ -194,6 +195,86 @@ class ImageUploadForm extends StatelessWidget {
     }
 }
 
+final List<String> _test = ["aa", "ab", "cc"];
+
+class TagField extends StatefulWidget {
+    const TagField({super.key, this.controller,  this.decoration, this.validator, this.style});
+
+    final TextEditingController? controller;
+    final InputDecoration? decoration;
+    final FormFieldValidator<String>? validator;
+    final TextStyle? style;
+
+    @override
+    State<TagField> createState() => _TagFieldState();
+}
+
+class _TagFieldState extends State<TagField> {
+    final FocusNode _focusNode = FocusNode();
+
+    @override
+    Widget build(context) {
+        return RawAutocomplete<String>(
+            textEditingController: widget.controller,
+            focusNode: _focusNode,
+            optionsBuilder: (textEditingValue) {
+                if (textEditingValue.text == '') {
+                    return const Iterable<String>.empty();
+                } else {
+                    List<String> tagList = textEditingValue.text.toLowerCase().split(" ");
+                    List<String> restOfList = List.from(tagList);
+                    restOfList.removeLast();
+                    String tag = tagList.last;
+
+                    List<String> matches = List.from(_test);
+
+                    matches.retainWhere((s){
+                        return s.toLowerCase().contains(tag);
+                    });
+                    debugPrint(matches.toString());
+                    return matches.map((e) => restOfList.isEmpty ? e : "${restOfList.join(" ")} $e").toList();
+                }
+            },
+            optionsViewBuilder: (context, onSelected, options) {
+                int highlightedIndex = AutocompleteHighlightedOption.of(context);
+                return SizedBox(
+                    height: 200,
+                    child: Material(
+                        elevation: 4.0,
+                        child: ListView.builder(
+                            itemCount: options.length,
+                            itemBuilder: (context, index) {
+                                final currentOption = options.toList()[index];
+                                return ListTile(
+                                    title: Text(currentOption.split(" ").last),
+                                    autofocus: true,
+                                    onTap: () => onSelected(currentOption),
+                                    selected: highlightedIndex == index,
+                                    selectedColor: widget.style?.color,
+                                    selectedTileColor: widget.style?.color?.withOpacity(0.1),
+                                );
+                            },
+                        ),
+                    ),
+                );
+            },
+            fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
+                return TextFormField(
+                    controller: textController,
+                    focusNode: focusNode,
+                    decoration: widget.decoration,
+                    validator: widget.validator,
+                    style: widget.style,
+                    onFieldSubmitted: (value) {
+                        debugPrint(value);
+                        onFieldSubmitted();
+                    },
+                );
+            },
+        );
+    }
+}
+
 class ListStringTextInput extends StatefulWidget {
     const ListStringTextInput({super.key, required this.onChanged, this.defaultValue = const [], this.canBeEmpty = false, this.formValidator});
 
@@ -205,7 +286,6 @@ class ListStringTextInput extends StatefulWidget {
     @override
     State<ListStringTextInput> createState() => _ListStringTextInputState();
 }
-
 class _ListStringTextInputState extends State<ListStringTextInput> {
     List<String> _currentValue = [];
     List<TextEditingController> _editControllers = [];
