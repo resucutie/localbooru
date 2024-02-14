@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
@@ -80,39 +82,18 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                             onPressed: (image) => context.push("/view/${image.id}"),
                                             autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
                                         ),
-                                        SliverToBoxAdapter(
-                                            child: SizedBox(
-                                                height: 48.0,
-                                                child: ListView.builder(
-                                                    physics: const ClampingScrollPhysics(),
-                                                    itemCount: pages,
-                                                    scrollDirection: Axis.horizontal,
-                                                    padding: const EdgeInsets.all(8.0),
-                                                    itemBuilder: (context, index) {
-                                                        final bool isCurrentPage = widget.index == index;
-                                                        Widget icon = Text((index + 1).toString());
-                                                        final ButtonStyle buttonStyle = TextButton.styleFrom(
-                                                            minimumSize: Size.zero,
-                                                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                                                        );
-
-                                                        void onPressed() {
-                                                            if(isCurrentPage) return;
-                                                            if(widget.routeNavigation) {
-                                                                context.push("/search?tag=${widget.tags}&index=$index");
-                                                            } else {
-                                                                setState(() => _currentIndex = index);
-                                                                Scrollable.ensureVisible(scrollToTop.currentContext!);
-                                                            }
-                                                        }
-                                                        
-                                                        return isCurrentPage
-                                                                ? FilledButton(onPressed: onPressed, style: buttonStyle, child: icon)
-                                                                : OutlinedButton(onPressed: onPressed, style: buttonStyle, child: icon);
-                                                    }
-                                                ),
-                                            ),
-                                        ),
+                                        SliverToBoxAdapter(child: PageDisplay(
+                                            currentPage: _currentIndex,
+                                            pages: pages,
+                                            onSelect: (selectedPage) {
+                                                if(widget.routeNavigation) {
+                                                    context.push("/search?tag=${widget.tags}&index=$selectedPage");
+                                                } else {
+                                                    setState(() => _currentIndex = selectedPage);
+                                                    Scrollable.ensureVisible(scrollToTop.currentContext!);
+                                                }
+                                            },
+                                        )),
                                     ]
                                 );
                             } else if(snapshot.hasError) {
@@ -158,4 +139,51 @@ class SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
 
     @override
     bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) => false;
+}
+
+class PageDisplay extends StatelessWidget {
+    final double height;
+    final int pages;
+    final int currentPage;
+    final Function(int selectedPage)? onSelect;
+
+    const PageDisplay({super.key, this.height = 48.0, required this.currentPage, required this.pages, this.onSelect});
+
+    @override
+    Widget build(context) {
+        return SizedBox(
+            height: height,
+            child: Center(
+                child: ScrollConfiguration(
+                    behavior: const MaterialScrollBehavior().copyWith(
+                        dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.trackpad},
+                    ),
+                    child: ListView.separated(
+                        itemCount: pages,
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.all(8.0),
+                        shrinkWrap: true,
+                        separatorBuilder: (context, index) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                            final bool isCurrentPage = currentPage == index;
+                            Widget icon = Text((index + 1).toString());
+                            final ButtonStyle buttonStyle = TextButton.styleFrom(
+                                minimumSize: Size.zero,
+                                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                            );
+
+                            void onPressed() {
+                                if(isCurrentPage) return;
+                                if(onSelect != null) onSelect!(index);
+                            }
+
+                            return isCurrentPage
+                                ? FilledButton(onPressed: onPressed, style: buttonStyle, child: icon)
+                                : OutlinedButton(onPressed: onPressed, style: buttonStyle, child: icon);
+                        }
+                    ),
+                ),
+            )
+        );
+    }
 }
