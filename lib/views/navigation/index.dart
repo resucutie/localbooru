@@ -238,7 +238,7 @@ List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildConte
             onTap: () => context.push("/manage_image/${image.id}")
         ),
         PopupMenuItem(
-            child: const Text("Delete image"),
+            child: Text("Delete image", style: TextStyle(color: Theme.of(context).colorScheme.error)),
             onTap: () => showDialog(context: context,
                 builder: (context) => DeleteImageDialogue(id: image.id)
             )

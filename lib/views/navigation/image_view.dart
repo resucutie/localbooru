@@ -101,6 +101,11 @@ class ImageViewZoom extends StatelessWidget {
                         backgroundColor: _appBarColor,
                         elevation: 0,
                         title: Text(image.filename),
+                        actions: [
+                            PopupMenuButton(
+                                itemBuilder: (context) => imageShareItems(image),
+                            )
+                        ],
                     ),
                 ),
                 body: InteractiveViewer(
