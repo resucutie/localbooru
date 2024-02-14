@@ -78,19 +78,15 @@ class _SearchTagState extends State<SearchTag> {
             builder: (context, controller) => SearchBar(
                 controller: controller,
                 hintText: "Type a tag",
-                // // shadowColor: !widget.hasShadows ? MaterialStateProperty.all(Colors.transparent) : null,
-                // textStyle: MaterialStateProperty.all(
-                //     TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)
-                // ),
                 padding: const MaterialStatePropertyAll<EdgeInsets>(
-                    EdgeInsets.symmetric(horizontal: 16.0)
+                    EdgeInsets.only(left: 16.0, right: 10.0)
                 ),
                 onSubmitted: widget.onSearch,
                 onTap: controller.openView,
                 onChanged: (_) => controller.openView(),
                 leading: const Icon(Icons.search),
                 trailing: [
-                    _SearchButton(controller: controller, onSearch: widget.onSearch,)
+                    _SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
                 ]
             ),
             suggestionsBuilder: (context, controller) async {
@@ -113,22 +109,23 @@ class _SearchTagState extends State<SearchTag> {
             },
             viewTrailing: [
                 IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
-                _SearchButton(controller: _controller, onSearch: widget.onSearch,)
+                _SearchButton(controller: _controller, onSearch: widget.onSearch)
             ],
         );
     }
 }
 
 class _SearchButton extends StatelessWidget {
-    const _SearchButton({super.key, required this.controller, required this.onSearch});
+    const _SearchButton({super.key, required this.controller, required this.onSearch, this.icon = const Icon(Icons.search)});
 
     final SearchController controller;
+    final Widget icon;
     final Function(String) onSearch;
     
     @override
     Widget build(context) {
         return IconButton(
-            icon: const Icon(Icons.arrow_forward_sharp),
+            icon: icon,
             onPressed: controller.text.isEmpty ? null : () => onSearch(controller.text),
         );
     }
