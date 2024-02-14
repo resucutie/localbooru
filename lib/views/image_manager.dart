@@ -195,8 +195,6 @@ class ImageUploadForm extends StatelessWidget {
     }
 }
 
-final List<String> _test = ["aa", "ab", "cc"];
-
 class TagField extends StatefulWidget {
     const TagField({super.key, this.controller,  this.decoration, this.validator, this.style});
 
@@ -208,7 +206,6 @@ class TagField extends StatefulWidget {
     @override
     State<TagField> createState() => _TagFieldState();
 }
-
 class _TagFieldState extends State<TagField> {
     final FocusNode _focusNode = FocusNode();
 
@@ -217,44 +214,49 @@ class _TagFieldState extends State<TagField> {
         return RawAutocomplete<String>(
             textEditingController: widget.controller,
             focusNode: _focusNode,
-            optionsBuilder: (textEditingValue) {
+            optionsBuilder: (textEditingValue) async {
                 if (textEditingValue.text == '') {
                     return const Iterable<String>.empty();
                 } else {
-                    List<String> tagList = textEditingValue.text.toLowerCase().split(" ");
+                    List<String> tagList = textEditingValue.text.split(" ");
                     List<String> restOfList = List.from(tagList);
                     restOfList.removeLast();
                     String tag = tagList.last;
 
-                    List<String> matches = List.from(_test);
+                    Booru currentBooru = await getCurrentBooru();
+                    List<String> allTags = await currentBooru.getAllTags();
+
+                    List<String> matches = List.from(allTags);
 
                     matches.retainWhere((s){
-                        return s.toLowerCase().contains(tag);
+                        return s.contains(tag) && !restOfList.contains(s);
                     });
-                    debugPrint(matches.toString());
                     return matches.map((e) => restOfList.isEmpty ? e : "${restOfList.join(" ")} $e").toList();
                 }
             },
             optionsViewBuilder: (context, onSelected, options) {
                 int highlightedIndex = AutocompleteHighlightedOption.of(context);
-                return SizedBox(
-                    height: 200,
+                return Align(
+                    alignment: Alignment.topCenter,
                     child: Material(
                         elevation: 4.0,
-                        child: ListView.builder(
-                            itemCount: options.length,
-                            itemBuilder: (context, index) {
-                                final currentOption = options.toList()[index];
-                                return ListTile(
-                                    title: Text(currentOption.split(" ").last),
-                                    autofocus: true,
-                                    onTap: () => onSelected(currentOption),
-                                    selected: highlightedIndex == index,
-                                    selectedColor: widget.style?.color,
-                                    selectedTileColor: widget.style?.color?.withOpacity(0.1),
-                                );
-                            },
-                        ),
+                        child: Container(
+                            constraints: const BoxConstraints(maxHeight: 400),
+                            child: ListView.builder(
+                                itemCount: options.length,
+                                itemBuilder: (context, index) {
+                                    final currentOption = options.toList()[index];
+                                    return ListTile(
+                                        title: Text(currentOption.split(" ").last),
+                                        autofocus: true,
+                                        onTap: () => onSelected(currentOption),
+                                        selected: highlightedIndex == index,
+                                        selectedColor: widget.style?.color,
+                                        selectedTileColor: widget.style?.color?.withOpacity(0.1),
+                                    );
+                                },
+                            ),
+                        )
                     ),
                 );
             },
@@ -265,10 +267,7 @@ class _TagFieldState extends State<TagField> {
                     decoration: widget.decoration,
                     validator: widget.validator,
                     style: widget.style,
-                    onFieldSubmitted: (value) {
-                        debugPrint(value);
-                        onFieldSubmitted();
-                    },
+                    onFieldSubmitted: (value) => onFieldSubmitted(),
                 );
             },
         );

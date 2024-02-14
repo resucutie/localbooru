@@ -88,6 +88,29 @@ class Booru {
 
         return (list.length / size).ceil();
     }
+
+    // ignore: prefer_final_fields
+    Map<String, List<String>> _allTags = {
+        "tags": List<String>.empty(growable: true)
+    };
+
+    Future<List<String>> getAllTags() async {
+        if(_allTags["tags"]!.isEmpty) {
+            final List files = (await getRawInfo())["files"];
+            List<String> allTags = List<String>.empty(growable: true);
+            for (var file in files) {
+                List<String> fileTags = file["tags"].split(" ");
+                for (String tag in fileTags) {
+                debugPrint("woof");
+                    if(allTags.isEmpty || !allTags.contains(tag)) allTags.add(tag);
+                }
+            }
+
+            _allTags["tags"] = allTags;
+        }
+        
+        return _allTags["tags"]!;
+    }
 }
 
 class BooruImage {
