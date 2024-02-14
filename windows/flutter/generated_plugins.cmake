@@ -5,9 +5,10 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_windows
   dynamic_color
-  pasteboard
+  irondash_engine_context
   permission_handler_windows
   share_plus
+  super_native_extensions
   url_launcher_windows
 )
 

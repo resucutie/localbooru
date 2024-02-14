@@ -68,6 +68,7 @@ Not so easily. The main issue is with adding tags, as it fetches a website to do
 - [ ] Tag classification (separate by author, character...)
 - [ ] Auto-import from other booru websites (and Twitter)
 - [ ] Auto import from local image collections
-- [ ] Tag suggestion
+- [x] Tag suggestion
 - [x] Material You
+- [ ] Support for multiple file formats
 - [ ] Multi booru support

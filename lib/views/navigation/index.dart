@@ -8,8 +8,9 @@ import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:open_file/open_file.dart';
-import 'package:pasteboard/pasteboard.dart';
+import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 class BrowseScreen extends StatelessWidget {
     const BrowseScreen({super.key, required this.child, required this.uri});
@@ -214,10 +215,14 @@ List<PopupMenuEntry> imageShareItems(BooruImage image) {
             child: const Text("Open image"),
             onTap: () => OpenFile.open(image.path),
         ),
-        if(!isMobile()) PopupMenuItem(
-            enabled: !isMobile(),
+        PopupMenuItem(
+            // enabled: !isMobile(),
             child: const Text("Copy image to clipboard"),
-            onTap: () => Pasteboard.writeFiles([image.path]),
+            onTap: () async {
+                final item = DataWriterItem();
+                item.add(Formats.png(await File(image.path).readAsBytes()));
+                await SystemClipboard.instance?.write([item]);
+            },
         ),
         PopupMenuItem(
             child: const Text("Share image"),

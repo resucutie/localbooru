@@ -19,32 +19,30 @@ class _HomePageState extends State<HomePage> {
 
     @override
     Widget build(BuildContext context) {
-        return Center(
-            child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                        SearchTag(
-                            onSearch: (_) => _onSearch(),
-                            controller: _searchController,
-                        ),
-                        const SizedBox(height: 16.0),
-                        Wrap(
-                            direction: Axis.horizontal,
-                            spacing: 8.0,
-                            children: [
-                                OutlinedButton.icon(
-                                    onPressed: () => context.push("/recent"),
-                                    label: const Text("Recent posts"),
-                                    icon: const Icon(Icons.history)
-                                )
-                            ],
-                        )
-                    ],
-                ),
-            )
+        return Container(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                    SearchTag(
+                        onSearch: (_) => _onSearch(),
+                        controller: _searchController,
+                    ),
+                    const SizedBox(height: 16.0),
+                    Wrap(
+                        direction: Axis.horizontal,
+                        spacing: 8.0,
+                        children: [
+                            OutlinedButton.icon(
+                                onPressed: () => context.push("/recent"),
+                                label: const Text("Recent posts"),
+                                icon: const Icon(Icons.history)
+                            )
+                        ],
+                    )
+                ],
+            ),
         );
     }
 }
