@@ -98,3 +98,32 @@ jobs:
         with:
           name: localbooru-android
           path: build/app/outputs/flutter-apk/app-release.apk
+  
+  package:
+    runs-on: ubuntu-latest
+    needs: [build-android, build-windows, build-linux]
+    steps:
+      - uses: actions/download-artifact@v4
+      - name: Create folder
+        run: mkdir build
+      - name: Pack Linux binaries
+        uses: vimtor/action-zip@v1.1
+        with:
+          files: localbooru-linux-binaries/
+          dest: build/localbooru-linux-binaries.zip
+      - name: Pack Windows binaries
+        uses: vimtor/action-zip@v1.1
+        with:
+          files: localbooru-windows-portable/
+          dest: build/localbooru-windows-portable.zip
+      - name: Rename files
+        run: |
+          mv app-release.apk build/localbooru-android.apk
+          mv localbooru-linux-distro-specific-packages/*/localbooru-*-linux.deb build/localbooru-linux.deb
+          mv localbooru-linux-distro-specific-packages/*/localbooru-*-linux.rpm build/localbooru-linux.rpm
+          mv localbooru-windows-setup/*/localbooru-*-windows-setup.exe build/localbooru-windows-setup.exe
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: localbooru-all
+          path: build
