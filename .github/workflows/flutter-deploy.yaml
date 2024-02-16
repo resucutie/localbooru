@@ -116,13 +116,17 @@ jobs:
         with:
           files: localbooru-windows-portable/
           dest: build/localbooru-windows-portable.zip
+      - name: Pack macOS
+        uses: vimtor/action-zip@v1.1
+        with:
+          files: localbooru-macos/Release/
+          dest: build/localbooru-macos.zip
       - name: Rename files
         run: |
           mv localbooru-android/app-release.apk build/localbooru-android.apk
           mv localbooru-linux-distro-specific-packages/*/localbooru-*-linux.deb build/localbooru-linux.deb
           mv localbooru-linux-distro-specific-packages/*/localbooru-*-linux.rpm build/localbooru-linux.rpm
           mv localbooru-windows-setup/*/localbooru-*-windows-setup.exe build/localbooru-windows-setup.exe
-          mv localbooru-macos/Release/LocalBooru.app build/LocalBooru.app
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
