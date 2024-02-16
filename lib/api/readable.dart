@@ -108,8 +108,12 @@ class Booru {
     }
 
     Future<String> getTagType(String tag) async {
-        final Map<String, String> getType = (await getRawInfo())["specificTags"];
-        return getType.keys.firstWhere((type) => getType[type] != null && getType[type]!.split(" ").contains(tag));
+        final Map getType = Map.from((await getRawInfo())["specificTags"]);
+        return getType.keys.firstWhere((type) => getType[type].contains(tag), orElse: () => "generic");
+    }
+
+    Future<String?> getAllTagsFromType(String type) async {
+        return (await getRawInfo())["specificTags"][type];
     }
 }
 

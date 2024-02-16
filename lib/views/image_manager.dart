@@ -26,6 +26,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     final _formKey = GlobalKey<FormState>();
 
     final tagController = TextEditingController();
+    final artistTagController = TextEditingController();
 
     bool isEditing = false;
     bool isGeneratingTags = false;
@@ -37,21 +38,49 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     void initState() {
         super.initState();
         isEditing = widget.image != null;
+
+        
         if(widget.image != null) {
             final image = widget.image!;
-            tagController.text = image.tags;
             loadedImage = image.path;
             if(image.sources != null) urlList = image.sources!;
+
+            final String tags = image.tags;
+            final List<String> genericTags = List<String>.empty(growable: true);
+            final List<String> artistTags = List<String>.empty(growable: true);
+            Future<void> grabTags() async {
+                final Booru booru = await getCurrentBooru();
+
+                for (String tag in tags.split(" ")) {
+                    final type = await booru.getTagType(tag);
+
+                    if(type == "artist") artistTags.add(tag);
+                    genericTags.add(tag);
+                }
+            }
+
+            grabTags().then((_) {
+                tagController.text = genericTags.join(" ");
+                artistTagController.text = artistTags.join(" ");
+            });
+
         }
     }
 
     void _submit() {
+        final allTags = <String>[
+            ...tagController.text.split(" "),
+            ...artistTagController.text.split(" ")
+        ];
+
         addImage(
             imageFile: File(loadedImage),
-            tags: tagController.text,
+            tags: allTags.join(" "),
             sources: urlList,
             id: widget.image?.id
         );
+        addSpecificTags(artistTagController.text.split(" "), type: "artist");
+
         context.pop();
         if(!isEditing) context.push("/recent");
     }
@@ -91,6 +120,13 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 return null;
                             },
                             currentValue: loadedImage,
+                        ),
+                        TagField(
+                            controller: artistTagController,
+                            decoration: const InputDecoration(
+                                hintText: "Artist(s)"
+                            ),
+                            style: const TextStyle(color: Colors.yellowAccent),
                         ),
                         TagField(
                             controller: tagController,

@@ -44,14 +44,17 @@ Future<BooruImage> addImage({required File imageFile,
     return (await booru.getImage(id))!;
 }
 
-Future<void> addSpecificTag(String tag, {required String type}) async {
+Future<void> addSpecificTags(List<String> tags, {required String type}) async {
     final Booru booru = await getCurrentBooru();
 
     // add to json
-    Map raw = await booru.getRawInfo();
-    String specificTags = raw["specificTags"][type];
+    var raw = await booru.getRawInfo();
+    List<String> specificTags = (raw["specificTags"][type] ?? "").split(" ");
 
-    specificTags += " $tag";
+    for(String tag in tags) {
+        if(!tags.contains(tag)) specificTags.add(tag);
+    }
+
 
     raw["specificTags"][type] = specificTags;
 
