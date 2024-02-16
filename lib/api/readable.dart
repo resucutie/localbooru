@@ -1,7 +1,7 @@
 
 part of localbooru_api;
 
-// ignore: constant_identifier_names
+// ignore: non_constant_identifier_names
 final int INDEX_IMAGE_LIMIT = settingsDefaults["page_size"];
 
 class Booru {
@@ -9,10 +9,10 @@ class Booru {
     
     String path;
 
-    Future<Map> getRawInfo() async {
+    Future<Map<String, dynamic>> getRawInfo() async {
         final File file = File(p.join(path, "repoinfo.json"));
         final String fileinfo = await file.readAsString();
-        final Map json = jsonDecode(fileinfo);
+        final Map<String, dynamic> json = jsonDecode(fileinfo);
         return json;
     }
 
@@ -89,13 +89,9 @@ class Booru {
         return (list.length / size).ceil();
     }
 
-    // ignore: prefer_final_fields
-    Map<String, List<String>> _allTags = {
-        "tags": List<String>.empty(growable: true)
-    };
-
+    List<String> _allTags = List<String>.empty(growable: true);
     Future<List<String>> getAllTags() async {
-        if(_allTags["tags"]!.isEmpty) {
+        if(_allTags.isEmpty) {
             final List files = (await getRawInfo())["files"];
             List<String> allTags = List<String>.empty(growable: true);
             for (var file in files) {
@@ -105,10 +101,15 @@ class Booru {
                 }
             }
 
-            _allTags["tags"] = allTags;
+            _allTags = allTags;
         }
         
-        return _allTags["tags"]!;
+        return _allTags;
+    }
+
+    Future<String> getTagType(String tag) async {
+        final Map<String, String> getType = (await getRawInfo())["specificTags"];
+        return getType.keys.firstWhere((type) => getType[type] != null && getType[type]!.split(" ").contains(tag));
     }
 }
 

@@ -239,7 +239,7 @@ class _AppState extends State<App> {
                     context: _router.routerDelegate.navigatorKey.currentContext!,
                     builder: (context) => UpdateAvaiableDialog(ver: ver),
                 );
-            };
+            }
         }).catchError((err) {debugPrint(err);});
     }
 

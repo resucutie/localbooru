@@ -9,3 +9,8 @@ final Map<String, dynamic> settingsDefaults = {
     "theme": "system",
     "autotag_accuracy": 0.15,
 };
+
+final Map<String, dynamic> defaultFileInfoJson  = {
+    "files": [],
+    "specificTags": {}
+};
