@@ -75,7 +75,7 @@ Map<String, dynamic> rebase(Map<String, dynamic> raw) {
     raw["files"] = files;
 
     // check specific tags
-    if(raw["specificTags"] == null) raw["specificTags"] = {};
+    if(raw["specificTags"] == null) raw["specificTags"] = defaultFileInfoJson["specificTags"];
     for (final type in raw["specificTags"].keys) {
         List<String> contents = List.from(raw["specificTags"][type]);
         contents = contents.where((e) => e.isNotEmpty).toList();

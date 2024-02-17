@@ -119,6 +119,30 @@ class _ImageManagerViewState extends State<ImageManagerView> {
         tagController.dispose();
     }
 
+    void fetchTags() async {
+        final prefs = await SharedPreferences.getInstance();
+        setState(() => isGeneratingTags = true);
+        autoTag(File(loadedImage)).then((tags) async {
+            final moreAccurateTags = filterAccurateResults(tags, prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"]);
+
+            final separatedTags = await (await getCurrentBooru()).separateTagsByType(moreAccurateTags.keys.toList());
+
+            tagController.text = separatedTags["generic"]?.join(" ") ?? "";
+            artistTagController.text = separatedTags["artist"]?.join(" ") ?? "";
+            characterTagController.text = separatedTags["character"]?.join(" ") ?? "";
+            copyrightTagController.text = separatedTags["copyright"]?.join(" ") ?? "";
+            speciesTagController.text = separatedTags["species"]?.join(" ") ?? "";
+        }).catchError((error, stackTrace) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text('Could not obtain tag information, ${error.toString()}'),
+            ));
+            throw error;
+            // debugPrintStack(label: error.toString(), stackTrace: stackTrace);
+        }).whenComplete(() {
+            setState(() => isGeneratingTags = false);
+        });
+    }
+
     @override
     Widget build(BuildContext context) {
         return Scaffold(
@@ -148,6 +172,23 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 return null;
                             },
                             currentValue: loadedImage,
+                        ),
+                        Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                                const Header("Tags", padding: EdgeInsets.zero),
+                                TextButton(
+                                    onPressed: (loadedImage.isEmpty || isGeneratingTags) ? null : fetchTags, 
+                                    child: Wrap(
+                                        spacing: 8,
+                                        children: [
+                                            const Icon(CupertinoIcons.sparkles),
+                                            isGeneratingTags ? const Text("Generating...") : const Text("Generate tags")
+                                        ],
+                                    )
+                                )
+                            ],
                         ),
                         TagField(
                             controller: artistTagController,
@@ -185,25 +226,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                             controller: tagController,
                             decoration: InputDecoration(
                                 labelText: "Tags",
-                                suffixIcon: TextButton(
-                                    onPressed: (loadedImage.isEmpty || isGeneratingTags) ? null : () async {
-                                        final prefs = await SharedPreferences.getInstance();
-                                        setState(() => isGeneratingTags = true);
-                                        autoTag(File(loadedImage)).then((tags) {
-                                            final moreAccurateTags = filterAccurateResults(tags, prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"]);
-                                            tagController.text = moreAccurateTags.keys.join(" ");
-                                        }).catchError((error, stackTrace) {
-                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                                content: Text('Could not obtain tag information, ${error.toString()}'),
-                                            ));
-                                            throw error;
-                                            // debugPrintStack(label: error.toString(), stackTrace: stackTrace);
-                                        }).whenComplete(() {
-                                            setState(() => isGeneratingTags = false);
-                                        });
-                                    }, 
-                                    child: isGeneratingTags ? const Text("Generating...") : const Icon(CupertinoIcons.sparkles)
-                                )
+                                // suffixIcon: 
                             ),
                             style: const TextStyle(color: SpecificTagsColors.generic),
                             validator: (value) {
