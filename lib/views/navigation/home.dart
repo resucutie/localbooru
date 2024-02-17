@@ -83,7 +83,7 @@ class _SearchTagState extends State<SearchTag> {
                 onChanged: (_) => controller.openView(),
                 leading: const Icon(Icons.search),
                 trailing: [
-                    _SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
+                    SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
                 ]
             ),
             suggestionsBuilder: (context, controller) async {
@@ -106,14 +106,14 @@ class _SearchTagState extends State<SearchTag> {
             },
             viewTrailing: [
                 IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
-                _SearchButton(controller: _controller, onSearch: widget.onSearch)
+                SearchButton(controller: _controller, onSearch: widget.onSearch)
             ],
         );
     }
 }
 
-class _SearchButton extends StatelessWidget {
-    const _SearchButton({super.key, required this.controller, required this.onSearch, this.icon = const Icon(Icons.search)});
+class SearchButton extends StatelessWidget {
+    const SearchButton({super.key, required this.controller, required this.onSearch, this.icon = const Icon(Icons.search)});
 
     final SearchController controller;
     final Widget icon;

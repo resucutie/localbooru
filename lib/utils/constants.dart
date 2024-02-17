@@ -30,4 +30,12 @@ class SpecificTagsColors {
     static const character = Colors.greenAccent;
     static const copyright = Colors.deepPurpleAccent;
     static const species = Colors.pinkAccent;
+
+    Color getColor(String type) {
+        if(type == "artist") return artist;
+        if(type == "character") return character;
+        if(type == "copyright") return copyright;
+        if(type == "species") return species;
+        return generic;
+    }
 }
