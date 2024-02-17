@@ -127,11 +127,11 @@ class _ImageManagerViewState extends State<ImageManagerView> {
 
             final separatedTags = await (await getCurrentBooru()).separateTagsByType(moreAccurateTags.keys.toList());
 
-            tagController.text = separatedTags["generic"]?.join(" ") ?? "";
-            artistTagController.text = separatedTags["artist"]?.join(" ") ?? "";
-            characterTagController.text = separatedTags["character"]?.join(" ") ?? "";
-            copyrightTagController.text = separatedTags["copyright"]?.join(" ") ?? "";
-            speciesTagController.text = separatedTags["species"]?.join(" ") ?? "";
+            if(separatedTags["generic"] != null) tagController.text = separatedTags["generic"]!.join(" ");
+            if(separatedTags["artist"] != null) artistTagController.text = separatedTags["artist"]!.join(" ");
+            if(separatedTags["character"] != null) characterTagController.text = separatedTags["character"]!.join(" ");
+            if(separatedTags["copyright"] != null) copyrightTagController.text = separatedTags["copyright"]!.join(" ");
+            if(separatedTags["species"] != null) speciesTagController.text = separatedTags["species"]!.join(" ");
         }).catchError((error, stackTrace) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Could not obtain tag information, ${error.toString()}'),
