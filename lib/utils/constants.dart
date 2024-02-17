@@ -11,7 +11,7 @@ final Map<String, dynamic> settingsDefaults = {
     "autotag_accuracy": 0.15,
 };
 
-final Map<String, dynamic> defaultFileInfoJson  = {
+final Map<String, dynamic> defaultFileInfoJson = {
     "files": [],
     "specificTags": {
         "artist": [ // general tags
@@ -31,7 +31,7 @@ final Map<String, dynamic> defaultFileInfoJson  = {
             "sega",
             "bandai_namco",
         ],
-        "species": [ // some species tags. very low because not feeling like adding mammal 
+        "species": [ // some species tags
             "pokemon_(creature)",
             "pokemon_(species)",
             "humanoid",

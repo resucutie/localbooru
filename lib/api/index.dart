@@ -42,7 +42,7 @@ void setBooru(String path) async {
 
 void createDefaultBooruModel(String folderPath) async {
     File repoinfoFile = await File(p.join(folderPath, "repoinfo.json")).create(recursive: true);
-    repoinfoFile.writeAsString(defaultFileInfoJson.toString());
+    repoinfoFile.writeAsString(jsonEncode(defaultFileInfoJson));
     await Directory(p.join(folderPath, "files")).create(recursive: true);
     setBooru(folderPath);
 }

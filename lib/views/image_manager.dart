@@ -191,6 +191,17 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                             ],
                         ),
                         TagField(
+                            controller: tagController,
+                            decoration: const InputDecoration(
+                                labelText: "General",
+                            ),
+                            style: const TextStyle(color: SpecificTagsColors.generic),
+                            validator: (value) {
+                                if (value == null || value.isEmpty) return 'Please enter tags';
+                                return null;
+                            },
+                        ),
+                        TagField(
                             controller: artistTagController,
                             decoration: const InputDecoration(
                                 labelText: "Artist(s)"
@@ -221,18 +232,6 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                             ),
                             type: "species",
                             style: const TextStyle(color: SpecificTagsColors.species),
-                        ),
-                        TagField(
-                            controller: tagController,
-                            decoration: InputDecoration(
-                                labelText: "Tags",
-                                // suffixIcon: 
-                            ),
-                            style: const TextStyle(color: SpecificTagsColors.generic),
-                            validator: (value) {
-                                if (value == null || value.isEmpty) return 'Please enter tags';
-                                return null;
-                            },
                         ),
                         const Header("Sources"),
                         ListStringTextInput(
