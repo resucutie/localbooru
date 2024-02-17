@@ -27,6 +27,9 @@ class _ImageManagerViewState extends State<ImageManagerView> {
 
     final tagController = TextEditingController();
     final artistTagController = TextEditingController();
+    final characterTagController = TextEditingController();
+    final copyrightTagController = TextEditingController();
+    final speciesTagController = TextEditingController();
 
     bool isEditing = false;
     bool isGeneratingTags = false;
@@ -46,8 +49,11 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             if(image.sources != null) urlList = image.sources!;
 
             final String tags = image.tags;
-            final List<String> genericTags = List<String>.empty(growable: true);
-            final List<String> artistTags = List<String>.empty(growable: true);
+            final List<String> genericTags = [];
+            final List<String> artistTags = [];
+            final List<String> characterTags = [];
+            final List<String> copyrightTags = [];
+            final List<String> speciesTags = [];
             Future<void> grabTags() async {
                 final Booru booru = await getCurrentBooru();
 
@@ -55,6 +61,9 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                     final type = await booru.getTagType(tag);
 
                     if(type == "artist") artistTags.add(tag);
+                    if(type == "character") characterTags.add(tag);
+                    if(type == "copyright") copyrightTags.add(tag);
+                    if(type == "species") speciesTags.add(tag);
                     genericTags.add(tag);
                 }
             }
@@ -62,15 +71,25 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             grabTags().then((_) {
                 tagController.text = genericTags.join(" ");
                 artistTagController.text = artistTags.join(" ");
+                characterTagController.text = characterTags.join(" ");
+                copyrightTagController.text = copyrightTags.join(" ");
+                speciesTagController.text = speciesTags.join(" ");
             });
-
         }
     }
 
     void _submit() {
+        final List<String> genericTags = tagController.text.split(" ");
+        final List<String> artistTags = artistTagController.text.split(" ");
+        final List<String> characterTags = characterTagController.text.split(" ");
+        final List<String> copyrightTags = copyrightTagController.text.split(" ");
+        final List<String> speciesTags = tagController.text.split(" ");
         final allTags = <String>[
-            ...tagController.text.split(" "),
-            ...artistTagController.text.split(" ")
+            ...genericTags,
+            ...artistTags,
+            ...characterTags,
+            ...copyrightTags,
+            ...speciesTags,
         ];
 
         addImage(
@@ -79,7 +98,10 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             sources: urlList,
             id: widget.image?.id
         );
-        addSpecificTags(artistTagController.text.split(" "), type: "artist");
+        addSpecificTags(artistTags, type: "artist");
+        addSpecificTags(characterTags, type: "character");
+        addSpecificTags(copyrightTags, type: "copyright");
+        addSpecificTags(speciesTags, type: "species");
 
         context.pop();
         if(!isEditing) context.push("/recent");
@@ -124,9 +146,34 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                         TagField(
                             controller: artistTagController,
                             decoration: const InputDecoration(
-                                hintText: "Artist(s)"
+                                labelText: "Artist(s)"
                             ),
+                            type: "artist",
                             style: const TextStyle(color: Colors.yellowAccent),
+                        ),
+                        TagField(
+                            controller: characterTagController,
+                            decoration: const InputDecoration(
+                                labelText: "Character(s)"
+                            ),
+                            type: "character",
+                            style: TextStyle(color: Colors.greenAccent),
+                        ),
+                        TagField(
+                            controller: copyrightTagController,
+                            decoration: const InputDecoration(
+                                labelText: "Copyright"
+                            ),
+                            type: "copyright",
+                            style: const TextStyle(color: Colors.deepPurpleAccent),
+                        ),
+                        TagField(
+                            controller: speciesTagController,
+                            decoration: const InputDecoration(
+                                labelText: "Species"
+                            ),
+                            type: "species",
+                            style: const TextStyle(color: Colors.pinkAccent),
                         ),
                         TagField(
                             controller: tagController,
@@ -233,12 +280,13 @@ class ImageUploadForm extends StatelessWidget {
 }
 
 class TagField extends StatefulWidget {
-    const TagField({super.key, this.controller,  this.decoration, this.validator, this.style});
+    const TagField({super.key, this.controller,  this.decoration, this.validator, this.style, this.type = "generic"});
 
     final TextEditingController? controller;
     final InputDecoration? decoration;
     final FormFieldValidator<String>? validator;
     final TextStyle? style;
+    final String type;
 
     @override
     State<TagField> createState() => _TagFieldState();
@@ -261,7 +309,7 @@ class _TagFieldState extends State<TagField> {
                     String tag = tagList.last;
 
                     Booru currentBooru = await getCurrentBooru();
-                    List<String> allTags = await currentBooru.getAllTags();
+                    List<String> allTags = await currentBooru.getAllTagsFromType(widget.type);
 
                     List<String> matches = List.from(allTags);
 
