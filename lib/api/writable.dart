@@ -49,10 +49,11 @@ Future<void> addSpecificTags(List<String> tags, {required String type}) async {
 
     // add to json
     var raw = await booru.getRawInfo();
-    List<String> specificTags = (raw["specificTags"][type] ?? "").split(" ");
+    final specificTagsList = raw["specificTags"][type];
+    List<String> specificTags = List<String>.from(specificTagsList ?? []);
 
     for(String tag in tags) {
-        if(!tags.contains(tag)) specificTags.add(tag);
+        if(!specificTags.contains(tag)) specificTags.add(tag);
     }
 
 
@@ -73,8 +74,14 @@ Map<String, dynamic> rebase(Map<String, dynamic> raw) {
     }
     raw["files"] = files;
 
-    // assert specificTags
+    // check specific tags
     if(raw["specificTags"] == null) raw["specificTags"] = {};
+    for (final type in raw["specificTags"].keys) {
+        List<String> contents = List.from(raw["specificTags"][type]);
+        contents = contents.where((e) => e.isNotEmpty).toList();
+        raw["specificTags"][type] = contents;
+    }
+    debugPrint(raw["specificTags"].toString());
 
     return raw;
 }

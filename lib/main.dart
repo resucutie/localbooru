@@ -135,7 +135,6 @@ final _router = GoRouter(
                     routes: [
                         GoRoute(path: ":id",
                             builder: (context, state) {
-                                debugPrint("mow");
                                 final String? id = state.pathParameters["id"];
                                 if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
                                 return BooruLoader( builder: (_, booru) => BooruImageLoader(

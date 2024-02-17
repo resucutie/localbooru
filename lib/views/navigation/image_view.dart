@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
+import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/views/navigation/index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -123,7 +124,6 @@ class ImageViewZoom extends StatelessWidget {
 
 class ImageViewProprieties extends StatelessWidget {
     const ImageViewProprieties(this.image, {super.key});
-
     
     final BooruImage image;
 
@@ -139,7 +139,48 @@ class ImageViewProprieties extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                     const Header("Tags"),
-                    Wrap(children: List.from(image.tags.split(" ")..sort()).map((e) => Tag(e)).toList()),
+                    FutureBuilder(
+                        future: getCurrentBooru().then((booru) => booru.separateTagsByType(image.tags.split(" "))),
+                        builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                                final tags = snapshot.data!;
+                                return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        if (tags["artist"] != null && tags["artist"]!.isNotEmpty) ...[
+                                            const SmallThemedHeader("Artist", padding: EdgeInsets.zero,),
+                                            Wrap(children: List.from(tags["artist"]!..sort()).map((e) {
+                                                return Tag(e, color: SpecificTagsColors.artist,);
+                                            }).toList())
+                                        ],
+                                        if (tags["character"] != null && tags["character"]!.isNotEmpty) ...[
+                                            const SmallThemedHeader("Character", padding: EdgeInsets.zero,),
+                                            Wrap(children: List.from(tags["character"]!..sort()).map((e) {
+                                                return Tag(e, color: SpecificTagsColors.character,);
+                                            }).toList())
+                                        ],
+                                        if (tags["copyright"] != null && tags["copyright"]!.isNotEmpty) ...[
+                                            const SmallThemedHeader("Copyright", padding: EdgeInsets.zero,),
+                                            Wrap(children: List.from(tags["copyright"]!..sort()).map((e) {
+                                                return Tag(e, color: SpecificTagsColors.copyright,);
+                                            }).toList())
+                                        ],
+                                        if (tags["species"] != null && tags["species"]!.isNotEmpty) ...[
+                                            const SmallThemedHeader("Species", padding: EdgeInsets.zero,),
+                                            Wrap(children: List.from(tags["species"]!..sort()).map((e) {
+                                                return Tag(e, color: SpecificTagsColors.species,);
+                                            }).toList())
+                                        ],
+                                        const SmallThemedHeader("Generic", padding: EdgeInsets.zero,),
+                                        Wrap(children: List.from(tags["generic"]!..sort()).map((e) {
+                                            return Tag(e);
+                                        }).toList())
+                                    ],
+                                );
+                            }
+                            return const SizedBox(height: 0);
+                        }
+                    ),
 
                     const Header("Sources"),
                     image.sources == null || image.sources!.isEmpty ? const Text("None") : Column(
@@ -161,9 +202,10 @@ class ImageViewProprieties extends StatelessWidget {
 }
 
 class Tag extends StatefulWidget {
-    const Tag(this.tag, {super.key});
+    const Tag(this.tag, {super.key, this.color = SpecificTagsColors.generic});
 
     final String tag;
+    final Color color;
 
     @override
     State<Tag> createState() => _TagState();
@@ -173,8 +215,6 @@ class _TagState extends State<Tag> {
 
     @override
     Widget build(BuildContext context) {
-        const color = Colors.blueAccent;
-
         return GestureDetector(
             onTap: () => context.push("/search/?tag=${widget.tag}"),
             child: MouseRegion(
@@ -183,7 +223,7 @@ class _TagState extends State<Tag> {
                 onExit: (details) => setState(() => _isHovering = false),
                 child: Padding(
                     padding: const EdgeInsets.only(right: 8.0),
-                    child: Text(widget.tag, style: TextStyle(color: color, decoration: _isHovering ? TextDecoration.underline : null, decorationColor: color)),
+                    child: Text(widget.tag, style: TextStyle(color: widget.color, decoration: _isHovering ? TextDecoration.underline : null, decorationColor: widget.color)),
                 ),
             )
         );

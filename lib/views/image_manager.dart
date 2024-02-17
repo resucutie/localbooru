@@ -49,62 +49,68 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             if(image.sources != null) urlList = image.sources!;
 
             final String tags = image.tags;
-            final List<String> genericTags = [];
-            final List<String> artistTags = [];
-            final List<String> characterTags = [];
-            final List<String> copyrightTags = [];
-            final List<String> speciesTags = [];
-            Future<void> grabTags() async {
-                final Booru booru = await getCurrentBooru();
-
-                for (String tag in tags.split(" ")) {
-                    final type = await booru.getTagType(tag);
-
-                    if(type == "artist") artistTags.add(tag);
-                    if(type == "character") characterTags.add(tag);
-                    if(type == "copyright") copyrightTags.add(tag);
-                    if(type == "species") speciesTags.add(tag);
-                    genericTags.add(tag);
-                }
-            }
-
-            grabTags().then((_) {
-                tagController.text = genericTags.join(" ");
-                artistTagController.text = artistTags.join(" ");
-                characterTagController.text = characterTags.join(" ");
-                copyrightTagController.text = copyrightTags.join(" ");
-                speciesTagController.text = speciesTags.join(" ");
+            // final List<String> genericTags = [];
+            // final List<String> artistTags = [];
+            // final List<String> characterTags = [];
+            // final List<String> copyrightTags = [];
+            // final List<String> speciesTags = [];
+            getCurrentBooru().then((booru) async {
+                final separatedTags = await booru.separateTagsByType(tags.split(" "));
+                tagController.text = separatedTags["generic"]?.join(" ") ?? "";
+                artistTagController.text = separatedTags["artist"]?.join(" ") ?? "";
+                characterTagController.text = separatedTags["character"]?.join(" ") ?? "";
+                copyrightTagController.text = separatedTags["copyright"]?.join(" ") ?? "";
+                speciesTagController.text = separatedTags["species"]?.join(" ") ?? "";
             });
+            // Future<void> grabTags() async {
+            //     getCurrentBooru().separateTagsByType(tags.split(" ")).then((value) {
+            //         tagController.text = value["generic"]?.join(" ") ?? "";
+            //         artistTagController.text = value["artist"]?.join(" ") ?? "";
+            //         characterTagController.text = value["character"]?.join(" ") ?? "";
+            //         copyrightTagController.text = value["copyright"]?.join(" ") ?? "";
+            //         speciesTagController.text = value["species"]?.join(" ") ?? "";
+            //     });
+            // }
+
+            // grabTags();
         }
     }
 
-    void _submit() {
+    void _submit() async {
         final List<String> genericTags = tagController.text.split(" ");
         final List<String> artistTags = artistTagController.text.split(" ");
         final List<String> characterTags = characterTagController.text.split(" ");
         final List<String> copyrightTags = copyrightTagController.text.split(" ");
-        final List<String> speciesTags = tagController.text.split(" ");
+        final List<String> speciesTags = speciesTagController.text.split(" ");
         final allTags = <String>[
             ...genericTags,
             ...artistTags,
             ...characterTags,
             ...copyrightTags,
             ...speciesTags,
-        ];
+        ].where((e) => e.isNotEmpty).toList();
 
-        addImage(
+        debugPrint(allTags.toString(), wrapWidth: 9999);
+
+        await addImage(
             imageFile: File(loadedImage),
             tags: allTags.join(" "),
             sources: urlList,
             id: widget.image?.id
         );
-        addSpecificTags(artistTags, type: "artist");
-        addSpecificTags(characterTags, type: "character");
-        addSpecificTags(copyrightTags, type: "copyright");
-        addSpecificTags(speciesTags, type: "species");
+        await addSpecificTags(artistTags, type: "artist");
+        await addSpecificTags(characterTags, type: "character");
+        await addSpecificTags(copyrightTags, type: "copyright");
+        await addSpecificTags(speciesTags, type: "species");
 
-        context.pop();
-        if(!isEditing) context.push("/recent");
+        final Booru booru = await getCurrentBooru();
+        await writeSettings(booru.path, await booru.rebaseRaw());
+
+        if(context.mounted) {
+            context.pop();
+            if(!isEditing) context.push("/recent");
+        }
+
     }
 
     @override
@@ -149,7 +155,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 labelText: "Artist(s)"
                             ),
                             type: "artist",
-                            style: const TextStyle(color: Colors.yellowAccent),
+                            style: const TextStyle(color: SpecificTagsColors.artist),
                         ),
                         TagField(
                             controller: characterTagController,
@@ -157,7 +163,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 labelText: "Character(s)"
                             ),
                             type: "character",
-                            style: TextStyle(color: Colors.greenAccent),
+                            style: const TextStyle(color: SpecificTagsColors.character),
                         ),
                         TagField(
                             controller: copyrightTagController,
@@ -165,7 +171,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 labelText: "Copyright"
                             ),
                             type: "copyright",
-                            style: const TextStyle(color: Colors.deepPurpleAccent),
+                            style: const TextStyle(color: SpecificTagsColors.copyright),
                         ),
                         TagField(
                             controller: speciesTagController,
@@ -173,7 +179,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 labelText: "Species"
                             ),
                             type: "species",
-                            style: const TextStyle(color: Colors.pinkAccent),
+                            style: const TextStyle(color: SpecificTagsColors.species),
                         ),
                         TagField(
                             controller: tagController,
@@ -199,7 +205,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                     child: isGeneratingTags ? const Text("Generating...") : const Icon(CupertinoIcons.sparkles)
                                 )
                             ),
-                            style: const TextStyle(color: Colors.blueAccent),
+                            style: const TextStyle(color: SpecificTagsColors.generic),
                             validator: (value) {
                                 if (value == null || value.isEmpty) return 'Please enter tags';
                                 return null;

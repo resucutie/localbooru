@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/views/navigation/tag_browse.dart';
 
 class HomePage extends StatefulWidget {
     const HomePage({super.key});

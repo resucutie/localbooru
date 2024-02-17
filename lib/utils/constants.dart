@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 
 final Map<String, dynamic> settingsDefaults = {
@@ -14,3 +15,19 @@ final Map<String, dynamic> defaultFileInfoJson  = {
     "files": [],
     "specificTags": {}
 };
+
+// final Map<String, Color> specificTagsColors = {
+//     "generic": Colors.blueAccent,
+//     "artist": Colors.yellowAccent,
+//     "character": Colors.greenAccent,
+//     "copyright": Colors.deepPurpleAccent,
+//     "species": Colors.pinkAccent,
+// };
+
+class SpecificTagsColors {
+    static const generic = Colors.blueAccent;
+    static const artist = Colors.yellowAccent;
+    static const character = Colors.greenAccent;
+    static const copyright = Colors.deepPurpleAccent;
+    static const species = Colors.pinkAccent;
+}
