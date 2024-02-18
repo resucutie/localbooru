@@ -143,6 +143,27 @@ class _ImageManagerViewState extends State<ImageManagerView> {
         });
     }
 
+    String? validateTagTexts(String? value, String type) {
+        if(value == null || value.isNotEmpty) {
+            // check for overlaps
+            List hasOverlap = [false, ""];
+
+            if(type != "generic" && !hasOverlap[0]) hasOverlap = [tagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "generic"];
+            if(type != "artist" && !hasOverlap[0]) hasOverlap = [artistTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "artist"];
+            if(type != "character" && !hasOverlap[0]) hasOverlap = [characterTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "character"];
+            if(type != "copyright" && !hasOverlap[0]) hasOverlap = [copyrightTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "copyright"];
+            if(type != "species" && !hasOverlap[0]) hasOverlap = [speciesTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "species"];
+            
+            if(hasOverlap[0]) return "Overlapping tags exists with the ${hasOverlap[1]} field";
+        }
+
+        // check if it is empty
+        if([tagController, artistTagController, characterTagController, copyrightTagController, speciesTagController]
+            .every((controller) => controller.text.isEmpty)) return "Please insert a tag";
+
+        return null;
+    }
+
     @override
     Widget build(BuildContext context) {
         return Scaffold(
@@ -196,10 +217,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 labelText: "General",
                             ),
                             style: const TextStyle(color: SpecificTagsColors.generic),
-                            validator: (value) {
-                                if (value == null || value.isEmpty) return 'Please enter tags';
-                                return null;
-                            },
+                            validator: (value) => validateTagTexts(value, "generic"),
                         ),
                         TagField(
                             controller: artistTagController,
@@ -207,6 +225,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 labelText: "Artist(s)"
                             ),
                             type: "artist",
+                            validator: (value) => validateTagTexts(value, "artist"),
                             style: const TextStyle(color: SpecificTagsColors.artist),
                         ),
                         TagField(
@@ -215,6 +234,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 labelText: "Character(s)"
                             ),
                             type: "character",
+                            validator: (value) => validateTagTexts(value, "character"),
                             style: const TextStyle(color: SpecificTagsColors.character),
                         ),
                         TagField(
@@ -223,6 +243,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 labelText: "Copyright"
                             ),
                             type: "copyright",
+                            validator: (value) => validateTagTexts(value, "copyright"),
                             style: const TextStyle(color: SpecificTagsColors.copyright),
                         ),
                         TagField(
@@ -231,6 +252,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 labelText: "Species"
                             ),
                             type: "species",
+                            validator: (value) => validateTagTexts(value, "species"),
                             style: const TextStyle(color: SpecificTagsColors.species),
                         ),
                         const Header("Sources"),
