@@ -49,11 +49,6 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             if(image.sources != null) urlList = image.sources!;
 
             final String tags = image.tags;
-            // final List<String> genericTags = [];
-            // final List<String> artistTags = [];
-            // final List<String> characterTags = [];
-            // final List<String> copyrightTags = [];
-            // final List<String> speciesTags = [];
             getCurrentBooru().then((booru) async {
                 final separatedTags = await booru.separateTagsByType(tags.split(" "));
                 tagController.text = separatedTags["generic"]?.join(" ") ?? "";
@@ -62,17 +57,6 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                 copyrightTagController.text = separatedTags["copyright"]?.join(" ") ?? "";
                 speciesTagController.text = separatedTags["species"]?.join(" ") ?? "";
             });
-            // Future<void> grabTags() async {
-            //     getCurrentBooru().separateTagsByType(tags.split(" ")).then((value) {
-            //         tagController.text = value["generic"]?.join(" ") ?? "";
-            //         artistTagController.text = value["artist"]?.join(" ") ?? "";
-            //         characterTagController.text = value["character"]?.join(" ") ?? "";
-            //         copyrightTagController.text = value["copyright"]?.join(" ") ?? "";
-            //         speciesTagController.text = value["species"]?.join(" ") ?? "";
-            //     });
-            // }
-
-            // grabTags();
         }
     }
 
@@ -141,7 +125,6 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                 content: Text('Could not obtain tag information, ${error.toString()}'),
             ));
             throw error;
-            // debugPrintStack(label: error.toString(), stackTrace: stackTrace);
         }).whenComplete(() {
             setState(() => isGeneratingTags = false);
         });
@@ -453,7 +436,6 @@ class _ListStringTextInputState extends State<ListStringTextInput> {
     @override
     Widget build(BuildContext context) {
         return Column(
-            // mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
                 Container(

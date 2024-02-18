@@ -98,7 +98,6 @@ class ImageViewZoom extends StatelessWidget {
                     title: "Zoom",
                     backgroundColor: _appBarColor,
                     appBar: AppBar(
-                        // systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: Colors.transparent),
                         backgroundColor: _appBarColor,
                         elevation: 0,
                         title: Text(image.filename),
@@ -131,11 +130,9 @@ class ImageViewProprieties extends StatelessWidget {
     Widget build(BuildContext context) {
         final TextStyle linkText = TextStyle(color: Theme.of(context).colorScheme.primary, decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.primary);
         
-        // debugPrint("sources ${image.source}");
         return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-                // mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                     const Header("Tags"),

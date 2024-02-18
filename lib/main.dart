@@ -99,33 +99,6 @@ final _router = GoRouter(
                                 );
                             }
                         ),
-                        // GoRoute(path: "delete_image_confirmation/:id",
-                        //     pageBuilder: (context, state) {
-                        //         final String? id = state.pathParameters["id"];
-                        //         if (id == null) return DialogPage(builder: (_) => Text("Invalid ID $id"));
-                        //         return DialogPage(
-                        //             builder: (context) => DeleteImageDialogue(id: id,)
-                        //         );
-                        //     }
-                        // ),
-                        // GoRoute(path: "update",
-                        //     pageBuilder: (context, state) {
-                        //         final String ver = state.uri.queryParameters["ver"] ?? "";
-                        //         return DialogPage(builder: (context) => AlertDialog(
-                        //             title: const Text("Update avaiable"),
-                        //             content: Text("A new version is avaiable for download: $ver. Update now?"),
-                        //             actions: [
-                        //                 TextButton(onPressed: context.pop, child: const Text("Later")),
-                        //                 TextButton(child: const Text("Yes"), 
-                        //                     onPressed: () {
-                        //                         launchUrlString("https://github.com/resucutie/localbooru/releases/tag/$ver");
-                        //                         context.pop();
-                        //                     }
-                        //                 ),
-                        //             ],
-                        //         ));
-                        //     },
-                        // )
                     ]
                 ),
 

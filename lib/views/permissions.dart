@@ -39,7 +39,6 @@ class _PermissionsScreenState extends State<PermissionsScreen>{
                                                 content: Text("don't be so scawed i wont mess with ur pwone :3"),
                                             ));
                                         }
-                                        // throw "Please allow storage permission to upload files";
                                     } else {
                                         if (context.mounted) context.go("/");
                                     }

@@ -35,13 +35,6 @@ class _GalleryViewerState extends State<GalleryViewer> {
         _searchController.text = widget.tags;
     }
 
-    // @override
-    // void initState() {
-    //     super.initState();
-
-    //     _searchController.text = widget.tags;
-    // }
-
     Future<Map> _obtainResults() async {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         int indexSize = prefs.getInt("page_size") ?? settingsDefaults["page_size"];

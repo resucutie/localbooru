@@ -8,7 +8,6 @@ import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:open_file/open_file.dart';
-import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
@@ -22,7 +21,6 @@ class BrowseScreen extends StatelessWidget {
     bool isOnSearch() => uri.path.contains("/search");
     bool isOnView() => uri.path.contains("/view");
     String _getTitle(Uri uri) {
-        // Uri.parse(url).queryParameters["tag"].isEmpty();
         final String? tags = uri.queryParameters["tag"];
         if(isOnSearch()) {
             if(tags != null && tags.isNotEmpty) return "Browse";
@@ -50,7 +48,6 @@ class BrowseScreen extends StatelessWidget {
         return Scaffold(
             appBar: WindowFrameAppBar(
                 appBar: AppBar(
-                    // backgroundColor: Colors.transparent,
                     title: Builder(
                         builder: (builder) {
                             final String title = _getTitle(uri);
@@ -155,25 +152,6 @@ class BrowseScreen extends StatelessWidget {
                 ),
             ),
             body: child,
-            // floatingActionButton: Wrap(
-            //     children: [
-            //         FloatingActionButton(
-            //             onPressed: () async{
-            //                 Booru booru = await getCurrentBooru();
-            //                 addImage(
-            //                     imageFile: File(join(booru.path, "testFile.jpeg"))
-            //                 );
-            //             },
-            //             child: const Icon(Icons.add)
-            //         ),
-            //         FloatingActionButton(
-            //             onPressed: () {
-            //                 removeImage("5");
-            //             },
-            //             child: const Icon(Icons.remove)
-            //         ),
-            //     ]
-            // )
         );
     }
 }
@@ -215,7 +193,6 @@ List<PopupMenuEntry> imageShareItems(BooruImage image) {
             onTap: () => OpenFile.open(image.path),
         ),
         PopupMenuItem(
-            // enabled: !isMobile(),
             child: const Text("Copy image to clipboard"),
             onTap: () async {
                 final item = DataWriterItem();
