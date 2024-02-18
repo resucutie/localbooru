@@ -17,7 +17,8 @@ final Map<String, dynamic> defaultFileInfoJson = {
         "artist": [ // general tags
             "unknown_artist",
             "anonymous_artist",
-            "third-party_edit"
+            "third-party_edit",
+            "artist_name"
         ],
         "character": [ // fun fact: there's WAY TOO MANY posts on e6 about mlp characters https://e621.net/tags?commit=Search&search%5Bcategory%5D=4&search%5Bhide_empty%5D=1&search%5Border%5D=count
             "fan_character"
@@ -25,6 +26,7 @@ final Map<String, dynamic> defaultFileInfoJson = {
         "copyright": [ // basic copyright tags
             "nintendo"
             "pokemon",
+            "pokemon_(game)",
             "animal_crossing",
             "hasbro",
             "disney",
