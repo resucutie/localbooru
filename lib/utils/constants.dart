@@ -59,10 +59,10 @@ final Map<String, dynamic> defaultFileInfoJson = {
 
 class SpecificTagsColors {
     static const generic = Colors.blueAccent;
-    static const artist = Colors.yellowAccent;
-    static const character = Colors.greenAccent;
-    static const copyright = Colors.deepPurpleAccent;
-    static const species = Colors.pinkAccent;
+    static const artist = Color(0xFFFFC800);
+    static const character = Color(0xFF56C58F);
+    static const copyright = Colors.purpleAccent;
+    static const species = Colors.redAccent;
 
     static Color getColor(String type) {
         if(type == "artist") return artist;
