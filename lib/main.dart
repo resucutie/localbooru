@@ -50,7 +50,7 @@ final _router = GoRouter(
                         ),
                         GoRoute(path: "search",
                             builder: (context, state) {
-                                final String tags = Uri.decodeFull(state.uri.queryParameters["tag"] ?? "");
+                                final String tags = state.uri.queryParameters["tag"] ?? "";
                                 final String? index = state.uri.queryParameters["index"];
                                 return BooruLoader(
                                     builder: (context, booru) => GalleryViewer(
@@ -195,6 +195,7 @@ void main() async {
 class App extends StatefulWidget {
     const App({super.key});
 
+    @override
     State<App> createState() => _AppState();
 }
 
