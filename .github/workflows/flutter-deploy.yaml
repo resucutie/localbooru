@@ -107,17 +107,17 @@ jobs:
       - name: Create folder
         run: mkdir build
       - name: Pack Linux binaries
-        uses: vimtor/action-zip@v1.1
+        uses: vimtor/action-zip@v1.2
         with:
           files: localbooru-linux-binaries/
           dest: build/localbooru-linux-binaries.zip
       - name: Pack Windows binaries
-        uses: vimtor/action-zip@v1.1
+        uses: vimtor/action-zip@v1.2
         with:
           files: localbooru-windows-portable/
           dest: build/localbooru-windows-portable.zip
       - name: Pack macOS
-        uses: vimtor/action-zip@v1.1
+        uses: vimtor/action-zip@v1.2
         with:
           files: localbooru-macos/Release/
           dest: build/localbooru-macos.zip
