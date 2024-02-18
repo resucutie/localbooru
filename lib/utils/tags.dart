@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 
@@ -49,13 +50,12 @@ bool shouldBeIncluded({required List<String> tagList, required String fileTags})
         final tag = TagSearchParams(tagSearch);
         if(tag.obtainSelector() == "-") {
             return !fileTags.contains(_spaceMatch(tag.raw));
-        } else if (tag.obtainSelector() == null) {
-            return fileTags.contains(_spaceMatch(tag.raw));
         }
-        return true; //otherwise adds if every condition fails
+        return fileTags.contains(_spaceMatch(tag.raw));
     });
 }
 
+//this was made so that it wouldn't ignore if there was a space on the tag that was being searched for
 RegExp _spaceMatch(String match) {
-    return RegExp(r"\b" + match + r"\b", caseSensitive: false);
+    return RegExp(r"(?<!\\)" + RegExp.escape(match) + r"(?=\W|$)", caseSensitive: false);
 }
