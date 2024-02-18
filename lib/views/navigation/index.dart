@@ -75,7 +75,6 @@ class BrowseScreen extends StatelessWidget {
                             onPressed: () {
                                 if(isOnView()) {
                                     final String id = uri.pathSegments[1];
-                                    debugPrint("/manage_image/$id");
                                     context.push("/manage_image/$id");
                                 } else {
                                     context.push("/manage_image");

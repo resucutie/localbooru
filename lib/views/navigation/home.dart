@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/views/navigation/tag_browse.dart';
+import 'package:localbooru/utils/constants.dart';
 
 class HomePage extends StatefulWidget {
     const HomePage({super.key});
@@ -84,37 +84,39 @@ class _SearchTagState extends State<SearchTag> {
                 onChanged: (_) => controller.openView(),
                 leading: const Icon(Icons.search),
                 trailing: [
-                    _SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
+                    SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
                 ]
             ),
             suggestionsBuilder: (context, controller) async {
                 Booru booru = await getCurrentBooru();
                 List<String> tags = await booru.getAllTags();
-                final currentTags = List.from(controller.text.split(" "));
-                final displayTags = List.from(tags);
-                displayTags.retainWhere((s){
+                final currentTags = List<String>.from(controller.text.split(" "));
+                var filteredTags = List<String>.from(tags);
+                filteredTags.retainWhere((s){
                         return s.contains(currentTags.last) && !currentTags.contains(s);
                 });
-                return displayTags.map((tag) => ListTile(
-                    title: Text(tag),
+                var specialTags = await booru.separateTagsByType(filteredTags);
+                var mew = specialTags.entries.map((type) => type.value.map((tag) => ListTile(
+                    title: Text(tag, style: TextStyle(color: SpecificTagsColors.getColor(type.key)),),
                     onTap: () {
                         List endResult = List.from(currentTags);
                         endResult.removeLast();
                         endResult.add(tag);
                         setState(() => controller.closeView("${endResult.join(" ")} "));
                     },
-                ));
+                )));
+                return mew.expand((i) => i);
             },
             viewTrailing: [
                 IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
-                _SearchButton(controller: _controller, onSearch: widget.onSearch)
+                SearchButton(controller: _controller, onSearch: widget.onSearch)
             ],
         );
     }
 }
 
-class _SearchButton extends StatelessWidget {
-    const _SearchButton({super.key, required this.controller, required this.onSearch, this.icon = const Icon(Icons.search)});
+class SearchButton extends StatelessWidget {
+    const SearchButton({super.key, required this.controller, required this.onSearch, this.icon = const Icon(Icons.search)});
 
     final SearchController controller;
     final Widget icon;

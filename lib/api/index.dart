@@ -18,11 +18,21 @@ Future<Booru> getCurrentBooru() async {
     if(currentBooru == null) {
         final prefs = await SharedPreferences.getInstance();
         final String? booruPath = prefs.getString("booruPath");
-        debugPrint("booruPath $booruPath");
+        debugPrint("Loaded booruPath with $booruPath");
         if (booruPath is! String) throw "Invalid or unset booru on settings";
+
+        final String repoinfoPath = p.join(booruPath, "repoinfo.json");
+
+        Map<String, dynamic> raw = jsonDecode(await File(repoinfoPath).readAsString());
+        if(!isValidBooruModel(raw)) {
+            debugPrint("Booru is not valid. Trying to fix it");
+            writeSettings(booruPath, rebase(raw));
+        }
+
         currentBooru = Booru(booruPath);
     }
-    return currentBooru as Booru;
+
+    return currentBooru!;
 }
 
 void setBooru(String path) async {
@@ -32,9 +42,14 @@ void setBooru(String path) async {
 
 void createDefaultBooruModel(String folderPath) async {
     File repoinfoFile = await File(p.join(folderPath, "repoinfo.json")).create(recursive: true);
-    repoinfoFile.writeAsString("{\"files\": []}");
+    repoinfoFile.writeAsString(jsonEncode(defaultFileInfoJson));
     await Directory(p.join(folderPath, "files")).create(recursive: true);
     setBooru(folderPath);
+}
+
+bool isValidBooruModel(Map<String, dynamic> raw) {
+    return raw["files"] != null &&
+        raw["specificTags"] != null;
 }
 
 class BooruLoader extends StatelessWidget {

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class Header extends StatelessWidget {
-    const Header(this.title, {super.key, padding});
+    const Header(this.title, {super.key, this.padding = const EdgeInsets.only(top: 16.0)});
 
     final String title;
-    final EdgeInsets padding = const EdgeInsets.only(top: 16.0);
+    final EdgeInsets padding;
 
     @override
     Widget build(BuildContext context) {
@@ -19,10 +19,10 @@ class Header extends StatelessWidget {
 }
 
 class SmallThemedHeader extends StatelessWidget {
-    const SmallThemedHeader(this.title, {super.key, padding});
+    const SmallThemedHeader(this.title, {super.key, this.padding = const EdgeInsets.only(top: 16.0, left: 16.0)});
 
     final String title;
-    final EdgeInsets padding = const EdgeInsets.only(top: 16.0, left: 16.0);
+    final EdgeInsets padding;
 
     @override
     Widget build(BuildContext context) {

@@ -1,7 +1,7 @@
 
 part of localbooru_api;
 
-// ignore: constant_identifier_names
+// ignore: non_constant_identifier_names
 final int INDEX_IMAGE_LIMIT = settingsDefaults["page_size"];
 
 class Booru {
@@ -9,12 +9,17 @@ class Booru {
     
     String path;
 
-    Future<Map> getRawInfo() async {
+    Future<Map<String, dynamic>> getRawInfo() async {
         final File file = File(p.join(path, "repoinfo.json"));
         final String fileinfo = await file.readAsString();
-        final Map json = jsonDecode(fileinfo);
+        final Map<String, dynamic> json = jsonDecode(fileinfo);
         return json;
     }
+    Future<Map<String, dynamic>> rebaseRaw() async {
+        return rebase(Map.from(await getRawInfo()));
+    }
+
+
 
     Future<BooruImage?> getImage(String id) async {
         final List files = (await getRawInfo())["files"];
@@ -39,6 +44,8 @@ class Booru {
         );
     }
 
+
+
     Future<List<BooruImage>> getImagesFromRange(List list, {required int from, required int to}) async {
         final List rangedList = list.getRange(from, to).toList();
         // debugPrint("rangedList: $rangedList");
@@ -49,7 +56,6 @@ class Booru {
         }
         return mappedList.reversed.toList();
     }
-
     Future<List<BooruImage>> getImagesFromIndex(List list, {int index = 0, int? size}) async {
         size ??= INDEX_IMAGE_LIMIT;
 
@@ -64,7 +70,6 @@ class Booru {
 
         return range;
     }
-
     Future<List<BooruImage>> getRecentImages() async => await getImagesFromIndex((await getRawInfo())["files"]);
 
     Future<List> _doTagFiltering(String tags) async {
@@ -78,7 +83,6 @@ class Booru {
 
         return filteredFiles;
     }
-
     Future<List<BooruImage>> searchByTags(String tags, {int index = 0, int? size}) async => await getImagesFromIndex(await _doTagFiltering(tags), index: index, size: size);
 
     Future<int> getIndexNumberLength(tags, {int? size}) async {
@@ -89,13 +93,11 @@ class Booru {
         return (list.length / size).ceil();
     }
 
-    // ignore: prefer_final_fields
-    Map<String, List<String>> _allTags = {
-        "tags": List<String>.empty(growable: true)
-    };
 
+
+    List<String> _allTags = List<String>.empty(growable: true);
     Future<List<String>> getAllTags() async {
-        if(_allTags["tags"]!.isEmpty) {
+        if(_allTags.isEmpty) {
             final List files = (await getRawInfo())["files"];
             List<String> allTags = List<String>.empty(growable: true);
             for (var file in files) {
@@ -105,10 +107,38 @@ class Booru {
                 }
             }
 
-            _allTags["tags"] = allTags;
+            _allTags = allTags;
         }
         
-        return _allTags["tags"]!;
+        return _allTags;
+    }
+
+
+
+    Future<String> getTagType(String tag) async {
+        final Map<String, List> allSpecificTags = Map.from((await getRawInfo())["specificTags"]);
+        return allSpecificTags.keys.firstWhere((type) => allSpecificTags[type]!.contains(tag), orElse: () => "generic");
+    }
+    Future<List<String>> getAllTagsFromType(String type) async {
+        final Map specificTags = Map.from((await getRawInfo())["specificTags"]);
+        if (type == "generic") {
+            final allTags = await getAllTags();
+            final allSpecificTags = specificTags.values.expand((i) => i).toList();
+            allTags.removeWhere((element) => allSpecificTags.contains(element));
+            return allTags;
+        }
+        return List<String>.from(specificTags[type] ?? []);
+    }
+    Future<Map<String, List<String>>> separateTagsByType(List<String> tags) async {
+        List<String> genericList = List.from(tags);
+        final Map<String, List> specificTags = Map.from((await getRawInfo())["specificTags"]);
+        final Map<String, List<String>> result = {};
+        for (final type in specificTags.keys) {
+            result[type] = List.from(tags.toSet().intersection(specificTags[type]!.toSet()));
+            genericList.removeWhere((element) => result[type]!.contains(element));
+        }
+        result["generic"] = genericList;
+        return result;
     }
 }
 

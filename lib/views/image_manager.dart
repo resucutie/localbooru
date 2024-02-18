@@ -26,6 +26,10 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     final _formKey = GlobalKey<FormState>();
 
     final tagController = TextEditingController();
+    final artistTagController = TextEditingController();
+    final characterTagController = TextEditingController();
+    final copyrightTagController = TextEditingController();
+    final speciesTagController = TextEditingController();
 
     bool isEditing = false;
     bool isGeneratingTags = false;
@@ -37,29 +41,131 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     void initState() {
         super.initState();
         isEditing = widget.image != null;
+
+        
         if(widget.image != null) {
             final image = widget.image!;
-            tagController.text = image.tags;
             loadedImage = image.path;
             if(image.sources != null) urlList = image.sources!;
+
+            final String tags = image.tags;
+            // final List<String> genericTags = [];
+            // final List<String> artistTags = [];
+            // final List<String> characterTags = [];
+            // final List<String> copyrightTags = [];
+            // final List<String> speciesTags = [];
+            getCurrentBooru().then((booru) async {
+                final separatedTags = await booru.separateTagsByType(tags.split(" "));
+                tagController.text = separatedTags["generic"]?.join(" ") ?? "";
+                artistTagController.text = separatedTags["artist"]?.join(" ") ?? "";
+                characterTagController.text = separatedTags["character"]?.join(" ") ?? "";
+                copyrightTagController.text = separatedTags["copyright"]?.join(" ") ?? "";
+                speciesTagController.text = separatedTags["species"]?.join(" ") ?? "";
+            });
+            // Future<void> grabTags() async {
+            //     getCurrentBooru().separateTagsByType(tags.split(" ")).then((value) {
+            //         tagController.text = value["generic"]?.join(" ") ?? "";
+            //         artistTagController.text = value["artist"]?.join(" ") ?? "";
+            //         characterTagController.text = value["character"]?.join(" ") ?? "";
+            //         copyrightTagController.text = value["copyright"]?.join(" ") ?? "";
+            //         speciesTagController.text = value["species"]?.join(" ") ?? "";
+            //     });
+            // }
+
+            // grabTags();
         }
     }
 
-    void _submit() {
-        addImage(
+    void _submit() async {
+        final List<String> genericTags = tagController.text.split(" ");
+        final List<String> artistTags = artistTagController.text.split(" ");
+        final List<String> characterTags = characterTagController.text.split(" ");
+        final List<String> copyrightTags = copyrightTagController.text.split(" ");
+        final List<String> speciesTags = speciesTagController.text.split(" ");
+        final allTags = <String>[
+            ...genericTags,
+            ...artistTags,
+            ...characterTags,
+            ...copyrightTags,
+            ...speciesTags,
+        ].where((e) => e.isNotEmpty).toList();
+
+        debugPrint(allTags.toString(), wrapWidth: 9999);
+
+        await addImage(
             imageFile: File(loadedImage),
-            tags: tagController.text,
+            tags: allTags.join(" "),
             sources: urlList,
             id: widget.image?.id
         );
-        context.pop();
-        if(!isEditing) context.push("/recent");
+        await addSpecificTags(artistTags, type: "artist");
+        await addSpecificTags(characterTags, type: "character");
+        await addSpecificTags(copyrightTags, type: "copyright");
+        await addSpecificTags(speciesTags, type: "species");
+
+        final Booru booru = await getCurrentBooru();
+        await writeSettings(booru.path, await booru.rebaseRaw());
+
+        if(context.mounted) {
+            context.pop();
+            if(!isEditing) context.push("/recent");
+        }
+
     }
 
     @override
     void dispose() {
         super.dispose();
         tagController.dispose();
+        artistTagController.dispose();
+        characterTagController.dispose();
+        copyrightTagController.dispose();
+        speciesTagController.dispose();
+    }
+
+    void fetchTags() async {
+        final prefs = await SharedPreferences.getInstance();
+        setState(() => isGeneratingTags = true);
+        autoTag(File(loadedImage)).then((tags) async {
+            final moreAccurateTags = filterAccurateResults(tags, prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"]);
+
+            final separatedTags = await (await getCurrentBooru()).separateTagsByType(moreAccurateTags.keys.toList());
+
+            if(separatedTags["generic"] != null) tagController.text = separatedTags["generic"]!.join(" ");
+            if(separatedTags["artist"] != null) artistTagController.text = separatedTags["artist"]!.join(" ");
+            if(separatedTags["character"] != null) characterTagController.text = separatedTags["character"]!.join(" ");
+            if(separatedTags["copyright"] != null) copyrightTagController.text = separatedTags["copyright"]!.join(" ");
+            if(separatedTags["species"] != null) speciesTagController.text = separatedTags["species"]!.join(" ");
+        }).catchError((error, stackTrace) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text('Could not obtain tag information, ${error.toString()}'),
+            ));
+            throw error;
+            // debugPrintStack(label: error.toString(), stackTrace: stackTrace);
+        }).whenComplete(() {
+            setState(() => isGeneratingTags = false);
+        });
+    }
+
+    String? validateTagTexts(String? value, String type) {
+        if(value == null || value.isNotEmpty) {
+            // check for overlaps
+            List hasOverlap = [false, ""];
+
+            if(type != "generic" && !hasOverlap[0]) hasOverlap = [tagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "generic"];
+            if(type != "artist" && !hasOverlap[0]) hasOverlap = [artistTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "artist"];
+            if(type != "character" && !hasOverlap[0]) hasOverlap = [characterTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "character"];
+            if(type != "copyright" && !hasOverlap[0]) hasOverlap = [copyrightTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "copyright"];
+            if(type != "species" && !hasOverlap[0]) hasOverlap = [speciesTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "species"];
+            
+            if(hasOverlap[0]) return "Overlapping tags exists with the ${hasOverlap[1]} field";
+        }
+
+        // check if it is empty
+        if([tagController, artistTagController, characterTagController, copyrightTagController, speciesTagController]
+            .every((controller) => controller.text.isEmpty)) return "Please insert a tag";
+
+        return null;
     }
 
     @override
@@ -92,35 +198,66 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                             },
                             currentValue: loadedImage,
                         ),
+                        Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                                const Header("Tags", padding: EdgeInsets.zero),
+                                TextButton(
+                                    onPressed: (loadedImage.isEmpty || isGeneratingTags) ? null : fetchTags, 
+                                    child: Wrap(
+                                        spacing: 8,
+                                        children: [
+                                            const Icon(CupertinoIcons.sparkles),
+                                            isGeneratingTags ? const Text("Generating...") : const Text("Generate tags")
+                                        ],
+                                    )
+                                )
+                            ],
+                        ),
                         TagField(
                             controller: tagController,
-                            decoration: InputDecoration(
-                                labelText: "Tags",
-                                suffixIcon: TextButton(
-                                    onPressed: (loadedImage.isEmpty || isGeneratingTags) ? null : () async {
-                                        final prefs = await SharedPreferences.getInstance();
-                                        setState(() => isGeneratingTags = true);
-                                        autoTag(File(loadedImage)).then((tags) {
-                                            final moreAccurateTags = filterAccurateResults(tags, prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"]);
-                                            tagController.text = moreAccurateTags.keys.join(" ");
-                                        }).catchError((error, stackTrace) {
-                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                                content: Text('Could not obtain tag information, ${error.toString()}'),
-                                            ));
-                                            throw error;
-                                            // debugPrintStack(label: error.toString(), stackTrace: stackTrace);
-                                        }).whenComplete(() {
-                                            setState(() => isGeneratingTags = false);
-                                        });
-                                    }, 
-                                    child: isGeneratingTags ? const Text("Generating...") : const Icon(CupertinoIcons.sparkles)
-                                )
+                            decoration: const InputDecoration(
+                                labelText: "General",
                             ),
-                            style: const TextStyle(color: Colors.blueAccent),
-                            validator: (value) {
-                                if (value == null || value.isEmpty) return 'Please enter tags';
-                                return null;
-                            },
+                            style: const TextStyle(color: SpecificTagsColors.generic),
+                            validator: (value) => validateTagTexts(value, "generic"),
+                        ),
+                        TagField(
+                            controller: artistTagController,
+                            decoration: const InputDecoration(
+                                labelText: "Artist(s)"
+                            ),
+                            type: "artist",
+                            validator: (value) => validateTagTexts(value, "artist"),
+                            style: const TextStyle(color: SpecificTagsColors.artist),
+                        ),
+                        TagField(
+                            controller: characterTagController,
+                            decoration: const InputDecoration(
+                                labelText: "Character(s)"
+                            ),
+                            type: "character",
+                            validator: (value) => validateTagTexts(value, "character"),
+                            style: const TextStyle(color: SpecificTagsColors.character),
+                        ),
+                        TagField(
+                            controller: copyrightTagController,
+                            decoration: const InputDecoration(
+                                labelText: "Copyright"
+                            ),
+                            type: "copyright",
+                            validator: (value) => validateTagTexts(value, "copyright"),
+                            style: const TextStyle(color: SpecificTagsColors.copyright),
+                        ),
+                        TagField(
+                            controller: speciesTagController,
+                            decoration: const InputDecoration(
+                                labelText: "Species"
+                            ),
+                            type: "species",
+                            validator: (value) => validateTagTexts(value, "species"),
+                            style: const TextStyle(color: SpecificTagsColors.species),
                         ),
                         const Header("Sources"),
                         ListStringTextInput(
@@ -197,12 +334,13 @@ class ImageUploadForm extends StatelessWidget {
 }
 
 class TagField extends StatefulWidget {
-    const TagField({super.key, this.controller,  this.decoration, this.validator, this.style});
+    const TagField({super.key, this.controller,  this.decoration, this.validator, this.style, this.type = "generic"});
 
     final TextEditingController? controller;
     final InputDecoration? decoration;
     final FormFieldValidator<String>? validator;
     final TextStyle? style;
+    final String type;
 
     @override
     State<TagField> createState() => _TagFieldState();
@@ -225,12 +363,12 @@ class _TagFieldState extends State<TagField> {
                     String tag = tagList.last;
 
                     Booru currentBooru = await getCurrentBooru();
-                    List<String> allTags = await currentBooru.getAllTags();
+                    List<String> allTags = await currentBooru.getAllTagsFromType(widget.type);
 
                     List<String> matches = List.from(allTags);
 
                     matches.retainWhere((s){
-                        return s.contains(tag) && !restOfList.contains(s);
+                        return s.contains(tag) && !restOfList.contains(s) && s != tag;
                     });
                     return matches.map((e) => restOfList.isEmpty ? e : "${restOfList.join(" ")} $e").toList();
                 }
@@ -246,10 +384,9 @@ class _TagFieldState extends State<TagField> {
                             child: ListView.builder(
                                 itemCount: options.length,
                                 itemBuilder: (context, index) {
-                                    final currentOption = options.toList()[index];
+                                    final currentOption = options.elementAt(index);
                                     return ListTile(
                                         title: Text(currentOption.split(" ").last),
-                                        autofocus: true,
                                         onTap: () => onSelected(currentOption),
                                         selected: highlightedIndex == index,
                                         selectedColor: widget.style?.color,
@@ -266,12 +403,16 @@ class _TagFieldState extends State<TagField> {
                     controller: textController,
                     focusNode: focusNode,
                     decoration: widget.decoration,
+                    keyboardType: TextInputType.text,
                     minLines: 1,
                     maxLines: 6,
-                    inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'[\n]')),],
+                    inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\n')),],
                     validator: widget.validator,
                     style: widget.style,
-                    onFieldSubmitted: (value) => onFieldSubmitted(),
+                    onFieldSubmitted: (value) {
+                        debugPrint(value);
+                        onFieldSubmitted();
+                    },
                 );
             },
         );

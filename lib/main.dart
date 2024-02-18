@@ -14,7 +14,8 @@ import 'package:localbooru/views/navigation/index.dart';
 import 'package:localbooru/views/navigation/tag_browse.dart';
 import 'package:localbooru/views/set_booru.dart';
 import 'package:localbooru/utils/platform_tools.dart';
-import 'package:localbooru/views/settings/booru_settings.dart';
+import 'package:localbooru/views/settings/booru_settings/index.dart';
+import 'package:localbooru/views/settings/booru_settings/tag_types.dart';
 import 'package:localbooru/views/settings/index.dart';
 import 'package:localbooru/views/settings/overall_settings.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -51,7 +52,7 @@ final _router = GoRouter(
                         ),
                         GoRoute(path: "search",
                             builder: (context, state) {
-                                final String tags = Uri.decodeFull(state.uri.queryParameters["tag"] ?? "");
+                                final String tags = state.uri.queryParameters["tag"] ?? "";
                                 final String? index = state.uri.queryParameters["index"];
                                 return BooruLoader(
                                     builder: (context, booru) => GalleryViewer(
@@ -136,7 +137,6 @@ final _router = GoRouter(
                     routes: [
                         GoRoute(path: ":id",
                             builder: (context, state) {
-                                debugPrint("mow");
                                 final String? id = state.pathParameters["id"];
                                 if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
                                 return BooruLoader( builder: (_, booru) => BooruImageLoader(
@@ -171,6 +171,13 @@ final _router = GoRouter(
                                             builder: (context, booru) => BooruSettings(prefs: prefs, booru: booru,),
                                         )
                                     ),
+                                    routes: [
+                                        GoRoute(path: "tag_types",
+                                            builder: (context, state) => BooruLoader(
+                                                builder: (context, booru) => TagTypesSettings(booru: booru),
+                                            ),
+                                    )
+                                    ]
                                 )
                             ]
                         )
@@ -206,6 +213,7 @@ void main() async {
 class App extends StatefulWidget {
     const App({super.key});
 
+    @override
     State<App> createState() => _AppState();
 }
 
@@ -249,7 +257,7 @@ class _AppState extends State<App> {
                     context: _router.routerDelegate.navigatorKey.currentContext!,
                     builder: (context) => UpdateAvaiableDialog(ver: ver),
                 );
-            };
+            }
         }).catchError((err) {debugPrint(err);});
     }
 
