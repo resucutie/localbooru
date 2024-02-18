@@ -342,7 +342,7 @@ class _TagFieldState extends State<TagField> {
                     List<String> matches = List.from(allTags);
 
                     matches.retainWhere((s){
-                        return s.contains(tag) && !restOfList.contains(s);
+                        return s.contains(tag) && !restOfList.contains(s) && s != tag;
                     });
                     return matches.map((e) => restOfList.isEmpty ? e : "${restOfList.join(" ")} $e").toList();
                 }
@@ -358,10 +358,9 @@ class _TagFieldState extends State<TagField> {
                             child: ListView.builder(
                                 itemCount: options.length,
                                 itemBuilder: (context, index) {
-                                    final currentOption = options.toList()[index];
+                                    final currentOption = options.elementAt(index);
                                     return ListTile(
                                         title: Text(currentOption.split(" ").last),
-                                        autofocus: true,
                                         onTap: () => onSelected(currentOption),
                                         selected: highlightedIndex == index,
                                         selectedColor: widget.style?.color,
@@ -378,12 +377,16 @@ class _TagFieldState extends State<TagField> {
                     controller: textController,
                     focusNode: focusNode,
                     decoration: widget.decoration,
+                    keyboardType: TextInputType.text,
                     minLines: 1,
                     maxLines: 6,
-                    inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'[\n]')),],
+                    inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\n')),],
                     validator: widget.validator,
                     style: widget.style,
-                    onFieldSubmitted: (value) => onFieldSubmitted(),
+                    onFieldSubmitted: (value) {
+                        debugPrint(value);
+                        onFieldSubmitted();
+                    },
                 );
             },
         );
