@@ -14,7 +14,8 @@ import 'package:localbooru/views/navigation/index.dart';
 import 'package:localbooru/views/navigation/tag_browse.dart';
 import 'package:localbooru/views/set_booru.dart';
 import 'package:localbooru/utils/platform_tools.dart';
-import 'package:localbooru/views/settings/booru_settings.dart';
+import 'package:localbooru/views/settings/booru_settings/index.dart';
+import 'package:localbooru/views/settings/booru_settings/tag_types.dart';
 import 'package:localbooru/views/settings/index.dart';
 import 'package:localbooru/views/settings/overall_settings.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -170,6 +171,13 @@ final _router = GoRouter(
                                             builder: (context, booru) => BooruSettings(prefs: prefs, booru: booru,),
                                         )
                                     ),
+                                    routes: [
+                                        GoRoute(path: "tag_types",
+                                            builder: (context, state) => BooruLoader(
+                                                builder: (context, booru) => TagTypesSettings(booru: booru),
+                                            ),
+                                    )
+                                    ]
                                 )
                             ]
                         )

@@ -24,7 +24,7 @@ final Map<String, dynamic> defaultFileInfoJson = {
             "fan_character"
         ],
         "copyright": [ // basic copyright tags
-            "nintendo"
+            "nintendo",
             "pokemon",
             "pokemon_(game)",
             "animal_crossing",

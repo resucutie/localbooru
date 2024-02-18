@@ -44,6 +44,16 @@ Future<BooruImage> addImage({required File imageFile,
     return (await booru.getImage(id))!;
 }
 
+Future<void> writeSpecificTags(Map<String, List<String>> specificTags) async {
+    final Booru booru = await getCurrentBooru();
+
+    // add to json
+    var raw = await booru.getRawInfo();
+    raw["specificTags"] = specificTags;
+
+    await writeSettings(booru.path, raw);
+}
+
 Future<void> addSpecificTags(List<String> tags, {required String type}) async {
     final Booru booru = await getCurrentBooru();
 
@@ -56,10 +66,9 @@ Future<void> addSpecificTags(List<String> tags, {required String type}) async {
         if(!specificTags.contains(tag)) specificTags.add(tag);
     }
 
-
     raw["specificTags"][type] = specificTags;
 
-    await writeSettings(booru.path, raw);
+    await writeSpecificTags(raw["specificTags"]);
 }
 
 Map<String, dynamic> rebase(Map<String, dynamic> raw) {

@@ -117,6 +117,10 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     void dispose() {
         super.dispose();
         tagController.dispose();
+        artistTagController.dispose();
+        characterTagController.dispose();
+        copyrightTagController.dispose();
+        speciesTagController.dispose();
     }
 
     void fetchTags() async {
