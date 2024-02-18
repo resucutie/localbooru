@@ -1,14 +1,16 @@
 # LocalBooru
 Your personal booru collection
 
-This is a cross platform local booru collection that exclusively works on your local storage, without selfhosting. Will require importing
+This is a cross platform local booru collection that exclusively works on your local storage, without selfhosting.
 
 ## Targetted platforms
-- Android (F-droid)
+- Android
 - Linux
 - Windows
 - macOS
-- iOS (Sideloading) (Not avaiable as of now)
+
+### Planned platforms
+- iOS (Sideloading)
 
 ## Install
 ### Windows
@@ -24,16 +26,14 @@ There are prebuilt .deb and .rpm packages over at [Releases](https://github.com/
 ### Android
 Download `localbooru-android.apk` over at [Releases](https://github.com/resucutie/localbooru/releases/latest) and install it by opening the file
 
+You can use [Obtanium](https://github.com/ImranR98/Obtainium) if you want an update manager
+
 
 ## FAQ
-### Why the copy button is only avaiable on desktop?
-No. The clipboard manager that we (a.k.a. the only dev here) use, [pasteboard](https://pub.dev/packages/pasteboard), cannot copy images on mobile devices, only on desktop ones. If anyone has any replacement for it that can actually copy images (we are looking at you [super_clipboard](https://pub.dev/packages/super_clipboard)) for at least any of the mobile platforms we will happily include. For now mobile users are limited to opening and sharing files.  
-As the "hotfix" solution for Android users, you can use [an share to clipboard app](https://f-droid.org/en/packages/com.kpstv.xclipper/)
-
 ### How does the versioning work?
 For the number, the first number is fixed to "1" unless the whole program gets rewritten. The second number is the major version, reserved for when new features come out, and the third is the minor, reserved for bug fixes.
 
-For the names, the versions are named based on any artist's name that we deem enough to homenage. For bug fix versions, the name won't be updated  
+For the names, the versions are named based on any artist's name that we deem good enough to homenage. For bug fix versions, the name won't be updated  
 Some of the parameters that we choose to homenage are:
 - Good or outstanding art style (always try to be better)
 - Makes inovating and constructive art
@@ -65,7 +65,7 @@ Not so easily. The main issue is with adding tags, as it fetches a website to do
 - [x] Organize alphabetically the tag list
 - [x] Auto tag generation
 - [x] Update checker for the app
-- [ ] Tag classification (separate by author, character...)
+- [x] Tag classification (separate by author, character...)
 - [ ] Auto-import from other booru websites (and Twitter)
 - [ ] Auto import from local image collections
 - [x] Tag suggestion
