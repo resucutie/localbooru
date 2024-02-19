@@ -174,9 +174,8 @@ void main() async {
 
     if(isDestkop()) {
         doWhenWindowReady(() {
-            const initialSize = Size(420, 260);
-            appWindow.minSize = initialSize;
             appWindow.size = const Size(1280, 720);
+            appWindow.minSize = const Size(420, 260);
             appWindow.alignment = Alignment.center;
             appWindow.show();
         });

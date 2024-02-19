@@ -32,9 +32,12 @@ class SilverRepoGrid extends StatelessWidget {
                 delegate: SliverChildListDelegate(images.map((image) {
                     return Padding(
                         padding: const EdgeInsets.all(5.0),
-                        child: GestureDetector(
-                            onTap: () {if(onPressed != null) onPressed!(image);},
-                            child: Image.file(image.getImage(), fit: BoxFit.cover)
+                        child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: GestureDetector(
+                                onTap: () {if(onPressed != null) onPressed!(image);},
+                                child: Image.file(image.getImage(), fit: BoxFit.cover)
+                            ),
                         ),
                     );
                 }).toList()),

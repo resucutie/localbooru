@@ -58,23 +58,28 @@ class ImageViewDisplay extends StatelessWidget {
     Widget build(BuildContext context) {
         return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Listener(
-                child: GestureDetector(
-                    onTap: () => {
-                        context.push("/dialogs/zoom_image/${image.id}")
-                    },
-                    child: Image.file(image.getImage(), fit: BoxFit.contain),
-                ),
-                onPointerDown: (PointerDownEvent event) async {
-                    if(event.kind != PointerDeviceKind.mouse) return;
-                    if(event.buttons == kSecondaryMouseButton) {
-                        await showMenu(
-                            context: context,
-                            position: RelativeRect.fromSize(event.position & const Size(48.0, 48.0), (Overlay.of(context).context.findRenderObject() as RenderBox).size),
-                            items: imageShareItems(image)
-                        );
-                    }
-                },
+            child: Center(
+              child: Listener(
+                  child: MouseRegion(
+                      cursor: SystemMouseCursors.zoomIn,
+                      child: GestureDetector(
+                          onTap: () => {
+                              context.push("/dialogs/zoom_image/${image.id}")
+                          },
+                          child: Image.file(image.getImage(), fit: BoxFit.contain),
+                      ),
+                  ),
+                  onPointerDown: (PointerDownEvent event) async {
+                      if(event.kind != PointerDeviceKind.mouse) return;
+                      if(event.buttons == kSecondaryMouseButton) {
+                          await showMenu(
+                              context: context,
+                              position: RelativeRect.fromSize(event.position & const Size(48.0, 48.0), (Overlay.of(context).context.findRenderObject() as RenderBox).size),
+                              items: imageShareItems(image)
+                          );
+                      }
+                  },
+              ),
             ),
         );
     }
@@ -135,7 +140,7 @@ class ImageViewProprieties extends StatelessWidget {
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                    const Header("Tags"),
+                    const Header("Tags", padding: EdgeInsets.zero),
                     FutureBuilder(
                         future: getCurrentBooru().then((booru) => booru.separateTagsByType(image.tags.split(" "))),
                         builder: (context, snapshot) {
@@ -145,30 +150,30 @@ class ImageViewProprieties extends StatelessWidget {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                         if (tags["artist"] != null && tags["artist"]!.isNotEmpty) ...[
-                                            const SmallThemedHeader("Artist", padding: EdgeInsets.zero,),
+                                            const SmallHeader("Artist", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["artist"]!..sort()).map((e) {
                                                 return Tag(e, color: SpecificTagsColors.artist,);
                                             }).toList())
                                         ],
                                         if (tags["character"] != null && tags["character"]!.isNotEmpty) ...[
-                                            const SmallThemedHeader("Character", padding: EdgeInsets.zero,),
+                                            const SmallHeader("Character", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["character"]!..sort()).map((e) {
                                                 return Tag(e, color: SpecificTagsColors.character,);
                                             }).toList())
                                         ],
                                         if (tags["copyright"] != null && tags["copyright"]!.isNotEmpty) ...[
-                                            const SmallThemedHeader("Copyright", padding: EdgeInsets.zero,),
+                                            const SmallHeader("Copyright", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["copyright"]!..sort()).map((e) {
                                                 return Tag(e, color: SpecificTagsColors.copyright,);
                                             }).toList())
                                         ],
                                         if (tags["species"] != null && tags["species"]!.isNotEmpty) ...[
-                                            const SmallThemedHeader("Species", padding: EdgeInsets.zero,),
+                                            const SmallHeader("Species", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["species"]!..sort()).map((e) {
                                                 return Tag(e, color: SpecificTagsColors.species,);
                                             }).toList())
                                         ],
-                                        const SmallThemedHeader("Generic", padding: EdgeInsets.zero,),
+                                        const SmallHeader("Generic", padding: EdgeInsets.only(top: 4)),
                                         Wrap(children: List.from(tags["generic"]!..sort()).map((e) {
                                             return Tag(e);
                                         }).toList())

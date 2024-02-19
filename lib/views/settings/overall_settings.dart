@@ -60,7 +60,7 @@ class _OverallSettingsState extends State<OverallSettings> {
     Widget build(BuildContext context) {
         return ListView(
             children: [
-                const SmallThemedHeader("Browsing"),
+                const SmallHeader("Browsing"),
                 ListTile(
                     title: Row(
                         children: [
@@ -134,7 +134,7 @@ class _OverallSettingsState extends State<OverallSettings> {
                         ],
                     )
                 ),
-                const SmallThemedHeader("Tags"),
+                const SmallHeader("Tags"),
                 ListTile(
                     title: Row(
                         children: [
@@ -173,7 +173,7 @@ class _OverallSettingsState extends State<OverallSettings> {
                         ],
                     )
                 ),
-                const SmallThemedHeader("Appearence"),
+                const SmallHeader("Appearence"),
                 ListTile(
                     title: const Text("Theme"),
                     subtitle: Text(_theme.replaceFirstMapped(_theme[0], (match) => _theme[0].toUpperCase())),
