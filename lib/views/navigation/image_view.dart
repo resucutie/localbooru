@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:math' as m;
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -179,8 +181,9 @@ class ImageViewProprieties extends StatelessWidget {
                                         }).toList())
                                     ],
                                 );
+                            } else {
+                                return const CircularProgressIndicator();
                             }
-                            return const SizedBox(height: 0);
                         }
                     ),
 
@@ -196,7 +199,32 @@ class ImageViewProprieties extends StatelessWidget {
                     ),
 
                     const Header("Other"),
-                    SelectableText("Path: ${image.path}")
+                    FutureBuilder<Map>(
+                        future: (() async => {
+                            "dimensions": await decodeImageFromList(await File(image.path).readAsBytes()),
+                            "size": await File(image.path).length()
+                        })(),
+                        builder: (context, snapshot) {
+                            if(snapshot.hasData) {
+                                final bytes = snapshot.data!["size"]!;
+                                const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+                                var i = (m.log(bytes) / m.log(1000)).floor();
+                                final formattedSize = '${(bytes / m.pow(1000, i)).toStringAsFixed(2)} ${suffixes[i]}';
+
+                                return SelectableText.rich(
+                                    TextSpan(
+                                        text: "Path: ${image.path}\n",
+                                        children: [
+                                            TextSpan(text: "Dimensions: ${snapshot.data!["dimensions"]!.width}x${snapshot.data!["dimensions"]!.height}\n"),
+                                            TextSpan(text: "Size: $formattedSize"),
+                                        ]
+                                    )
+                                );
+                            } else {
+                                return const CircularProgressIndicator();
+                            }
+                        },
+                    )
                 ],
             ),
         );
