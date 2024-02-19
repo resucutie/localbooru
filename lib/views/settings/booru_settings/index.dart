@@ -31,6 +31,19 @@ class _BooruSettingsState extends State<BooruSettings> {
                 const Divider(),
                 const SmallThemedHeader("Other"),
                 ListTile(
+                    title: const Text("Rebase"),
+                    subtitle: const Text("Reconstruct certain elements from the booru. Useful if you have some weird issue with it"),
+                    leading: const Icon(Icons.refresh),
+                    onTap: () async {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Rebasing...")));
+                        await writeSettings(widget.booru.path, await widget.booru.rebaseRaw());
+                        if (context.mounted) {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();    
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Rebased")));
+                        }
+                    },
+                ),
+                ListTile(
                     title: const Text("Syncing"),
                     subtitle: const Text("This program does not offer syncing capabilities out of the box, but if you want to sync your computer storage, we recommend using Syncthing"),
                     leading: SvgPicture.asset("assets/syncthing.svg", width: 24, height: 24,),
