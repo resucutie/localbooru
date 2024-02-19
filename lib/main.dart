@@ -224,7 +224,11 @@ class _AppState extends State<App> {
         super.initState();
         checkForUpdates().then((ver) async {
             await Future.delayed(const Duration(seconds: 1));
-            if(!(await ver.isCurrentLatest()) && _router.routerDelegate.navigatorKey.currentContext != null) {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            if( !(await ver.isCurrentLatest()) &&
+                (prefs.getBool("update") ?? settingsDefaults["update"]) &&
+                _router.routerDelegate.navigatorKey.currentContext != null
+            ) {
                 showDialog(
                     context: _router.routerDelegate.navigatorKey.currentContext!,
                     builder: (context) => UpdateAvaiableDialog(ver: ver),

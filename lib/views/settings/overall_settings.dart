@@ -22,6 +22,7 @@ class _OverallSettingsState extends State<OverallSettings> {
     double _gridSizeSliderValue = settingsDefaults["grid_size"].toDouble();
     double _autotagAccuracy = settingsDefaults["autotag_accuracy"];
     bool _monetTheme = settingsDefaults["monet"];
+    bool _update = settingsDefaults["update"];
     String _theme = settingsDefaults["theme"];
 
     bool isSettingModified(String setting) {
@@ -41,6 +42,7 @@ class _OverallSettingsState extends State<OverallSettings> {
         _gridSizeSliderValue = (widget.prefs.getInt("grid_size") ?? settingsDefaults["grid_size"]).toDouble();
         _pageSizeController.text = (widget.prefs.getInt("page_size") ?? settingsDefaults["page_size"]).toString();
         _monetTheme = widget.prefs.getBool("monet") ?? settingsDefaults["monet"];
+        _update = widget.prefs.getBool("update") ?? settingsDefaults["update"];
         _autotagAccuracy = widget.prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"];
         _theme = widget.prefs.getString("theme") ?? settingsDefaults["theme"];
     }
@@ -189,6 +191,17 @@ class _OverallSettingsState extends State<OverallSettings> {
                         widget.prefs.setBool("monet", value);
                         themeListener.update();
                         setState(() => _monetTheme = value);
+                    }
+                ),
+                const SmallHeader("Other"),
+                SwitchListTile(
+                    title: const Text("Prompt for updates"),
+                    secondary: const Icon(Icons.cached),
+                    subtitle: const Text("If the program it outdated, it'll prompt for an update"),
+                    value: _update,
+                    onChanged: (value) {
+                        widget.prefs.setBool("update", value);
+                        setState(() => _update = value);
                     }
                 ),
             ],

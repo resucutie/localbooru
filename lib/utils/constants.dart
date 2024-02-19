@@ -9,6 +9,7 @@ final Map<String, dynamic> settingsDefaults = {
     "monet": Platform.isAndroid ? true : false,
     "theme": "system",
     "autotag_accuracy": 0.15,
+    "update": true,
 };
 
 final Map<String, dynamic> defaultFileInfoJson = {
