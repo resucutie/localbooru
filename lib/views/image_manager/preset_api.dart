@@ -32,24 +32,47 @@ class PresetImage {
 Future<PresetImage> urlToPreset(String url) {
     Uri uri = Uri.parse(url);
     if(uri.host.endsWith("donmai.us")) return danbooruToPreset(url);
+    if(uri.host.endsWith("e621.net") || uri.host.endsWith("e926.net")) return e621ToPreset(url);
     throw "Unknown URL";
 }
 
 Future<PresetImage> danbooruToPreset(String url) async {
     Uri uri = Uri.parse(url);
-    final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
+    Uri fetchUrl = Uri.parse("${[uri.origin, uri.path].join("/")}.json");
+    final res = await http.get(fetchUrl);
     final bodyRes = jsonDecode(res.body);
 
     final downloadedFileInfo = await cache.downloadFile(bodyRes["file_url"]);
 
     return PresetImage(
         image: downloadedFileInfo.file,
-        sources: [bodyRes["source"], url],
+        sources: [bodyRes["source"], [uri.origin, uri.path].join("")],
         tags: {
             "generic": bodyRes["tag_string_general"].split(" "),
             "artist": bodyRes["tag_string_artist"].split(" "),
             "character": bodyRes["tag_string_character"].split(" "),
             "copyright": bodyRes["tag_string_copyright"].split(" "),
+        }
+    );
+}
+
+Future<PresetImage> e621ToPreset(String url) async {
+    Uri uri = Uri.parse(url);
+    Uri fetchUrl = Uri.parse("${[uri.origin, uri.path].join("/")}.json");
+    final res = await http.get(fetchUrl);
+    final postRes = jsonDecode(res.body)["post"];
+
+    final downloadedFileInfo = await cache.downloadFile(postRes["file"]["url"]);
+
+    return PresetImage(
+        image: downloadedFileInfo.file,
+        sources: [...(postRes["sources"] ?? []), [uri.origin, uri.path].join("")],
+        tags: {
+            "generic": List<String>.from(postRes["tags"]["general"]),
+            "artist": List<String>.from(postRes["tags"]["artist"]),
+            "character": List<String>.from(postRes["tags"]["character"]),
+            "copyright": List<String>.from(postRes["tags"]["copyright"]),
+            "species": List<String>.from(postRes["tags"]["species"]),
         }
     );
 }
