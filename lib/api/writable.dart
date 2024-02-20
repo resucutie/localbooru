@@ -68,7 +68,11 @@ Future<void> addSpecificTags(List<String> tags, {required String type}) async {
 
     raw["specificTags"][type] = specificTags;
 
-    await writeSpecificTags(raw["specificTags"]);
+    Map<String, List<String>> iLoveDartsTypeSystem = {};
+    for(String key in raw["specificTags"].keys) {
+        iLoveDartsTypeSystem[key] = List<String>.from(raw["specificTags"][key]);
+    }
+    await writeSpecificTags(iLoveDartsTypeSystem);
 }
 
 Map<String, dynamic> rebase(Map<String, dynamic> raw) {
