@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/views/image_manager.dart';
+import 'package:localbooru/views/image_manager/index.dart';
 
 class TagTypesSettings extends StatefulWidget {
     const TagTypesSettings({super.key, required this.booru});

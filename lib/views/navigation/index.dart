@@ -72,7 +72,7 @@ class BrowseScreen extends StatelessWidget {
                             onPressed: () {
                                 if(isOnView()) {
                                     final String id = uri.pathSegments[1];
-                                    context.push("/manage_image/$id");
+                                    context.push("/manage_image/internal/$id");
                                 } else {
                                     context.push("/manage_image");
                                 }
@@ -89,7 +89,8 @@ class BrowseScreen extends StatelessWidget {
                         })
                     ],
                 ),
-            ) ,
+            ),
+            floatingActionButton: FloatingActionButton(onPressed: () => context.pushNamed("download_url", pathParameters: {"url": "https://danbooru.donmai.us/posts/7242366"})),
             drawer: Drawer(
                 child: Builder(
                     builder: (context) => ListView(

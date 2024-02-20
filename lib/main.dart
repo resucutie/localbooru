@@ -7,7 +7,8 @@ import 'package:localbooru/utils/dialog_page.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
-import 'package:localbooru/views/image_manager.dart';
+import 'package:localbooru/views/image_manager/preset_api.dart';
+import 'package:localbooru/views/image_manager/index.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
 import 'package:localbooru/views/navigation/index.dart';
@@ -108,7 +109,7 @@ final _router = GoRouter(
                         return const ImageManagerView();
                     },
                     routes: [
-                        GoRoute(path: ":id",
+                        GoRoute(path: "internal/:id",
                             builder: (context, state) {
                                 final String? id = state.pathParameters["id"];
                                 if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
@@ -116,11 +117,39 @@ final _router = GoRouter(
                                     booru: booru,
                                     id: id,
                                     builder: (context, image) {
-                                        return ImageManagerView(
-                                            image: image,
+                                        return FutureBuilder(
+                                            future: PresetImage.fromExistingImage(image),
+                                            builder: (context, snapshot) {
+                                                if(snapshot.hasData) {
+                                                    return ImageManagerView(preset: snapshot.data);
+                                                }
+                                                return const Center(child: CircularProgressIndicator());
+                                            },
                                         );
                                     }
                                 ));
+                            },
+                        ),
+                        GoRoute(path: "url/:url", name:"download_url",
+                            builder: (context, state) {
+                                final String? url = state.pathParameters["url"];
+                                if(url == null) return const Text("Invalid route");
+                                return FutureBuilder(
+                                    future: urlToPreset(url),
+                                    builder: (context, snapshot) {
+                                        if(snapshot.hasData) {
+                                            return ImageManagerView(preset: snapshot.data);
+                                        }
+                                        return const Scaffold(
+                                            body: Column(
+                                                children: [
+                                                    Text("Loading URL..."),
+                                                    Center(child: CircularProgressIndicator())
+                                                ],
+                                            ),
+                                        );
+                                    },
+                                );
                             },
                         )
                     ]
