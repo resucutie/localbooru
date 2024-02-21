@@ -72,7 +72,7 @@ Not so easily. The main issue is with adding tags, as it fetches a website to do
     - [x] e621/e926
     - [x] Gelbooru 0.2.5
     - [x] Gelbooru 0.2
-    - [ ] Twitter (web scrapping because my balls i wont get an api key)
+    - [x] Twitter (we're using fxtwitter babeee)
     - [ ] Pixiv (cAnT bElIeVe I'lL hAvE tO cReAtE aN aPi KeY)
     - [ ] Gelbooru 0.1 maybe (apparently rule34.us is the only popular website that uses 0.1)
 - [ ] Auto import from local image collections

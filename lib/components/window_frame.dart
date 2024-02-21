@@ -7,15 +7,15 @@ import 'package:titlebar_buttons/titlebar_buttons.dart';
 
 class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double height;
-  final AppBar appBar;
+  final AppBar? appBar;
   final String title;
   final Color? backgroundColor;
 
-  const WindowFrameAppBar({super.key, this.height = 32.0, required this.appBar, this.title = "LocalBooru", this.backgroundColor});
+  const WindowFrameAppBar({super.key, this.height = 32.0, this.appBar, this.title = "LocalBooru", this.backgroundColor});
 
   @override
   Widget build(BuildContext context) {
-    if (!isDestkop()) return appBar;
+    if (!isDestkop()) return appBar ?? const SizedBox(height: 0);
     return Column(
         children: [
             WindowTitleBarBox(
@@ -37,7 +37,7 @@ class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                 )
             ),
-            appBar,
+            if(appBar != null) appBar!,
         ],
     );
   }

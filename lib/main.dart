@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -21,8 +23,8 @@ import 'package:localbooru/views/settings/index.dart';
 import 'package:localbooru/views/settings/overall_settings.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:localbooru/views/permissions.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<bool> hasExternalStoragePerms() async{
@@ -37,6 +39,10 @@ final _router = GoRouter(
             redirect: (context, GoRouterState state) async {
                 final hasPerms = await hasExternalStoragePerms();
                 final prefs = await SharedPreferences.getInstance();
+
+                final shareIntent = await ReceiveSharingIntent.getInitialMedia();
+
+                debugPrint(shareIntent.toString());
                 
                 if (!hasPerms) return "/permissions";
                 if (prefs.getString("booruPath") == null) return "/setbooru";
@@ -219,6 +225,7 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
+    late StreamSubscription _intentSub;
 
     // This widget is the root of your application.
     @override
@@ -251,6 +258,8 @@ class _AppState extends State<App> {
     @override
     void initState() {
         super.initState();
+
+        //updates
         checkForUpdates().then((ver) async {
             await Future.delayed(const Duration(seconds: 1));
             SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -264,6 +273,33 @@ class _AppState extends State<App> {
                 );
             }
         }).catchError((err) {debugPrint(err);});
+
+        Future<void> onShare(List<SharedMediaFile> value) async {
+            final String text = value[0].toMap()["path"];
+            final uri = Uri.tryParse(text);
+            if(uri == null) return;
+            await Future.delayed(const Duration(milliseconds: 500));
+            final routerContext = _router.routerDelegate.navigatorKey.currentContext;
+            if(routerContext != null && routerContext.mounted) routerContext.pushNamed("download_url", pathParameters: {"url": uri.toString()});
+        }
+
+        //shared media
+        // Listen to media sharing coming from outside the app while the app is in the memory.
+        _intentSub = ReceiveSharingIntent.getMediaStream().listen(onShare, onError: (err) {
+            debugPrint("getIntentDataStream error: $err");
+        });
+
+        // Get the media sharing coming from outside the app while the app is closed.
+        ReceiveSharingIntent.getInitialMedia().then((value) async {
+            if(value.isNotEmpty) await onShare(value);
+            ReceiveSharingIntent.reset();
+        });
+    }
+
+    @override
+    void dispose() {
+        _intentSub.cancel();
+        super.dispose();
     }
 
     final Color _brandColor = Colors.deepPurple;

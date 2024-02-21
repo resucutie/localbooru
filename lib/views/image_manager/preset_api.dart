@@ -30,19 +30,21 @@ class PresetImage {
     }
 }
 
-Future<PresetImage> urlToPreset(String url) {
+Future<PresetImage> urlToPreset(String url) async {
     Uri uri = Uri.parse(url);
+    
+    if(await File(url).exists()) return PresetImage(image: File(url));
     if( uri.host.endsWith("behoimi.org") || // literally the only site running danbooru 1 on the planet
         uri.host.endsWith("konachan.com") || uri.host.endsWith("yande.re") // moebooru
-    ) return danbooru1ToPreset(url);
-    if(uri.host.endsWith("donmai.us")) return danbooru2ToPreset(url);
-    if(uri.host.endsWith("e621.net") || uri.host.endsWith("e926.net")) return e621ToPreset(url);
+    ) return await danbooru1ToPreset(url);
+    if(uri.host.endsWith("donmai.us")) return await danbooru2ToPreset(url);
+    if(uri.host.endsWith("e621.net") || uri.host.endsWith("e926.net")) return await e621ToPreset(url);
     if( uri.host.endsWith("gelbooru.com") || //0.2.5
         uri.host.endsWith("safebooru.org") || uri.host.endsWith("rule34.xxx") || uri.host.endsWith("xbooru.com") // 0.2.0
-    ) return gelbooruToPreset(url);
+    ) return await gelbooruToPreset(url);
     if( uri.host== "twitter.com" || uri.host == "x.com" ||
         uri.host.endsWith("fixupx.com") || uri.host.endsWith("fivx.com")
-    ) return twitterToPreset(url);
+    ) return await twitterToPreset(url);
     throw "Unknown URL";
 }
 

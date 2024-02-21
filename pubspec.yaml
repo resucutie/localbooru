@@ -54,6 +54,7 @@ dependencies:
   flutter_svg: ^1.1.6
   flutter_cache_manager: ^3.3.1
   html: ^0.15.4
+  receive_sharing_intent: ^1.6.7
 
 dev_dependencies:
   flutter_test:
