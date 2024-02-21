@@ -88,11 +88,14 @@ Map<String, dynamic> rebase(Map<String, dynamic> raw) {
     raw["files"] = files;
 
     // check specific tags
-    if(raw["specificTags"] == null) raw["specificTags"] = defaultFileInfoJson["specificTags"];
-    for (final type in raw["specificTags"].keys) {
-        List<String> contents = List.from(raw["specificTags"][type]);
-        contents = contents.where((e) => e.isNotEmpty).toList();
-        raw["specificTags"][type] = contents;
+    if(raw["specificTags"] == null) {
+        raw["specificTags"] = defaultFileInfoJson["specificTags"];
+    } else {
+        for (final type in raw["specificTags"].keys) {
+            List<String> contents = List.from(raw["specificTags"][type]);
+            contents = contents.where((e) => e.isNotEmpty).toList();
+            raw["specificTags"][type] = contents;
+        }
     }
     debugPrint(raw["specificTags"].toString());
 

@@ -117,6 +117,7 @@ class BrowseScreen extends StatelessWidget {
                                 onTap: () {
                                     TextEditingController controller = TextEditingController();
                                     void importFromService() {
+                                        Scaffold.of(context).closeDrawer();
                                         context.pushNamed("download_url", pathParameters: {"url": controller.text});
                                         Navigator.of(context).pop();
                                     }

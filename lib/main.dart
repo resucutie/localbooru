@@ -9,6 +9,7 @@ import 'package:localbooru/utils/dialog_page.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
+import 'package:localbooru/views/image_manager/loading_screen.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:localbooru/views/image_manager/index.dart';
 import 'package:localbooru/views/navigation/home.dart';
@@ -39,10 +40,6 @@ final _router = GoRouter(
             redirect: (context, GoRouterState state) async {
                 final hasPerms = await hasExternalStoragePerms();
                 final prefs = await SharedPreferences.getInstance();
-
-                final shareIntent = await ReceiveSharingIntent.getInitialMedia();
-
-                debugPrint(shareIntent.toString());
                 
                 if (!hasPerms) return "/permissions";
                 if (prefs.getString("booruPath") == null) return "/setbooru";
@@ -141,19 +138,22 @@ final _router = GoRouter(
                                 final String? url = state.pathParameters["url"];
                                 if(url == null) return const Text("Invalid route");
                                 return FutureBuilder(
-                                    future: urlToPreset(url),
+                                    future: PresetImage.urlToPreset(url),
                                     builder: (context, snapshot) {
                                         if(snapshot.hasData) {
                                             return ImageManagerView(preset: snapshot.data);
                                         }
-                                        return const Scaffold(
-                                            body: Column(
-                                                children: [
-                                                    Text("Loading URL..."),
-                                                    Center(child: CircularProgressIndicator())
-                                                ],
-                                            ),
-                                        );
+                                        if(snapshot.hasError) {
+                                            if(snapshot.error.toString() == "Unknown Service") {
+                                                Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                                                    context.pop();
+                                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid URL inserted")));
+                                                });
+                                            } else {
+                                                throw snapshot.error!;
+                                            }
+                                        }
+                                        return const ImageManagerLoadingScreen();
                                     },
                                 );
                             },
@@ -274,6 +274,7 @@ class _AppState extends State<App> {
             }
         }).catchError((err) {debugPrint(err);});
 
+
         Future<void> onShare(List<SharedMediaFile> value) async {
             final String text = value[0].toMap()["path"];
             final uri = Uri.tryParse(text);
@@ -283,17 +284,19 @@ class _AppState extends State<App> {
             if(routerContext != null && routerContext.mounted) routerContext.pushNamed("download_url", pathParameters: {"url": uri.toString()});
         }
 
-        //shared media
-        // Listen to media sharing coming from outside the app while the app is in the memory.
-        _intentSub = ReceiveSharingIntent.getMediaStream().listen(onShare, onError: (err) {
-            debugPrint("getIntentDataStream error: $err");
-        });
+        if(isMobile()) {
+            //shared media
+            // Listen to media sharing coming from outside the app while the app is in the memory.
+            _intentSub = ReceiveSharingIntent.getMediaStream().listen(onShare, onError: (err) {
+                debugPrint("getIntentDataStream error: $err");
+            });
 
-        // Get the media sharing coming from outside the app while the app is closed.
-        ReceiveSharingIntent.getInitialMedia().then((value) async {
-            if(value.isNotEmpty) await onShare(value);
-            ReceiveSharingIntent.reset();
-        });
+            // Get the media sharing coming from outside the app while the app is closed.
+            ReceiveSharingIntent.getInitialMedia().then((value) async {
+                if(value.isNotEmpty) await onShare(value);
+                ReceiveSharingIntent.reset();
+            });
+        }
     }
 
     @override

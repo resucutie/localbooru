@@ -41,7 +41,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     @override
     void initState() {
         super.initState();
-        isEditing = widget.preset != null;
+        isEditing = widget.preset?.replaceID != null;
 
         
         if(widget.preset != null) {
