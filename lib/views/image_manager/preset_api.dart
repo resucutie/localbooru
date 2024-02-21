@@ -40,7 +40,7 @@ Future<PresetImage> urlToPreset(String url) {
     if( uri.host.endsWith("gelbooru.com") || //0.2.5
         uri.host.endsWith("safebooru.org") || uri.host.endsWith("rule34.xxx") || uri.host.endsWith("xbooru.com") // 0.2.0
     ) return gelbooruToPreset(url);
-    if( uri.host.endsWith("twitter.com") || uri.host == "http://x.com" || uri.host == "https://x.com" ||
+    if( uri.host== "twitter.com" || uri.host == "x.com" ||
         uri.host.endsWith("fixupx.com") || uri.host.endsWith("fivx.com")
     ) return twitterToPreset(url);
     throw "Unknown URL";
@@ -210,7 +210,7 @@ Future<PresetImage> twitterToPreset(String url) async {
         image: downloadedFileInfo.file,
         sources: [["https://x.com", uri.path].join("")],
         tags: {
-            "artist": List<String>.from([uri.pathSegments[0]]),
+            "artist": List<String>.from([uri.pathSegments[0].toLowerCase()]),
         }
     );
 }

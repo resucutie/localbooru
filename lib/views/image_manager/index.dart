@@ -113,11 +113,11 @@ class _ImageManagerViewState extends State<ImageManagerView> {
 
             final separatedTags = await (await getCurrentBooru()).separateTagsByType(moreAccurateTags.keys.toList());
 
-            if(separatedTags["generic"] != null) tagController.text = separatedTags["generic"]!.join(" ");
-            if(separatedTags["artist"] != null) artistTagController.text = separatedTags["artist"]!.join(" ");
-            if(separatedTags["character"] != null) characterTagController.text = separatedTags["character"]!.join(" ");
-            if(separatedTags["copyright"] != null) copyrightTagController.text = separatedTags["copyright"]!.join(" ");
-            if(separatedTags["species"] != null) speciesTagController.text = separatedTags["species"]!.join(" ");
+            if(separatedTags["generic"] != null) tagController.text = [tagController.text, ...separatedTags["generic"]!].where((e) => e.isNotEmpty).join(" ");
+            if(separatedTags["artist"] != null) artistTagController.text = [artistTagController.text, ...separatedTags["artist"]!].where((e) => e.isNotEmpty).join(" ");
+            if(separatedTags["character"] != null) characterTagController.text = [characterTagController.text, ...separatedTags["character"]!].where((e) => e.isNotEmpty).join(" ");
+            if(separatedTags["copyright"] != null) copyrightTagController.text = [copyrightTagController.text, ...separatedTags["copyright"]!].where((e) => e.isNotEmpty).join(" ");
+            if(separatedTags["species"] != null) speciesTagController.text = [speciesTagController.text, ...separatedTags["species"]!].where((e) => e.isNotEmpty).join(" ");
         }).catchError((error, stackTrace) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Could not obtain tag information, ${error.toString()}'),

@@ -90,7 +90,6 @@ class BrowseScreen extends StatelessWidget {
                     ],
                 ),
             ),
-            floatingActionButton: FloatingActionButton(onPressed: () => context.pushNamed("download_url", pathParameters: {"url": "https://fixupx.com/avogado6/status/1759971756779921728/"})),
             drawer: Drawer(
                 child: Builder(
                     builder: (context) => ListView(
@@ -110,6 +109,42 @@ class BrowseScreen extends StatelessWidget {
                                 onTap: () {
                                     Scaffold.of(context).closeDrawer();
                                     context.push("/manage_image");
+                                },
+                            ),
+                            ListTile(
+                                title: const Text("Import from service"),
+                                leading: const Icon(Icons.link),
+                                onTap: () {
+                                    TextEditingController controller = TextEditingController();
+                                    void importFromService() {
+                                        context.pushNamed("download_url", pathParameters: {"url": controller.text});
+                                        Navigator.of(context).pop();
+                                    }
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                            return AlertDialog(
+                                                title: const Text("Import from service"),
+                                                content: Container(
+                                                    constraints: const BoxConstraints(minWidth: 600),
+                                                    child: TextField(
+                                                        controller: controller,
+                                                        onSubmitted: (_) => importFromService(),
+                                                    ),
+                                                ),
+                                                actions: [
+                                                    TextButton(
+                                                        onPressed: Navigator.of(context).pop,
+                                                        child: const Text("Close")
+                                                    ),
+                                                    TextButton(
+                                                        onPressed: importFromService,
+                                                        child: const Text("Import")
+                                                    )
+                                                ],
+                                            );
+                                        },
+                                    );
                                 },
                             ),
                             ListTile(
