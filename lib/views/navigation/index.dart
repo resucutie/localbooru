@@ -90,7 +90,7 @@ class BrowseScreen extends StatelessWidget {
                     ],
                 ),
             ),
-            floatingActionButton: FloatingActionButton(onPressed: () => context.pushNamed("download_url", pathParameters: {"url": "https://konachan.com/post/show/372505/aliasing-aqua_eyes-aqua_hair-blush-dadada-hatsune_"})),
+            floatingActionButton: FloatingActionButton(onPressed: () => context.pushNamed("download_url", pathParameters: {"url": "https://fixupx.com/avogado6/status/1759971756779921728/"})),
             drawer: Drawer(
                 child: Builder(
                     builder: (context) => ListView(

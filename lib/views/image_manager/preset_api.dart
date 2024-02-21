@@ -40,6 +40,9 @@ Future<PresetImage> urlToPreset(String url) {
     if( uri.host.endsWith("gelbooru.com") || //0.2.5
         uri.host.endsWith("safebooru.org") || uri.host.endsWith("rule34.xxx") || uri.host.endsWith("xbooru.com") // 0.2.0
     ) return gelbooruToPreset(url);
+    if( uri.host.endsWith("twitter.com") || uri.host == "http://x.com" || uri.host == "https://x.com" ||
+        uri.host.endsWith("fixupx.com") || uri.host.endsWith("fivx.com")
+    ) return twitterToPreset(url);
     throw "Unknown URL";
 }
 
@@ -193,6 +196,21 @@ Future<PresetImage> gelbooruToPreset(String url) async {
             "artist": List<String>.from(tagList["artist"]!),
             "character": List<String>.from(tagList["character"]!),
             "copyright": List<String>.from(tagList["copyright"]!),
+        }
+    );
+}
+
+Future<PresetImage> twitterToPreset(String url) async {
+    Uri uri = Uri.parse(url);
+    // final res = await http.get(Uri.parse(["https://d.fxtwitter.com", uri.path].join()));
+
+    final downloadedFileInfo = await cache.downloadFile(["https://d.fxtwitter.com", uri.path].join());
+    
+    return PresetImage(
+        image: downloadedFileInfo.file,
+        sources: [["https://x.com", uri.path].join("")],
+        tags: {
+            "artist": List<String>.from([uri.pathSegments[0]]),
         }
     );
 }
