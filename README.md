@@ -67,6 +67,12 @@ Not so easily. The main issue is with adding tags, as it fetches a website to do
 - [x] Update checker for the app
 - [x] Tag classification (separate by author, character...)
 - [ ] Auto-import from other booru websites (and Twitter)
+    - [x] Danbooru
+    - [x] e621/e926
+    - [ ] Gelbooru
+    - [ ] Twitter (cant believe i'll have to create an api key)
+    - [ ] Rule34.xxx
+    - [ ] That other rule 34 website
 - [ ] Auto import from local image collections
 - [x] Tag suggestion
 - [x] Material You

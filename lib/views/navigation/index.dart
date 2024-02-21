@@ -90,7 +90,7 @@ class BrowseScreen extends StatelessWidget {
                     ],
                 ),
             ),
-            floatingActionButton: FloatingActionButton(onPressed: () => context.pushNamed("download_url", pathParameters: {"url": "https://e926.net/posts/4608952?q=pokemon_%28species%29"})),
+            floatingActionButton: FloatingActionButton(onPressed: () => context.pushNamed("download_url", pathParameters: {"url": "https://xbooru.com/index.php?page=post&s=view&id=1060254"})),
             drawer: Drawer(
                 child: Builder(
                     builder: (context) => ListView(
