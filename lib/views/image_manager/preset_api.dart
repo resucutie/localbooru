@@ -32,7 +32,10 @@ class PresetImage {
 
 Future<PresetImage> urlToPreset(String url) {
     Uri uri = Uri.parse(url);
-    if(uri.host.endsWith("donmai.us")) return danbooruToPreset(url);
+    if( uri.host.endsWith("behoimi.org") || // literally the only site running danbooru 1 on the planet
+        uri.host.endsWith("konachan.com") || uri.host.endsWith("yande.re") // moebooru
+    ) return danbooru1ToPreset(url);
+    if(uri.host.endsWith("donmai.us")) return danbooru2ToPreset(url);
     if(uri.host.endsWith("e621.net") || uri.host.endsWith("e926.net")) return e621ToPreset(url);
     if( uri.host.endsWith("gelbooru.com") || //0.2.5
         uri.host.endsWith("safebooru.org") || uri.host.endsWith("rule34.xxx") || uri.host.endsWith("xbooru.com") // 0.2.0
@@ -40,7 +43,7 @@ Future<PresetImage> urlToPreset(String url) {
     throw "Unknown URL";
 }
 
-Future<PresetImage> danbooruToPreset(String url) async {
+Future<PresetImage> danbooru2ToPreset(String url) async {
     Uri uri = Uri.parse(url);
     final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final bodyRes = jsonDecode(res.body);
@@ -55,6 +58,45 @@ Future<PresetImage> danbooruToPreset(String url) async {
             "artist": bodyRes["tag_string_artist"].split(" "),
             "character": bodyRes["tag_string_character"].split(" "),
             "copyright": bodyRes["tag_string_copyright"].split(" "),
+        }
+    );
+}
+
+Future<PresetImage> danbooru1ToPreset(String url) async {
+    Uri uri = Uri.parse(url);
+    final postID = uri.pathSegments[2];
+    final res = await http.get(Uri.parse("${[uri.origin, "post.json?tags=id:$postID"].join("/")}.json"));
+    final post = jsonDecode(res.body)[0];
+
+    final downloadedFileInfo = await cache.downloadFile(post["file_url"]);
+
+    final webpage = await http.get(uri);
+    final document = parse(webpage.body);
+
+    final tagsElements = document.getElementsByClassName("tag-link");
+
+    // sadly it doesn't have an api to obtain tag types, or i couldn't find one
+    Map<String, List<String>> tagList = {
+        "generic": [],
+        "artist": [],
+        "copyright": [],
+        "character": [],
+    };
+    for (var tag in tagsElements) {
+        final name = tag.attributes["data-name"];
+        String type = tag.classes.last.substring("tag-type-".length);
+        if(type == "general") type = "generic";
+        if(name != null && tagList[type] != null) tagList[type]!.add(name);
+    }
+
+    return PresetImage(
+        image: downloadedFileInfo.file,
+        sources: [post["source"], [uri.origin, uri.path].join("")].whereType<String>().toList(),
+        tags: {
+            "generic": List<String>.from(tagList["generic"]!),
+            "artist": List<String>.from(tagList["artist"]!),
+            "character": List<String>.from(tagList["character"]!),
+            "copyright": List<String>.from(tagList["copyright"]!),
         }
     );
 }
@@ -107,16 +149,12 @@ Future<PresetImage> gelbooruToPreset(String url) async {
         "character": [],
     };
     String imageURL;
-    if(is020) {
-        // probably 0.2.0, grab html documents
-        debugPrint("gelbooru 0.2.0");
-        
+    if(is020) { // probably 0.2.0, grab html documents
+        // sadly it doesn't have an api to obtain tag types, or i couldn't find one
         final webpage = await http.get(Uri.parse([uri.origin, "index.php?page=post&s=view&id=$imageID"].join("/")));
         final document = parse(webpage.body);
 
         final tagsElements = document.getElementsByClassName("tag");
-
-        debugPrint(tagsElements.length.toString());
 
         for (var tag in tagsElements) {
             final nameRedirectUri = Uri.parse(tag.children[0].attributes["href"]!);
@@ -126,14 +164,12 @@ Future<PresetImage> gelbooruToPreset(String url) async {
             if(name != null && tagList[type] != null) tagList[type]!.add(name);
         }
 
+        // nor images lmao
         final imageElement = document.getElementById("image");
 
         imageURL = imageElement!.attributes["src"]!;
 
-    } else {
-        // probably 0.2.5, use their api instead
-        debugPrint("gelbooru 0.2.5");
-
+    } else { // probably 0.2.5, use their api instead
         final tagTypesRes = await http.get(Uri.parse([uri.origin, "index.php?page=dapi&s=tag&q=index&json=1&names=$tags"].join("/")));
         
         final List<dynamic> tagTypes = jsonDecode(tagTypesRes.body)["tag"];
