@@ -68,7 +68,11 @@ Future<void> addSpecificTags(List<String> tags, {required String type}) async {
 
     raw["specificTags"][type] = specificTags;
 
-    await writeSpecificTags(raw["specificTags"]);
+    Map<String, List<String>> iLoveDartsTypeSystem = {};
+    for(String key in raw["specificTags"].keys) {
+        iLoveDartsTypeSystem[key] = List<String>.from(raw["specificTags"][key]);
+    }
+    await writeSpecificTags(iLoveDartsTypeSystem);
 }
 
 Map<String, dynamic> rebase(Map<String, dynamic> raw) {
@@ -84,11 +88,14 @@ Map<String, dynamic> rebase(Map<String, dynamic> raw) {
     raw["files"] = files;
 
     // check specific tags
-    if(raw["specificTags"] == null) raw["specificTags"] = defaultFileInfoJson["specificTags"];
-    for (final type in raw["specificTags"].keys) {
-        List<String> contents = List.from(raw["specificTags"][type]);
-        contents = contents.where((e) => e.isNotEmpty).toList();
-        raw["specificTags"][type] = contents;
+    if(raw["specificTags"] == null) {
+        raw["specificTags"] = defaultFileInfoJson["specificTags"];
+    } else {
+        for (final type in raw["specificTags"].keys) {
+            List<String> contents = List.from(raw["specificTags"][type]);
+            contents = contents.where((e) => e.isNotEmpty).toList();
+            raw["specificTags"][type] = contents;
+        }
     }
     debugPrint(raw["specificTags"].toString());
 

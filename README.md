@@ -54,6 +54,20 @@ Not so easily. The main issue is with adding tags, as it fetches a website to do
 `-tag` - Exclude every image with that tag  
 `+tag` - Includes every image with that tag  
 
+### Which services can it autoimport from?
+- Danbooru 2
+- Danbooru 1 (Moebooru)
+- e621/e926
+- Gelbooru 0.2.0 to 0.2.5
+- Twitter (using [fxtwitter](https://fxtwitter.com) to gather data)
+- Fur Affinity ((using [fxraffinity](https://fxraffinity.net) to gather data)
+- Devianart
+- Any URL that returns an image or video
+
+We still have to add:
+- Pixiv (we cant obtain the data using its API without log in information and we cant webscrap it because of it blocking NSFW content)
+- Gelbooru 0.1 (not a necessity, the reason that it is considered is because rule34.us is the only popular website that uses 0.1)
+
 ## To-do
 - [ ] Packaging stuff
     - [x] RPM
@@ -66,8 +80,8 @@ Not so easily. The main issue is with adding tags, as it fetches a website to do
 - [x] Auto tag generation
 - [x] Update checker for the app
 - [x] Tag classification (separate by author, character...)
-- [ ] Auto-import from other booru websites (and Twitter)
-- [ ] Auto import from local image collections
+- [x] Auto-import from other booru websites (and Twitter)
+- [ ] Mass import from local image collections
 - [x] Tag suggestion
 - [x] Material You
 - [ ] Support for multiple file formats

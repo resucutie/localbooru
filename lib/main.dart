@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +9,9 @@ import 'package:localbooru/utils/dialog_page.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
-import 'package:localbooru/views/image_manager.dart';
+import 'package:localbooru/views/image_manager/loading_screen.dart';
+import 'package:localbooru/views/image_manager/preset_api.dart';
+import 'package:localbooru/views/image_manager/index.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
 import 'package:localbooru/views/navigation/index.dart';
@@ -20,8 +24,8 @@ import 'package:localbooru/views/settings/index.dart';
 import 'package:localbooru/views/settings/overall_settings.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:localbooru/views/permissions.dart';
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<bool> hasExternalStoragePerms() async{
@@ -108,7 +112,7 @@ final _router = GoRouter(
                         return const ImageManagerView();
                     },
                     routes: [
-                        GoRoute(path: ":id",
+                        GoRoute(path: "internal/:id",
                             builder: (context, state) {
                                 final String? id = state.pathParameters["id"];
                                 if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
@@ -116,11 +120,42 @@ final _router = GoRouter(
                                     booru: booru,
                                     id: id,
                                     builder: (context, image) {
-                                        return ImageManagerView(
-                                            image: image,
+                                        return FutureBuilder(
+                                            future: PresetImage.fromExistingImage(image),
+                                            builder: (context, snapshot) {
+                                                if(snapshot.hasData) {
+                                                    return ImageManagerView(preset: snapshot.data);
+                                                }
+                                                return const Center(child: CircularProgressIndicator());
+                                            },
                                         );
                                     }
                                 ));
+                            },
+                        ),
+                        GoRoute(path: "url/:url", name:"download_url",
+                            builder: (context, state) {
+                                final String? url = state.pathParameters["url"];
+                                if(url == null) return const Text("Invalid route");
+                                return FutureBuilder(
+                                    future: PresetImage.urlToPreset(url),
+                                    builder: (context, snapshot) {
+                                        if(snapshot.hasData) {
+                                            return ImageManagerView(preset: snapshot.data);
+                                        }
+                                        if(snapshot.hasError) {
+                                            if(snapshot.error.toString() == "Unknown file type") {
+                                                Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                                                    context.pop();
+                                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
+                                                });
+                                            } else {
+                                                throw snapshot.error!;
+                                            }
+                                        }
+                                        return const ImageManagerLoadingScreen();
+                                    },
+                                );
                             },
                         )
                     ]
@@ -190,6 +225,7 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
+    late StreamSubscription _intentSub;
 
     // This widget is the root of your application.
     @override
@@ -222,6 +258,8 @@ class _AppState extends State<App> {
     @override
     void initState() {
         super.initState();
+
+        //updates
         checkForUpdates().then((ver) async {
             await Future.delayed(const Duration(seconds: 1));
             SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -235,6 +273,36 @@ class _AppState extends State<App> {
                 );
             }
         }).catchError((err) {debugPrint(err);});
+
+
+        Future<void> onShare(List<SharedMediaFile> value) async {
+            final String text = value[0].toMap()["path"];
+            final uri = Uri.tryParse(text);
+            if(uri == null) return;
+            await Future.delayed(const Duration(milliseconds: 500));
+            final routerContext = _router.routerDelegate.navigatorKey.currentContext;
+            if(routerContext != null && routerContext.mounted) routerContext.pushNamed("download_url", pathParameters: {"url": uri.toString()});
+        }
+
+        if(isMobile()) {
+            //shared media
+            // Listen to media sharing coming from outside the app while the app is in the memory.
+            _intentSub = ReceiveSharingIntent.getMediaStream().listen(onShare, onError: (err) {
+                debugPrint("getIntentDataStream error: $err");
+            });
+
+            // Get the media sharing coming from outside the app while the app is closed.
+            ReceiveSharingIntent.getInitialMedia().then((value) async {
+                if(value.isNotEmpty) await onShare(value);
+                ReceiveSharingIntent.reset();
+            });
+        }
+    }
+
+    @override
+    void dispose() {
+        _intentSub.cancel();
+        super.dispose();
     }
 
     final Color _brandColor = Colors.deepPurple;

@@ -11,12 +11,13 @@ import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/tags.dart';
+import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageManagerView extends StatefulWidget {
-    const ImageManagerView({super.key, this.image});
+    const ImageManagerView({super.key, this.preset});
 
-    final BooruImage? image;
+    final PresetImage? preset;
 
     @override
     State<ImageManagerView> createState() => _ImageManagerViewState();
@@ -40,23 +41,21 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     @override
     void initState() {
         super.initState();
-        isEditing = widget.image != null;
+        isEditing = widget.preset?.replaceID != null;
 
         
-        if(widget.image != null) {
-            final image = widget.image!;
-            loadedImage = image.path;
-            if(image.sources != null) urlList = image.sources!;
+        if(widget.preset != null) {
+            final preset = widget.preset!;
+            if(preset.image != null) loadedImage = preset.image!.path;
+            if(preset.sources != null) urlList = preset.sources!;
 
-            final String tags = image.tags;
-            getCurrentBooru().then((booru) async {
-                final separatedTags = await booru.separateTagsByType(tags.split(" "));
-                tagController.text = separatedTags["generic"]?.join(" ") ?? "";
-                artistTagController.text = separatedTags["artist"]?.join(" ") ?? "";
-                characterTagController.text = separatedTags["character"]?.join(" ") ?? "";
-                copyrightTagController.text = separatedTags["copyright"]?.join(" ") ?? "";
-                speciesTagController.text = separatedTags["species"]?.join(" ") ?? "";
-            });
+            if(preset.tags != null) {
+                tagController.text = preset.tags!["generic"]?.join(" ") ?? "";
+                artistTagController.text = preset.tags!["artist"]?.join(" ") ?? "";
+                characterTagController.text = preset.tags!["character"]?.join(" ") ?? "";
+                copyrightTagController.text = preset.tags!["copyright"]?.join(" ") ?? "";
+                speciesTagController.text = preset.tags!["species"]?.join(" ") ?? "";
+            }
         }
     }
 
@@ -80,7 +79,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             imageFile: File(loadedImage),
             tags: allTags.join(" "),
             sources: urlList,
-            id: widget.image?.id
+            id: widget.preset?.replaceID
         );
         await addSpecificTags(artistTags, type: "artist");
         await addSpecificTags(characterTags, type: "character");
@@ -94,7 +93,6 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             context.pop();
             if(!isEditing) context.push("/recent");
         }
-
     }
 
     @override
@@ -115,11 +113,11 @@ class _ImageManagerViewState extends State<ImageManagerView> {
 
             final separatedTags = await (await getCurrentBooru()).separateTagsByType(moreAccurateTags.keys.toList());
 
-            if(separatedTags["generic"] != null) tagController.text = separatedTags["generic"]!.join(" ");
-            if(separatedTags["artist"] != null) artistTagController.text = separatedTags["artist"]!.join(" ");
-            if(separatedTags["character"] != null) characterTagController.text = separatedTags["character"]!.join(" ");
-            if(separatedTags["copyright"] != null) copyrightTagController.text = separatedTags["copyright"]!.join(" ");
-            if(separatedTags["species"] != null) speciesTagController.text = separatedTags["species"]!.join(" ");
+            if(separatedTags["generic"] != null) tagController.text = [tagController.text, ...separatedTags["generic"]!].where((e) => e.isNotEmpty).join(" ");
+            if(separatedTags["artist"] != null) artistTagController.text = [artistTagController.text, ...separatedTags["artist"]!].where((e) => e.isNotEmpty).join(" ");
+            if(separatedTags["character"] != null) characterTagController.text = [characterTagController.text, ...separatedTags["character"]!].where((e) => e.isNotEmpty).join(" ");
+            if(separatedTags["copyright"] != null) copyrightTagController.text = [copyrightTagController.text, ...separatedTags["copyright"]!].where((e) => e.isNotEmpty).join(" ");
+            if(separatedTags["species"] != null) speciesTagController.text = [speciesTagController.text, ...separatedTags["species"]!].where((e) => e.isNotEmpty).join(" ");
         }).catchError((error, stackTrace) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Could not obtain tag information, ${error.toString()}'),
