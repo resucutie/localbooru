@@ -32,10 +32,6 @@ if (keystorePropertiesFile.exists() && !keystorePropertiesFile.isDirectory()) {
     keystoreProperties['prodStoreFile'] = 'dummy.keystore';
 }
 
-if (keystoreProperties['uatStoreFile'] == null) {
-    keystoreProperties['uatStoreFile'] = 'dummy.keystore'
-}
-
 if (keystoreProperties['prodStoreFile'] == null) {
     keystoreProperties['prodStoreFile'] = 'dummy.keystore'
 }
