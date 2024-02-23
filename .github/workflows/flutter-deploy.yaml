@@ -133,7 +133,7 @@ jobs:
           dest: build/localbooru-macos.zip
       - name: Rename files
         run: |
-          mv localbooru-android/app-release.apk build/localbooru-android.apk
+          mv localbooru-android/app-release-signed.apk build/localbooru-android.apk
           mv localbooru-linux-distro-specific-packages/*/localbooru-*-linux.deb build/localbooru-linux.deb
           mv localbooru-linux-distro-specific-packages/*/localbooru-*-linux.rpm build/localbooru-linux.rpm
           mv localbooru-windows-setup/*/localbooru-*-windows-setup.exe build/localbooru-windows-setup.exe
