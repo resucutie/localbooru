@@ -46,6 +46,7 @@ class PresetImage {
             uri.host.endsWith("fixupx.com") || uri.host.endsWith("fivx.com")
         ) return await twitterToPreset(url);
         if(uri.host.endsWith("furaffinity.net")) return await furaffinityToPreset(url);
+        if(uri.host.endsWith("deviantart.com") || uri.host == "fav.me") return await devianartToPreset(url);
         throw "Unknown Service";
     }
 }
@@ -246,6 +247,22 @@ Future<PresetImage> furaffinityToPreset(String url) async {
         sources: [["https://furaffinity.net", uri.path].join()],
         tags: {
             "artist": title != null ? [title.split(" ").last.toLowerCase()] : [],
+        }
+    );
+}
+
+// devianart: use their oEmbed API
+Future<PresetImage> devianartToPreset(String url) async {
+    final res = await http.get(Uri.parse(["https://backend.deviantart.com/oembed?url=", url].join()));
+    final json = jsonDecode(res.body);
+
+    final downloadedFileInfo = await cache.downloadFile(json["url"]);
+    
+    return PresetImage(
+        image: downloadedFileInfo.file,
+        sources: [url],
+        tags: {
+            "artist": [json["author_name"].toLowerCase()],
         }
     );
 }
