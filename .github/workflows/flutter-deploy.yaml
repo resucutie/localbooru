@@ -84,8 +84,6 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     environment: Production
-    with: 
-      flavor: "prod"
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -100,14 +98,14 @@ jobs:
         env:
           KEYSTORE_PROPERTIES_PATH: ${{ github.workspace }}/app/android/keystore.properties
         run: |
-          echo '${{ inputs.flavor }}StoreFile=${{ github.workspace }}/android-keystore.jks' > $KEYSTORE_PROPERTIES_PATH
-          echo '${{ inputs.flavor }}KeyAlias=${{ secrets.KEYSTORE_KEY_ALIAS }}' >> $KEYSTORE_PROPERTIES_PATH
-          echo '${{ inputs.flavor }}StorePassword=${{ secrets.KEYSTORE_PASSWORD }}' >> $KEYSTORE_PROPERTIES_PATH
-          echo '${{ inputs.flavor }}KeyPassword=${{ secrets.KEYSTORE_KEY_PASSWORD }}' >> $KEYSTORE_PROPERTIES_PATH
+          echo 'prodStoreFile=${{ github.workspace }}/android-keystore.jks' > $KEYSTORE_PROPERTIES_PATH
+          echo 'prodKeyAlias=${{ secrets.KEYSTORE_KEY_ALIAS }}' >> $KEYSTORE_PROPERTIES_PATH
+          echo 'prodStorePassword=${{ secrets.KEYSTORE_PASSWORD }}' >> $KEYSTORE_PROPERTIES_PATH
+          echo 'prodKeyPassword=${{ secrets.KEYSTORE_KEY_PASSWORD }}' >> $KEYSTORE_PROPERTIES_PATH
       - name: Install project dependencies
         run: flutter pub get
       - name: Build artifacts
-        run: flutter build apk --release --flavor ${{ inputs.flavor }}
+        run: flutter build apk --release --flavor prod
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
