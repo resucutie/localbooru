@@ -49,6 +49,8 @@ class PresetImage {
         throw "Unknown Service";
     }
 }
+
+// danbooru 2: if you add .json at the end of the post url, it'll return the JSON of that post
 Future<PresetImage> danbooru2ToPreset(String url) async {
     Uri uri = Uri.parse(url);
     final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
@@ -68,6 +70,8 @@ Future<PresetImage> danbooru2ToPreset(String url) async {
     );
 }
 
+// danbooru 1/moebooru: you can ask danbooru to do a search with the id: meta-tag. for obtaining the tag types, only webcrawling
+// as we cant obtain tag types in bulk, nor does post.json returns tag types in its response like danbooru 2
 Future<PresetImage> danbooru1ToPreset(String url) async {
     Uri uri = Uri.parse(url);
     final postID = uri.pathSegments[2];
@@ -107,6 +111,7 @@ Future<PresetImage> danbooru1ToPreset(String url) async {
     );
 }
 
+// e926/e621: same idea as danbooru 2, if you add .json at the end of the post url, it'll return the JSON of that post
 Future<PresetImage> e621ToPreset(String url) async {
     Uri uri = Uri.parse(url);
     final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
@@ -135,8 +140,10 @@ final Map<int, String> gelbooruTagMap = {
     4: "character",
     // 5: "metadata",
 };
-
 // wtf is this api
+// gelbooru 2: for some reason everything works under index.php. we can filter for posts using the "s=post" and "id" query parameters.
+// it is a weird system of post filtering ngl. 0.2.5 has an api to return tag types in bulk. on the other hand 0.2.0 doesn't include
+// that api, and as such we need to webcrawl to obtain them
 Future<PresetImage> gelbooruToPreset(String url) async {
     Uri uri = Uri.parse(url);
     final String imageID = uri.queryParameters["id"]!;
@@ -189,7 +196,6 @@ Future<PresetImage> gelbooruToPreset(String url) async {
     }
 
     final downloadedFileInfo = await cache.downloadFile(imageURL);
-    debugPrint("hi");
 
     return PresetImage(
         image: downloadedFileInfo.file,
@@ -203,6 +209,7 @@ Future<PresetImage> gelbooruToPreset(String url) async {
     );
 }
 
+// twitter: fxtwitter offers a url to give only the image. getting the artist is as easy as reading the first path segment
 Future<PresetImage> twitterToPreset(String url) async {
     Uri uri = Uri.parse(url);
     // final res = await http.get(Uri.parse(["https://d.fxtwitter.com", uri.path].join()));
@@ -218,14 +225,14 @@ Future<PresetImage> twitterToPreset(String url) async {
     );
 }
 
+// furaffinity: it doesn't offer an api, but fxraffinity exists, and it bypasses the nsfw sign up wall, so we can extract its embed to
+// obtain its image. the url nor fxraffinity's embed gives any clue about the poster, but furryaffinity's website title, as well as its
+// embed title gives, so we just fetch those (and also bypasses the nsfw sign up wall)
 Future<PresetImage> furaffinityToPreset(String url) async {
     Uri uri = Uri.parse(url);
-    // final res = await http.get(Uri.parse(["https://fxraffinity.net", uri.path, "?full"].join()));
-
     final fxReq = http.Request("Get", Uri.parse(["https://fxraffinity.net", uri.path, "?full"].join()))..followRedirects = false;
-
-    var res = await http.Response.fromStream(await http.Client().send(fxReq));
-    final websiteRes = await http.get(Uri.parse(["https://furaffinity.net", uri.path, "?full"].join()));
+    final res = await http.Response.fromStream(await http.Client().send(fxReq));
+    final websiteRes = await http.get(Uri.parse(["https://furaffinity.net", uri.path].join()));
 
     final fileUrl = getMetaProperty(parse(res.body), property: "og:image");
     if(fileUrl == null) throw "Could not grab image";
