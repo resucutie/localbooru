@@ -73,6 +73,8 @@ Not so easily. The main issue is with adding tags, as it fetches a website to do
     - [x] Gelbooru 0.2.5
     - [x] Gelbooru 0.2
     - [x] Twitter (we're using fxtwitter babeee)
+    - [x] Fur Affinity (we're using fxraffinity babeee)
+    - [ ] Devianart
     - [ ] Pixiv (cAnT bElIeVe I'lL hAvE tO cReAtE aN aPi KeY)
     - [ ] Gelbooru 0.1 maybe (apparently rule34.us is the only popular website that uses 0.1)
 - [ ] Auto import from local image collections

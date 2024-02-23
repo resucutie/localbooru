@@ -6,6 +6,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:localbooru/api/index.dart';
 import 'package:html/parser.dart' show parse;
+import 'package:localbooru/utils/get_meta_property.dart';
 
 final cache = DefaultCacheManager();
 
@@ -41,9 +42,10 @@ class PresetImage {
         if( uri.host.endsWith("gelbooru.com") || //0.2.5
             uri.host.endsWith("safebooru.org") || uri.host.endsWith("rule34.xxx") || uri.host.endsWith("xbooru.com") // 0.2.0
         ) return await gelbooruToPreset(url);
-        if( uri.host== "twitter.com" || uri.host == "x.com" ||
+        if( uri.host == "twitter.com" || uri.host == "x.com" ||
             uri.host.endsWith("fixupx.com") || uri.host.endsWith("fivx.com")
         ) return await twitterToPreset(url);
+        if(uri.host.endsWith("furaffinity.net")) return await furaffinityToPreset(url);
         throw "Unknown Service";
     }
 }
@@ -212,6 +214,31 @@ Future<PresetImage> twitterToPreset(String url) async {
         sources: [["https://x.com", uri.path].join("")],
         tags: {
             "artist": List<String>.from([uri.pathSegments[0].toLowerCase()]),
+        }
+    );
+}
+
+Future<PresetImage> furaffinityToPreset(String url) async {
+    Uri uri = Uri.parse(url);
+    // final res = await http.get(Uri.parse(["https://fxraffinity.net", uri.path, "?full"].join()));
+
+    final fxReq = http.Request("Get", Uri.parse(["https://fxraffinity.net", uri.path, "?full"].join()))..followRedirects = false;
+
+    var res = await http.Response.fromStream(await http.Client().send(fxReq));
+    final websiteRes = await http.get(Uri.parse(["https://furaffinity.net", uri.path, "?full"].join()));
+
+    final fileUrl = getMetaProperty(parse(res.body), property: "og:image");
+    if(fileUrl == null) throw "Could not grab image";
+
+    final title = getMetaProperty(parse(websiteRes.body), property: "og:title");
+
+    final downloadedFileInfo = await cache.downloadFile(fileUrl);
+    
+    return PresetImage(
+        image: downloadedFileInfo.file,
+        sources: [["https://furaffinity.net", uri.path].join()],
+        tags: {
+            "artist": title != null ? [title.split(" ").last.toLowerCase()] : [],
         }
     );
 }
