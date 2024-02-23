@@ -144,10 +144,10 @@ final _router = GoRouter(
                                             return ImageManagerView(preset: snapshot.data);
                                         }
                                         if(snapshot.hasError) {
-                                            if(snapshot.error.toString() == "Unknown Service") {
+                                            if(snapshot.error.toString() == "Unknown file type") {
                                                 Future.delayed(const Duration(milliseconds: 1)).then((value) {
                                                     context.pop();
-                                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid URL inserted")));
+                                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
                                                 });
                                             } else {
                                                 throw snapshot.error!;

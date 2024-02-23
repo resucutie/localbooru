@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:localbooru/api/index.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:localbooru/utils/get_meta_property.dart';
+import 'package:mime/mime.dart';
 
 final cache = DefaultCacheManager();
 
@@ -30,7 +31,7 @@ class PresetImage {
         );
     }
 
-    static Future<PresetImage?> urlToPreset(String url) async {
+    static Future<PresetImage> urlToPreset(String url) async {
         Uri uri = Uri.parse(url);
 
         if(await File(url).exists()) return PresetImage(image: File(url));
@@ -47,7 +48,7 @@ class PresetImage {
         ) return await twitterToPreset(url);
         if(uri.host.endsWith("furaffinity.net")) return await furaffinityToPreset(url);
         if(uri.host.endsWith("deviantart.com") || uri.host == "fav.me") return await devianartToPreset(url);
-        throw "Unknown Service";
+        return anyURLToPreset(url);
     }
 }
 
@@ -264,5 +265,19 @@ Future<PresetImage> devianartToPreset(String url) async {
         tags: {
             "artist": [json["author_name"].toLowerCase()],
         }
+    );
+}
+
+// devianart: use their oEmbed API
+Future<PresetImage> anyURLToPreset(String url) async {
+    final downloadedFileInfo = await cache.downloadFile(url);
+
+    final mime = lookupMimeType(downloadedFileInfo.file.basename)!;
+
+    if(!(mime.startsWith("image/") || mime.startsWith("video/"))) throw "Unknown file type";
+    
+    return PresetImage(
+        image: downloadedFileInfo.file,
+        sources: [url],
     );
 }
