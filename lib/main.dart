@@ -22,6 +22,7 @@ import 'package:localbooru/views/settings/booru_settings/index.dart';
 import 'package:localbooru/views/settings/booru_settings/tag_types.dart';
 import 'package:localbooru/views/settings/index.dart';
 import 'package:localbooru/views/settings/overall_settings.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/views/permissions.dart';
@@ -206,6 +207,8 @@ final _router = GoRouter(
 
 void main() async {
     runApp(const App());
+
+    MediaKit.ensureInitialized();
 
     if(isDestkop()) {
         doWhenWindowReady(() {

@@ -10,7 +10,10 @@ import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/views/navigation/index.dart';
+import 'package:mime/mime.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:media_kit/media_kit.dart';                      // Provides [Player], [Media], [Playlist] etc.
+import 'package:media_kit_video/media_kit_video.dart';          // Provides [VideoController] & [Video] etc.        
 
 class ImageView extends StatelessWidget {
     const ImageView({super.key, required this.image});
@@ -62,15 +65,17 @@ class ImageViewDisplay extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: Center(
               child: Listener(
-                  child: MouseRegion(
-                      cursor: SystemMouseCursors.zoomIn,
-                      child: GestureDetector(
-                          onTap: () => {
-                              context.push("/dialogs/zoom_image/${image.id}")
-                          },
-                          child: Image.file(image.getImage(), fit: BoxFit.contain),
-                      ),
-                  ),
+                  child: lookupMimeType(image.filename)!.startsWith("video/")
+                    ? VideoView(image.path)
+                    : MouseRegion(
+                        cursor: SystemMouseCursors.zoomIn,
+                        child: GestureDetector(
+                            onTap: () => {
+                                context.push("/dialogs/zoom_image/${image.id}")
+                            },
+                            child: Image.file(image.getImage(), fit: BoxFit.contain),
+                        ),
+                    ),
                   onPointerDown: (PointerDownEvent event) async {
                       if(event.kind != PointerDeviceKind.mouse) return;
                       if(event.buttons == kSecondaryMouseButton) {
@@ -85,6 +90,45 @@ class ImageViewDisplay extends StatelessWidget {
             ),
         );
     }
+}
+
+class VideoView extends StatefulWidget {
+  const VideoView(this.path, {Key? key}) : super(key: key);
+  
+  final String path;
+  
+  @override
+  State<VideoView> createState() => VideoViewState();
+}
+
+class VideoViewState extends State<VideoView> {
+    late final player = Player();
+
+    late final controller = VideoController(player);
+
+    @override
+    void initState() {
+        super.initState();
+
+        player.open(Media(widget.path));
+    }
+
+    @override
+    void dispose() {
+        player.pause();
+        player.dispose();
+        super.dispose();
+    }
+
+    @override
+    Widget build(BuildContext context) {
+        return SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.width,
+        // Use [Video] widget to display video output.
+            child: Video(controller: controller),
+      );
+  }
 }
 
 class ImageViewZoom extends StatelessWidget {
