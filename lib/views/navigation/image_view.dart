@@ -9,6 +9,7 @@ import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/views/navigation/index.dart';
 import 'package:mime/mime.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -61,32 +62,34 @@ class ImageViewDisplay extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
-        return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(
-              child: Listener(
-                  child: lookupMimeType(image.filename)!.startsWith("video/")
-                    ? VideoView(image.path)
-                    : MouseRegion(
-                        cursor: SystemMouseCursors.zoomIn,
-                        child: GestureDetector(
-                            onTap: () => {
-                                context.push("/dialogs/zoom_image/${image.id}")
-                            },
-                            child: Image.file(image.getImage(), fit: BoxFit.contain),
+        return SharedPreferencesBuilder(
+            builder: (context, prefs) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: Listener(
+                      child: lookupMimeType(image.filename)!.startsWith("video/") || (prefs.getBool("gif_video") ?? settingsDefaults["gif_video"]) && lookupMimeType(image.filename) == "image/gif"
+                        ? VideoView(image.path)
+                        : MouseRegion(
+                            cursor: SystemMouseCursors.zoomIn,
+                            child: GestureDetector(
+                                onTap: () => {
+                                    context.push("/dialogs/zoom_image/${image.id}")
+                                },
+                                child: Image.file(image.getImage(), fit: BoxFit.contain),
+                            ),
                         ),
-                    ),
-                  onPointerDown: (PointerDownEvent event) async {
-                      if(event.kind != PointerDeviceKind.mouse) return;
-                      if(event.buttons == kSecondaryMouseButton) {
-                          await showMenu(
-                              context: context,
-                              position: RelativeRect.fromSize(event.position & const Size(48.0, 48.0), (Overlay.of(context).context.findRenderObject() as RenderBox).size),
-                              items: imageShareItems(image)
-                          );
-                      }
-                  },
-              ),
+                      onPointerDown: (PointerDownEvent event) async {
+                          if(event.kind != PointerDeviceKind.mouse) return;
+                          if(event.buttons == kSecondaryMouseButton) {
+                              await showMenu(
+                                  context: context,
+                                  position: RelativeRect.fromSize(event.position & const Size(48.0, 48.0), (Overlay.of(context).context.findRenderObject() as RenderBox).size),
+                                  items: imageShareItems(image)
+                              );
+                          }
+                      },
+                  ),
+                ),
             ),
         );
     }
@@ -110,7 +113,8 @@ class VideoViewState extends State<VideoView> {
     void initState() {
         super.initState();
 
-        player.open(Media(widget.path), play: false);
+        player.open(Media(widget.path), play: lookupMimeType(widget.path) == "image/gif");
+        player.setPlaylistMode(PlaylistMode.single);
     }
 
     @override

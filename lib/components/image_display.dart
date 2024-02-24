@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:gif_view/gif_view.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:media_kit/media_kit.dart';
@@ -57,7 +58,9 @@ class SilverRepoGrid extends StatelessWidget {
                                             aspectRatio: 1,
                                             child: getType(image.filename) == "video"
                                                 ? VideoPreview(image: image,)
-                                                : Image.file(image.getImage(), fit: BoxFit.cover,),
+                                                : getType(image.filename) == "gif"
+                                                    ? GifView(image: FileImage(image.getImage()), fit: BoxFit.cover, controller: GifController(autoPlay: false),)
+                                                    : Image.file(image.getImage(), fit: BoxFit.cover,),
                                         ),
                                         if(getType(image.filename) != "image") Positioned(
                                             // top:6,
