@@ -53,13 +53,18 @@ class SilverRepoGrid extends StatelessWidget {
                                 onTap: () {if(onPressed != null) onPressed!(image);},
                                 child: Stack(
                                     children: [
-                                        AspectRatio(aspectRatio: 1, child: GridImage(path: image.path,),),
+                                        AspectRatio(
+                                            aspectRatio: 1,
+                                            child: getType(image.filename) == "video"
+                                                ? VideoPreview(image: image,)
+                                                : Image.file(image.getImage(), fit: BoxFit.cover,),
+                                        ),
                                         if(getType(image.filename) != "image") Positioned(
                                             // top:6,
                                             // left:6,
                                             child: Container(
                                                 decoration: const BoxDecoration(
-                                                    color: Color.fromARGB(60, 0, 0, 0),
+                                                    color: Color.fromARGB(160, 0, 0, 0),
                                                     borderRadius: BorderRadius.only(
                                                         bottomRight: Radius.circular(8),
                                                     )
@@ -83,21 +88,19 @@ class SilverRepoGrid extends StatelessWidget {
     }
 }
 
-class GridImage extends StatefulWidget {
-    const GridImage({super.key, required this.path});
+class VideoPreview extends StatefulWidget {
+    const VideoPreview({super.key, required this.image});
 
-    final String path;
+    final BooruImage image;
 
     @override
-    State<GridImage> createState() => _GridImageState();
+    State<VideoPreview> createState() => _VideoPreviewState();
 }
 
-class _GridImageState extends State<GridImage> {
+class _VideoPreviewState extends State<VideoPreview> {
     final _player = Player();
     
     Future<Uint8List> getVideoPreview(String videoPath) async {
-        if(!lookupMimeType(p.basename(videoPath))!.startsWith("video/")) throw "Not a video";
-
         final controller = VideoController(_player); // has to be created according to https://github.com/media-kit/media-kit/issues/419#issuecomment-1703855470
         await _player.open(Media(videoPath), play: false);
         await controller.waitUntilFirstFrameRendered;
@@ -116,15 +119,10 @@ class _GridImageState extends State<GridImage> {
     @override
     Widget build(context) {
         return FutureBuilder(
-            future: getVideoPreview(widget.path),
+            future: getVideoPreview(widget.image.path),
             builder: (context, snapshot) {
-                if(snapshot.hasData || snapshot.hasError) {
-                    return Image(
-                        image: !snapshot.hasError
-                            ? MemoryImage(snapshot.data!)
-                            : FileImage(File(widget.path)) as ImageProvider, 
-                        fit: BoxFit.cover,
-                    );
+                if(snapshot.hasData) {
+                    return Image.memory(snapshot.data!, fit: BoxFit.cover,);
                 }
                 return const Center(child: CircularProgressIndicator(),);
             }
