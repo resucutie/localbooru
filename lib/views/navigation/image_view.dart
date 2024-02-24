@@ -110,7 +110,7 @@ class VideoViewState extends State<VideoView> {
     void initState() {
         super.initState();
 
-        player.open(Media(widget.path));
+        player.open(Media(widget.path), play: false);
     }
 
     @override
@@ -125,8 +125,7 @@ class VideoViewState extends State<VideoView> {
         return SizedBox(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.width,
-        // Use [Video] widget to display video output.
-            child: Video(controller: controller),
+            child: Video(controller: controller, fill: Colors.transparent),
       );
   }
 }
