@@ -115,7 +115,6 @@ class VideoViewState extends State<VideoView> {
 
     @override
     void dispose() {
-        player.pause();
         player.dispose();
         super.dispose();
     }

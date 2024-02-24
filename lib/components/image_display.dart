@@ -96,7 +96,6 @@ class VideoPreview extends StatefulWidget {
     @override
     State<VideoPreview> createState() => _VideoPreviewState();
 }
-
 class _VideoPreviewState extends State<VideoPreview> {
     final _player = Player();
     
@@ -104,7 +103,7 @@ class _VideoPreviewState extends State<VideoPreview> {
         final controller = VideoController(_player); // has to be created according to https://github.com/media-kit/media-kit/issues/419#issuecomment-1703855470
         await _player.open(Media(videoPath), play: false);
         await controller.waitUntilFirstFrameRendered;
-        await Future.delayed(const Duration(seconds: 1)); // idk why but this works
+        await Future.delayed(const Duration(milliseconds: 500)); // idk why but this works
         await _player.seek(Duration.zero); 
         final bytes = await _player.screenshot();
         return bytes!;
@@ -121,9 +120,8 @@ class _VideoPreviewState extends State<VideoPreview> {
         return FutureBuilder(
             future: getVideoPreview(widget.image.path),
             builder: (context, snapshot) {
-                if(snapshot.hasData) {
-                    return Image.memory(snapshot.data!, fit: BoxFit.cover,);
-                }
+                if(snapshot.hasData) return Image.memory(snapshot.data!, fit: BoxFit.cover,);
+                if(snapshot.hasError) throw snapshot.error!;
                 return const Center(child: CircularProgressIndicator(),);
             }
         );

@@ -63,6 +63,7 @@ dependencies:
       ref: main
       path: ./media_kit_video
   media_kit_libs_video: ^1.0.4
+  string_validator: ^1.0.2
 dependency_overrides:
   media_kit_native_event_loop:
     git:

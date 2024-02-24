@@ -7,6 +7,7 @@ import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
+import 'package:localbooru/views/image_manager/peripherals.dart';
 import 'package:open_file/open_file.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:super_clipboard/super_clipboard.dart';
@@ -115,35 +116,10 @@ class BrowseScreen extends StatelessWidget {
                                 title: const Text("Import from service"),
                                 leading: const Icon(Icons.link),
                                 onTap: () {
-                                    TextEditingController controller = TextEditingController();
-                                    void importFromService() {
-                                        Scaffold.of(context).closeDrawer();
-                                        context.pushNamed("download_url", pathParameters: {"url": controller.text});
-                                        Navigator.of(context).pop();
-                                    }
                                     showDialog(
                                         context: context,
                                         builder: (context) {
-                                            return AlertDialog(
-                                                title: const Text("Import from service"),
-                                                content: Container(
-                                                    constraints: const BoxConstraints(minWidth: 600),
-                                                    child: TextField(
-                                                        controller: controller,
-                                                        onSubmitted: (_) => importFromService(),
-                                                    ),
-                                                ),
-                                                actions: [
-                                                    TextButton(
-                                                        onPressed: Navigator.of(context).pop,
-                                                        child: const Text("Close")
-                                                    ),
-                                                    TextButton(
-                                                        onPressed: importFromService,
-                                                        child: const Text("Import")
-                                                    )
-                                                ],
-                                            );
+                                            return const InsertURLDialog();
                                         },
                                     );
                                 },
