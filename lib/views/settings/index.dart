@@ -70,7 +70,12 @@ class SettingsHome extends StatelessWidget {
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("You're on the latest version")));
                         }
                     },
-                )
+                ),
+                ListTile(
+                    title: const Text("About"),
+                    leading: const Icon(Icons.info_outline),
+                    onTap: () => context.push("/about"),
+                ),
             ],
         );
     }

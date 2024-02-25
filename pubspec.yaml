@@ -17,6 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 version: 1.2.1
+localbooru_codename: "David Revoy"
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
@@ -56,6 +57,7 @@ dependencies:
   html: ^0.15.4
   receive_sharing_intent: ^1.6.7
   mime: ^1.0.5
+  yaml: ^3.1.2
   media_kit: ^1.1.10
   media_kit_video:
     git:
@@ -97,7 +99,10 @@ flutter:
   assets:
     - assets/brand/icon.svg
     - assets/brand/monochrome-icon.svg
+    - assets/brand/rounded-icon.svg
     - assets/syncthing.svg
+    - assets/github.svg
+    - pubspec.yaml # reading itself
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
