@@ -9,6 +9,7 @@ import 'package:localbooru/utils/dialog_page.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
+import 'package:localbooru/views/about.dart';
 import 'package:localbooru/views/image_manager/loading_screen.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:localbooru/views/image_manager/index.dart';
@@ -198,6 +199,9 @@ final _router = GoRouter(
                 ),
                 GoRoute(path: "setbooru",
                     builder: (context, state) => const SetBooruScreen(),
+                ),
+                GoRoute(path: "about",
+                    builder: (context, state) => const AboutScreen(),
                 ),
             ]
         ),
