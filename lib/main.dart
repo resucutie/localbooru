@@ -10,7 +10,7 @@ import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
 import 'package:localbooru/views/about.dart';
-import 'package:localbooru/views/image_manager/loading_screen.dart';
+import 'package:localbooru/views/image_manager/peripherals.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:localbooru/views/image_manager/index.dart';
 import 'package:localbooru/views/navigation/home.dart';
