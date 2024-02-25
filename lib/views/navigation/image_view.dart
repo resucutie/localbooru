@@ -247,11 +247,13 @@ class ImageViewProprieties extends StatelessWidget {
                     const Header("Other"),
                     FutureBuilder<Map>(
                         future: (() async => {
-                            "dimensions": await decodeImageFromList(await File(image.path).readAsBytes()),
+                            "dimensions": lookupMimeType(image.filename)!.startsWith("video/") ? null : await decodeImageFromList(await File(image.path).readAsBytes()),
                             "size": await File(image.path).length()
                         })(),
                         builder: (context, snapshot) {
-                            if(snapshot.hasData) {
+                            if(snapshot.hasData || snapshot.hasError) {
+                                final hasDimensionsMetadata = snapshot.data?["dimensions"] == null;
+
                                 final bytes = snapshot.data!["size"]!;
                                 const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
                                 var i = (m.log(bytes) / m.log(1000)).floor();
@@ -261,14 +263,13 @@ class ImageViewProprieties extends StatelessWidget {
                                     TextSpan(
                                         text: "Path: ${image.path}\n",
                                         children: [
-                                            TextSpan(text: "Dimensions: ${snapshot.data!["dimensions"]!.width}x${snapshot.data!["dimensions"]!.height}\n"),
+                                            if(!hasDimensionsMetadata) TextSpan(text: "Dimensions: ${snapshot.data?["dimensions"]?.width}x${snapshot.data?["dimensions"]?.height}\n"),
                                             TextSpan(text: "Size: $formattedSize"),
                                         ]
                                     )
                                 );
-                            } else {
-                                return const CircularProgressIndicator();
                             }
+                            return const CircularProgressIndicator();
                         },
                     )
                 ],

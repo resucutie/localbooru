@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:gif_view/gif_view.dart';
@@ -9,7 +7,6 @@ import 'package:localbooru/utils/constants.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:mime/mime.dart';
-import 'package:path/path.dart' as p;
 
 
 class SilverRepoGrid extends StatelessWidget {
