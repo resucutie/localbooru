@@ -9,8 +9,12 @@ import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/views/navigation/index.dart';
+import 'package:mime/mime.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:media_kit/media_kit.dart';                      // Provides [Player], [Media], [Playlist] etc.
+import 'package:media_kit_video/media_kit_video.dart';          // Provides [VideoController] & [Video] etc.        
 
 class ImageView extends StatelessWidget {
     const ImageView({super.key, required this.image});
@@ -58,33 +62,75 @@ class ImageViewDisplay extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
-        return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(
-              child: Listener(
-                  child: MouseRegion(
-                      cursor: SystemMouseCursors.zoomIn,
-                      child: GestureDetector(
-                          onTap: () => {
-                              context.push("/dialogs/zoom_image/${image.id}")
-                          },
-                          child: Image.file(image.getImage(), fit: BoxFit.contain),
-                      ),
+        return SharedPreferencesBuilder(
+            builder: (context, prefs) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                  child: Listener(
+                      child: lookupMimeType(image.filename)!.startsWith("video/") || (prefs.getBool("gif_video") ?? settingsDefaults["gif_video"]) && lookupMimeType(image.filename) == "image/gif"
+                        ? VideoView(image.path)
+                        : MouseRegion(
+                            cursor: SystemMouseCursors.zoomIn,
+                            child: GestureDetector(
+                                onTap: () => {
+                                    context.push("/dialogs/zoom_image/${image.id}")
+                                },
+                                child: Image.file(image.getImage(), fit: BoxFit.contain),
+                            ),
+                        ),
+                      onPointerDown: (PointerDownEvent event) async {
+                          if(event.kind != PointerDeviceKind.mouse) return;
+                          if(event.buttons == kSecondaryMouseButton) {
+                              await showMenu(
+                                  context: context,
+                                  position: RelativeRect.fromSize(event.position & const Size(48.0, 48.0), (Overlay.of(context).context.findRenderObject() as RenderBox).size),
+                                  items: imageShareItems(image)
+                              );
+                          }
+                      },
                   ),
-                  onPointerDown: (PointerDownEvent event) async {
-                      if(event.kind != PointerDeviceKind.mouse) return;
-                      if(event.buttons == kSecondaryMouseButton) {
-                          await showMenu(
-                              context: context,
-                              position: RelativeRect.fromSize(event.position & const Size(48.0, 48.0), (Overlay.of(context).context.findRenderObject() as RenderBox).size),
-                              items: imageShareItems(image)
-                          );
-                      }
-                  },
-              ),
+                ),
             ),
         );
     }
+}
+
+class VideoView extends StatefulWidget {
+  const VideoView(this.path, {Key? key}) : super(key: key);
+  
+  final String path;
+  
+  @override
+  State<VideoView> createState() => VideoViewState();
+}
+
+class VideoViewState extends State<VideoView> {
+    late final player = Player();
+
+    late final controller = VideoController(player);
+
+    @override
+    void initState() {
+        super.initState();
+
+        player.open(Media(widget.path), play: lookupMimeType(widget.path) == "image/gif");
+        player.setPlaylistMode(PlaylistMode.single);
+    }
+
+    @override
+    void dispose() {
+        player.dispose();
+        super.dispose();
+    }
+
+    @override
+    Widget build(BuildContext context) {
+        return SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.width,
+            child: Video(controller: controller, fill: Colors.transparent),
+      );
+  }
 }
 
 class ImageViewZoom extends StatelessWidget {
@@ -201,11 +247,13 @@ class ImageViewProprieties extends StatelessWidget {
                     const Header("Other"),
                     FutureBuilder<Map>(
                         future: (() async => {
-                            "dimensions": await decodeImageFromList(await File(image.path).readAsBytes()),
+                            "dimensions": lookupMimeType(image.filename)!.startsWith("video/") ? null : await decodeImageFromList(await File(image.path).readAsBytes()),
                             "size": await File(image.path).length()
                         })(),
                         builder: (context, snapshot) {
-                            if(snapshot.hasData) {
+                            if(snapshot.hasData || snapshot.hasError) {
+                                final hasDimensionsMetadata = snapshot.data?["dimensions"] == null;
+
                                 final bytes = snapshot.data!["size"]!;
                                 const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
                                 var i = (m.log(bytes) / m.log(1000)).floor();
@@ -215,14 +263,13 @@ class ImageViewProprieties extends StatelessWidget {
                                     TextSpan(
                                         text: "Path: ${image.path}\n",
                                         children: [
-                                            TextSpan(text: "Dimensions: ${snapshot.data!["dimensions"]!.width}x${snapshot.data!["dimensions"]!.height}\n"),
+                                            if(!hasDimensionsMetadata) TextSpan(text: "Dimensions: ${snapshot.data?["dimensions"]?.width}x${snapshot.data?["dimensions"]?.height}\n"),
                                             TextSpan(text: "Size: $formattedSize"),
                                         ]
                                     )
                                 );
-                            } else {
-                                return const CircularProgressIndicator();
                             }
+                            return const CircularProgressIndicator();
                         },
                     )
                 ],

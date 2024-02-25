@@ -10,7 +10,7 @@ import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
 import 'package:localbooru/views/about.dart';
-import 'package:localbooru/views/image_manager/loading_screen.dart';
+import 'package:localbooru/views/image_manager/peripherals.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:localbooru/views/image_manager/index.dart';
 import 'package:localbooru/views/navigation/home.dart';
@@ -23,6 +23,7 @@ import 'package:localbooru/views/settings/booru_settings/index.dart';
 import 'package:localbooru/views/settings/booru_settings/tag_types.dart';
 import 'package:localbooru/views/settings/index.dart';
 import 'package:localbooru/views/settings/overall_settings.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/views/permissions.dart';
@@ -34,7 +35,7 @@ Future<bool> hasExternalStoragePerms() async{
     return true;
 }
 
-final _router = GoRouter(
+final router = GoRouter(
     initialLocation: '/home',
     routes: [
         GoRoute(path: '/',
@@ -110,7 +111,7 @@ final _router = GoRouter(
                 // image add
                 GoRoute(path: "manage_image",
                     builder: (context, state) {
-                        return const ImageManagerView();
+                        return const ImageManagerView(shouldOpenRecents: true,);
                     },
                     routes: [
                         GoRoute(path: "internal/:id",
@@ -136,8 +137,7 @@ final _router = GoRouter(
                         ),
                         GoRoute(path: "url/:url", name:"download_url",
                             builder: (context, state) {
-                                final String? url = state.pathParameters["url"];
-                                if(url == null) return const Text("Invalid route");
+                                final String url = state.pathParameters["url"]!;
                                 return FutureBuilder(
                                     future: PresetImage.urlToPreset(url),
                                     builder: (context, snapshot) {
@@ -145,7 +145,7 @@ final _router = GoRouter(
                                             return ImageManagerView(preset: snapshot.data);
                                         }
                                         if(snapshot.hasError) {
-                                            if(snapshot.error.toString() == "Unknown file type") {
+                                            if(snapshot.error.toString() == "Unknown file type" || snapshot.error.toString() == "Not a URL") {
                                                 Future.delayed(const Duration(milliseconds: 1)).then((value) {
                                                     context.pop();
                                                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
@@ -211,6 +211,8 @@ final _router = GoRouter(
 void main() async {
     runApp(const App());
 
+    MediaKit.ensureInitialized();
+
     if(isDestkop()) {
         doWhenWindowReady(() {
             appWindow.size = const Size(1280, 720);
@@ -251,7 +253,7 @@ class _AppState extends State<App> {
                             theme: theme["light"],
                             darkTheme: theme["dark"],
                             themeMode: ThemeMode.values[themeModeIndex], 
-                            routerConfig: _router,
+                            routerConfig: router,
                         );
                     }
                 )
@@ -269,10 +271,10 @@ class _AppState extends State<App> {
             SharedPreferences prefs = await SharedPreferences.getInstance();
             if( !(await ver.isCurrentLatest()) &&
                 (prefs.getBool("update") ?? settingsDefaults["update"]) &&
-                _router.routerDelegate.navigatorKey.currentContext != null
+                router.routerDelegate.navigatorKey.currentContext != null
             ) {
                 showDialog(
-                    context: _router.routerDelegate.navigatorKey.currentContext!,
+                    context: router.routerDelegate.navigatorKey.currentContext!,
                     builder: (context) => UpdateAvaiableDialog(ver: ver),
                 );
             }
@@ -284,7 +286,7 @@ class _AppState extends State<App> {
             final uri = Uri.tryParse(text);
             if(uri == null) return;
             await Future.delayed(const Duration(milliseconds: 500));
-            final routerContext = _router.routerDelegate.navigatorKey.currentContext;
+            final routerContext = router.routerDelegate.navigatorKey.currentContext;
             if(routerContext != null && routerContext.mounted) routerContext.pushNamed("download_url", pathParameters: {"url": uri.toString()});
         }
 

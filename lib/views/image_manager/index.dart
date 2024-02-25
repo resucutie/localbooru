@@ -15,9 +15,10 @@ import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageManagerView extends StatefulWidget {
-    const ImageManagerView({super.key, this.preset});
+    const ImageManagerView({super.key, this.preset, this.shouldOpenRecents = false});
 
     final PresetImage? preset;
+    final bool shouldOpenRecents;
 
     @override
     State<ImageManagerView> createState() => _ImageManagerViewState();
@@ -91,7 +92,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
 
         if(context.mounted) {
             context.pop();
-            if(!isEditing) context.push("/recent");
+            if(!widget.shouldOpenRecents) context.push("/recent");
         }
     }
 

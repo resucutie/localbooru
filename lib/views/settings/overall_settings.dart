@@ -19,11 +19,12 @@ class _OverallSettingsState extends State<OverallSettings> {
     final _pageSizeValidator = GlobalKey<FormState>();
     final _pageSizeController = TextEditingController();
 
-    double _gridSizeSliderValue = settingsDefaults["grid_size"].toDouble();
-    double _autotagAccuracy = settingsDefaults["autotag_accuracy"];
-    bool _monetTheme = settingsDefaults["monet"];
-    bool _update = settingsDefaults["update"];
-    String _theme = settingsDefaults["theme"];
+    late double _gridSizeSliderValue;
+    late double _autotagAccuracy;
+    late bool _monetTheme;
+    late bool _update;
+    late String _theme;
+    late bool _gif_video;
 
     bool isSettingModified(String setting) {
         return widget.prefs.get(setting) != null && widget.prefs.get(setting) != settingsDefaults[setting];
@@ -45,6 +46,7 @@ class _OverallSettingsState extends State<OverallSettings> {
         _update = widget.prefs.getBool("update") ?? settingsDefaults["update"];
         _autotagAccuracy = widget.prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"];
         _theme = widget.prefs.getString("theme") ?? settingsDefaults["theme"];
+        _gif_video = widget.prefs.getBool("gif_video") ?? settingsDefaults["gif_video"];
     }
 
     Future<void> onChangeTheme() async {
@@ -191,6 +193,17 @@ class _OverallSettingsState extends State<OverallSettings> {
                         widget.prefs.setBool("monet", value);
                         themeListener.update();
                         setState(() => _monetTheme = value);
+                    }
+                ),
+                const SmallHeader("Behavior"),
+                SwitchListTile(
+                    title: const Text("Display GIFs as videos"),
+                    secondary: const Icon(Icons.gif),
+                    subtitle: const Text("It will add video controllers to GIFs"),
+                    value: _gif_video,
+                    onChanged: (value) {
+                        widget.prefs.setBool("gif_video", value);
+                        setState(() => _gif_video = value);
                     }
                 ),
                 const SmallHeader("Other"),

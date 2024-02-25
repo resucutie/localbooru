@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:localbooru/api/index.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:localbooru/utils/get_meta_property.dart';
 import 'package:mime/mime.dart';
+import 'package:string_validator/string_validator.dart';
 
 final cache = DefaultCacheManager();
 
@@ -32,9 +32,11 @@ class PresetImage {
     }
 
     static Future<PresetImage> urlToPreset(String url) async {
-        Uri uri = Uri.parse(url);
-
         if(await File(url).exists()) return PresetImage(image: File(url));
+        
+        if(!isURL(url)) throw "Not a URL";
+
+        Uri uri = Uri.parse(url);
         if( uri.host.endsWith("behoimi.org") || // literally the only site running danbooru 1 on the planet
             uri.host.endsWith("konachan.com") || uri.host.endsWith("yande.re") // moebooru
         ) return await danbooru1ToPreset(url);

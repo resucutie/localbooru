@@ -10,6 +10,7 @@ final Map<String, dynamic> settingsDefaults = {
     "theme": "system",
     "autotag_accuracy": 0.15,
     "update": true,
+    "gif_video": false,
 };
 
 final Map<String, dynamic> defaultFileInfoJson = {
