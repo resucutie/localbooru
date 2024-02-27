@@ -67,6 +67,7 @@ dependencies:
   media_kit_libs_video: ^1.0.4
   string_validator: ^1.0.2
   gif_view: ^0.4.3
+  image_compression: ^1.0.5
 dependency_overrides:
   media_kit_native_event_loop:
     git:

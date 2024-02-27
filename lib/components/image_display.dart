@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gif_view/gif_view.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/image_thumbnailer.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:mime/mime.dart';
@@ -57,11 +58,20 @@ class SilverRepoGrid extends StatelessWidget {
                                                 ? VideoPreview(image: image,)
                                                 : getType(image.filename) == "gif"
                                                     ? GifView(image: FileImage(image.getImage()), fit: BoxFit.cover, controller: GifController(autoPlay: false),)
-                                                    : Image.file(image.getImage(), fit: BoxFit.cover,),
+                                                    : FutureBuilder(
+                                                        future: getImageThumbnail(image),
+                                                        builder: (context, snapshot) {
+                                                            if(snapshot.hasData) {
+                                                                return Image(
+                                                                    image: FileImage(snapshot.data!),
+                                                                    fit: BoxFit.cover,
+                                                                );
+                                                            }
+                                                            return const Center(child: CircularProgressIndicator(),);
+                                                        },
+                                                    )
                                         ),
                                         if(getType(image.filename) != "image") Positioned(
-                                            // top:6,
-                                            // left:6,
                                             child: Container(
                                                 decoration: const BoxDecoration(
                                                     color: Color.fromARGB(160, 0, 0, 0),
