@@ -9,18 +9,30 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:mime/mime.dart';
 
-
-class SilverRepoGrid extends StatelessWidget {
+class SilverRepoGrid extends StatefulWidget {
     const SilverRepoGrid({super.key, required this.images, this.onPressed, this.autoadjustColumns});
+
     final List<BooruImage> images;
     final Function(BooruImage image)? onPressed;
     final int? autoadjustColumns;
 
+    @override
+    State<SilverRepoGrid> createState() => _SilverRepoGridState();
+}
+
+class _SilverRepoGridState extends State<SilverRepoGrid> {
     String? getType(String filename) {
         final mime = lookupMimeType(filename)!;
         if(mime.startsWith("video")) return "video";
         if(mime.startsWith("image/gif")) return "gif";
         return "image";
+    }
+    @override
+    void dispose() {
+        // clear memory leak
+        PaintingBinding.instance.imageCache.clear();
+        PaintingBinding.instance.imageCache.clearLiveImages();
+        super.dispose();
     }
   
     @override
@@ -32,24 +44,24 @@ class SilverRepoGrid extends StatelessWidget {
             (
                 (20*50)
                 /
-                (autoadjustColumns ?? settingsDefaults["grid_size"])
+                (widget.autoadjustColumns ?? settingsDefaults["grid_size"])
             )
         ).ceil();
 
-        if(images.isEmpty) {
+        if(widget.images.isEmpty) {
             return const SizedBox.shrink();
         } else {
             return SliverGrid(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: columns,
                 ),
-                delegate: SliverChildListDelegate(images.map((image) {
+                delegate: SliverChildListDelegate(widget.images.map((image) {
                     return Padding(
                         padding: const EdgeInsets.all(4.0),
                         child: MouseRegion(
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
-                                onTap: () {if(onPressed != null) onPressed!(image);},
+                                onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
                                 child: Stack(
                                     children: [
                                         AspectRatio(
