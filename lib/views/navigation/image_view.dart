@@ -227,9 +227,8 @@ class ImageViewProprieties extends StatelessWidget {
                                         }).toList())
                                     ],
                                 );
-                            } else {
-                                return const CircularProgressIndicator();
                             }
+                            return const CircularProgressIndicator();
                         }
                     ),
 
