@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.auser.localbooru</id>
+  
+  <name>LocalBooru</name>
+  <summary>Cross platform local booru collection that exclusively works on local storage, without selfhosting</summary>
+  
+  <metadata_license>CC0-1.0</metadata_license>
+  <!-- <project_license>AGPL-3.0-only</project_license> -->
+  
+  <description>
+    <p>Cross platform local booru collection that exclusively works on local storage, without selfhosting</p>
+  </description>
+  <!-- <releases>
+    <release version="1.3.0" date="2023-11-09">
+      <description>
+        <p>
+          Published TPR build 59 to Flathub
+        </p>
+      </description>
+    </release>
+  </releases> -->
+  
+  <content_rating type="oars-1.1" />
+  
+  <url type="homepage">https://github.com/resucutie/localbooru/</url>
+  <url type="help">https://github.com/resucutie/localbooru/issues</url>
+  <url type="faw">https://github.com/resucutie/localbooru#faq</url>
+  
+  
+  <launchable type="desktop-id">com.auser.localbooru.desktop</launchable>
+  <!-- <screenshots>
+    <screenshot type="default">
+      <image>https://americanmonk.org/wp-content/uploads/2022/09/TPR-MainScreen-1024x500.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://americanmonk.org/wp-content/uploads/2022/09/screenlinux.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://americanmonk.org/wp-content/uploads/2023/04/extensions-1536x909.png</image>
+    </screenshot>
+  </screenshots> -->
+</component>

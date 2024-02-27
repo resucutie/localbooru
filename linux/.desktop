@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=LocalBooru
+Comment=Cross platform local booru collection that exclusively works on local storage, without selfhosting
+Exec=localbooru
+Icon=icon.svg
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=Converter,Unit,Currencies,Tools;
+StartupNotify=false
