@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gif_view/gif_view.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/image_thumbnailer.dart';
 import 'package:media_kit/media_kit.dart';
@@ -56,12 +57,29 @@ class _SilverRepoGridState extends State<SilverRepoGrid> {
                     crossAxisCount: columns,
                 ),
                 delegate: SliverChildListDelegate(widget.images.map((image) {
+                    void openContextMenu(Offset offset) {
+                        final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
+                        showMenu(
+                            context: context,
+                            position: RelativeRect.fromRect(
+                                Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
+                                Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
+                            ),
+                            items: [
+                                ...imageShareItems(image),
+                                const PopupMenuDivider(),
+                                ...imageManagementItems(image, context: context),
+                            ]
+                        );
+                    }
                     return Padding(
                         padding: const EdgeInsets.all(4.0),
                         child: MouseRegion(
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
                                 onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
+                                onLongPressEnd: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
+                                onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
                                 child: Stack(
                                     children: [
                                         AspectRatio(
