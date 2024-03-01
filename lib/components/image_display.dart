@@ -1,13 +1,8 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:gif_view/gif_view.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/image_thumbnailer.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 import 'package:mime/mime.dart';
 
 class SilverRepoGrid extends StatefulWidget {
@@ -84,22 +79,18 @@ class _SilverRepoGridState extends State<SilverRepoGrid> {
                                     children: [
                                         AspectRatio(
                                             aspectRatio: 1,
-                                            child: getType(image.filename) == "video"
-                                                ? VideoPreview(image: image,)
-                                                : getType(image.filename) == "gif"
-                                                    ? GifView(image: FileImage(image.getImage()), fit: BoxFit.cover, controller: GifController(autoPlay: false),)
-                                                    : FutureBuilder(
-                                                        future: getImageThumbnail(image),
-                                                        builder: (context, snapshot) {
-                                                            if(snapshot.hasData) {
-                                                                return Image(
-                                                                    image: FileImage(snapshot.data!),
-                                                                    fit: BoxFit.cover,
-                                                                );
-                                                            }
-                                                            return const Center(child: CircularProgressIndicator(),);
-                                                        },
-                                                    )
+                                            child: FutureBuilder(
+                                                future: getImageThumbnail(image),
+                                                builder: (context, snapshot) {
+                                                    if(snapshot.hasData) {
+                                                        return Image(
+                                                            image: FileImage(snapshot.data!),
+                                                            fit: BoxFit.cover,
+                                                        );
+                                                    }
+                                                    return const Center(child: CircularProgressIndicator(),);
+                                                },
+                                            )
                                         ),
                                         if(getType(image.filename) != "image") Positioned(
                                             child: Container(
@@ -125,45 +116,5 @@ class _SilverRepoGridState extends State<SilverRepoGrid> {
                 }).toList()),
             );
         }
-    }
-}
-
-class VideoPreview extends StatefulWidget {
-    const VideoPreview({super.key, required this.image});
-
-    final BooruImage image;
-
-    @override
-    State<VideoPreview> createState() => _VideoPreviewState();
-}
-class _VideoPreviewState extends State<VideoPreview> {
-    final _player = Player();
-    
-    Future<Uint8List> getVideoPreview(String videoPath) async {
-        final controller = VideoController(_player); // has to be created according to https://github.com/media-kit/media-kit/issues/419#issuecomment-1703855470
-        await _player.open(Media(videoPath), play: false);
-        await controller.waitUntilFirstFrameRendered;
-        await Future.delayed(const Duration(milliseconds: 500)); // idk why but this works
-        await _player.seek(Duration.zero); 
-        final bytes = await _player.screenshot();
-        return bytes!;
-    }
-
-    @override
-    void dispose() {
-        _player.dispose();
-        super.dispose();
-    }
-
-    @override
-    Widget build(context) {
-        return FutureBuilder(
-            future: getVideoPreview(widget.image.path),
-            builder: (context, snapshot) {
-                if(snapshot.hasData) return Image.memory(snapshot.data!, fit: BoxFit.cover,);
-                if(snapshot.hasError) throw snapshot.error!;
-                return const Center(child: CircularProgressIndicator(),);
-            }
-        );
     }
 }
