@@ -8,6 +8,7 @@ import 'package:open_file/open_file.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import "package:vector_math/vector_math_64.dart";
 
 List<PopupMenuEntry> booruItems() {
     return [
@@ -43,7 +44,7 @@ List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildConte
     return [
         PopupMenuItem(
             child: const Text("Edit image metadata"),
-            onTap: () => context.push("/manage_image/${image.id}")
+            onTap: () => context.push("/manage_image/internal/${image.id}")
         ),
         PopupMenuItem(
             child: Text("Delete image", style: TextStyle(color: Theme.of(context).colorScheme.error)),
@@ -98,4 +99,24 @@ class DeleteImageDialogue extends StatelessWidget {
             ],
         );
     }
+}
+
+Offset getOffsetRelativeToBox({required Offset offset, required RenderObject renderObject}) {
+    debugPrint(globalToLocal(renderObject, offset).toString());
+    return globalToLocal(renderObject, offset);
+}
+
+Offset globalToLocal(RenderObject object, Offset point, { RenderObject? ancestor }) {
+    // Copied from
+    final Matrix4 transform = object.getTransformTo(ancestor);
+    final double det = transform.invert();
+    if (det == 0.0) {
+        return Offset.zero;
+    }
+    final Vector3 n = Vector3(0.0, 0.0, 1.0);
+    final Vector3 i = transform.perspectiveTransform(Vector3(0.0, 0.0, 0.0));
+    final Vector3 d = transform.perspectiveTransform(Vector3(0.0, 0.0, 1.0)) - i;
+    final Vector3 s = transform.perspectiveTransform(Vector3(point.dx, point.dy, 0.0));
+    final Vector3 p = s - d * (n.dot(s) / n.dot(d));
+    return Offset(p.x, p.y);
 }

@@ -40,7 +40,7 @@ class ImageView extends StatelessWidget {
                                 constraints: const BoxConstraints(maxWidth: 400.0),
                                 child: ListView(
                                     children: [
-                                        ImageViewProprieties(image)
+                                        ImageViewProprieties(image, renderObject: context.findRenderObject(),)
                                     ],
                                 )
                             )
@@ -89,8 +89,8 @@ class _ImageViewDisplayState extends State<ImageViewDisplay> {
                                 onTap: () => {
                                     context.push("/dialogs/zoom_image/${widget.image.id}")
                                 },
-                                onLongPressEnd: (tap) => openContextMenu(getContextMenuPosition(long: tap, renderBox: context.findRenderObject() as RenderBox)),
-                                onSecondaryTapDown: (tap) => openContextMenu(getContextMenuPosition(short: tap, renderBox: context.findRenderObject() as RenderBox)),
+                                onLongPressEnd: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
+                                onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
                                 child: Image.file(widget.image.getImage(), fit: BoxFit.contain),
                             ),
                         ),
@@ -180,9 +180,10 @@ class ImageViewZoom extends StatelessWidget {
 }
 
 class ImageViewProprieties extends StatelessWidget {
-    const ImageViewProprieties(this.image, {super.key});
+    const ImageViewProprieties(this.image, {super.key, this.renderObject});
     
     final BooruImage image;
+    final RenderObject? renderObject;
 
     @override
     Widget build(BuildContext context) {
@@ -255,8 +256,8 @@ class ImageViewProprieties extends StatelessWidget {
                                 cursor: SystemMouseCursors.click,
                                 child: GestureDetector(
                                     onTap: () => launchUrlString(e),
-                                    onLongPressEnd: (tap) => openContextMenu(getContextMenuPosition(long: tap, renderBox: context.findRenderObject() as RenderBox)),
-                                    onSecondaryTapDown: (tap) => openContextMenu(getContextMenuPosition(short: tap, renderBox: context.findRenderObject() as RenderBox)),
+                                    onLongPressEnd: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: renderObject ?? context.findRenderObject()!)),
+                                    onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: renderObject ?? context.findRenderObject()!)),
                                     child: Text(e, style: linkText)
                                 )
                             );
@@ -324,11 +325,4 @@ class _TagState extends State<Tag> {
             )
         );
     }
-}
-
-Offset getContextMenuPosition({TapDownDetails? short, LongPressEndDetails? long, required RenderBox renderBox}) {
-    final dynamic tap = short ?? long;
-    if(tap == null) throw "Either a TapDownDetails or a LongPressEndDetails should be informed";
-    debugPrint(renderBox.globalToLocal(tap.globalPosition).toString());
-    return renderBox.globalToLocal(tap.globalPosition);
 }

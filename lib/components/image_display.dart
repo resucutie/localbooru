@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:gif_view/gif_view.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -14,13 +15,14 @@ class SilverRepoGrid extends StatelessWidget {
     final List<BooruImage> images;
     final Function(BooruImage image)? onPressed;
     final int? autoadjustColumns;
-
+    
     String? getType(String filename) {
         final mime = lookupMimeType(filename)!;
         if(mime.startsWith("video")) return "video";
         if(mime.startsWith("image/gif")) return "gif";
         return "image";
     }
+
   
     @override
     Widget build(BuildContext context) {
@@ -43,12 +45,29 @@ class SilverRepoGrid extends StatelessWidget {
                     crossAxisCount: columns,
                 ),
                 delegate: SliverChildListDelegate(images.map((image) {
+                    void openContextMenu(Offset offset) {
+                        final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
+                        showMenu(
+                            context: context,
+                            position: RelativeRect.fromRect(
+                                Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
+                                Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
+                            ),
+                            items: [
+                                ...imageShareItems(image),
+                                const PopupMenuDivider(),
+                                ...imageManagementItems(image, context: context),
+                            ]
+                        );
+                    }
                     return Padding(
                         padding: const EdgeInsets.all(4.0),
                         child: MouseRegion(
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
                                 onTap: () {if(onPressed != null) onPressed!(image);},
+                                onLongPressEnd: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
+                                onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
                                 child: Stack(
                                     children: [
                                         AspectRatio(
