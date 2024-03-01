@@ -22,7 +22,7 @@ List<PopupMenuEntry> booruItems() {
 List<PopupMenuEntry> imageShareItems(BooruImage image) {
     return [
         PopupMenuItem(
-            child: const Text("Open image"),
+            child: const Text("Open image in image viewer"),
             onTap: () => OpenFile.open(image.path),
         ),
         PopupMenuItem(
