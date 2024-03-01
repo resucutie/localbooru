@@ -4,13 +4,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/window_frame.dart';
-import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/image_manager/peripherals.dart';
-import 'package:open_file/open_file.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:super_clipboard/super_clipboard.dart';
 
 class BrowseScreen extends StatelessWidget {
     const BrowseScreen({super.key, required this.child, required this.uri});
@@ -178,7 +175,7 @@ class BrowseScreenPopupMenuButton extends StatelessWidget {
     Widget build(context) {
         return PopupMenuButton(
             itemBuilder: (context) {
-                final List<PopupMenuEntry> filteredList = generalItems();
+                final List<PopupMenuEntry> filteredList = booruItems();
                 if(image != null) {
                     filteredList.add(const PopupMenuDivider());
                     filteredList.addAll(imageShareItems(image!));
@@ -187,75 +184,6 @@ class BrowseScreenPopupMenuButton extends StatelessWidget {
                 };
                 return filteredList;
             }
-        );
-    }
-}
-
-List<PopupMenuEntry> generalItems() {
-    return [
-        PopupMenuItem(
-            child: const Text("Refresh"),
-            onTap: () => booruUpdateListener.update(),
-        )
-    ];
-}
-List<PopupMenuEntry> imageShareItems(BooruImage image) {
-    return [
-        PopupMenuItem(
-            child: const Text("Open image"),
-            onTap: () => OpenFile.open(image.path),
-        ),
-        PopupMenuItem(
-            child: const Text("Copy image to clipboard"),
-            onTap: () async {
-                final item = DataWriterItem();
-                item.add(Formats.png(await File(image.path).readAsBytes()));
-                await SystemClipboard.instance?.write([item]);
-            },
-        ),
-        PopupMenuItem(
-            child: const Text("Share image"),
-            onTap: () async => await Share.shareXFiles([XFile(image.path)]),
-        )
-    ];
-}
-
-List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildContext context}) {
-    return [
-        PopupMenuItem(
-            child: const Text("Edit image metadata"),
-            onTap: () => context.push("/manage_image/${image.id}")
-        ),
-        PopupMenuItem(
-            child: Text("Delete image", style: TextStyle(color: Theme.of(context).colorScheme.error)),
-            onTap: () => showDialog(context: context,
-                builder: (context) => DeleteImageDialogue(id: image.id)
-            )
-        ),
-    ];
-}
-
-class DeleteImageDialogue extends StatelessWidget {
-    const DeleteImageDialogue({super.key, required this.id});
-
-    final String id;
-
-    @override
-    Widget build(BuildContext context) {
-        return AlertDialog(
-            title: const Text("Delete image"),
-            content: const Text("Are you sure that you want to delete this image? This action will be irreversible"),
-            actions: [
-                TextButton(onPressed: Navigator.of(context).pop, child: const Text("No")),
-                TextButton(
-                    child: const Text("Yes"), 
-                    onPressed: () async {
-                        Navigator.of(context).pop(); //first to close menu
-                        context.pop(); //second to close viewer
-                        await removeImage(id);
-                    }
-                ),
-            ],
         );
     }
 }

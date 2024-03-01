@@ -1,16 +1,14 @@
 import 'dart:io';
 import 'dart:math' as m;
-import 'dart:ui';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
-import 'package:localbooru/views/navigation/index.dart';
 import 'package:mime/mime.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:media_kit/media_kit.dart';                      // Provides [Player], [Media], [Playlist] etc.
@@ -65,13 +63,6 @@ class ImageViewDisplay extends StatefulWidget {
 }
 
 class _ImageViewDisplayState extends State<ImageViewDisplay> {
-    Offset getContextMenuPosition({TapDownDetails? short, LongPressEndDetails? long}) {
-        final dynamic tap = short ?? long;
-        if(tap == null) throw "Either a TapDownDetails or a LongPressEndDetails should be informed";
-        final RenderBox renderBox = context.findRenderObject() as RenderBox;
-        return renderBox.globalToLocal(tap.globalPosition);
-    }
-
     void openContextMenu(Offset offset) {
         final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
         showMenu(
@@ -98,8 +89,8 @@ class _ImageViewDisplayState extends State<ImageViewDisplay> {
                                 onTap: () => {
                                     context.push("/dialogs/zoom_image/${widget.image.id}")
                                 },
-                                onLongPressEnd: (tap) => openContextMenu(getContextMenuPosition(long: tap)),
-                                onSecondaryTapDown: (tap) => openContextMenu(getContextMenuPosition(short: tap)),
+                                onLongPressEnd: (tap) => openContextMenu(getContextMenuPosition(long: tap, renderBox: context.findRenderObject() as RenderBox)),
+                                onSecondaryTapDown: (tap) => openContextMenu(getContextMenuPosition(short: tap, renderBox: context.findRenderObject() as RenderBox)),
                                 child: Image.file(widget.image.getImage(), fit: BoxFit.contain),
                             ),
                         ),
@@ -248,13 +239,28 @@ class ImageViewProprieties extends StatelessWidget {
 
                     const Header("Sources"),
                     image.sources == null || image.sources!.isEmpty ? const Text("None") : Column(
-                        children: image.sources!.map((e) => MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: GestureDetector(
-                                onTap: () => launchUrlString(e),
-                                child: Text(e, style: linkText)
-                            )
-                        )).toList()
+                        children: image.sources!.map((e) {
+                            void openContextMenu(Offset offset) {
+                                final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
+                                showMenu(
+                                    context: context,
+                                    position: RelativeRect.fromRect(
+                                        Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
+                                        Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
+                                    ),
+                                    items: urlItems(e)
+                                );
+                            }
+                            return MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                    onTap: () => launchUrlString(e),
+                                    onLongPressEnd: (tap) => openContextMenu(getContextMenuPosition(long: tap, renderBox: context.findRenderObject() as RenderBox)),
+                                    onSecondaryTapDown: (tap) => openContextMenu(getContextMenuPosition(short: tap, renderBox: context.findRenderObject() as RenderBox)),
+                                    child: Text(e, style: linkText)
+                                )
+                            );
+                        }).toList()
                     ),
 
                     const Header("Other"),
@@ -318,4 +324,11 @@ class _TagState extends State<Tag> {
             )
         );
     }
+}
+
+Offset getContextMenuPosition({TapDownDetails? short, LongPressEndDetails? long, required RenderBox renderBox}) {
+    final dynamic tap = short ?? long;
+    if(tap == null) throw "Either a TapDownDetails or a LongPressEndDetails should be informed";
+    debugPrint(renderBox.globalToLocal(tap.globalPosition).toString());
+    return renderBox.globalToLocal(tap.globalPosition);
 }
