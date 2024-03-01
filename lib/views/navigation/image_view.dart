@@ -240,6 +240,8 @@ class ImageViewProprieties extends StatelessWidget {
 
                     const Header("Sources"),
                     image.sources == null || image.sources!.isEmpty ? const Text("None") : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: image.sources!.map((e) {
                             void openContextMenu(Offset offset) {
                                 final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
