@@ -55,10 +55,34 @@ class ImageView extends StatelessWidget {
     }
 }
 
-class ImageViewDisplay extends StatelessWidget {
+class ImageViewDisplay extends StatefulWidget {
     const ImageViewDisplay(this.image, {super.key});
 
     final BooruImage image;
+
+    @override
+    State<ImageViewDisplay> createState() => _ImageViewDisplayState();
+}
+
+class _ImageViewDisplayState extends State<ImageViewDisplay> {
+    Offset getContextMenuPosition({TapDownDetails? short, LongPressEndDetails? long}) {
+        final dynamic tap = short ?? long;
+        if(tap == null) throw "Either a TapDownDetails or a LongPressEndDetails should be informed";
+        final RenderBox renderBox = context.findRenderObject() as RenderBox;
+        return renderBox.globalToLocal(tap.globalPosition);
+    }
+
+    void openContextMenu(Offset offset) {
+        final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
+        showMenu(
+            context: context,
+            position: RelativeRect.fromRect(
+                Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
+                Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
+            ),
+            items: imageShareItems(widget.image)
+        );
+    }
 
     @override
     Widget build(BuildContext context) {
@@ -66,31 +90,21 @@ class ImageViewDisplay extends StatelessWidget {
             builder: (context, prefs) => Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Center(
-                  child: Listener(
-                      child: lookupMimeType(image.filename)!.startsWith("video/") || (prefs.getBool("gif_video") ?? settingsDefaults["gif_video"]) && lookupMimeType(image.filename) == "image/gif"
-                        ? VideoView(image.path)
+                    child: lookupMimeType(widget.image.filename)!.startsWith("video/") || (prefs.getBool("gif_video") ?? settingsDefaults["gif_video"]) && lookupMimeType(widget.image.filename) == "image/gif"
+                        ? VideoView(widget.image.path)
                         : MouseRegion(
                             cursor: SystemMouseCursors.zoomIn,
                             child: GestureDetector(
                                 onTap: () => {
-                                    context.push("/dialogs/zoom_image/${image.id}")
+                                    context.push("/dialogs/zoom_image/${widget.image.id}")
                                 },
-                                child: Image.file(image.getImage(), fit: BoxFit.contain),
+                                onLongPressEnd: (tap) => openContextMenu(getContextMenuPosition(long: tap)),
+                                onSecondaryTapDown: (tap) => openContextMenu(getContextMenuPosition(short: tap)),
+                                child: Image.file(widget.image.getImage(), fit: BoxFit.contain),
                             ),
                         ),
-                      onPointerDown: (PointerDownEvent event) async {
-                          if(event.kind != PointerDeviceKind.mouse) return;
-                          if(event.buttons == kSecondaryMouseButton) {
-                              await showMenu(
-                                  context: context,
-                                  position: RelativeRect.fromSize(event.position & const Size(48.0, 48.0), (Overlay.of(context).context.findRenderObject() as RenderBox).size),
-                                  items: imageShareItems(image)
-                              );
-                          }
-                      },
-                  ),
+                    ),
                 ),
-            ),
         );
     }
 }
