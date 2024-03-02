@@ -47,7 +47,7 @@ jobs:
       - name: why tf there's stuff inside here
         run: |
           git clone --mirror https://github.com/media-kit/media-kit/ /c/Users/runneradmin/.pub-cache\git\cache\media-kit-a5754130f6d48cc5c7f8dcd88fcd7a2a48ac2f63
-          rmdir /s /q /c/Users/runneradmin/.pub-cache
+          rd -r /c/Users/runneradmin/.pub-cache
       - name: Install project dependencies
         run: flutter pub get
       - name: Enable windows building
