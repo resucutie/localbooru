@@ -45,7 +45,7 @@ jobs:
           channel: 'stable'
           flutter-version: '3.16.9'
       - name: why tf there's stuff inside here
-        run: mkdir /c/Users/runneradmin/.pub-cache
+        run: git clone --mirror https://github.com/media-kit/media-kit/ /c/Users/runneradmin/.pub-cache\git\cache\media-kit-a5754130f6d48cc5c7f8dcd88fcd7a2a48ac2f63
       - name: Install project dependencies
         run: flutter pub get
       - name: Enable windows building
