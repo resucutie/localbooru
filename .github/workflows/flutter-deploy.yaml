@@ -45,7 +45,7 @@ jobs:
           channel: 'stable'
           flutter-version: '3.16.9'
       - name: why tf there's stuff inside here
-        run: dir C:/Users/runneradmin/.pub-cache/git/cache/
+        run: dir C:/Users/runneradmin/
       - name: Install project dependencies
         run: flutter pub get
       - name: Enable windows building
