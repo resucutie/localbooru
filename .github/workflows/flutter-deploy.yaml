@@ -51,8 +51,8 @@ jobs:
           commitChange: false
           changes: |
             {
-              "dependencies.media_kit_video": ^1.2.4,
-              "dependency_overrides": null
+              "dependencies.media_kit_video": "^1.2.4",
+              "dependency_overrides": "null"
             }
       - name: Install project dependencies
         run: flutter pub get
