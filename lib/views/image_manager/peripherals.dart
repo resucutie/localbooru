@@ -40,7 +40,6 @@ class _InsertURLDialogState extends State<InsertURLDialog> {
     TextEditingController controller = TextEditingController();
 
     void importFromService() {
-        Scaffold.of(context).closeDrawer();
         context.pushNamed("download_url", pathParameters: {"url": controller.text});
         Navigator.of(context).pop();
     }
