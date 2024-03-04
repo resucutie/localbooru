@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math' as m;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
@@ -10,6 +11,7 @@ import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:mime/mime.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:media_kit/media_kit.dart';                      // Provides [Player], [Media], [Playlist] etc.
 import 'package:media_kit_video/media_kit_video.dart';          // Provides [VideoController] & [Video] etc.        
@@ -91,7 +93,10 @@ class _ImageViewDisplayState extends State<ImageViewDisplay> {
                                 },
                                 onLongPressEnd: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
                                 onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
-                                child: Image.file(widget.image.getImage(), fit: BoxFit.contain),
+                                child: Hero(
+                                    tag: "detailed",
+                                    child: Image.file(widget.image.getImage(), fit: BoxFit.contain),
+                                ),
                             ),
                         ),
                     ),
@@ -138,12 +143,25 @@ class VideoViewState extends State<VideoView> {
   }
 }
 
-class ImageViewZoom extends StatelessWidget {
+class ImageViewZoom extends StatefulWidget {
     const ImageViewZoom(this.image, {super.key});
 
     final BooruImage image;
+  
+    @override
+    State<ImageViewZoom> createState() => _ImageViewZoomState();
+}
 
+class _ImageViewZoomState extends State<ImageViewZoom> {
     final Color _appBarColor = const Color.fromARGB(150, 0, 0, 0);
+
+    PhotoViewController controller = PhotoViewController();
+
+    @override
+    void dispose() {
+        controller.dispose();
+        super.dispose();
+    }
 
     @override
     Widget build(BuildContext context) {
@@ -158,22 +176,41 @@ class ImageViewZoom extends StatelessWidget {
                     appBar: AppBar(
                         backgroundColor: _appBarColor,
                         elevation: 0,
-                        title: Text(image.filename),
+                        title: Text(widget.image.filename),
                         actions: [
                             PopupMenuButton(
-                                itemBuilder: (context) => imageShareItems(image),
+                                itemBuilder: (context) => imageShareItems(widget.image),
                             )
                         ],
                     ),
                 ),
-                body: InteractiveViewer(
-                    minScale: 0.1,
-                    maxScale: double.infinity,
-                    boundaryMargin: EdgeInsets.all((MediaQuery.of(context).size.width + MediaQuery.of(context).size.height) / 4),
-                    child: Center(
-                        child: Image.file(image.getImage())
+                body: Listener(
+                    onPointerSignal:(event) {
+                        if(event is PointerScrollEvent) {
+                            double scrollBy = .15;
+                            if(!event.scrollDelta.dy.isNegative) {
+                                if((controller.scale ?? 1) <= .1) return;
+                                scrollBy = -scrollBy;
+                            }
+                            controller.scale = (controller.scale ?? 1) * (1 + scrollBy);
+                            controller.position = Offset(controller.position.dx * (1 + scrollBy), controller.position.dy * (1 + scrollBy));
+                        }
+                    },
+                    child: GestureDetector(
+                        onVerticalDragEnd: (details) {
+                            if(details.velocity.pixelsPerSecond.dy.abs() > 0) context.pop();
+                        },
+                        child: PhotoViewGestureDetectorScope(
+                            axis: Axis.vertical,
+                            child: PhotoView(
+                                imageProvider: FileImage(widget.image.getImage()),
+                                heroAttributes: const PhotoViewHeroAttributes(tag: "detailed"),
+                                minScale: .1,
+                                controller: controller,
+                            ),
+                        ),
                     )
-                ),
+                )
             ),
         );
     }
