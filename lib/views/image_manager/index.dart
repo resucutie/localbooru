@@ -331,11 +331,26 @@ class TagField extends StatefulWidget {
 }
 class _TagFieldState extends State<TagField> {
     final FocusNode _focusNode = FocusNode();
+    late TextEditingController controller;
+    GlobalKey textboxKey = GlobalKey();
+
+    @override
+    void initState() {
+        super.initState();
+        controller = widget.controller ?? TextEditingController();
+    }
+
+    bool spawnAtBottom() {
+        if(textboxKey.currentContext == null) return true;
+        RenderBox textboxRenderBox = textboxKey.currentContext!.findRenderObject() as RenderBox;
+        double textboxPosY = textboxRenderBox.localToGlobal(Offset.zero).dy;
+        return textboxPosY <= (MediaQuery.of(context).size.height / 2);
+    }
 
     @override
     Widget build(context) {
         return RawAutocomplete<String>(
-            textEditingController: widget.controller,
+            textEditingController: controller,
             focusNode: _focusNode,
             optionsBuilder: (textEditingValue) async {
                 if (textEditingValue.text == '') {
@@ -360,11 +375,12 @@ class _TagFieldState extends State<TagField> {
             optionsViewBuilder: (context, onSelected, options) {
                 int highlightedIndex = AutocompleteHighlightedOption.of(context);
                 return Align(
-                    alignment: Alignment.topCenter,
+                    alignment: spawnAtBottom() ? Alignment.topCenter : Alignment.bottomCenter,
                     child: Material(
                         elevation: 4.0,
                         child: Container(
-                            constraints: const BoxConstraints(maxHeight: 400),
+                            constraints: const BoxConstraints(maxHeight: 300),
+                            alignment: Alignment.bottomCenter,
                             child: ListView.builder(
                                 itemCount: options.length,
                                 itemBuilder: (context, index) {
@@ -382,8 +398,10 @@ class _TagFieldState extends State<TagField> {
                     ),
                 );
             },
+            optionsViewOpenDirection: spawnAtBottom() ? OptionsViewOpenDirection.down : OptionsViewOpenDirection.up,
             fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
                 return TextFormField(
+                    key: textboxKey,
                     controller: textController,
                     focusNode: focusNode,
                     decoration: widget.decoration,
