@@ -158,8 +158,9 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                 appBar: AppBar(
                     title: Text("${isEditing ? "Edit" : "Add"} image"),
                     actions: [
-                        IconButton(
-                            icon: const Icon(Icons.done),
+                        TextButton.icon(
+                            icon: const Icon(Icons.check),
+                            label: const Text("Done"),
                             onPressed: () {
                                 if(_formKey.currentState!.validate()) _submit();
                             }
@@ -243,6 +244,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                         ),
                         const Header("Sources"),
                         ListStringTextInput(
+                            addButton: const Text("Add source"),
                             onChanged: (list) => setState(() => urlList = list),
                             canBeEmpty: true,
                             defaultValue: urlList,
@@ -402,12 +404,13 @@ class _TagFieldState extends State<TagField> {
 }
 
 class ListStringTextInput extends StatefulWidget {
-    const ListStringTextInput({super.key, required this.onChanged, this.defaultValue = const [], this.canBeEmpty = false, this.formValidator});
+    const ListStringTextInput({super.key, required this.onChanged, this.defaultValue = const [], this.canBeEmpty = false, this.formValidator, this.addButton = const Text("Add")});
 
     final Function(List<String>) onChanged;
     final List<String> defaultValue;
     final FormFieldValidator<String>? formValidator;
     final bool canBeEmpty;
+    final Widget addButton;
 
     @override
     State<ListStringTextInput> createState() => _ListStringTextInputState();
@@ -471,15 +474,19 @@ class _ListStringTextInputState extends State<ListStringTextInput> {
                     )
                 ),
                 const SizedBox(height: 16),
-                FilledButton(onPressed: () async {
-                    setState(() => _currentValue.add(""));
-                    _updateList();
-                    Future.delayed(const Duration(milliseconds: 10), () => _scrollController.animateTo(
-                        _scrollController.position.maxScrollExtent,
-                        duration: const Duration(milliseconds: 150),
-                        curve: Curves.fastOutSlowIn,
-                    ));
-                }, child: const Text("Add"))
+                ListTile(
+                    title: widget.addButton,
+                    leading: const Icon(Icons.add),
+                    onTap: () async {
+                        setState(() => _currentValue.add(""));
+                        _updateList();
+                        Future.delayed(const Duration(milliseconds: 10), () => _scrollController.animateTo(
+                            _scrollController.position.maxScrollExtent,
+                            duration: const Duration(milliseconds: 150),
+                            curve: Curves.fastOutSlowIn,
+                        ));
+                    }, 
+                )
             ],
         );
     }
