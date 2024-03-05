@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gif_view/gif_view.dart';
 import 'package:localbooru/api/index.dart';
@@ -10,11 +11,18 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:mime/mime.dart';
 
 
-class SilverRepoGrid extends StatelessWidget {
+class SilverRepoGrid extends StatefulWidget {
     const SilverRepoGrid({super.key, required this.images, this.onPressed, this.autoadjustColumns});
     final List<BooruImage> images;
     final Function(BooruImage image)? onPressed;
     final int? autoadjustColumns;
+
+    @override
+    State<SilverRepoGrid> createState() => _SilverRepoGridState();
+}
+
+class _SilverRepoGridState extends State<SilverRepoGrid> {
+    late LongPressDownDetails longTap;
     
     String? getType(String filename) {
         final mime = lookupMimeType(filename)!;
@@ -33,18 +41,18 @@ class SilverRepoGrid extends StatelessWidget {
             (
                 (20*50)
                 /
-                (autoadjustColumns ?? settingsDefaults["grid_size"])
+                (widget.autoadjustColumns ?? settingsDefaults["grid_size"])
             )
         ).ceil();
 
-        if(images.isEmpty) {
+        if(widget.images.isEmpty) {
             return const SizedBox.shrink();
         } else {
             return SliverGrid(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: columns,
                 ),
-                delegate: SliverChildListDelegate(images.map((image) {
+                delegate: SliverChildListDelegate(widget.images.map((image) {
                     void openContextMenu(Offset offset) {
                         final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
                         showMenu(
@@ -65,8 +73,9 @@ class SilverRepoGrid extends StatelessWidget {
                         child: MouseRegion(
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
-                                onTap: () {if(onPressed != null) onPressed!(image);},
-                                onLongPressEnd: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
+                                onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
+                                onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!)),
+                                onLongPressDown: (tap) => longTap = tap,
                                 onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
                                 child: Stack(
                                     children: [

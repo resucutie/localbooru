@@ -65,6 +65,8 @@ class ImageViewDisplay extends StatefulWidget {
 }
 
 class _ImageViewDisplayState extends State<ImageViewDisplay> {
+    late LongPressDownDetails longPress;
+
     void openContextMenu(Offset offset) {
         final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
         showMenu(
@@ -91,7 +93,8 @@ class _ImageViewDisplayState extends State<ImageViewDisplay> {
                                 onTap: () => {
                                     context.push("/dialogs/zoom_image/${widget.image.id}")
                                 },
-                                onLongPressEnd: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
+                                onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: context.findRenderObject()!)),
+                                onLongPressDown: (tap) => setState(() => longPress = tap),
                                 onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
                                 child: Hero(
                                     tag: "detailed",
@@ -216,16 +219,41 @@ class _ImageViewZoomState extends State<ImageViewZoom> {
     }
 }
 
-class ImageViewProprieties extends StatelessWidget {
+class ImageViewProprieties extends StatefulWidget {
     const ImageViewProprieties(this.image, {super.key, this.renderObject});
     
     final BooruImage image;
     final RenderObject? renderObject;
+    
+    @override
+    State<StatefulWidget> createState() => _ImageViewProprietiesState();
+}
+
+class _ImageViewProprietiesState extends State<ImageViewProprieties> {
+    late final TextStyle linkText = TextStyle(color: Theme.of(context).colorScheme.primary, decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.primary);
+    late LongPressDownDetails longPress;
+
+    void openContextMenu({required Offset offset, required String url}) {
+        final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
+        showMenu(
+            context: context,
+            position: RelativeRect.fromRect(
+                Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
+                Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
+            ),
+            items: [
+                PopupMenuItem(
+                    enabled: false,
+                    height: 16,
+                    child: Text(url, maxLines: 1),
+                ),
+                ...urlItems(url)
+            ]
+        );
+    }
 
     @override
-    Widget build(BuildContext context) {
-        final TextStyle linkText = TextStyle(color: Theme.of(context).colorScheme.primary, decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.primary);
-        
+    Widget build(BuildContext context) {    
         return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -233,7 +261,7 @@ class ImageViewProprieties extends StatelessWidget {
                 children: [
                     const Header("Tags", padding: EdgeInsets.zero),
                     FutureBuilder(
-                        future: getCurrentBooru().then((booru) => booru.separateTagsByType(image.tags.split(" "))),
+                        future: getCurrentBooru().then((booru) => booru.separateTagsByType(widget.image.tags.split(" "))),
                         builder: (context, snapshot) {
                             if (snapshot.hasData) {
                                 final tags = snapshot.data!;
@@ -276,28 +304,19 @@ class ImageViewProprieties extends StatelessWidget {
                     ),
 
                     const Header("Sources"),
-                    image.sources == null || image.sources!.isEmpty ? const Text("None") : Column(
+                    widget.image.sources == null || widget.image.sources!.isEmpty ? const Text("None") : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
-                        children: image.sources!.map((e) {
-                            void openContextMenu(Offset offset) {
-                                final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
-                                showMenu(
-                                    context: context,
-                                    position: RelativeRect.fromRect(
-                                        Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
-                                        Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
-                                    ),
-                                    items: urlItems(e)
-                                );
-                            }
+                        children: widget.image.sources!.map((url) {
+                            final ro = widget.renderObject ?? context.findRenderObject()!;
                             return MouseRegion(
                                 cursor: SystemMouseCursors.click,
                                 child: GestureDetector(
-                                    onTap: () => launchUrlString(e),
-                                    onLongPressEnd: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: renderObject ?? context.findRenderObject()!)),
-                                    onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: renderObject ?? context.findRenderObject()!)),
-                                    child: Text(e, style: linkText)
+                                    onTap: () => launchUrlString(url),
+                                    onLongPress: () => openContextMenu(offset: getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: ro), url: url),
+                                    onLongPressDown: (details) => longPress = details,
+                                    onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: ro), url: url),
+                                    child: Text(url, style: linkText)
                                 )
                             );
                         }).toList()
@@ -306,8 +325,8 @@ class ImageViewProprieties extends StatelessWidget {
                     const Header("Other"),
                     FutureBuilder<Map>(
                         future: (() async => {
-                            "dimensions": lookupMimeType(image.filename)!.startsWith("video/") ? null : await decodeImageFromList(await File(image.path).readAsBytes()),
-                            "size": await File(image.path).length()
+                            "dimensions": lookupMimeType(widget.image.filename)!.startsWith("video/") ? null : await decodeImageFromList(await File(widget.image.path).readAsBytes()),
+                            "size": await File(widget.image.path).length()
                         })(),
                         builder: (context, snapshot) {
                             if(snapshot.hasData || snapshot.hasError) {
@@ -320,7 +339,7 @@ class ImageViewProprieties extends StatelessWidget {
 
                                 return SelectableText.rich(
                                     TextSpan(
-                                        text: "Path: ${image.path}\n",
+                                        text: "Path: ${widget.image.path}\n",
                                         children: [
                                             if(!hasDimensionsMetadata) TextSpan(text: "Dimensions: ${snapshot.data?["dimensions"]?.width}x${snapshot.data?["dimensions"]?.height}\n"),
                                             TextSpan(text: "Size: $formattedSize"),
