@@ -82,7 +82,7 @@ class _ImageViewDisplayState extends State<ImageViewDisplay> {
     @override
     Widget build(BuildContext context) {
         return SharedPreferencesBuilder(
-            builder: (context, prefs) => Padding(
+            builder: (_, prefs) => Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Center(
                     child: lookupMimeType(widget.image.filename)!.startsWith("video/") || (prefs.getBool("gif_video") ?? settingsDefaults["gif_video"]) && lookupMimeType(widget.image.filename) == "image/gif"
@@ -91,7 +91,7 @@ class _ImageViewDisplayState extends State<ImageViewDisplay> {
                             cursor: SystemMouseCursors.zoomIn,
                             child: GestureDetector(
                                 onTap: () => {
-                                    context.push("/dialogs/zoom_image/${widget.image.id}")
+                                    GoRouter.of(context).push("/zoom_image/${widget.image.id}")
                                 },
                                 onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: context.findRenderObject()!)),
                                 onLongPressDown: (tap) => setState(() => longPress = tap),

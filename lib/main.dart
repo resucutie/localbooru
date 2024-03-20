@@ -91,11 +91,7 @@ final router = GoRouter(
                                 ),
                             ]
                         ),
-                        // dialogs
-                        GoRoute(path: "dialogs",
-                            redirect: (context, state) => null,
-                            routes: [
-                                GoRoute(path: "zoom_image/:id",
+                        GoRoute(path: "zoom_image/:id",
                                     pageBuilder: (context, state) {
                                         final String? id = state.pathParameters["id"];
                                         if (id == null) return MaterialPage(child: Text("Invalid ID $id"));
@@ -116,8 +112,6 @@ final router = GoRouter(
                                         );
                                     }
                                 ),
-                            ]
-                        ),
                     ]
                 ),
                 // navigation
