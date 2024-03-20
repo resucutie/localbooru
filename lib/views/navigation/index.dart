@@ -113,6 +113,7 @@ class BrowseScreen extends StatelessWidget {
                                 title: const Text("Import from service"),
                                 leading: const Icon(Icons.link),
                                 onTap: () {
+                                    Scaffold.of(context).closeDrawer();
                                     showDialog(
                                         context: context,
                                         builder: (context) {

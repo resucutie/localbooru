@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/utils/constants.dart';
@@ -22,14 +23,17 @@ class _HomePageState extends State<HomePage> {
         return Container(
             padding: const EdgeInsets.all(8.0),
             child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                // mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                    const SizedBox(height: 64),
+                    const LocalBooruHeader(),
+                    const SizedBox(height: 32),
                     SearchTag(
                         onSearch: (_) => _onSearch(),
                         controller: _searchController,
                     ),
-                    const SizedBox(height: 16.0),
+                    const SizedBox(height: 16),
                     Wrap(
                         direction: Axis.horizontal,
                         spacing: 8.0,
@@ -40,7 +44,9 @@ class _HomePageState extends State<HomePage> {
                                 icon: const Icon(Icons.history)
                             )
                         ],
-                    )
+                    ),
+                    const SizedBox(height: 32),
+                    const ImageDisplay()
                 ],
             ),
         );
@@ -127,6 +133,52 @@ class SearchButton extends StatelessWidget {
         return IconButton(
             icon: icon,
             onPressed: controller.text.isEmpty ? null : () => onSearch(controller.text),
+        );
+    }
+}
+
+class LocalBooruHeader extends StatelessWidget {
+    const LocalBooruHeader({super.key});
+    
+    @override
+    Widget build(context) {
+        return OrientationBuilder(
+            builder: (context, orientation) => Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                direction: Axis.vertical,
+                spacing: 16,
+                children: [
+                    SvgPicture.asset("assets/brand/monochrome-icon.svg",
+                        color: Theme.of(context).colorScheme.primary,
+                        height: 128,
+                    ),
+                    const Text("LocalBooru",
+                        style: TextStyle(
+                            fontSize: 32,
+                        ),
+                    )
+                ],
+            ),
+        );
+    }
+}
+
+class ImageDisplay extends StatelessWidget {
+    const ImageDisplay({super.key});
+    
+    @override
+    Widget build(context) {
+        return BooruLoader(
+            builder: (context, booru) => FutureBuilder(
+                future: booru.getListLength(),
+                builder: (context, snapshot) {
+                    if(snapshot.hasData) {
+                        return Text("With ${snapshot.data} posts");
+                    }
+                    if(snapshot.hasError) throw snapshot.error!;
+                    return const CircularProgressIndicator();
+                },
+            ),
         );
     }
 }

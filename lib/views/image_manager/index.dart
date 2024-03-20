@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/formatter.dart';
 import 'package:localbooru/utils/tags.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -158,8 +160,9 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                 appBar: AppBar(
                     title: Text("${isEditing ? "Edit" : "Add"} image"),
                     actions: [
-                        IconButton(
-                            icon: const Icon(Icons.done),
+                        TextButton.icon(
+                            icon: const Icon(Icons.check),
+                            label: const Text("Done"),
                             onPressed: () {
                                 if(_formKey.currentState!.validate()) _submit();
                             }
@@ -180,6 +183,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                             },
                             currentValue: loadedImage,
                         ),
+                        const SizedBox(height: 16,),
                         Wrap(
                             alignment: WrapAlignment.spaceBetween,
                             crossAxisAlignment: WrapCrossAlignment.center,
@@ -243,6 +247,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                         ),
                         const Header("Sources"),
                         ListStringTextInput(
+                            addButton: const Text("Add source"),
                             onChanged: (list) => setState(() => urlList = list),
                             canBeEmpty: true,
                             defaultValue: urlList,
@@ -280,7 +285,7 @@ class ImageUploadForm extends StatelessWidget {
                                 strokeWidth: 2,
                                 borderType: BorderType.RRect,
                                 radius: const Radius.circular(24),
-                                color: Theme.of(context).colorScheme.primary,
+                                color: state.hasError ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
                                 child: ClipRRect(borderRadius: const BorderRadius.all(Radius.circular(22)),
                                     child: TextButton(
                                         style: TextButton.styleFrom(
@@ -306,8 +311,27 @@ class ImageUploadForm extends StatelessWidget {
                                 )
                             ),
                         ),
-                        if(!state.value.isEmpty) Text(state.value),
-                        if(state.hasError) Text(state.errorText!)
+                        if(!state.value.isEmpty) Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: ImageInfoBuilder(
+                                path: state.value,
+                                builder: (context, size, image) => Card(
+                                    child: ListTile(
+                                        leading: const Icon(Icons.info),
+                                        subtitle: SelectableText.rich(
+                                            TextSpan(
+                                                text: "Path: ${state.value}\n",
+                                                children: [
+                                                    if(image != null) TextSpan(text: "Dimensions: ${image.width}x${image.height}\n"),
+                                                    TextSpan(text: "Size: ${formatSize(size)}"),
+                                                ]
+                                            )
+                                        ),
+                                    ),
+                                ),
+                            )
+                        ),
+                        if(state.hasError) Text(state.errorText!, style: TextStyle(color: Theme.of(context).colorScheme.error),)
                     ],
                 );
             },
@@ -329,11 +353,26 @@ class TagField extends StatefulWidget {
 }
 class _TagFieldState extends State<TagField> {
     final FocusNode _focusNode = FocusNode();
+    late TextEditingController controller;
+    GlobalKey textboxKey = GlobalKey();
+
+    @override
+    void initState() {
+        super.initState();
+        controller = widget.controller ?? TextEditingController();
+    }
+
+    bool spawnAtBottom() {
+        if(textboxKey.currentContext == null) return true;
+        RenderBox textboxRenderBox = textboxKey.currentContext!.findRenderObject() as RenderBox;
+        double textboxPosY = textboxRenderBox.localToGlobal(Offset.zero).dy;
+        return textboxPosY <= (MediaQuery.of(context).size.height / 2);
+    }
 
     @override
     Widget build(context) {
         return RawAutocomplete<String>(
-            textEditingController: widget.controller,
+            textEditingController: controller,
             focusNode: _focusNode,
             optionsBuilder: (textEditingValue) async {
                 if (textEditingValue.text == '') {
@@ -358,11 +397,12 @@ class _TagFieldState extends State<TagField> {
             optionsViewBuilder: (context, onSelected, options) {
                 int highlightedIndex = AutocompleteHighlightedOption.of(context);
                 return Align(
-                    alignment: Alignment.topCenter,
+                    alignment: spawnAtBottom() ? Alignment.topCenter : Alignment.bottomCenter,
                     child: Material(
                         elevation: 4.0,
                         child: Container(
-                            constraints: const BoxConstraints(maxHeight: 400),
+                            constraints: const BoxConstraints(maxHeight: 300),
+                            alignment: Alignment.bottomCenter,
                             child: ListView.builder(
                                 itemCount: options.length,
                                 itemBuilder: (context, index) {
@@ -380,8 +420,10 @@ class _TagFieldState extends State<TagField> {
                     ),
                 );
             },
+            optionsViewOpenDirection: spawnAtBottom() ? OptionsViewOpenDirection.down : OptionsViewOpenDirection.up,
             fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
                 return TextFormField(
+                    key: textboxKey,
                     controller: textController,
                     focusNode: focusNode,
                     decoration: widget.decoration,
@@ -402,12 +444,13 @@ class _TagFieldState extends State<TagField> {
 }
 
 class ListStringTextInput extends StatefulWidget {
-    const ListStringTextInput({super.key, required this.onChanged, this.defaultValue = const [], this.canBeEmpty = false, this.formValidator});
+    const ListStringTextInput({super.key, required this.onChanged, this.defaultValue = const [], this.canBeEmpty = false, this.formValidator, this.addButton = const Text("Add")});
 
     final Function(List<String>) onChanged;
     final List<String> defaultValue;
     final FormFieldValidator<String>? formValidator;
     final bool canBeEmpty;
+    final Widget addButton;
 
     @override
     State<ListStringTextInput> createState() => _ListStringTextInputState();
@@ -471,15 +514,19 @@ class _ListStringTextInputState extends State<ListStringTextInput> {
                     )
                 ),
                 const SizedBox(height: 16),
-                FilledButton(onPressed: () async {
-                    setState(() => _currentValue.add(""));
-                    _updateList();
-                    Future.delayed(const Duration(milliseconds: 10), () => _scrollController.animateTo(
-                        _scrollController.position.maxScrollExtent,
-                        duration: const Duration(milliseconds: 150),
-                        curve: Curves.fastOutSlowIn,
-                    ));
-                }, child: const Text("Add"))
+                ListTile(
+                    title: widget.addButton,
+                    leading: const Icon(Icons.add),
+                    onTap: () async {
+                        setState(() => _currentValue.add(""));
+                        _updateList();
+                        Future.delayed(const Duration(milliseconds: 10), () => _scrollController.animateTo(
+                            _scrollController.position.maxScrollExtent,
+                            duration: const Duration(milliseconds: 150),
+                            curve: Curves.fastOutSlowIn,
+                        ));
+                    }, 
+                )
             ],
         );
     }

@@ -1,9 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/image_thumbnailer.dart';
 import 'package:mime/mime.dart';
+
 
 class SilverRepoGrid extends StatefulWidget {
     const SilverRepoGrid({super.key, required this.images, this.onPressed, this.autoadjustColumns});
@@ -17,6 +19,8 @@ class SilverRepoGrid extends StatefulWidget {
 }
 
 class _SilverRepoGridState extends State<SilverRepoGrid> {
+    late LongPressDownDetails longTap;
+    
     String? getType(String filename) {
         final mime = lookupMimeType(filename)!;
         if(mime.startsWith("video")) return "video";
@@ -73,7 +77,8 @@ class _SilverRepoGridState extends State<SilverRepoGrid> {
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
                                 onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
-                                onLongPressEnd: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
+                                onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!)),
+                                onLongPressDown: (tap) => longTap = tap,
                                 onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
                                 child: Stack(
                                     children: [

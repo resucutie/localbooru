@@ -1,15 +1,16 @@
-import 'dart:io';
-import 'dart:math' as m;
-
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/formatter.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:mime/mime.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:media_kit/media_kit.dart'; // Provides [Player], [Media], [Playlist] etc.
 import 'package:media_kit_video/media_kit_video.dart'; // Provides [VideoController] & [Video] etc.        
@@ -63,6 +64,8 @@ class ImageViewDisplay extends StatefulWidget {
 }
 
 class _ImageViewDisplayState extends State<ImageViewDisplay> {
+    late LongPressDownDetails longPress;
+
     void openContextMenu(Offset offset) {
         final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
         showMenu(
@@ -78,7 +81,7 @@ class _ImageViewDisplayState extends State<ImageViewDisplay> {
     @override
     Widget build(BuildContext context) {
         return SharedPreferencesBuilder(
-            builder: (context, prefs) => Padding(
+            builder: (_, prefs) => Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Center(
                     child: lookupMimeType(widget.image.filename)!.startsWith("video/") || ((prefs.getBool("gif_video") ?? settingsDefaults["gif_video"]) && lookupMimeType(widget.image.filename) == "image/gif")
@@ -87,11 +90,15 @@ class _ImageViewDisplayState extends State<ImageViewDisplay> {
                             cursor: SystemMouseCursors.zoomIn,
                             child: GestureDetector(
                                 onTap: () => {
-                                    context.push("/dialogs/zoom_image/${widget.image.id}")
+                                    GoRouter.of(context).push("/zoom_image/${widget.image.id}")
                                 },
-                                onLongPressEnd: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
+                                onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: context.findRenderObject()!)),
+                                onLongPressDown: (tap) => setState(() => longPress = tap),
                                 onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
-                                child: Image.file(widget.image.getImage(), fit: BoxFit.contain),
+                                child: Hero(
+                                    tag: "detailed",
+                                    child: Image.file(widget.image.getImage(), fit: BoxFit.contain),
+                                ),
                             ),
                         ),
                     ),
@@ -138,12 +145,25 @@ class VideoViewState extends State<VideoView> {
     }
 }
 
-class ImageViewZoom extends StatelessWidget {
+class ImageViewZoom extends StatefulWidget {
     const ImageViewZoom(this.image, {super.key});
 
     final BooruImage image;
+  
+    @override
+    State<ImageViewZoom> createState() => _ImageViewZoomState();
+}
 
+class _ImageViewZoomState extends State<ImageViewZoom> {
     final Color _appBarColor = const Color.fromARGB(150, 0, 0, 0);
+
+    PhotoViewController controller = PhotoViewController();
+
+    @override
+    void dispose() {
+        controller.dispose();
+        super.dispose();
+    }
 
     @override
     Widget build(BuildContext context) {
@@ -158,37 +178,81 @@ class ImageViewZoom extends StatelessWidget {
                     appBar: AppBar(
                         backgroundColor: _appBarColor,
                         elevation: 0,
-                        title: Text(image.filename),
+                        title: Text(widget.image.filename),
                         actions: [
                             PopupMenuButton(
-                                itemBuilder: (context) => imageShareItems(image),
+                                itemBuilder: (context) => imageShareItems(widget.image),
                             )
                         ],
                     ),
                 ),
-                body: InteractiveViewer(
-                    minScale: 0.1,
-                    maxScale: double.infinity,
-                    boundaryMargin: EdgeInsets.all((MediaQuery.of(context).size.width + MediaQuery.of(context).size.height) / 4),
-                    child: Center(
-                        child: Image.file(image.getImage())
+                body: Listener(
+                    onPointerSignal:(event) {
+                        if(event is PointerScrollEvent) {
+                            double scrollBy = .15;
+                            if(!event.scrollDelta.dy.isNegative) {
+                                if((controller.scale ?? 1) <= .1) return;
+                                scrollBy = -scrollBy;
+                            }
+                            controller.scale = (controller.scale ?? 1) * (1 + scrollBy);
+                            controller.position = Offset(controller.position.dx * (1 + scrollBy), controller.position.dy * (1 + scrollBy));
+                        }
+                    },
+                    child: GestureDetector(
+                        onVerticalDragEnd: (details) {
+                            if(details.velocity.pixelsPerSecond.dy.abs() > 0) context.pop();
+                        },
+                        child: PhotoViewGestureDetectorScope(
+                            axis: Axis.vertical,
+                            child: PhotoView(
+                                imageProvider: FileImage(widget.image.getImage()),
+                                heroAttributes: const PhotoViewHeroAttributes(tag: "detailed"),
+                                minScale: .1,
+                                controller: controller,
+                            ),
+                        ),
                     )
-                ),
+                )
             ),
         );
     }
 }
 
-class ImageViewProprieties extends StatelessWidget {
+class ImageViewProprieties extends StatefulWidget {
     const ImageViewProprieties(this.image, {super.key, this.renderObject});
     
     final BooruImage image;
     final RenderObject? renderObject;
+    
+    @override
+    State<StatefulWidget> createState() => _ImageViewProprietiesState();
+}
+
+class _ImageViewProprietiesState extends State<ImageViewProprieties> {
+    late final TextStyle linkText = TextStyle(color: Theme.of(context).colorScheme.primary, decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.primary);
+    late LongPressDownDetails longPress;
+
+    void openContextMenu({required Offset offset, required String url}) {
+        final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
+        showMenu(
+            context: context,
+            position: RelativeRect.fromRect(
+                Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
+                Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
+            ),
+            items: [
+                PopupMenuItem(
+                    enabled: false,
+                    height: 16,
+                    child: Text(url, maxLines: 1),
+                ),
+                ...urlItems(url)
+            ]
+        );
+    }
 
     @override
-    Widget build(BuildContext context) {
-        final TextStyle linkText = TextStyle(color: Theme.of(context).colorScheme.primary, decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.primary);
-        
+    Widget build(BuildContext context) {    
         return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -196,7 +260,7 @@ class ImageViewProprieties extends StatelessWidget {
                 children: [
                     const Header("Tags", padding: EdgeInsets.zero),
                     FutureBuilder(
-                        future: getCurrentBooru().then((booru) => booru.separateTagsByType(image.tags.split(" "))),
+                        future: getCurrentBooru().then((booru) => booru.separateTagsByType(widget.image.tags.split(" "))),
                         builder: (context, snapshot) {
                             if (snapshot.hasData) {
                                 final tags = snapshot.data!;
@@ -239,57 +303,37 @@ class ImageViewProprieties extends StatelessWidget {
                     ),
 
                     const Header("Sources"),
-                    image.sources == null || image.sources!.isEmpty ? const Text("None") : Column(
-                        children: image.sources!.map((e) {
-                            void openContextMenu(Offset offset) {
-                                final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
-                                showMenu(
-                                    context: context,
-                                    position: RelativeRect.fromRect(
-                                        Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
-                                        Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
-                                    ),
-                                    items: urlItems(e)
-                                );
-                            }
+                    widget.image.sources == null || widget.image.sources!.isEmpty ? const Text("None") : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: widget.image.sources!.map((url) {
+                            final ro = widget.renderObject ?? context.findRenderObject()!;
                             return MouseRegion(
                                 cursor: SystemMouseCursors.click,
                                 child: GestureDetector(
-                                    onTap: () => launchUrlString(e),
-                                    onLongPressEnd: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: renderObject ?? context.findRenderObject()!)),
-                                    onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: renderObject ?? context.findRenderObject()!)),
-                                    child: Text(e, style: linkText)
+                                    onTap: () => launchUrlString(url),
+                                    onLongPress: () => openContextMenu(offset: getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: ro), url: url),
+                                    onLongPressDown: (details) => longPress = details,
+                                    onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: ro), url: url),
+                                    child: Text(url, style: linkText)
                                 )
                             );
                         }).toList()
                     ),
 
                     const Header("Other"),
-                    FutureBuilder<Map>(
-                        future: (() async => {
-                            "dimensions": lookupMimeType(image.filename)!.startsWith("video/") ? null : await decodeImageFromList(await File(image.path).readAsBytes()),
-                            "size": await File(image.path).length()
-                        })(),
-                        builder: (context, snapshot) {
-                            if(snapshot.hasData || snapshot.hasError) {
-                                final hasDimensionsMetadata = snapshot.data?["dimensions"] == null;
-
-                                final bytes = snapshot.data!["size"]!;
-                                const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-                                var i = (m.log(bytes) / m.log(1000)).floor();
-                                final formattedSize = '${(bytes / m.pow(1000, i)).toStringAsFixed(2)} ${suffixes[i]}';
-
-                                return SelectableText.rich(
-                                    TextSpan(
-                                        text: "Path: ${image.path}\n",
-                                        children: [
-                                            if(!hasDimensionsMetadata) TextSpan(text: "Dimensions: ${snapshot.data?["dimensions"]?.width}x${snapshot.data?["dimensions"]?.height}\n"),
-                                            TextSpan(text: "Size: $formattedSize"),
-                                        ]
-                                    )
-                                );
-                            }
-                            return const CircularProgressIndicator();
+                    ImageInfoBuilder(
+                        path: widget.image.path,
+                        builder: (context, size, image) {
+                            return SelectableText.rich(
+                                TextSpan(
+                                    text: "Path: ${widget.image.path}\n",
+                                    children: [
+                                        if(image != null) TextSpan(text: "Dimensions: ${image.width}x${image.height}\n"),
+                                        TextSpan(text: "Size: ${formatSize(size)}"),
+                                    ]
+                                )
+                            );
                         },
                     )
                 ],

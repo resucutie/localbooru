@@ -5,7 +5,6 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/utils/dialog_page.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
@@ -49,64 +48,73 @@ final router = GoRouter(
                 return null;
             },
             routes: [
-                // navigation
                 ShellRoute(
-                    builder: (context, state, child) => BrowseScreen(uri: state.uri, child: child),
+                    builder: (context, state, child) => HeroControllerScope(
+                        controller: MaterialApp.createMaterialHeroController(),
+                        child: child,
+                    ),
                     routes: [
-                        GoRoute(path: "home",
-                            builder: (context, state) => const HomePage(),
-                        ),
-                        GoRoute(path: "search",
-                            builder: (context, state) {
-                                final String tags = state.uri.queryParameters["tag"] ?? "";
-                                final String? index = state.uri.queryParameters["index"];
-                                return BooruLoader(
-                                    builder: (context, booru) => GalleryViewer(
-                                        booru: booru,
-                                        tags: tags,
-                                        index: int.parse(index ?? "0"),
-                                        routeNavigation: true,
-                                    ),
-                                );
-                            }
-                        ),
-                        GoRoute(path: "recent", redirect: (_, __) => '/search',),
-                        GoRoute(path: "view/:id",
-                            builder: (context, state)  {
-                                final String? id = state.pathParameters["id"];
-                                if (id == null) return Text("Invalid ID $id");
-                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
-                                    booru: booru,
-                                    id: id,
-                                    builder: (context, image) {
-                                        return ImageView(image: image);
+                        ShellRoute( //main nav shell
+                            builder: (context, state, child) => BrowseScreen(uri: state.uri, child: child),
+                            routes: [
+                                GoRoute(path: "home",
+                                    builder: (context, state) => const HomePage(),
+                                ),
+                                GoRoute(path: "search",
+                                    builder: (context, state) {
+                                        final String tags = state.uri.queryParameters["tag"] ?? "";
+                                        final String? index = state.uri.queryParameters["index"];
+                                        return BooruLoader(
+                                            builder: (context, booru) => GalleryViewer(
+                                                booru: booru,
+                                                tags: tags,
+                                                index: int.parse(index ?? "0"),
+                                                routeNavigation: true,
+                                            ),
+                                        );
                                     }
-                                ));
-                            }
+                                ),
+                                GoRoute(path: "recent", redirect: (_, __) => '/search',),
+                                GoRoute(path: "view/:id",
+                                    builder: (context, state)  {
+                                        final String? id = state.pathParameters["id"];
+                                        if (id == null) return Text("Invalid ID $id");
+                                        return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                            booru: booru,
+                                            id: id,
+                                            builder: (context, image) {
+                                                return ImageView(image: image);
+                                            }
+                                        ));
+                                    }
+                                ),
+                            ]
                         ),
-                    ]
-                ),
-
-                // dialogs
-                GoRoute(path: "dialogs",
-                    redirect: (context, state) => null,
-                    routes: [
                         GoRoute(path: "zoom_image/:id",
-                            pageBuilder: (context, state) {
-                                final String? id = state.pathParameters["id"];
-                                if (id == null) return DialogPage(builder: (_) => Text("Invalid ID $id"));
-                                return DialogPage(
-                                    barrierColor: Colors.black,
-                                    builder: (context) => BooruLoader(builder: (_, booru) => BooruImageLoader(
-                                        booru: booru,
-                                        id: id,
-                                        builder: (context, image) => ImageViewZoom(image),
-                                    ))
-                                );
-                            }
-                        ),
+                                    pageBuilder: (context, state) {
+                                        final String? id = state.pathParameters["id"];
+                                        if (id == null) return MaterialPage(child: Text("Invalid ID $id"));
+                                        return CustomTransitionPage(
+                                            transitionDuration: const Duration(milliseconds: 200),
+                                            key: state.pageKey,
+                                            child: BooruLoader(builder: (_, booru) => BooruImageLoader(
+                                                booru: booru,
+                                                id: id,
+                                                builder: (context, image) => ImageViewZoom(image),
+                                            )),
+                                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                                return FadeTransition(
+                                                    opacity: animation,
+                                                    child: child,
+                                                );
+                                            },
+                                        );
+                                    }
+                                ),
                     ]
                 ),
+                // navigation
+
 
                 // image add
                 GoRoute(path: "manage_image",

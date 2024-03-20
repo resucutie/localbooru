@@ -92,6 +92,11 @@ class Booru {
 
         return (list.length / size).ceil();
     }
+    Future<int> getListLength([List? list]) async {
+        list ??= (await getRawInfo())["files"];
+
+        return list?.length ?? 0;
+    }
 
 
 
