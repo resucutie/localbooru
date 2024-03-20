@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/utils/image_thumbnailer.dart';
+import 'package:localbooru/utils/compressor.dart';
 import 'package:mime/mime.dart';
 
 

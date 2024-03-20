@@ -1,4 +1,5 @@
 import 'dart:io';
+import "dart:ui" as dui;
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
@@ -6,14 +7,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_compression/image_compression.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
+import 'package:localbooru/utils/compressor.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/formatter.dart';
 import 'package:localbooru/utils/tags.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageManagerView extends StatefulWidget {
@@ -298,7 +303,7 @@ class ImageUploadForm extends StatelessWidget {
                                             if (result != null) {
                                                 state.didChange(result.files.single.path);
                                                 onChanged(result.files.single.path!);
-                                            };
+                                            }
                                         },
                                         child: Builder(builder: (context) {
                                             if(state.value.isEmpty) {
@@ -313,28 +318,79 @@ class ImageUploadForm extends StatelessWidget {
                         ),
                         if(!state.value.isEmpty) Padding(
                             padding: const EdgeInsets.all(8),
-                            child: ImageInfoBuilder(
-                                path: state.value,
-                                builder: (context, size, image) => Card(
-                                    child: ListTile(
-                                        leading: const Icon(Icons.info),
-                                        subtitle: SelectableText.rich(
-                                            TextSpan(
-                                                text: "Path: ${state.value}\n",
-                                                children: [
-                                                    if(image != null) TextSpan(text: "Dimensions: ${image.width}x${image.height}\n"),
-                                                    TextSpan(text: "Size: ${formatSize(size)}"),
-                                                ]
-                                            )
-                                        ),
-                                    ),
-                                ),
+                            child: FileInfo(File(state.value),
+                                onCompressed: (compressed) {
+                                    state.didChange(compressed.path);
+                                    onChanged(compressed.path);
+                                }
                             )
                         ),
                         if(state.hasError) Text(state.errorText!, style: TextStyle(color: Theme.of(context).colorScheme.error),)
                     ],
                 );
             },
+        );
+    }
+}
+class FileInfo extends StatefulWidget {
+    const FileInfo(this.file, {super.key, required this.onCompressed});
+
+    final File file;
+    final ValueChanged<File>? onCompressed;
+
+    @override
+    State<FileInfo> createState() => _FileInfoState();
+}
+class _FileInfoState extends State<FileInfo> {
+    bool isCompressing = false;
+
+    @override
+    Widget build(context) {
+        return ImageInfoBuilder(
+            path: widget.file.path,
+            builder: (context, size, image) => Card(
+                child: ListTile(
+                    leading: const Icon(Icons.info),
+                    subtitle: SelectableText.rich(
+                        TextSpan(
+                            text: "Path: ${widget.file.path}\n",
+                            children: [
+                                if(image != null) TextSpan(text: "Dimensions: ${image.width}x${image.height}\n"),
+                                TextSpan(
+                                    text: "Size: ${formatSize(size)}",
+                                    children: size > 3000000 && widget.onCompressed != null ? [
+                                        WidgetSpan(child: Builder(
+                                            builder: (_) {                                        
+                                                if(isCompressing) return const CircularProgressIndicator();
+                                                return TextButton.icon(
+                                                    icon: const Icon(Icons.compress),
+                                                    onPressed: () async {
+                                                        if(widget.onCompressed == null) return;
+                                                        setState(() => isCompressing = true);
+                                                        final compressedImage = await compressImage(ImageFile(
+                                                            filePath: widget.file.path,
+                                                            rawBytes: await widget.file.readAsBytes()
+                                                        ), quality: 80);
+
+                                                        final tempDir = await getTemporaryDirectory();
+                                                        
+                                                        final newFile = File("${p.join(tempDir.path, p.basenameWithoutExtension(widget.file.path))}.jpg");
+                                                        await newFile.writeAsBytes(compressedImage.rawBytes);
+                                                                                                                
+                                                        widget.onCompressed!(newFile);
+                                                        setState(() => isCompressing = false);
+                                                    },
+                                                    label: const Text("Compress")
+                                                );
+                                            },
+                                        ))
+                                    ] : null
+                                ),
+                            ]
+                        )
+                    ),
+                ),
+            ),
         );
     }
 }

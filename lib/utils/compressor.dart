@@ -25,28 +25,9 @@ Future<File> getImageThumbnail(BooruImage image) async {
     File thumbnailFile = File("${p.join(thumbDir.path, p.basenameWithoutExtension(filename))}.jpg");
     if(await thumbnailFile.exists()) return thumbnailFile;
 
-    ImageFile input;
-
-    final mime = lookupMimeType(image.filename);
-    if(mime!.startsWith("video/") || mime == "image/gif") {
-        input = ImageFile(
-            filePath: image.path,
-            rawBytes: await getVideoThumbnail(image.path)
-        );
-    } else if(mime.startsWith("image/")) {
-        input = ImageFile(
-            filePath: image.path,
-            rawBytes: await image.getImage().readAsBytes()
-        );
-    } else {
-        throw "Unknown file type";
-    }
-
-
     debugPrint("Compressing $filename");
 
-    final compressedImage = await compressImage(input, thumbnailFile.path);
-
+    final compressedImage = await compressToThumbnail(image.getImage());
     debugPrint("Obtained ${p.basename(thumbnailFile.path)}");
 
     await thumbnailFile.writeAsBytes(compressedImage.rawBytes);
@@ -54,7 +35,50 @@ Future<File> getImageThumbnail(BooruImage image) async {
     return thumbnailFile;
 }
 
-Future<Uint8List> getVideoThumbnail(String path) async {
+Future<ImageFile> compressToThumbnail(File file,) async {
+    ImageFile input;
+
+    final mime = lookupMimeType(file.path);
+    if(mime!.startsWith("video/") || mime == "image/gif") {
+        input = ImageFile(
+            filePath: file.path,
+            rawBytes: await getVideoFirstFrame(file.path)
+        );
+    } else if(mime.startsWith("image/")) {
+        input = ImageFile(
+            filePath: file.path,
+            rawBytes: await file.readAsBytes()
+        );
+    } else {
+        throw "Unknown file type";
+    }
+
+    final compressedImage = await compressImage(input);
+    return compressedImage;
+}
+
+Future<Uint8List> compress(File file,) async {
+    final mime = lookupMimeType(file.path)!;
+    if(false/*mime!.startsWith("video/") || mime == "image/gif"*/) {
+        // input = ImageFile(
+        //     filePath: file.path,
+        //     rawBytes: await getFirstFrame(file.path)
+        // );
+        // return 
+    } else if(mime.startsWith("image/")) {
+        final compressedImage = await compressImage(ImageFile(
+            filePath: file.path,
+            rawBytes: await file.readAsBytes()
+        ));
+        return compressedImage.rawBytes;
+    } else {
+        throw "Unknown file type";
+    }
+}
+
+
+
+Future<Uint8List> getVideoFirstFrame(String path) async {
     final player = Player();
     final controller = VideoController(player); // has to be created according to https://github.com/media-kit/media-kit/issues/419#issuecomment-1703855470
     
@@ -71,11 +95,11 @@ Future<Uint8List> getVideoThumbnail(String path) async {
     return bytes!;
 }
 
-Future<ImageFile> compressImage(ImageFile file, String path) {
+Future<ImageFile> compressImage(ImageFile file, {int quality = 30}) {
     return imageCompression.compressInQueue(imageCompression.ImageFileConfiguration(
         input: file,
-        config: const imageCompression.Configuration(
-            jpgQuality: 30,
+        config: imageCompression.Configuration(
+            jpgQuality: quality,
         )
     ));
 }

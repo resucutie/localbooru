@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import "dart:ui" as dui;
 
 import 'package:flutter/material.dart';
@@ -16,14 +17,25 @@ class ImageInfoBuilder extends StatefulWidget {
 class _ImageInfoBuilderState extends State<ImageInfoBuilder> {
     late Future<Map> _data;
 
+    void loadData() {
+        _data = (() async {
+            final Uint8List bytes = await File(widget.path).readAsBytes();
+            return {
+                "image": lookupMimeType(widget.path)!.startsWith("video/") ? null : await decodeImageFromList(bytes),
+                "size": bytes.lengthInBytes
+            };
+        })();
+    }
+
     @override
     void initState() {
         super.initState();
-
-        _data = (() async => {
-            "image": lookupMimeType(widget.path)!.startsWith("video/") ? null : await decodeImageFromList(await File(widget.path).readAsBytes()),
-            "size": await File(widget.path).length()
-        })();
+        loadData();
+    }
+    @override
+    void didUpdateWidget(_) {
+        super.didUpdateWidget(_);
+        loadData();
     }
     
     @override
