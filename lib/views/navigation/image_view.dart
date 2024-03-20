@@ -5,10 +5,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/formatter.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:mime/mime.dart';
 import 'package:photo_view/photo_view.dart';
@@ -323,31 +325,18 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                     ),
 
                     const Header("Other"),
-                    FutureBuilder<Map>(
-                        future: (() async => {
-                            "dimensions": lookupMimeType(widget.image.filename)!.startsWith("video/") ? null : await decodeImageFromList(await File(widget.image.path).readAsBytes()),
-                            "size": await File(widget.image.path).length()
-                        })(),
-                        builder: (context, snapshot) {
-                            if(snapshot.hasData || snapshot.hasError) {
-                                final hasDimensionsMetadata = snapshot.data?["dimensions"] == null;
-
-                                final bytes = snapshot.data!["size"]!;
-                                const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-                                var i = (m.log(bytes) / m.log(1000)).floor();
-                                final formattedSize = '${(bytes / m.pow(1000, i)).toStringAsFixed(2)} ${suffixes[i]}';
-
-                                return SelectableText.rich(
-                                    TextSpan(
-                                        text: "Path: ${widget.image.path}\n",
-                                        children: [
-                                            if(!hasDimensionsMetadata) TextSpan(text: "Dimensions: ${snapshot.data?["dimensions"]?.width}x${snapshot.data?["dimensions"]?.height}\n"),
-                                            TextSpan(text: "Size: $formattedSize"),
-                                        ]
-                                    )
-                                );
-                            }
-                            return const CircularProgressIndicator();
+                    ImageInfoBuilder(
+                        path: widget.image.path,
+                        builder: (context, size, image) {
+                            return SelectableText.rich(
+                                TextSpan(
+                                    text: "Path: ${widget.image.path}\n",
+                                    children: [
+                                        if(image != null) TextSpan(text: "Dimensions: ${image.width}x${image.height}\n"),
+                                        TextSpan(text: "Size: ${formatSize(size)}"),
+                                    ]
+                                )
+                            );
                         },
                     )
                 ],

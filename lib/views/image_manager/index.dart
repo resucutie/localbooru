@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/formatter.dart';
 import 'package:localbooru/utils/tags.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -181,6 +183,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                             },
                             currentValue: loadedImage,
                         ),
+                        const SizedBox(height: 16,),
                         Wrap(
                             alignment: WrapAlignment.spaceBetween,
                             crossAxisAlignment: WrapCrossAlignment.center,
@@ -282,7 +285,7 @@ class ImageUploadForm extends StatelessWidget {
                                 strokeWidth: 2,
                                 borderType: BorderType.RRect,
                                 radius: const Radius.circular(24),
-                                color: Theme.of(context).colorScheme.primary,
+                                color: state.hasError ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
                                 child: ClipRRect(borderRadius: const BorderRadius.all(Radius.circular(22)),
                                     child: TextButton(
                                         style: TextButton.styleFrom(
@@ -308,8 +311,27 @@ class ImageUploadForm extends StatelessWidget {
                                 )
                             ),
                         ),
-                        if(!state.value.isEmpty) Text(state.value),
-                        if(state.hasError) Text(state.errorText!)
+                        if(!state.value.isEmpty) Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: ImageInfoBuilder(
+                                path: state.value,
+                                builder: (context, size, image) => Card(
+                                    child: ListTile(
+                                        leading: const Icon(Icons.info),
+                                        subtitle: SelectableText.rich(
+                                            TextSpan(
+                                                text: "Path: ${state.value}\n",
+                                                children: [
+                                                    if(image != null) TextSpan(text: "Dimensions: ${image.width}x${image.height}\n"),
+                                                    TextSpan(text: "Size: ${formatSize(size)}"),
+                                                ]
+                                            )
+                                        ),
+                                    ),
+                                ),
+                            )
+                        ),
+                        if(state.hasError) Text(state.errorText!, style: TextStyle(color: Theme.of(context).colorScheme.error),)
                     ],
                 );
             },
