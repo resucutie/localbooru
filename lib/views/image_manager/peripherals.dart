@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/components/window_frame.dart';
+import 'package:localbooru/utils/get_website.dart';
 import 'package:string_validator/string_validator.dart';
 
 class ImageManagerLoadingScreen extends StatelessWidget {
@@ -56,6 +57,7 @@ class _InsertURLDialogState extends State<InsertURLDialog> {
                 constraints: const BoxConstraints(minWidth: 600),
                 child: TextField(
                     controller: controller,
+                    decoration: InputDecoration(icon: getWebsiteIcon(Uri.parse(controller.text))),
                     onSubmitted: (_) {
                         if(allowedToSend()) importFromService();
                     },

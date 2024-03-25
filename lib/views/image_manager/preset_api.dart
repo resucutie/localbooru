@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:localbooru/api/index.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:localbooru/utils/get_meta_property.dart';
+import 'package:localbooru/utils/get_website.dart';
 import 'package:mime/mime.dart';
 import 'package:string_validator/string_validator.dart';
 
@@ -37,20 +38,17 @@ class PresetImage {
         if(!isURL(url)) throw "Not a URL";
 
         Uri uri = Uri.parse(url);
-        if( uri.host.endsWith("behoimi.org") || // literally the only site running danbooru 1 on the planet
-            uri.host.endsWith("konachan.com") || uri.host.endsWith("yande.re") // moebooru
-        ) return await danbooru1ToPreset(url);
-        if(uri.host.endsWith("donmai.us")) return await danbooru2ToPreset(url);
-        if(uri.host.endsWith("e621.net") || uri.host.endsWith("e926.net")) return await e621ToPreset(url);
-        if( uri.host.endsWith("gelbooru.com") || //0.2.5
-            uri.host.endsWith("safebooru.org") || uri.host.endsWith("rule34.xxx") || uri.host.endsWith("xbooru.com") // 0.2.0
-        ) return await gelbooruToPreset(url);
-        if( uri.host == "twitter.com" || uri.host == "x.com" ||
-            uri.host.endsWith("fixupx.com") || uri.host.endsWith("fivx.com")
-        ) return await twitterToPreset(url);
-        if(uri.host.endsWith("furaffinity.net")) return await furaffinityToPreset(url);
-        if(uri.host.endsWith("deviantart.com") || uri.host == "fav.me") return await devianartToPreset(url);
-        return anyURLToPreset(url);
+        final preset = switch (getWebsite(uri)) {
+            "danbooru1" => await danbooru1ToPreset(url),
+            "danbooru2" => await danbooru2ToPreset(url),
+            "e621" => await e621ToPreset(url),
+            "gelbooru2" => await gelbooruToPreset(url),
+            "twitter" => await twitterToPreset(url),
+            "furaffinity" => await furaffinityToPreset(url),
+            "devianart" => await devianartToPreset(url),
+            _ => await anyURLToPreset(url)
+        };
+        return preset;
     }
 }
 

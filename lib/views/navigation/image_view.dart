@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/context_menu.dart';
+import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/formatter.dart';
+import 'package:localbooru/utils/get_website.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:mime/mime.dart';
 import 'package:photo_view/photo_view.dart';
@@ -301,41 +303,35 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                             return const CircularProgressIndicator();
                         }
                     ),
-
-                    const Header("Sources"),
-                    widget.image.sources == null || widget.image.sources!.isEmpty ? const Text("None") : Column(
+                    
+                    const SizedBox(height: 16,),
+                    if(widget.image.sources != null && widget.image.sources!.isNotEmpty) Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: widget.image.sources!.map((url) {
                             final ro = widget.renderObject ?? context.findRenderObject()!;
+                            final uri = Uri.parse(url);
                             return MouseRegion(
                                 cursor: SystemMouseCursors.click,
                                 child: GestureDetector(
-                                    onTap: () => launchUrlString(url),
                                     onLongPress: () => openContextMenu(offset: getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: ro), url: url),
                                     onLongPressDown: (details) => longPress = details,
                                     onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: ro), url: url),
-                                    child: Text(url, style: linkText)
+                                    child: Card(
+                                        child: ListTile(
+                                            leading: getWebsiteIcon(uri, color: Theme.of(context).colorScheme.primary) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
+                                            onTap: () => launchUrlString(url),
+                                            title: Text(getWebsiteFormalType(uri) ?? "Website"),
+                                            subtitle: Text(url, style: linkText)
+                                        ),
+                                    )
                                 )
                             );
                         }).toList()
                     ),
 
-                    const Header("Other"),
-                    ImageInfoBuilder(
-                        path: widget.image.path,
-                        builder: (context, size, image) {
-                            return SelectableText.rich(
-                                TextSpan(
-                                    text: "Path: ${widget.image.path}\n",
-                                    children: [
-                                        if(image != null) TextSpan(text: "Dimensions: ${image.width}x${image.height}\n"),
-                                        TextSpan(text: "Size: ${formatSize(size)}"),
-                                    ]
-                                )
-                            );
-                        },
-                    )
+                    const SizedBox(height: 16,),
+                    FileInfo(widget.image.getImage())
                 ],
             ),
         );

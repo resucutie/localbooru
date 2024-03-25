@@ -61,7 +61,7 @@ Not so easily. The main issue is with adding tags, as it fetches a website to do
 - Gelbooru 0.2.0 to 0.2.5
 - Twitter (using [fxtwitter](https://fxtwitter.com) to gather data)
 - Fur Affinity ((using [fxraffinity](https://fxraffinity.net) to gather data)
-- Devianart
+- Deviantart
 - Any URL that returns an image or video
 
 We still have to add:

@@ -104,8 +104,17 @@ flutter:
     - assets/brand/icon.svg
     - assets/brand/monochrome-icon.svg
     - assets/brand/rounded-icon.svg
+
     - assets/syncthing.svg
     - assets/github.svg
+
+    - assets/websites/danbooru.svg
+    - assets/websites/danbooru-monochrome.svg
+    - assets/websites/e621.svg
+    - assets/websites/gelbooru.svg
+    - assets/websites/twitter.svg
+    - assets/websites/deviantart.svg
+    
     - pubspec.yaml # reading itself
 
   # An image asset can refer to one or more resolution-specific "variants", see
