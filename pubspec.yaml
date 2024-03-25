@@ -70,6 +70,7 @@ dependencies:
   image_compression: ^1.0.5
   vector_math: ^2.1.4
   photo_view: ^0.14.0
+  ffmpeg_cli: ^0.3.0
 dependency_overrides:
   media_kit_native_event_loop:
     git:

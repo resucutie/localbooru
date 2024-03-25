@@ -1,5 +1,4 @@
 import 'dart:io';
-import "dart:ui" as dui;
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
@@ -7,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_compression/image_compression.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/headers.dart';
@@ -358,32 +356,30 @@ class _FileInfoState extends State<FileInfo> {
                                 if(image != null) TextSpan(text: "Dimensions: ${image.width}x${image.height}\n"),
                                 TextSpan(
                                     text: "Size: ${formatSize(size)}",
-                                    children: size > 3000000 && widget.onCompressed != null ? [
-                                        WidgetSpan(child: Builder(
-                                            builder: (_) {                                        
-                                                if(isCompressing) return const CircularProgressIndicator();
-                                                return TextButton.icon(
-                                                    icon: const Icon(Icons.compress),
-                                                    onPressed: () async {
-                                                        if(widget.onCompressed == null) return;
-                                                        setState(() => isCompressing = true);
-                                                        final compressedImage = await compressImage(ImageFile(
-                                                            filePath: widget.file.path,
-                                                            rawBytes: await widget.file.readAsBytes()
-                                                        ), quality: 80);
+                                    children: widget.onCompressed != null ? [
+                                        WidgetSpan(
+                                            alignment: PlaceholderAlignment.middle,
+                                            child: Padding(
+                                                padding: const EdgeInsets.only(left: 8),
+                                                child: Builder(
+                                                    builder: (_) {                                        
+                                                        if(isCompressing) return const CircularProgressIndicator();
+                                                        return OutlinedButton.icon(
+                                                            icon: const Icon(Icons.compress),
+                                                            onPressed: () async {
+                                                                if(widget.onCompressed == null) return;
+                                                                setState(() => isCompressing = true);
+                                                            final compressed = await compress(widget.file);
 
-                                                        final tempDir = await getTemporaryDirectory();
-                                                        
-                                                        final newFile = File("${p.join(tempDir.path, p.basenameWithoutExtension(widget.file.path))}.jpg");
-                                                        await newFile.writeAsBytes(compressedImage.rawBytes);
-                                                                                                                
-                                                        widget.onCompressed!(newFile);
-                                                        setState(() => isCompressing = false);
+                                                                widget.onCompressed!(compressed);
+                                                                setState(() => isCompressing = false);
+                                                            },
+                                                            label: const Text("Compress")
+                                                        );
                                                     },
-                                                    label: const Text("Compress")
-                                                );
-                                            },
-                                        ))
+                                                )
+                                            ),
+                                            )
                                     ] : null
                                 ),
                             ]
