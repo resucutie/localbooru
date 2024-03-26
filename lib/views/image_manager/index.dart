@@ -7,17 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
-import 'package:localbooru/utils/compressor.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/utils/formatter.dart';
 import 'package:localbooru/utils/tags.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageManagerView extends StatefulWidget {

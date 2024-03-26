@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import "dart:ui" as dui;
 
 import 'package:flutter/material.dart';
+import 'package:localbooru/api/index.dart';
+import 'package:localbooru/utils/listeners.dart';
 import 'package:mime/mime.dart';
 
 class ImageInfoBuilder extends StatefulWidget {
@@ -47,6 +49,58 @@ class _ImageInfoBuilderState extends State<ImageInfoBuilder> {
                     return widget.builder(context, snapshot.data!["size"]!, snapshot.data?["image"]);
                 }
                 return const CircularProgressIndicator();
+            }
+        );
+    }   
+}
+
+
+class BooruLoader extends StatelessWidget {
+    const BooruLoader({super.key, required this.builder});
+
+    final Widget Function(BuildContext context, Booru booru) builder;
+    
+    @override
+    Widget build(BuildContext context) {
+        return ListenableBuilder(listenable: booruUpdateListener,
+            builder: (_, __) {
+                return FutureBuilder<Booru>(
+                    future: getCurrentBooru(),
+                    builder: (context, AsyncSnapshot<Booru> snapshot) {
+                        if(snapshot.hasData) {
+                            return builder(context, snapshot.data!);
+                        } else if(snapshot.hasError) {
+                            throw snapshot.error!;
+                        }
+                        return const Center(child: CircularProgressIndicator());
+                    }
+                );
+            }
+        );
+    }   
+}
+
+typedef BooruImageWidgetBuilder = Widget Function(BuildContext context, BooruImage image);
+class BooruImageLoader extends StatelessWidget {
+    const BooruImageLoader({super.key, required this.builder, required this.booru, required this.id});
+
+    final Booru booru;
+    final String id;
+
+    final BooruImageWidgetBuilder builder;
+    
+    @override
+    Widget build(BuildContext context) {
+        return FutureBuilder<BooruImage?>(
+            future: booru.getImage(id),
+            builder: (context, AsyncSnapshot<BooruImage?> snapshot) {
+                if(snapshot.hasData) {
+                    if(snapshot.data == null) return const Text("File does not exist");
+                    return builder(context, snapshot.data!);
+                } else if(snapshot.hasError) {
+                    throw snapshot.error!;
+                }
+                return const Center(child: CircularProgressIndicator());
             }
         );
     }   
