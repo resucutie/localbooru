@@ -149,7 +149,7 @@ class PageDisplay extends StatelessWidget {
             child: Center(
                 child: ScrollConfiguration(
                     behavior: const MaterialScrollBehavior().copyWith(
-                        dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.trackpad},
+                        dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.trackpad, PointerDeviceKind.stylus},
                     ),
                     child: ListView.separated(
                         itemCount: pages,
