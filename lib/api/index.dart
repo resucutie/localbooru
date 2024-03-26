@@ -35,16 +35,16 @@ Future<Booru> getCurrentBooru() async {
     return currentBooru!;
 }
 
-void setBooru(String path) async {
+Future<void> setBooru(String path) async {
     final prefs = await SharedPreferences.getInstance();
+    currentBooru = null;
     prefs.setString("booruPath", path);
 }
 
-void createDefaultBooruModel(String folderPath) async {
+Future<void> createDefaultBooruModel(String folderPath) async {
     File repoinfoFile = await File(p.join(folderPath, "repoinfo.json")).create(recursive: true);
-    repoinfoFile.writeAsString(jsonEncode(defaultFileInfoJson));
+    await repoinfoFile.writeAsString(jsonEncode(defaultFileInfoJson));
     await Directory(p.join(folderPath, "files")).create(recursive: true);
-    setBooru(folderPath);
 }
 
 bool isValidBooruModel(Map<String, dynamic> raw) {

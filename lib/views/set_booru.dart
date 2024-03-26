@@ -66,7 +66,8 @@ class SetBooruScreen extends StatelessWidget{
                                             onPressed: () async {
                                                 String? output = await FilePicker.platform.getDirectoryPath();
                                                 if(output == null) return;
-                                                createDefaultBooruModel(output);
+                                                await createDefaultBooruModel(output);
+                                                setBooru(output);
                                                 if (context.mounted) context.go("/home");
                                             },
                                         )
