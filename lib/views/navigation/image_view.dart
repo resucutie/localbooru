@@ -28,7 +28,7 @@ class ImageView extends StatelessWidget {
                     return ListView(
                         children: [
                             ImageViewDisplay(image),
-                            ImageViewProprieties(image)
+                            ImageViewProprieties(image, renderObject: context.findRenderObject())
                         ],
                     );
                 } else {
