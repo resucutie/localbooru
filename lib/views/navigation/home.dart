@@ -23,31 +23,48 @@ class _HomePageState extends State<HomePage> {
     Widget build(BuildContext context) {
         return Container(
             padding: const EdgeInsets.all(8.0),
+            width: double.infinity,  // <-- Takes up total width of the device
+            height: double.infinity, // <-- Takes up the total height of the device
             child: Column(
-                // mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                    const SizedBox(height: 64),
-                    const LocalBooruHeader(),
-                    const SizedBox(height: 32),
-                    SearchTag(
-                        onSearch: (_) => _onSearch(),
-                        controller: _searchController,
+                    Expanded(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                                const SizedBox(height: 64),
+                                const LocalBooruHeader(),
+                                const SizedBox(height: 32),
+                                SearchTag(
+                                    onSearch: (_) => _onSearch(),
+                                    controller: _searchController,
+                                ),
+                                const SizedBox(height: 16),
+                                Wrap(
+                                    direction: Axis.horizontal,
+                                    spacing: 8.0,
+                                    children: [
+                                        OutlinedButton.icon(
+                                            onPressed: () => context.push("/recent"),
+                                            label: const Text("Recent posts"),
+                                            icon: const Icon(Icons.history)
+                                        )
+                                    ],
+                                ),
+                                const SizedBox(height: 32),
+                                const ImageDisplay(),
+                            ],
+                        ),
                     ),
-                    const SizedBox(height: 16),
-                    Wrap(
-                        direction: Axis.horizontal,
-                        spacing: 8.0,
-                        children: [
-                            OutlinedButton.icon(
-                                onPressed: () => context.push("/recent"),
-                                label: const Text("Recent posts"),
-                                icon: const Icon(Icons.history)
-                            )
-                        ],
-                    ),
-                    const SizedBox(height: 32),
-                    const ImageDisplay()
+                    Align(
+                        alignment: Alignment.bottomCenter,
+                        child: BooruLoader(
+                            builder: (context, booru) => SelectableText(booru.path,
+                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                    color: Theme.of(context).hintColor
+                                ),
+                            ),
+                        ),
+                    )
                 ],
             ),
         );

@@ -39,6 +39,7 @@ Future<void> setBooru(String path) async {
     final prefs = await SharedPreferences.getInstance();
     currentBooru = null;
     prefs.setString("booruPath", path);
+    booruUpdateListener.update();
 }
 
 Future<void> createDefaultBooruModel(String folderPath) async {

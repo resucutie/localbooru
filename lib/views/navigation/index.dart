@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -139,6 +140,13 @@ class BrowseScreen extends StatelessWidget {
                                     child: Text("Dev mode"),
                                 ),
                                 ListTile(
+                                    title: const Text("Playground"),
+                                    onTap: () {
+                                        Scaffold.of(context).closeDrawer();
+                                        context.push("/playground");
+                                    },
+                                ),
+                                ListTile(
                                     title: const Text("Go to permissions screen"),
                                     onTap: () {
                                         Scaffold.of(context).closeDrawer();
@@ -153,11 +161,17 @@ class BrowseScreen extends StatelessWidget {
                                     },
                                 ),
                                 ListTile(
-                                    title: Text("Nuke app data (Linux, borken)", style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                                    onTap: () async {
-                                        Directory(r"~/.local/share/com.auser.localbooru").delete(recursive: true);
+                                    title: const Text("Desktop size"),
+                                    onTap: () {
+                                        appWindow.size = const Size(1280, 720);
                                     },
-                                )
+                                ),
+                                ListTile(
+                                    title: const Text("Phone size"),
+                                    onTap: () {
+                                        appWindow.size = const Size(320, 840);
+                                    },
+                                ),
                             ]
                         ],
                     ),

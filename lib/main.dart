@@ -22,6 +22,7 @@ import 'package:localbooru/views/settings/booru_settings/index.dart';
 import 'package:localbooru/views/settings/booru_settings/tag_types.dart';
 import 'package:localbooru/views/settings/index.dart';
 import 'package:localbooru/views/settings/overall_settings.dart';
+import 'package:localbooru/views/test_playground.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
@@ -210,6 +211,9 @@ final router = GoRouter(
                 ),
                 GoRoute(path: "about",
                     builder: (context, state) => const AboutScreen(),
+                ),
+                GoRoute(path: "playground",
+                    builder: (context, state) => const TestPlaygroundScreen(),
                 ),
             ]
         ),
