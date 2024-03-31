@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/utils/get_website.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:open_file/open_file.dart';
 import 'package:share_plus/share_plus.dart';
@@ -54,28 +55,6 @@ List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildConte
         ),
     ];
 }
-
-List<PopupMenuEntry> urlItems(String url) {
-    return [
-        PopupMenuItem(
-            child: const Text("Open URL"),
-            onTap: () => launchUrlString(url),
-        ),
-        PopupMenuItem(
-            child: const Text("Copy URL"),
-            onTap: () async {
-                final item = DataWriterItem();
-                item.add(Formats.plainText(url));
-                await SystemClipboard.instance?.write([item]);
-            },
-        ),
-        PopupMenuItem(
-            child: const Text("Share URL"),
-            onTap: () async => await Share.share(url),
-        )
-    ];
-}
-
 class DeleteImageDialogue extends StatelessWidget {
     const DeleteImageDialogue({super.key, required this.id});
 
@@ -97,6 +76,92 @@ class DeleteImageDialogue extends StatelessWidget {
                     }
                 ),
             ],
+        );
+    }
+}
+
+List<PopupMenuEntry> urlItems(String url) {
+    return [
+        PopupMenuItem(
+            child: const Text("Open URL"),
+            onTap: () => launchUrlString(url),
+        ),
+        PopupMenuItem(
+            child: const Text("Copy URL"),
+            onTap: () async {
+                final item = DataWriterItem();
+                item.add(Formats.plainText(url));
+                await SystemClipboard.instance?.write([item]);
+            },
+        ),
+        PopupMenuItem(
+            child: const Text("Share URL"),
+            onTap: () async => await Share.share(url),
+        ),
+    ];
+}
+
+List<PopupMenuEntry> tagItems(String tag, BuildContext context) {
+    return [
+        PopupMenuItem(
+            child: const Text("Search"),
+            onTap: () async {
+                final res = await showDialog<String>(context: context,
+                    builder: (context) => ServiceActionsDialogue(tag: tag, title: "Search on",)
+                );
+                switch (res) {
+                    case "Danbooru": launchUrlString("https://danbooru.donmai.us/posts?tags=$tag");
+                    case "e926": launchUrlString("https://e926.net/posts?tags=$tag");
+                    case "e621": launchUrlString("https://e621.net/posts?tags=$tag");
+                    case "Gelbooru": launchUrlString("https://gelbooru.com/index.php?page=post&s=list&tags=$tag");
+                }
+            }
+        ),
+        PopupMenuItem(
+            child: const Text("More information about"),
+            onTap: () async {
+                final res = await showDialog<String>(context: context,
+                    builder: (context) => ServiceActionsDialogue(tag: tag, title: "Open wiki",)
+                );
+                switch (res) {
+                    case "Danbooru": 
+                        final booru = await getCurrentBooru();
+                        final tagType = await booru.getTagType(tag);
+                        if(tagType == "artist") {
+                            launchUrlString("https://danbooru.donmai.us/artists/show_or_new?name=$tag");
+                        } else {
+                            launchUrlString("https://danbooru.donmai.us/wiki_pages/$tag");
+                        }
+                    case "e926": launchUrlString("https://e926.net/wiki_pages/show_or_new?title=$tag");
+                    case "e621": launchUrlString("https://e621.net/wiki_pages/show_or_new?title=$tag");
+                    case "Gelbooru": launchUrlString("https://gelbooru.com/index.php?page=wiki&s=list&search=$tag");
+                }
+            }
+        ),
+    ];
+}
+class ServiceActionsDialogue extends StatelessWidget {
+    const ServiceActionsDialogue({super.key, required this.tag, this.title = "Select a service"});
+
+    final String tag;
+    final String title;
+
+    @override
+    Widget build(BuildContext context) {
+        return SimpleDialog(
+            title: Text(title),
+            children: [
+                ["Danbooru", "https://danbooru.donmai.us"],
+                ["e621", "https://e621.net"],
+                ["e926", "https://e926.net"],
+                ["Gelbooru", "https://gelbooru.com"]
+            ].map((e) => SimpleDialogOption(
+                onPressed: () => Navigator.of(context).pop(e[0]),
+                child: ListTile(
+                    leading: getWebsiteIcon(Uri.parse(e[1])) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
+                    title: Text(e[0]),
+                ),
+            )).toList(),
         );
     }
 }

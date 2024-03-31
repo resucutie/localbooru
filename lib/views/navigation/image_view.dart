@@ -270,30 +270,30 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                         if (tags["artist"] != null && tags["artist"]!.isNotEmpty) ...[
                                             const SmallHeader("Artist", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["artist"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.artist,);
+                                                return Tag(e, color: SpecificTagsColors.artist, renderObject: widget.renderObject,);
                                             }).toList())
                                         ],
                                         if (tags["character"] != null && tags["character"]!.isNotEmpty) ...[
                                             const SmallHeader("Character", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["character"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.character,);
+                                                return Tag(e, color: SpecificTagsColors.character, renderObject: widget.renderObject,);
                                             }).toList())
                                         ],
                                         if (tags["copyright"] != null && tags["copyright"]!.isNotEmpty) ...[
                                             const SmallHeader("Copyright", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["copyright"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.copyright,);
+                                                return Tag(e, color: SpecificTagsColors.copyright, renderObject: widget.renderObject,);
                                             }).toList())
                                         ],
                                         if (tags["species"] != null && tags["species"]!.isNotEmpty) ...[
                                             const SmallHeader("Species", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["species"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.species,);
+                                                return Tag(e, color: SpecificTagsColors.species, renderObject: widget.renderObject,);
                                             }).toList())
                                         ],
                                         const SmallHeader("Generic", padding: EdgeInsets.only(top: 4)),
                                         Wrap(children: List.from(tags["generic"]!..sort()).map((e) {
-                                            return Tag(e);
+                                            return Tag(e, renderObject: widget.renderObject,);
                                         }).toList())
                                     ],
                                 );
@@ -337,21 +337,45 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
 }
 
 class Tag extends StatefulWidget {
-    const Tag(this.tag, {super.key, this.color = SpecificTagsColors.generic});
+    const Tag(this.tag, {super.key, this.color = SpecificTagsColors.generic, this.renderObject});
 
     final String tag;
     final Color color;
+    final RenderObject? renderObject;
 
     @override
     State<Tag> createState() => _TagState();
 }
 class _TagState extends State<Tag> {
     bool _isHovering = false;
+    late LongPressDownDetails longPress;
+
+    void openContextMenu({required Offset offset, required String tag}) {
+        final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
+        showMenu(
+            context: context,
+            position: RelativeRect.fromRect(
+                Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
+                Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
+            ),
+            items: [
+                PopupMenuItem(
+                    enabled: false,
+                    height: 16,
+                    child: Text(tag, maxLines: 1),
+                ),
+                ...tagItems(tag, context)
+            ]
+        );
+    }
 
     @override
     Widget build(BuildContext context) {
         return GestureDetector(
             onTap: () => context.push("/search/?tag=${widget.tag}"),
+            onLongPress: () => openContextMenu(offset: getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: widget.renderObject ?? context.findRenderObject()!), tag: widget.tag),
+            onLongPressDown: (details) => longPress = details,
+            onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: widget.renderObject ?? context.findRenderObject()!), tag: widget.tag),
             child: MouseRegion(
                 cursor: SystemMouseCursors.click,
                 onEnter: (details) => setState(() => _isHovering = true),

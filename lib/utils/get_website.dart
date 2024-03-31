@@ -36,7 +36,7 @@ Widget? getWebsiteIcon(Uri uri, {Color? color}) {
             ? SvgPicture.asset("assets/websites/danbooru.svg", width: 24, height: 24, color: color,)
             : SvgPicture.asset("assets/websites/danbooru-monochrome.svg", width: 24, height: 24, color: color,),
         "e621" => SvgPicture.asset("assets/websites/e621.svg", width: 24, height: 24, color: color,),
-        "gelbooru2" => SvgPicture.asset("assets/websites/gelbooru.svg", width: 24, height: 24, color: color,),
+        "gelbooru2" => SvgPicture.asset("assets/websites/gelbooru.svg", width: 24, height: 24, color: color ?? Colors.blue,),
         "twitter" => SvgPicture.asset("assets/websites/twitter.svg", width: 24, height: 24, color: color,),
         "furaffinity" => Icon(Icons.pets, color: color,),
         "deviantart" => SvgPicture.asset("assets/websites/deviantart.svg", width: 24, height: 24, color: color,),
