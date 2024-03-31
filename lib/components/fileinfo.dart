@@ -23,7 +23,7 @@ class _FileInfoState extends State<FileInfo> {
             path: widget.file.path,
             builder: (context, size, image) => Card(
                 child: ListTile(
-                    leading: const Icon(Icons.info),
+                    leading: Icon(Icons.info, color: Theme.of(context).colorScheme.primary),
                     subtitle: SelectableText.rich(
                         TextSpan(
                             text: "Path: ${widget.file.path}\n",
