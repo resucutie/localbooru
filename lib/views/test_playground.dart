@@ -52,7 +52,14 @@ class _TestPlaygroundScreenState extends State<TestPlaygroundScreen> {
                         return ListView.builder(
                             itemCount: snapshot.data!.length,
                             itemBuilder: (context, index) {
-                                return ExtendedImage.file(snapshot.data![index]);
+                                return Image(
+                                    image: ResizeImage(
+                                        FileImage(snapshot.data![index]),
+                                        width: 100,
+                                        height: 100,
+                                        policy: ResizeImagePolicy.fit
+                                    ),
+                                );
                             },
                         );
                     }

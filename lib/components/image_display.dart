@@ -1,3 +1,6 @@
+import 'dart:io';
+import "dart:ui" as dui;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
@@ -48,6 +51,8 @@ class _SilverRepoGridState extends State<SilverRepoGrid> {
             )
         ).ceil();
 
+        double resizeSize = (MediaQuery.of(context).size.width / columns) + 10;
+
         if(widget.images.isEmpty) {
             return const SizedBox.shrink();
         } else {
@@ -80,46 +85,85 @@ class _SilverRepoGridState extends State<SilverRepoGrid> {
                                 onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!)),
                                 onLongPressDown: (tap) => longTap = tap,
                                 onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
-                                child: Stack(
-                                    children: [
-                                        AspectRatio(
-                                            aspectRatio: 1,
-                                            child: FutureBuilder(
-                                                future: getImageThumbnail(image),
-                                                builder: (context, snapshot) {
-                                                    if(snapshot.hasData) {
-                                                        return Image(
-                                                            image: FileImage(snapshot.data!),
-                                                            fit: BoxFit.cover,
-                                                        );
-                                                    }
-                                                    return const Center(child: CircularProgressIndicator(),);
-                                                },
-                                            )
-                                        ),
-                                        if(getType(image.filename) != "image") Positioned(
-                                            child: Container(
-                                                decoration: const BoxDecoration(
-                                                    color: Color.fromARGB(160, 0, 0, 0),
-                                                    borderRadius: BorderRadius.only(
-                                                        bottomRight: Radius.circular(8),
-                                                    )
-                                                ),
-                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                child: Text(getType(image.filename)!.toUpperCase(),
-                                                    style: const TextStyle(
-                                                        fontSize: 12
-                                                    ),
-                                                ),
-                                            ),
-                                        ),
-                                    ],
-                                ),
+                                child: ImageGrid(image: image, resizeSize: resizeSize,)
                             )
                         ),
                     );
                 }).toList()),
             );
         }
+    }
+}
+
+class ImageGrid extends StatefulWidget {
+    const ImageGrid({super.key, required this.image, this.resizeSize});
+    final BooruImage image;
+    final double? resizeSize;
+
+    @override
+    State<ImageGrid> createState() => _ImageGridState();
+}
+
+class _ImageGridState extends State<ImageGrid> {   
+    late Future<File> imageThumbnail;
+    
+    String? getType(String filename) {
+        final mime = lookupMimeType(filename)!;
+        if(mime.startsWith("video")) return "video";
+        if(mime.startsWith("image/gif")) return "gif";
+        return "image";
+    }
+
+    @override
+    void initState() {
+        super.initState();
+
+        imageThumbnail = getImageThumbnail(widget.image);
+    }
+    
+    @override
+    Widget build(context) {
+        return Stack(
+            children: [
+            AspectRatio(
+                aspectRatio: 1,
+                child: FutureBuilder(
+                    future: imageThumbnail,
+                    builder: (context, snapshot) {
+                        if(snapshot.hasData) {
+                            final thumbnail = snapshot.data!;
+                            final hasResize = widget.resizeSize != null;
+                            final ImageProvider provider = hasResize ? ResizeImage(FileImage(thumbnail),
+                                width: (widget.resizeSize! * 2).ceil(),
+                                height: (widget.resizeSize! * 2).ceil(),
+                                policy: ResizeImagePolicy.fit
+                            ) : FileImage(thumbnail) as ImageProvider;
+                            return Image(
+                                image: provider,
+                                fit: BoxFit.cover,
+                            );
+                        }
+                        return const Center(child: CircularProgressIndicator(),);
+                    },
+                    )
+                ),
+                if(getType(widget.image.filename) != "image") Positioned(
+                    child: Container(
+                        decoration: const BoxDecoration(
+                            color: Color.fromARGB(160, 0, 0, 0),
+                            borderRadius: BorderRadius.only(
+                                bottomRight: Radius.circular(8),
+                            )
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        child: Text(getType(widget.image.filename)!.toUpperCase(),
+                            style: const TextStyle(
+                                fontSize: 12
+                            ),
+                        ),
+                    ),
+                ),
+            ],
+        );
     }
 }
