@@ -36,11 +36,20 @@ class Booru {
             if(!fileToCheck.containsKey(metadata)) throw "File  $id doesn't contain property $metadata";
         }
 
+        final Rating? rating = switch(fileToCheck["rating"]) {
+            "safe" => Rating.safe,
+            "questionable" => Rating.questionable,
+            "explicit" => Rating.explicit,
+            "illegal" => Rating.illegal,
+            _ => null
+        };
+
         return BooruImage(
             id: id,
             path: p.join(path, "files", fileToCheck["filename"]),
             tags: fileToCheck["tags"],
-            sources: List<String>.from(fileToCheck["sources"] ?? []) 
+            rating: rating,
+            sources: List<String>.from(fileToCheck["sources"] ?? [])
         );
     }
 
@@ -148,7 +157,7 @@ class Booru {
 }
 
 class BooruImage {
-    BooruImage({required this.id, required this.path, required this.tags, this.sources}) {
+    BooruImage({required this.id, required this.path, required this.tags, this.sources, this.rating}) {
         filename = p.basename(path);
     }
 
@@ -156,7 +165,10 @@ class BooruImage {
     String path;
     String filename = "";
     String tags;
+    Rating? rating;
     List<String>? sources;
 
     File getImage() => File(path);
 }
+
+enum Rating {safe, questionable, explicit, illegal}

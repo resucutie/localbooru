@@ -14,11 +14,12 @@ final cache = DefaultCacheManager();
 
 
 class PresetImage {
-    const PresetImage({this.image, this.tags, this.sources, this.replaceID});
+    const PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating});
 
     final File? image;
     final Map<String, List<String>>? tags;
     final List<String>? sources;
+    final Rating? rating;
     final String? replaceID;
 
     static Future<PresetImage> fromExistingImage(BooruImage image) async {
@@ -28,6 +29,7 @@ class PresetImage {
             image: File(image.path),
             sources: image.sources,
             tags: await booru.separateTagsByType(image.tags.split(" ")),
+            rating: image.rating,
             replaceID: image.id
         );
     }
@@ -45,7 +47,7 @@ class PresetImage {
             "gelbooru2" => await gelbooruToPreset(url),
             "twitter" => await twitterToPreset(url),
             "furaffinity" => await furaffinityToPreset(url),
-            "devianart" => await devianartToPreset(url),
+            "deviantart" => await deviantartToPreset(url),
             _ => await anyURLToPreset(url)
         };
         return preset;
@@ -253,7 +255,7 @@ Future<PresetImage> furaffinityToPreset(String url) async {
 }
 
 // devianart: use their oEmbed API
-Future<PresetImage> devianartToPreset(String url) async {
+Future<PresetImage> deviantartToPreset(String url) async {
     final res = await http.get(Uri.parse(["https://backend.deviantart.com/oembed?url=", url].join()));
     final json = jsonDecode(res.body);
 

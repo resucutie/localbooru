@@ -12,6 +12,7 @@ import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/tags.dart';
+import 'package:localbooru/views/image_manager/peripherals.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,6 +37,8 @@ class _ImageManagerViewState extends State<ImageManagerView> {
 
     bool isEditing = false;
     bool isGeneratingTags = false;
+    
+    Rating? rating;
 
     List<String> urlList = [];
     String loadedImage = "";
@@ -50,6 +53,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             final preset = widget.preset!;
             if(preset.image != null) loadedImage = preset.image!.path;
             if(preset.sources != null) urlList = preset.sources!;
+            rating = preset.rating;
 
             if(preset.tags != null) {
                 tagController.text = preset.tags!["generic"]?.join(" ") ?? "";
@@ -75,12 +79,13 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             ...speciesTags,
         ].where((e) => e.isNotEmpty).toList();
 
-        debugPrint(allTags.toString(), wrapWidth: 9999);
+        // debugPrint(allTags.toString(), wrapWidth: 9999);
 
         await addImage(
             imageFile: File(loadedImage),
             tags: allTags.join(" "),
             sources: urlList,
+            rating: rating,
             id: widget.preset?.replaceID
         );
         await addSpecificTags(artistTags, type: "artist");
@@ -244,6 +249,27 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                             validator: (value) => validateTagTexts(value, "species"),
                             style: const TextStyle(color: SpecificTagsColors.species),
                         ),
+                        
+                        const Header("Rating"),
+                        ListTile(
+                            title: Text(switch(rating) {
+                                Rating.safe => "Safe",
+                                Rating.questionable => "Questionable",
+                                Rating.explicit => "Explicit",
+                                Rating.illegal => "Illegal",
+                                _ => "None"
+                            }),
+                            onTap: () async {
+                                final choosenRating = await showDialog(
+                                    context: context,
+                                    builder: (_) => RatingChooserDialog(selected: rating, hasNull: true,)
+                                );
+                                if(choosenRating == null) return;
+                                else if(choosenRating == "None") setState(() => rating = null);
+                                else setState(() => rating = choosenRating);
+                            },
+                        ),
+
                         const Header("Sources"),
                         ListStringTextInput(
                             addButton: const Text("Add source"),

@@ -8,6 +8,7 @@ Future writeSettings(String path, Map raw) async {
 Future<BooruImage> addImage({required File imageFile,
     String? id,
     String tags = "",
+    Rating? rating,
     List<String> sources = const []
 }) async {
     final Booru booru = await getCurrentBooru();
@@ -26,10 +27,19 @@ Future<BooruImage> addImage({required File imageFile,
 
     if(id == null || int.parse(id) > files.length) id = "${files.length}";
 
+    final String? ratingString = switch(rating) {
+        Rating.safe => "safe",
+        Rating.questionable => "questionable",
+        Rating.explicit => "explicit",
+        Rating.illegal => "illegal",
+        _ => null
+    };
+
     Map toPush = {
         "id": id,
         "filename": p.basename(copiedFile.path),
         "tags": tags,
+        if(ratingString != null) "rating": ratingString,
         "sources": sources
     };
     

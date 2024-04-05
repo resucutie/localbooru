@@ -301,6 +301,17 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                             return const CircularProgressIndicator();
                         }
                     ),
+
+                    if(widget.image.rating != null) ...[
+                        const Header("Rating"),
+                        Text(switch(widget.image.rating) {
+                            Rating.safe => "Safe",
+                            Rating.questionable => "Questionable",
+                            Rating.explicit => "Explicit",
+                            Rating.illegal => "Illegal",
+                            _ => widget.image.rating!.name
+                        })
+                    ],
                     
                     const SizedBox(height: 16,),
                     if(widget.image.sources != null && widget.image.sources!.isNotEmpty) Column(

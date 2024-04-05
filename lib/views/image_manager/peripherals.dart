@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/get_website.dart';
 import 'package:string_validator/string_validator.dart';
@@ -73,6 +74,35 @@ class _InsertURLDialogState extends State<InsertURLDialog> {
                     onPressed: allowedToSend() ? importFromService : null,
                     child: const Text("Import")
                 )
+            ],
+        );
+    }
+}
+
+class RatingChooserDialog extends StatelessWidget {
+    const RatingChooserDialog({super.key, this.selected, this.hasNull = false});
+
+    final Rating? selected;
+    final bool hasNull;
+
+    @override
+    Widget build(BuildContext context) {
+        return AlertDialog(
+            title: const Text("Rating"),
+            contentPadding: const EdgeInsets.only(top: 16.0, bottom: 24.0),
+            content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                    for (final rating in [if(hasNull) null, Rating.safe, Rating.questionable, Rating.explicit, Rating.illegal]) RadioListTile(
+                        groupValue: selected,
+                        value: rating,
+                        title: Text(rating == null ? "None" : rating.name.replaceFirstMapped(rating.name[0], (match) => rating.name[0].toUpperCase())),
+                        onChanged: (value) => Navigator.of(context).pop(value ?? "None"),
+                    ),
+                ],
+            ),
+            actions: [
+                TextButton(onPressed: Navigator.of(context).pop, child: const Text("Close"))
             ],
         );
     }
