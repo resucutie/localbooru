@@ -21,10 +21,11 @@ class _OverallSettingsState extends State<OverallSettings> {
 
     late double _gridSizeSliderValue;
     late double _autotagAccuracy;
+    late double _thumbnailQuality;
     late bool _monetTheme;
     late bool _update;
-    late String _theme;
     late bool _gif_video;
+    late String _theme;
 
     bool isSettingModified(String setting) {
         return widget.prefs.get(setting) != null && widget.prefs.get(setting) != settingsDefaults[setting];
@@ -41,12 +42,13 @@ class _OverallSettingsState extends State<OverallSettings> {
     void initState() {
         super.initState();
         _gridSizeSliderValue = (widget.prefs.getInt("grid_size") ?? settingsDefaults["grid_size"]).toDouble();
+        _autotagAccuracy = widget.prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"];
+        _thumbnailQuality = widget.prefs.getDouble("thumbnail_quality") ?? settingsDefaults["thumbnail_quality"];
         _pageSizeController.text = (widget.prefs.getInt("page_size") ?? settingsDefaults["page_size"]).toString();
         _monetTheme = widget.prefs.getBool("monet") ?? settingsDefaults["monet"];
         _update = widget.prefs.getBool("update") ?? settingsDefaults["update"];
-        _autotagAccuracy = widget.prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"];
-        _theme = widget.prefs.getString("theme") ?? settingsDefaults["theme"];
         _gif_video = widget.prefs.getBool("gif_video") ?? settingsDefaults["gif_video"];
+        _theme = widget.prefs.getString("theme") ?? settingsDefaults["theme"];
     }
 
     Future<void> onChangeTheme() async {
@@ -65,7 +67,7 @@ class _OverallSettingsState extends State<OverallSettings> {
         return ListView(
             children: [
                 const SmallHeader("Browsing"),
-                ListTile(
+                SliderListTile(
                     title: Row(
                         children: [
                             const Text("Grid size"),
@@ -76,31 +78,16 @@ class _OverallSettingsState extends State<OverallSettings> {
                         ],
                     ),
                     leading: const Icon(Icons.grid_3x3),
-                    subtitle: Wrap(
-                        children: [
-                            const Text("Set how many columns should be displayed dynamically"),
-                            const Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [Text("Less elements"), Text("More elements")]
-                            ),
-                            Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                child: SliderTheme(
-                                    data: SliderThemeData(overlayShape: SliderComponentShape.noOverlay),
-                                    child: Slider(
-                                        value: _gridSizeSliderValue,
-                                        min: 1,
-                                        max: 10,
-                                        divisions: 9,
-                                        onChanged: (value) async {
-                                            setState(() => _gridSizeSliderValue = value);
-                                            widget.prefs.setInt("grid_size", value.ceil());
-                                        },
-                                    ),
-                                ),
-                            )
-                        ],
-                    )
+                    subtitle: const Text("Set how many columns should be displayed dynamically"),
+                    extremeTips: const [Text("Less elements"), Text("More elements")],
+                    value: _gridSizeSliderValue,
+                    min: 1,
+                    max: 10,
+                    divisions: 9,
+                    onChanged: (value) async {
+                        setState(() => _gridSizeSliderValue = value);
+                        widget.prefs.setInt("grid_size", value.ceil());
+                    },
                 ),
                 ListTile(
                     title: Row(
@@ -138,45 +125,55 @@ class _OverallSettingsState extends State<OverallSettings> {
                         ],
                     )
                 ),
+                SliderListTile(
+                    title: Row(
+                        children: [
+                            const Text("Thumbnail quality"),
+                            if(isSettingModified("thumbnail_quality")) IconButton(
+                                onPressed: () => resetProp("thumbnail_quality", modifier: (v) => _thumbnailQuality = v),
+                                icon: const Icon(Icons.restart_alt)
+                            )
+                        ],
+                    ),
+                    leading: const Icon(Icons.image_aspect_ratio),
+                    subtitle: const Text("Set how high quality should the thumbnails be on the browse screen. The less, the less ram will be used, but the preview will be lower quality"),
+                    extremeTips: const [Text("0.5x displayed"), Text("3x displayed")],
+                    value: _thumbnailQuality,
+                    min: 0.5,
+                    max: 3,
+                    divisions: 5,
+                    label: "$_thumbnailQuality",
+                    onChanged: (value) async {
+                        setState(() => _thumbnailQuality = value);
+                        widget.prefs.setDouble("thumbnail_quality", value);
+                    },
+                ),
+                
                 const SmallHeader("Tags"),
-                ListTile(
+                SliderListTile(
                     title: Row(
                         children: [
                             const Text("Autotag accuracy"),
                             if(isSettingModified("autotag_accuracy")) IconButton(
-                                onPressed: () => resetProp("autotag_accuracy", modifier: (v) => _autotagAccuracy = v.toDouble()),
+                                onPressed: () => resetProp("autotag_accuracy", modifier: (v) => _autotagAccuracy = v),
                                 icon: const Icon(Icons.restart_alt)
                             )
                         ],
                     ),
                     leading: const Icon(CupertinoIcons.sparkles),
-                    subtitle: Wrap(
-                        children: [
-                            const Text("How accurate should be the results of the autotagger"),
-                            const Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [Text("Less accurate"), Text("More accurate")]
-                            ),
-                            Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                child: SliderTheme(
-                                    data: SliderThemeData(overlayShape: SliderComponentShape.noOverlay, showValueIndicator: ShowValueIndicator.always),
-                                    child: Slider(
-                                        //TODO: Make this slider go in an exponential curve
-                                        value: _autotagAccuracy,
-                                        min: 0,
-                                        max: 1,
-                                        label: "${(_autotagAccuracy*100).round()}%",
-                                        onChanged: (value) async {
-                                            setState(() => _autotagAccuracy = value);
-                                            widget.prefs.setDouble("autotag_accuracy", value);
-                                        },
-                                    ),
-                                ),
-                            )
-                        ],
-                    )
+                    subtitle: const Text("How accurate should be the results of the autotagger"),
+                    extremeTips: const [Text("Less accurate"), Text("More accurate")],
+                    //TODO: Make this slider go in an exponential curve
+                    value: _autotagAccuracy,
+                    min: 0,
+                    max: 1,
+                    label: "${(_autotagAccuracy*100).round()}%",
+                    onChanged: (value) async {
+                        setState(() => _autotagAccuracy = value);
+                        widget.prefs.setDouble("autotag_accuracy", value);
+                    },
                 ),
+                
                 const SmallHeader("Appearence"),
                 ListTile(
                     title: const Text("Theme"),
@@ -195,6 +192,7 @@ class _OverallSettingsState extends State<OverallSettings> {
                         setState(() => _monetTheme = value);
                     }
                 ),
+
                 const SmallHeader("Behavior"),
                 SwitchListTile(
                     title: const Text("Display GIFs as videos"),
@@ -218,6 +216,53 @@ class _OverallSettingsState extends State<OverallSettings> {
                     }
                 ),
             ],
+        );
+    }
+}
+
+class SliderListTile extends StatelessWidget {
+    const SliderListTile({super.key, this.title, this.leading, required this.value, this.min = 0, this.max = 1, this.label, this.onChanged, this.subtitle, this.extremeTips, this.divisions});
+    
+    final Widget? title;
+    final Widget? subtitle;
+    final List<Widget>? extremeTips;
+    final Widget? leading;
+    final double value;
+    final double min;
+    final double max;
+    final int? divisions;
+    final String? label;
+    final Function(double)? onChanged;
+
+
+    @override
+    Widget build(BuildContext context) {
+        return ListTile(
+            title: title,
+            leading: leading,
+            subtitle: Wrap(
+                children: [
+                    if(subtitle != null) subtitle!,
+                    if(extremeTips != null) Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: extremeTips!
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        child: SliderTheme(
+                            data: SliderThemeData(overlayShape: SliderComponentShape.noOverlay, showValueIndicator: ShowValueIndicator.always),
+                            child: Slider(
+                                value: value,
+                                min: min,
+                                max: max,
+                                label: label,
+                                divisions: divisions,
+                                onChanged: onChanged,
+                            ),
+                        ),
+                    )
+                ],
+            )
         );
     }
 }

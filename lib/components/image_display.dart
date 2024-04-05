@@ -7,15 +7,17 @@ import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/compressor.dart';
+import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:mime/mime.dart';
 
 
 class SilverRepoGrid extends StatefulWidget {
-    const SilverRepoGrid({super.key, required this.images, this.onPressed, this.autoadjustColumns});
+    const SilverRepoGrid({super.key, required this.images, this.onPressed, this.autoadjustColumns, this.imageQualityScale});
 
     final List<BooruImage> images;
     final Function(BooruImage image)? onPressed;
     final int? autoadjustColumns;
+    final double? imageQualityScale;
 
     @override
     State<SilverRepoGrid> createState() => _SilverRepoGridState();
@@ -76,17 +78,19 @@ class _SilverRepoGridState extends State<SilverRepoGrid> {
                             ]
                         );
                     }
-                    return Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: GestureDetector(
-                                onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
-                                onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!)),
-                                onLongPressDown: (tap) => longTap = tap,
-                                onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
-                                child: ImageGrid(image: image, resizeSize: resizeSize,)
-                            )
+                    return SharedPreferencesBuilder(
+                        builder: (context, prefs) => Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                    onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
+                                    onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!)),
+                                    onLongPressDown: (tap) => longTap = tap,
+                                    onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
+                                    child: ImageGrid(image: image, resizeSize: resizeSize * (prefs.getDouble("thumbnail_quality") ?? settingsDefaults["thumbnail_quality"]),)
+                                )
+                            ),
                         ),
                     );
                 }).toList()),
@@ -134,8 +138,8 @@ class _ImageGridState extends State<ImageGrid> {
                             final thumbnail = snapshot.data!;
                             final hasResize = widget.resizeSize != null;
                             final ImageProvider provider = hasResize ? ResizeImage(FileImage(thumbnail),
-                                width: (widget.resizeSize! * 2).ceil(),
-                                height: (widget.resizeSize! * 2).ceil(),
+                                width: widget.resizeSize!.ceil(),
+                                height: widget.resizeSize!.ceil(),
                                 policy: ResizeImagePolicy.fit
                             ) : FileImage(thumbnail) as ImageProvider;
                             return Image(

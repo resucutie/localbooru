@@ -9,6 +9,7 @@ final Map<String, dynamic> settingsDefaults = {
     "monet": Platform.isAndroid ? true : false,
     "theme": "system",
     "autotag_accuracy": 0.15,
+    "thumbnail_quality": 2.0,
     "update": true,
     "gif_video": false,
 };
