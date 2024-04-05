@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/headers.dart';
+import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -17,6 +20,21 @@ class BooruSettings extends StatefulWidget {
 }
 
 class _BooruSettingsState extends State<BooruSettings> {
+    late Future<List<bool>> _hideMedia;
+
+    void setHideMedia() {
+        _hideMedia = Future.wait([
+            File(p.join(widget.booru.path, "files", ".nomedia")).exists(),
+            File(p.join(widget.booru.path, "thumbnails", ".nomedia")).exists()
+        ]);
+    }
+
+    @override
+    void initState() {
+        super.initState();
+        setHideMedia();
+    }
+
     @override
     Widget build(BuildContext context) {
         return ListView(
@@ -41,6 +59,26 @@ class _BooruSettingsState extends State<BooruSettings> {
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Rebased")));
                         }
                     },
+                ),
+                FutureBuilder(
+                    future: _hideMedia,
+                    builder: (context, snapshot) => SwitchListTile(
+                        title: const Text("Hide images from gallery"),
+                        secondary: const Icon(Icons.hide_image_outlined),
+                        value: snapshot.hasData ? snapshot.data!.every((e) => e == true) : false,
+                        onChanged: snapshot.hasData ? (value) async {
+                            final File nomediaFiles = File(p.join(widget.booru.path, "files", ".nomedia"));
+                            final File nomediaThumbnails = File(p.join(widget.booru.path, "thumbnails", ".nomedia"));
+                            if(value) {
+                                await nomediaFiles.create();
+                                await nomediaThumbnails.create();
+                            } else {
+                                await nomediaFiles.delete();
+                                await nomediaThumbnails.delete();
+                            }
+                            setState(setHideMedia);
+                        } : null
+                    ),
                 ),
                 ListTile(
                     title: const Text("Syncing"),

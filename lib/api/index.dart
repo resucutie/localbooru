@@ -46,6 +46,7 @@ Future<void> createDefaultBooruModel(String folderPath) async {
     File repoinfoFile = await File(p.join(folderPath, "repoinfo.json")).create(recursive: true);
     await repoinfoFile.writeAsString(jsonEncode(defaultFileInfoJson));
     await Directory(p.join(folderPath, "files")).create(recursive: true);
+    await Directory(p.join(folderPath, "thumbnails")).create(recursive: true);
 }
 
 bool isValidBooruModel(Map<String, dynamic> raw) {
