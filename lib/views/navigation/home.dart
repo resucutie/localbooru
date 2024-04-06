@@ -100,7 +100,7 @@ class _SearchTagState extends State<SearchTag> {
             builder: (context, controller) => SearchBar(
                 controller: controller,
                 hintText: "Type a tag",
-                padding: const MaterialStatePropertyAll<EdgeInsets>(
+                padding: const WidgetStatePropertyAll<EdgeInsets>(
                     EdgeInsets.only(left: 16.0, right: 10.0)
                 ),
                 onSubmitted: widget.onSearch,
@@ -115,21 +115,28 @@ class _SearchTagState extends State<SearchTag> {
                 Booru booru = await getCurrentBooru();
                 List<String> tags = await booru.getAllTags();
                 final currentTags = List<String>.from(controller.text.split(" "));
-                var filteredTags = List<String>.from(tags);
-                filteredTags.retainWhere((s){
-                        return s.contains(currentTags.last) && !currentTags.contains(s);
+
+                final filteredTags = List<String>.from(tags)..retainWhere((s){
+                    return s.contains(currentTags.last) && !currentTags.contains(s);
                 });
+
                 var specialTags = await booru.separateTagsByType(filteredTags);
-                var mew = specialTags.entries.map((type) => type.value.map((tag) => ListTile(
-                    title: Text(tag, style: TextStyle(color: SpecificTagsColors.getColor(type.key)),),
+                specialTags["meta"] = tagsToAddToSearch;
+
+                return specialTags.entries.map((type) => type.value.map((tag) => ListTile(
+                    title: Text(tag,
+                        style: TextStyle(
+                            color: !(type.key == "meta") ? SpecificTagsColors.getColor(type.key) : null,
+                            fontWeight: type.key == "meta" ? FontWeight.bold : null
+                        ),
+                    ),
                     onTap: () {
                         List endResult = List.from(currentTags);
                         endResult.removeLast();
                         endResult.add(tag);
                         setState(() => controller.closeView("${endResult.join(" ")} "));
                     },
-                )));
-                return mew.expand((i) => i);
+                ))).expand((i) => i);
             },
             viewTrailing: [
                 IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
@@ -138,6 +145,12 @@ class _SearchTagState extends State<SearchTag> {
         );
     }
 }
+final List<String> tagsToAddToSearch = [
+    "rating:safe",
+    "rating:questionable",
+    "rating:explicit",
+    "rating:illegal",
+];
 
 class SearchButton extends StatelessWidget {
     const SearchButton({super.key, required this.controller, required this.onSearch, this.icon = const Icon(Icons.search)});

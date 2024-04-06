@@ -11,7 +11,6 @@ import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/utils/tags.dart';
 import 'package:localbooru/views/image_manager/peripherals.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';

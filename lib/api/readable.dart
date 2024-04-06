@@ -85,9 +85,8 @@ class Booru {
         final List<String> tagList = tags.split(" ").where((s) => s.isNotEmpty).toList();
         final List files = (await getRawInfo())["files"];
         final List filteredFiles = files.where((file) {
-            final String fileTags = file["tags"].toLowerCase();
             if(tagList.isEmpty) return true;
-            return shouldBeIncluded(tagList: tagList, fileTags: fileTags);
+            return wouldImageBeSelected(inputTags: tagList, file: file);
         }).toList();
 
         return filteredFiles;

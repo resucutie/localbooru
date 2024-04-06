@@ -89,11 +89,15 @@ Map<String, dynamic> rebase(Map<String, dynamic> raw) {
     // check all files
     if(raw["files"] == null) raw["files"] = [];
     List files = raw["files"];
-    for(final (index, file) in files.indexed) {
+    for(final (int index, Map file) in files.indexed) {
         //recount all ids
         file["id"] = index.toString();
 
-        files[index] = file;
+        file["tags"] = (file["tags"] as String).split(" ")
+            .where((tag) => !tag.contains(":")) //remove any metatags on the tags
+            .join(" ");
+
+        files[index] = file as dynamic;
     }
     raw["files"] = files;
 
