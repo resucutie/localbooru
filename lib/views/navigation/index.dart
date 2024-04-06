@@ -37,7 +37,7 @@ class BrowseScreen extends StatelessWidget {
         }
         if(isOnView()) {
             final String id = uri.pathSegments[1];
-            return "No. ${int.parse(id) + 1}";
+            return "ID $id";
         }
         return null;
     }

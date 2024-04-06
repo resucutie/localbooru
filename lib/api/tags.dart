@@ -74,13 +74,26 @@ bool doTagMatch({required Map file, required TagText tag}) {
     if(tag.isMetatag()) {
         final Metatag metatag = Metatag(tag);
         switch (metatag.selector) {
-            case "rating" :
-                final ret = ((metatag.value == "safe" || metatag.value == "s") && file["rating"] == "safe")
+            case "rating":
+                return (metatag.value == "none" && file["rating"] == null)
+                    || ((metatag.value == "safe" || metatag.value == "s") && file["rating"] == "safe")
                     || ((metatag.value == "questionable" || metatag.value == "q") && file["rating"] == "questionable")
                     || ((metatag.value == "explicit" || metatag.value == "e") && file["rating"] == "explicit")
                     || ((metatag.value == "illegal" || metatag.value == "i") && file["rating"] == "illegal");
-                // debugPrint("checking for ${tag.rawText} on ${file["filename"]}, $ret");
-                return ret;
+            case "id":
+                return rangeMatch(double.parse(file["id"]), metatag.value) || metatag.value == file["id"];
+            case "type":
+                final String mime = lookupMimeType(file["filename"])!;
+                return wildcardMatch(mime, metatag.value) || 
+                    p.extension(file["filename"]).substring(1) == metatag.value ||
+                    (metatag.value == "animated" && (mime.startsWith("video/") || mime == "image/gif")) ||
+                    (metatag.value == "static" && (mime.startsWith("image/") && mime != "image/gif"));
+            case "file":
+                return wildcardMatch(file["filename"], metatag.value);
+            case "source":
+                final List<String> sources = List<String>.from(file["sources"]);
+                return sources.any((source) => wildcardMatch(Uri.parse(source).host, metatag.value)) || 
+                    (metatag.value == "none" && sources.isEmpty);
             default:
                 return false;
         }

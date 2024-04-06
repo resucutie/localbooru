@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/utils/compressor.dart';
-import 'package:localbooru/utils/formatter.dart';
+import 'package:localbooru/utils/misc.dart';
 
 class FileInfo extends StatefulWidget {
     const FileInfo(this.file, {super.key, this.onCompressed});

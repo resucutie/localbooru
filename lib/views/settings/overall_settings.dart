@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localbooru/components/headers.dart';
+import 'package:localbooru/components/radio_dialogs.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -263,34 +264,6 @@ class SliderListTile extends StatelessWidget {
                     )
                 ],
             )
-        );
-    }
-}
-
-class ThemeChangerDialog extends StatelessWidget {
-    const ThemeChangerDialog({super.key, required this.theme});
-
-    final String theme;
-
-    @override
-    Widget build(BuildContext context) {
-        return AlertDialog(
-            title: const Text("Theme"),
-            contentPadding: const EdgeInsets.only(top: 16.0, bottom: 24.0),
-            content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                    for (final themeMode in ["system", "dark", "light"]) RadioListTile(
-                        groupValue: theme,
-                        value: themeMode,
-                        title: Text(themeMode.replaceFirstMapped(themeMode[0], (match) => themeMode[0].toUpperCase())),
-                        onChanged: (value) => Navigator.of(context).pop(value),
-                    ),
-                ],
-            ),
-            actions: [
-                TextButton(onPressed: Navigator.of(context).pop, child: const Text("Close"))
-            ],
         );
     }
 }

@@ -9,9 +9,9 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
+import 'package:localbooru/components/radio_dialogs.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/views/image_manager/peripherals.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -146,6 +146,9 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             if(type != "species" && !hasOverlap[0]) hasOverlap = [speciesTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "species"];
             
             if(hasOverlap[0]) return "Overlapping tags exists with the ${hasOverlap[1]} field";
+            
+            //check for metatags
+            if(value!.contains(":")) return "Metatags cannot be added";
         }
 
         // check if it is empty

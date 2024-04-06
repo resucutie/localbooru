@@ -146,10 +146,18 @@ class _SearchTagState extends State<SearchTag> {
     }
 }
 final List<String> tagsToAddToSearch = [
+    "rating:none",
     "rating:safe",
     "rating:questionable",
     "rating:explicit",
     "rating:illegal",
+    "id:",
+    "file:",
+    "type:",
+    "type:static",
+    "type:animated",
+    "source:",
+    "source:none",
 ];
 
 class SearchButton extends StatelessWidget {
