@@ -11,7 +11,7 @@ Future<AccuracyTagList> autoTag(File file) async {
     http.Response response = await http.Response.fromStream(await req.send());
 
     // process it
-    final AccuracyTagList tags = AccuracyTagList.from(jsonDecode(response.body)[0]["tags"]);
+    final AccuracyTagList tags = AccuracyTagList.from(jsonDecode(response.body)[0]["tags"])..removeWhere((tag, _) => tag.contains(":"));
     return tags;
 }
 
