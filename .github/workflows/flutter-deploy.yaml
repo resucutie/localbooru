@@ -12,7 +12,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.19.2'
+          flutter-version: '3.19.5'
       - name: Install compiler dependencies
         run: sudo apt-get update && sudo apt-get install -y clang ninja-build libgtk-3-dev libmpv-dev mpv
       - name: Install project dependencies
@@ -43,7 +43,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.19.2'
+          flutter-version: '3.19.5'
       - name: Use pub version of media_kit_video
         uses: fjogeleit/yaml-update-action@main
         with:
@@ -82,7 +82,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.19.2'
+          flutter-version: '3.19.5'
       - name: Install project dependencies
         run: flutter pub get
       - name: Enable macOS building
@@ -103,7 +103,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.19.2'
+          flutter-version: '3.19.5'
       - name: Install project dependencies
         run: flutter pub get
       - name: Build artifacts
