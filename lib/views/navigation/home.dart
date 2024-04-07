@@ -100,7 +100,7 @@ class _SearchTagState extends State<SearchTag> {
             builder: (context, controller) => SearchBar(
                 controller: controller,
                 hintText: "Type a tag",
-                padding: const WidgetStatePropertyAll<EdgeInsets>(
+                padding: const MaterialStatePropertyAll<EdgeInsets>(
                     EdgeInsets.only(left: 16.0, right: 10.0)
                 ),
                 onSubmitted: widget.onSearch,
