@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/window_frame.dart';
