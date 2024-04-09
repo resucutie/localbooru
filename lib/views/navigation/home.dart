@@ -134,7 +134,10 @@ class _SearchTagState extends State<SearchTag> {
                         List endResult = List.from(currentTags);
                         endResult.removeLast();
                         endResult.add(tag);
-                        setState(() => controller.text = "${endResult.join(" ")} ");
+                        setState(() {
+                            if(tag.endsWith(":")) controller.text = endResult.join(" ");
+                            else controller.text = "${endResult.join(" ")} ";
+                        });
                     },
                 ))).expand((i) => i);
             },
