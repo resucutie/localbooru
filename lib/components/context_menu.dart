@@ -8,7 +8,6 @@ import 'package:localbooru/utils/listeners.dart';
 import 'package:open_file/open_file.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:super_clipboard/super_clipboard.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import "package:vector_math/vector_math_64.dart";
 
