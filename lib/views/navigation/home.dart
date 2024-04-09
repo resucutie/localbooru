@@ -72,12 +72,12 @@ class _HomePageState extends State<HomePage> {
 }
 
 class SearchTag extends StatefulWidget {
-    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.hasShadows = false});
+    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.isFullScreen});
 
     final String defaultText;
     final Function(String value) onSearch;
     final SearchController? controller;
-    final bool hasShadows;
+    final bool? isFullScreen;
 
     @override
     State<SearchTag> createState() => _SearchTagState();
@@ -134,7 +134,7 @@ class _SearchTagState extends State<SearchTag> {
                         List endResult = List.from(currentTags);
                         endResult.removeLast();
                         endResult.add(tag);
-                        setState(() => controller.closeView("${endResult.join(" ")} "));
+                        setState(() => controller.text = "${endResult.join(" ")} ");
                     },
                 ))).expand((i) => i);
             },
@@ -142,6 +142,7 @@ class _SearchTagState extends State<SearchTag> {
                 IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
                 SearchButton(controller: _controller, onSearch: widget.onSearch)
             ],
+            isFullScreen: widget.isFullScreen,
         );
     }
 }
@@ -161,17 +162,17 @@ final List<String> tagsToAddToSearch = [
 ];
 
 class SearchButton extends StatelessWidget {
-    const SearchButton({super.key, required this.controller, required this.onSearch, this.icon = const Icon(Icons.search)});
+    const SearchButton({super.key, required this.controller, this.onSearch, this.icon = const Icon(Icons.search)});
 
     final SearchController controller;
     final Widget icon;
-    final Function(String) onSearch;
+    final Function(String)? onSearch;
     
     @override
     Widget build(context) {
         return IconButton(
             icon: icon,
-            onPressed: controller.text.isEmpty ? null : () => onSearch(controller.text),
+            onPressed: onSearch != null ? () => onSearch!(controller.text) : null,
         );
     }
 }

@@ -120,7 +120,7 @@ class SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
                 child: SearchTag(
                     onSearch: onSearch,
                     controller: searchController,
-                    hasShadows: true,
+                    isFullScreen: false,
                 ),
             ),
         );
