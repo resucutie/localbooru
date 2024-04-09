@@ -1,5 +1,4 @@
 import 'dart:io';
-import "dart:ui" as dui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -79,7 +78,7 @@ class _SilverRepoGridState extends State<SilverRepoGrid> {
                         );
                     }
                     return SharedPreferencesBuilder(
-                        builder: (context, prefs) => Padding(
+                        builder: (_, prefs) => Padding(
                             padding: const EdgeInsets.all(4.0),
                             child: MouseRegion(
                                 cursor: SystemMouseCursors.click,
