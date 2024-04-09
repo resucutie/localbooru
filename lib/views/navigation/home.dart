@@ -41,13 +41,18 @@ class _HomePageState extends State<HomePage> {
                                 const SizedBox(height: 16),
                                 Wrap(
                                     direction: Axis.horizontal,
-                                    spacing: 8.0,
+                                    spacing: 16,
                                     children: [
                                         OutlinedButton.icon(
                                             onPressed: () => context.push("/recent"),
                                             label: const Text("Recent posts"),
                                             icon: const Icon(Icons.history)
-                                        )
+                                        ),
+                                        FilledButton.icon(
+                                            onPressed: _onSearch,
+                                            label: const Text("Search"),
+                                            icon: const Icon(Icons.search)
+                                        ),
                                     ],
                                 ),
                                 const SizedBox(height: 32),
@@ -108,6 +113,7 @@ class _SearchTagState extends State<SearchTag> {
                 onChanged: (_) => controller.openView(),
                 leading: const Icon(Icons.search),
                 trailing: [
+                    if(controller.text.isNotEmpty) IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
                     SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
                 ]
             ),
