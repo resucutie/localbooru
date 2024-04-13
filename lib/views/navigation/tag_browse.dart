@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/image_display.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +25,7 @@ class GalleryViewer extends StatefulWidget {
 
 class _GalleryViewerState extends State<GalleryViewer> {
     final SearchController _searchController = SearchController();
+    final ScrollController _whyDoWeHaveToAddThis = ScrollController();
     void _onSearch () => context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
 
     final scrollToTop = GlobalKey();
@@ -65,31 +67,41 @@ class _GalleryViewerState extends State<GalleryViewer> {
 
                                 if (pages == 0) return const Center(child: Text("nothing to see here!"));
 
-                                return CustomScrollView(
-                                    slivers: [
-                                        SliverPersistentHeader(
-                                            delegate: SearchBarHeaderDelegate(onSearch: (_) => _onSearch(), searchController: _searchController),
-                                            pinned: true,
+                                return Scrollbar(
+                                    thumbVisibility: isDestkop(),
+                                    trackVisibility: isDestkop(),
+                                    controller: _whyDoWeHaveToAddThis,
+                                    child: Padding(
+                                        padding: EdgeInsets.only(right: isDestkop() ? 14.0 : 0),
+                                        child: CustomScrollView(
+                                            controller: _whyDoWeHaveToAddThis,
+                                            scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                                            slivers: [
+                                                SliverPersistentHeader(
+                                                    delegate: SearchBarHeaderDelegate(onSearch: (_) => _onSearch(), searchController: _searchController),
+                                                    pinned: true,
+                                                ),
+                                                SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
+                                                SliverRepoGrid(
+                                                    images: snapshot.data!["images"],
+                                                    onPressed: (image) => context.push("/view/${image.id}"),
+                                                    autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
+                                                ),
+                                                SliverToBoxAdapter(child: PageDisplay(
+                                                    currentPage: _currentIndex,
+                                                    pages: pages,
+                                                    onSelect: (selectedPage) {
+                                                        if(widget.routeNavigation) {
+                                                            context.push("/search?tag=${widget.tags}&index=$selectedPage");
+                                                        } else {
+                                                            setState(() => _currentIndex = selectedPage);
+                                                            Scrollable.ensureVisible(scrollToTop.currentContext!);
+                                                        }
+                                                    },
+                                                )),
+                                            ]
                                         ),
-                                        SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
-                                        SilverRepoGrid(
-                                            images: snapshot.data!["images"],
-                                            onPressed: (image) => context.push("/view/${image.id}"),
-                                            autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
-                                        ),
-                                        SliverToBoxAdapter(child: PageDisplay(
-                                            currentPage: _currentIndex,
-                                            pages: pages,
-                                            onSelect: (selectedPage) {
-                                                if(widget.routeNavigation) {
-                                                    context.push("/search?tag=${widget.tags}&index=$selectedPage");
-                                                } else {
-                                                    setState(() => _currentIndex = selectedPage);
-                                                    Scrollable.ensureVisible(scrollToTop.currentContext!);
-                                                }
-                                            },
-                                        )),
-                                    ]
+                                    ),
                                 );
                             } else if(snapshot.hasError) {
                                 throw snapshot.error!;
@@ -163,6 +175,12 @@ class _PageDisplayState extends State<PageDisplay> {
         });
     }
 
+    final ButtonStyle indicatorStyle = TextButton.styleFrom(
+        minimumSize: const Size.square(38),
+        maximumSize: const Size.square(38),
+        padding: const EdgeInsets.all(0),
+    );
+
     @override
     Widget build(context) {
         return SizedBox(
@@ -186,11 +204,6 @@ class _PageDisplayState extends State<PageDisplay> {
                                 children: List.generate(widget.pages, (index) {
                                     final bool isCurrentPage = widget.currentPage == index;
                                     Widget icon = Text((index + 1).toString(), textAlign: TextAlign.center,);
-                                    final ButtonStyle buttonStyle = TextButton.styleFrom(
-                                        minimumSize: const Size.square(38),
-                                        maximumSize: const Size.square(38),
-                                        padding: const EdgeInsets.all(0),
-                                    );
                         
                                     void onPressed() {
                                         if(isCurrentPage) return;
@@ -200,8 +213,8 @@ class _PageDisplayState extends State<PageDisplay> {
                                     return Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 8),
                                         child: isCurrentPage
-                                            ? FilledButton(key: jumpToKey, onPressed: onPressed, style: buttonStyle, child: icon)
-                                            : OutlinedButton(onPressed: onPressed, style: buttonStyle, child: icon)
+                                            ? FilledButton(key: jumpToKey, onPressed: onPressed, style: indicatorStyle, child: icon)
+                                            : OutlinedButton(onPressed: onPressed, style: indicatorStyle, child: icon)
                                     );
                                 }),
                             )
