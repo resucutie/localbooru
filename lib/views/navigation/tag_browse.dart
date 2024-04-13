@@ -185,10 +185,11 @@ class _PageDisplayState extends State<PageDisplay> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: List.generate(widget.pages, (index) {
                                     final bool isCurrentPage = widget.currentPage == index;
-                                    Widget icon = Text((index + 1).toString());
+                                    Widget icon = Text((index + 1).toString(), textAlign: TextAlign.center,);
                                     final ButtonStyle buttonStyle = TextButton.styleFrom(
-                                        minimumSize: Size.zero,
-                                        padding: const EdgeInsets.all(12.0),
+                                        minimumSize: const Size.square(38),
+                                        maximumSize: const Size.square(38),
+                                        padding: const EdgeInsets.all(0),
                                     );
                         
                                     void onPressed() {
