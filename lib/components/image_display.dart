@@ -10,8 +10,8 @@ import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:mime/mime.dart';
 
 
-class SilverRepoGrid extends StatefulWidget {
-    const SilverRepoGrid({super.key, required this.images, this.onPressed, this.autoadjustColumns, this.imageQualityScale});
+class SliverRepoGrid extends StatefulWidget {
+    const SliverRepoGrid({super.key, required this.images, this.onPressed, this.autoadjustColumns, this.imageQualityScale});
 
     final List<BooruImage> images;
     final Function(BooruImage image)? onPressed;
@@ -19,10 +19,10 @@ class SilverRepoGrid extends StatefulWidget {
     final double? imageQualityScale;
 
     @override
-    State<SilverRepoGrid> createState() => _SilverRepoGridState();
+    State<SliverRepoGrid> createState() => _SliverRepoGridState();
 }
 
-class _SilverRepoGridState extends State<SilverRepoGrid> {
+class _SliverRepoGridState extends State<SliverRepoGrid> {
     late LongPressDownDetails longTap;
     
     String? getType(String filename) {
