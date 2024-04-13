@@ -39,6 +39,7 @@ class _HomePageState extends State<HomePage> {
                                         SearchTag(
                                             onSearch: (_) => _onSearch(),
                                             controller: _searchController,
+                                            showSearchButton: false,
                                         ),
                                         const SizedBox(height: 16),
                                         Wrap(
@@ -85,12 +86,13 @@ class _HomePageState extends State<HomePage> {
 }
 
 class SearchTag extends StatefulWidget {
-    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.isFullScreen});
+    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.isFullScreen, this.showSearchButton = true});
 
     final String defaultText;
     final Function(String value) onSearch;
     final SearchController? controller;
     final bool? isFullScreen;
+    final bool showSearchButton;
 
     @override
     State<SearchTag> createState() => _SearchTagState();
@@ -122,7 +124,7 @@ class _SearchTagState extends State<SearchTag> {
                 leading: const Icon(Icons.search),
                 trailing: [
                     if(controller.text.isNotEmpty) IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
-                    SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
+                    if(widget.showSearchButton) SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
                 ]
             ),
             suggestionsBuilder: (context, controller) async {
