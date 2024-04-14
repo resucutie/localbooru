@@ -21,67 +21,63 @@ class _HomePageState extends State<HomePage> {
 
     @override
     Widget build(BuildContext context) {
-        return OrientationBuilder(
-            builder: (context, orientation) {
-                return Container(
-                    padding: const EdgeInsets.all(8.0),
-                    width: double.infinity,  // <-- Takes up total width of the device
-                    height: double.infinity, // <-- Takes up the total height of the device
-                    child: Column(
-                        children: [
-                            Expanded(
-                                child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                        const SizedBox(height: 64),
-                                        const LocalBooruHeader(),
-                                        const SizedBox(height: 32),
-                                        SearchTag(
-                                            onSearch: (_) => _onSearch(),
-                                            controller: _searchController,
-                                            showSearchButton: false,
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Wrap(
-                                            direction: Axis.horizontal,
-                                            spacing: orientation == Orientation.landscape ? 16 : 8,
-                                            children: [
-                                                OutlinedButton.icon(
-                                                    onPressed: () => context.push("/recent"),
+        return OrientationBuilder(builder: (context, orientation) {
+            return LayoutBuilder(builder: (context, constraints) {
+                return SingleChildScrollView(
+                    child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        constraints: BoxConstraints(minWidth: constraints.maxWidth, minHeight: constraints.maxHeight),
+                        child: IntrinsicHeight(
+                            child: Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                    const SizedBox(height: 64),
+                                    const LocalBooruHeader(),
+                                    const SizedBox(height: 32),
+                                    SearchTag(
+                                        onSearch: (_) => _onSearch(),
+                                        controller: _searchController,
+                                        showSearchButton: false,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Wrap(
+                                        direction: Axis.horizontal,
+                                        spacing: orientation == Orientation.landscape ? 16 : 8,
+                                        children: [
+                                            OutlinedButton.icon(
+                                                onPressed: () => context.push("/recent"),
                                                     label: const Text("Recent posts"),
-                                                    icon: const Icon(Icons.history)
-                                                ),
-                                                orientation == Orientation.landscape ? FilledButton.icon(
+                                                icon: const Icon(Icons.history)
+                                            ),
+                                            orientation == Orientation.landscape ? FilledButton.icon(
+                                                onPressed: _onSearch,
+                                                label: const Text("Search"),
+                                                icon: const Icon(Icons.search)
+                                            ) : IconButton.filled(
                                                     onPressed: _onSearch,
-                                                    label: const Text("Search"),
-                                                    icon: const Icon(Icons.search)
-                                                ) : IconButton.filled(
-                                                    onPressed: _onSearch,
-                                                    icon: const Icon(Icons.search),
-                                                    // color: Theme.of(context).colorScheme.primary,
-                                                ),
-                                            ],
-                                        ),
-                                        const SizedBox(height: 32),
-                                        const ImageDisplay(),
-                                    ],
-                                ),
-                            ),
-                            Align(
-                                alignment: Alignment.bottomCenter,
-                                child: BooruLoader(
-                                    builder: (context, booru) => SelectableText(booru.path,
-                                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                            color: Theme.of(context).hintColor
+                                                icon: const Icon(Icons.search),
+                                                // color: Theme.of(context).colorScheme.primary,
+                                            ),
+                                        ],
+                                    ),
+                                    const SizedBox(height: 32),
+                                    const ImageDisplay(),
+                                    const SizedBox(height: 16),
+                                    const Spacer(),
+                                    BooruLoader(
+                                        builder: (context, booru) => SelectableText(booru.path,
+                                            style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                                color: Theme.of(context).hintColor
+                                            ),
                                         ),
                                     ),
-                                ),
-                            )
-                        ],
-                    ),
+                                ]
+                            ),
+                        )
+                    )
                 );
-            }
-        );
+            });
+        });
     }
 }
 
@@ -201,23 +197,21 @@ class LocalBooruHeader extends StatelessWidget {
     
     @override
     Widget build(context) {
-        return OrientationBuilder(
-            builder: (context, orientation) => Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                direction: Axis.vertical,
-                spacing: 16,
-                children: [
-                    SvgPicture.asset("assets/brand/monochrome-icon.svg",
-                        color: Theme.of(context).colorScheme.primary,
-                        height: 128,
+        return Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            direction: Axis.vertical,
+            spacing: 16,
+            children: [
+                SvgPicture.asset("assets/brand/monochrome-icon.svg",
+                    color: Theme.of(context).colorScheme.primary,
+                    height: 128,
+                ),
+                const Text("LocalBooru",
+                    style: TextStyle(
+                        fontSize: 32,
                     ),
-                    const Text("LocalBooru",
-                        style: TextStyle(
-                            fontSize: 32,
-                        ),
-                    )
-                ],
-            ),
+                )
+            ],
         );
     }
 }
