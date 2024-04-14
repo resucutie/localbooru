@@ -1,7 +1,12 @@
-# LocalBooru
-Your personal booru collection
+<p align="center"><img src="assets/promotional/banner + screenshot.png"/></p>
 
-This is a cross platform local booru collection that exclusively works on your local storage, without selfhosting.
+<p align="center">
+    Your personal booru collection
+</p>
+<p align="center">
+    This is a cross platform local booru collection that exclusively works on your local storage, without selfhosting.
+</p>
+
 
 ## Targetted platforms
 - Android
