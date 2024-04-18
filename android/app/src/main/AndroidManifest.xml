@@ -55,6 +55,12 @@
             android:exported="true"
             android:grantUriPermissions="true" >
         </provider>
+        <provider
+            android:name="com.superlist.super_native_extensions.DataProvider"
+            android:authorities="com.auser.localbooru.SuperClipboardDataProvider"
+            android:exported="true"
+            android:grantUriPermissions="true" >
+        </provider>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:dynamic_color/dynamic_color.dart';
@@ -142,6 +143,15 @@ final router = GoRouter(
                                         );
                                     }
                                 ));
+                            },
+                        ),
+                        GoRoute(path: "path/:path", name:"drag_path",
+                            builder: (context, state) {
+                                final String? path = state.pathParameters["path"];
+                                if(path == null) return const Text("Invalid URL");
+                                final file = File(path);
+                                if(!File(path).existsSync()) return const Text("Path does not exist");
+                                return ImageManagerView(preset: PresetImage(image: file));
                             },
                         ),
                         GoRoute(path: "url/:url", name:"download_url",

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:localbooru/utils/platform_tools.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 final Map<String, dynamic> settingsDefaults = {
     "grid_size": 4,
@@ -74,4 +75,11 @@ class SpecificTagsColors {
         if(type == "species") return species;
         return generic;
     }
+}
+
+class SuperFormats {
+    static const List<SimpleFileFormat> imageStaticOnly = [Formats.png, Formats.jpeg, Formats.bmp, Formats.webp, Formats.mp4, Formats.webm, Formats.mpeg, Formats.mov, Formats.mkv];
+    static const List<SimpleFileFormat> image = [...imageStaticOnly, Formats.gif];
+    static const List<SimpleFileFormat> video = [Formats.mp4, Formats.webm, Formats.mpeg, Formats.mov, Formats.mkv];
+    static const List<SimpleFileFormat> all = [...image, ...video];
 }

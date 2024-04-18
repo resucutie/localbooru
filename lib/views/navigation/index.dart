@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +9,12 @@ import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/window_frame.dart';
+import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/image_manager/peripherals.dart';
+import 'package:localbooru/views/image_manager/preset_api.dart';
+import 'package:super_clipboard/super_clipboard.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class BrowseScreen extends StatelessWidget {
     const BrowseScreen({super.key, required this.child, required this.uri});
@@ -175,7 +182,39 @@ class BrowseScreen extends StatelessWidget {
                     ),
                 ),
             ),
-            body: child,
+            body: DropRegion(
+                formats: Formats.standardFormats,
+                child: child,
+                onDropOver: (event) {
+                    final item = event.session.items.first;
+                    
+                    if(item.localData is Map) return DropOperation.none; // it is a drag from inside the app, ignore;
+
+                    if(event.session.allowedOperations.contains(DropOperation.copy)) return DropOperation.copy;
+                    else return DropOperation.none;
+                },
+                // onDropEnter: (p0) => debugPrint("mew $p0"),
+                onPerformDrop: (event) async {
+                    final item = event.session.items.first;
+                    final reader = item.dataReader!;
+                    debugPrint("got it, ${item.platformFormats}");
+                    
+                    final sentFormats = reader.getFormats(SuperFormats.all);
+                    if(sentFormats.isEmpty) {ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown format dragged"))); return;}
+                    final SimpleFileFormat insertedFormat = sentFormats[0] as SimpleFileFormat;
+                    debugPrint("inserted format: $insertedFormat");
+
+                    // late StreamSubscription ss;
+                    reader.getFile(insertedFormat, (file) async {
+                        final fileExtension = insertedFormat.mimeTypes!.first.split("/")[1];
+                        final mmm = await cache.putFileStream("drag&Drop${file.fileName ?? ""}${file.fileSize}", file.getStream(), fileExtension: fileExtension);
+                        debugPrint(mmm.path);
+                        if(context.mounted) GoRouter.of(context).pushNamed("drag_path", pathParameters: {"path": mmm.path});
+                    }, onError: (error) {
+                        debugPrint('Error reading value $error');
+                    });
+                },
+            ),
         );
     }
 }
