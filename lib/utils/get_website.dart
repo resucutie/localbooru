@@ -15,6 +15,7 @@ String? getWebsite(Uri uri) {
     ) return "twitter";
     if(uri.host.endsWith("furaffinity.net")) return "furaffinity";
     if(uri.host.endsWith("deviantart.com") || uri.host == "fav.me") return "deviantart";
+    if(uri.host.endsWith("instagram.com") || uri.host.endsWith("ddinstagram.com")) return "instagram";
     return null; // none
 }
 
