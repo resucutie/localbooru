@@ -10,7 +10,9 @@ import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/get_website.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:mime/mime.dart';
+import 'package:path/path.dart' as p;
 import 'package:photo_view/photo_view.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:media_kit/media_kit.dart'; // Provides [Player], [Media], [Playlist] etc.
 import 'package:media_kit_video/media_kit_video.dart'; // Provides [VideoController] & [Video] etc.        
@@ -97,7 +99,20 @@ class _ImageViewDisplayState extends State<ImageViewDisplay> {
                                 onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
                                 child: Hero(
                                     tag: "detailed",
-                                    child: Image.file(widget.image.getImage(), fit: BoxFit.contain),
+                                    child: DragItemWidget(
+                                        dragItemProvider: (request) {
+                                            final item = DragItem(
+                                                localData: {'context': "image_view"},
+                                                suggestedName: widget.image.filename
+                                            );
+                                            final format = SuperFormats.getFormatFromFileExtension(p.extension(widget.image.filename));
+                                            // debugPrint("$format");
+                                            if(format != null) item.add(format.lazy(() async => await widget.image.getImage().readAsBytes()));
+                                            return item;
+                                        },
+                                        allowedOperations: () => [DropOperation.copy],
+                                        child: DraggableWidget(child: Image.file(widget.image.getImage(), fit: BoxFit.contain))
+                                    ),
                                 ),
                             ),
                         ),
