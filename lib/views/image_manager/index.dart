@@ -313,7 +313,8 @@ class ImageUploadForm extends StatelessWidget {
                                 borderType: BorderType.RRect,
                                 radius: const Radius.circular(24),
                                 color: state.hasError ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
-                                child: ClipRRect(borderRadius: const BorderRadius.all(Radius.circular(22)),
+                                child: ClipRRect(
+                                    borderRadius: const BorderRadius.all(Radius.circular(22)),
                                     child: TextButton(
                                         style: TextButton.styleFrom(
                                             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero,),

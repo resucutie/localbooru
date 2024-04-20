@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -16,31 +17,38 @@ import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
-class BrowseScreen extends StatelessWidget {
+class BrowseScreen extends StatefulWidget {
     const BrowseScreen({super.key, required this.child, required this.uri});
 
     final Widget child;
     final Uri uri;
 
-    bool _isHome() => uri.path == "/home";
-    bool isOnSearch() => uri.path.contains("/search");
-    bool isOnView() => uri.path.contains("/view");
+    @override
+    State<BrowseScreen> createState() => _BrowseScreenState();
+}
+
+class _BrowseScreenState extends State<BrowseScreen> {
+    bool _isDragAndDrop = false;
+
+    bool _isHome() => widget.uri.path == "/home";
+    bool _isOnSearch() => widget.uri.path.contains("/search");
+    bool _isOnView() => widget.uri.path.contains("/view");
     String _getTitle(Uri uri) {
         final String? tags = uri.queryParameters["tag"];
-        if(isOnSearch()) {
+        if(_isOnSearch()) {
             if(tags != null && tags.isNotEmpty) return "Browse";
             return "Recent";
         }
-        if(isOnView()) return "Image";
+        if(_isOnView()) return "Image";
         return "Home";
     }
     String? _getSubtitle(Uri uri) {
         final String? index = uri.queryParameters["index"];
-        if(isOnSearch()) {
+        if(_isOnSearch()) {
             final int page = index == null ? 1 : int.parse(index) + 1;
             return "Page $page";
         }
-        if(isOnView()) {
+        if(_isOnView()) {
             final String id = uri.pathSegments[1];
             return "ID $id";
         }
@@ -55,8 +63,8 @@ class BrowseScreen extends StatelessWidget {
                 appBar: AppBar(
                     title: Builder(
                         builder: (builder) {
-                            final String title = _getTitle(uri);
-                            final String? subtitle = _getSubtitle(uri);
+                            final String title = _getTitle(widget.uri);
+                            final String? subtitle = _getSubtitle(widget.uri);
                             return ListTile(
                                 title: Text(title, style: const TextStyle(fontSize: 20.0), textAlign: isApple() ? TextAlign.center : TextAlign.start),
                                 subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 14.0), textAlign: isApple() ? TextAlign.center : TextAlign.start) : null,
@@ -72,11 +80,11 @@ class BrowseScreen extends StatelessWidget {
                     ) : null,
                     actions: [
                         IconButton(
-                            icon: isOnView() ? const Icon(Icons.edit) : const Icon(Icons.add),
-                            tooltip: "${isOnView() ? "Edit" : "Add"} image",
+                            icon: _isOnView() ? const Icon(Icons.edit) : const Icon(Icons.add),
+                            tooltip: "${_isOnView() ? "Edit" : "Add"} image",
                             onPressed: () {
-                                if(isOnView()) {
-                                    final String id = uri.pathSegments[1];
+                                if(_isOnView()) {
+                                    final String id = widget.uri.pathSegments[1];
                                     context.push("/manage_image/internal/$id");
                                 } else {
                                     context.push("/manage_image");
@@ -84,8 +92,8 @@ class BrowseScreen extends StatelessWidget {
                             },
                         ),
                         Builder(builder: (context) {
-                            if(uri.path.contains("/view")) {
-                                final String id = uri.pathSegments[1];
+                            if(widget.uri.path.contains("/view")) {
+                                final String id = widget.uri.pathSegments[1];
                                 return BooruLoader(builder: (_, booru) => BooruImageLoader(booru: booru, id: id,
                                     builder: (context, image) => BrowseScreenPopupMenuButton(image: image),
                                 ));
@@ -184,16 +192,51 @@ class BrowseScreen extends StatelessWidget {
             ),
             body: DropRegion(
                 formats: Formats.standardFormats,
-                child: child,
+                child: Stack(
+                    children: [
+                        widget.child,
+                        Positioned(
+                            left: 12, right: 12, bottom: 12, top: 12,
+                            child: AnimatedOpacity(
+                                opacity: _isDragAndDrop ? 1.0 : 0.0,
+                                duration: const Duration(milliseconds: 200),
+                                child: IgnorePointer(
+                                    child: DottedBorder(
+                                        strokeWidth: 6,
+                                        radius: const Radius.circular(24),
+                                        borderType: BorderType.RRect,
+                                        color: Theme.of(context).colorScheme.primary,
+                                        strokeCap: StrokeCap.round,
+                                        dashPattern: [32, 16],
+                                        child: Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 9.0),
+                                            child: ClipRRect(
+                                                borderRadius: const BorderRadius.all(Radius.circular(18)),
+                                                child: Container(
+                                                    color: Color.alphaBlend(Theme.of(context).colorScheme.primary.withOpacity(0.4), Colors.black.withOpacity(0.4)),
+                                                    child: const Center(
+                                                        child: Text("Drag to add", style: TextStyle(fontSize: 42, color: Colors.white),),
+                                                    ),
+                                                ),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            )
+                        )
+                    ],
+                ),
                 onDropOver: (event) {
                     final item = event.session.items.first;
                     
                     if(item.localData is Map) return DropOperation.none; // it is a drag from inside the app, ignore;
 
+                    setState(() => _isDragAndDrop = true);
+
                     if(event.session.allowedOperations.contains(DropOperation.copy)) return DropOperation.copy;
                     else return DropOperation.none;
                 },
-                // onDropEnter: (p0) => debugPrint("mew $p0"),
+                onDropLeave: (p0) => setState(() => _isDragAndDrop = false),
                 onPerformDrop: (event) async {
                     final item = event.session.items.first;
                     final reader = item.dataReader!;

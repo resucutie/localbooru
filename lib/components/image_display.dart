@@ -128,26 +128,26 @@ class _ImageGridState extends State<ImageGrid> {
     Widget build(context) {
         return Stack(
             children: [
-            AspectRatio(
-                aspectRatio: 1,
-                child: FutureBuilder(
-                    future: imageThumbnail,
-                    builder: (context, snapshot) {
-                        if(snapshot.hasData) {
-                            final thumbnail = snapshot.data!;
-                            final hasResize = widget.resizeSize != null;
-                            final ImageProvider provider = hasResize ? ResizeImage(FileImage(thumbnail),
-                                width: widget.resizeSize!.ceil(),
-                                height: widget.resizeSize!.ceil(),
-                                policy: ResizeImagePolicy.fit
-                            ) : FileImage(thumbnail) as ImageProvider;
-                            return Image(
-                                image: provider,
-                                fit: BoxFit.cover,
-                            );
-                        }
-                        return const Center(child: CircularProgressIndicator(),);
-                    },
+                AspectRatio(
+                    aspectRatio: 1,
+                    child: FutureBuilder(
+                        future: imageThumbnail,
+                        builder: (context, snapshot) {
+                            if(snapshot.hasData) {
+                                final thumbnail = snapshot.data!;
+                                final hasResize = widget.resizeSize != null;
+                                final ImageProvider provider = hasResize ? ResizeImage(FileImage(thumbnail),
+                                    width: widget.resizeSize!.ceil(),
+                                    height: widget.resizeSize!.ceil(),
+                                    policy: ResizeImagePolicy.fit
+                                ) : FileImage(thumbnail) as ImageProvider;
+                                return Image(
+                                    image: provider,
+                                    fit: BoxFit.cover,
+                                );
+                            }
+                            return const Center(child: CircularProgressIndicator(),);
+                        },
                     )
                 ),
                 if(getType(widget.image.filename) != "image") Positioned(
