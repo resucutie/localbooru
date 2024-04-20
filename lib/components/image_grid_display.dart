@@ -8,15 +8,18 @@ import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/compressor.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:mime/mime.dart';
+import 'package:path/path.dart' as p;
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 
 class SliverRepoGrid extends StatefulWidget {
-    const SliverRepoGrid({super.key, required this.images, this.onPressed, this.autoadjustColumns, this.imageQualityScale});
+    const SliverRepoGrid({super.key, required this.images, this.onPressed, this.autoadjustColumns, this.imageQualityScale, this.dragOutside = false});
 
     final List<BooruImage> images;
     final Function(BooruImage image)? onPressed;
     final int? autoadjustColumns;
     final double? imageQualityScale;
+    final bool dragOutside;
 
     @override
     State<SliverRepoGrid> createState() => _SliverRepoGridState();
@@ -78,19 +81,35 @@ class _SliverRepoGridState extends State<SliverRepoGrid> {
                         );
                     }
                     return SharedPreferencesBuilder(
-                        builder: (_, prefs) => Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
-                                    onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
-                                    onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!)),
-                                    onLongPressDown: (tap) => longTap = tap,
-                                    onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
-                                    child: ImageGrid(image: image, resizeSize: resizeSize * (prefs.getDouble("thumbnail_quality") ?? settingsDefaults["thumbnail_quality"]),)
-                                )
-                            ),
-                        ),
+                        builder: (_, prefs) {
+                            final Widget dragWidget = ImageGrid(image: image, resizeSize: resizeSize * (prefs.getDouble("thumbnail_quality") ?? settingsDefaults["thumbnail_quality"]),);
+                            return Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: MouseRegion(
+                                    cursor: SystemMouseCursors.click,
+                                    child: GestureDetector(
+                                        onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
+                                        onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!)),
+                                        onLongPressDown: (tap) => longTap = tap,
+                                        onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
+                                        child: !widget.dragOutside ? dragWidget : DragItemWidget(
+                                            dragItemProvider: (request) {
+                                                final item = DragItem(
+                                                    localData: {'context': "image_grid"},
+                                                    suggestedName: image.filename
+                                                );
+                                                final format = SuperFormats.getFormatFromFileExtension(p.extension(image.filename));
+                                                // debugPrint("$format");
+                                                if(format != null) item.add(format.lazy(() async => await image.getImage().readAsBytes()));
+                                                return item;
+                                            },
+                                            allowedOperations: () => [DropOperation.copy],
+                                            child: DraggableWidget(child: dragWidget),
+                                        )
+                                    )
+                                ),
+                            );
+                        }
                     );
                 }).toList()),
             );

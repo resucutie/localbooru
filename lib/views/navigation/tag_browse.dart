@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/components/image_display.dart';
+import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/navigation/home.dart';
@@ -86,6 +86,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                     images: snapshot.data!["images"],
                                                     onPressed: (image) => context.push("/view/${image.id}"),
                                                     autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
+                                                    dragOutside: true,
                                                 ),
                                                 SliverToBoxAdapter(child: PageDisplay(
                                                     currentPage: _currentIndex,
