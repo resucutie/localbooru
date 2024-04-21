@@ -329,33 +329,48 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                     ],
                     
                     const SizedBox(height: 16,),
-                    if(widget.image.sources != null && widget.image.sources!.isNotEmpty) Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: widget.image.sources!.map((url) {
-                            final ro = widget.renderObject ?? context.findRenderObject()!;
-                            final uri = Uri.parse(url);
-                            return MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
-                                    onLongPress: () => openContextMenu(offset: getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: ro), url: url),
-                                    onLongPressDown: (details) => longPress = details,
-                                    onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: ro), url: url),
-                                    child: Card(
-                                        child: ListTile(
-                                            leading: getWebsiteIcon(uri, color: Theme.of(context).colorScheme.primary) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
-                                            onTap: () => launchUrlString(url),
-                                            title: Text(getWebsiteFormalType(uri) ?? "Website"),
-                                            subtitle: Text(url, style: linkText)
-                                        ),
-                                    )
-                                )
-                            );
-                        }).toList()
+                    if(widget.image.sources != null && widget.image.sources!.isNotEmpty) Card(
+                        clipBehavior: Clip.hardEdge,
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: ListTile.divideTiles(
+                                context: context,
+                                tiles: widget.image.sources!.map((url) {
+                                    final ro = widget.renderObject ?? context.findRenderObject()!;
+                                    final uri = Uri.parse(url);
+                                    return MouseRegion(
+                                        cursor: SystemMouseCursors.click,
+                                        child: GestureDetector(
+                                            onLongPress: () => openContextMenu(offset: getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: ro), url: url),
+                                            onLongPressDown: (details) => longPress = details,
+                                            onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: ro), url: url),
+                                            child: ListTile(
+                                                leading: getWebsiteIcon(uri, color: Theme.of(context).colorScheme.primary) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
+                                                onTap: () => launchUrlString(url),
+                                                title: Text(getWebsiteFormalType(uri) ?? "Website"),
+                                                subtitle: Text(url, style: linkText)
+                                            ),
+                                        )
+                                    );
+                                }).toList()
+                            ).toList()
+                        ),
                     ),
 
                     const SizedBox(height: 16,),
-                    FileInfo(widget.image.getImage())
+                    Card(
+                        child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 16.0),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                    const SmallHeader("Information:", padding: EdgeInsets.only(bottom: 4),),
+                                    FileInfo(widget.image.getImage())
+                                ],
+                            ),
+                        ),
+                    )
                 ],
             ),
         );

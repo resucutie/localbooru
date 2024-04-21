@@ -160,142 +160,146 @@ class _ImageManagerViewState extends State<ImageManagerView> {
 
     @override
     Widget build(BuildContext context) {
-        return Scaffold(
-            appBar: WindowFrameAppBar(
-                title: "Image manager",
-                appBar: AppBar(
-                    title: Text("${isEditing ? "Edit" : "Add"} image"),
-                    actions: [
-                        TextButton.icon(
-                            icon: const Icon(Icons.check),
-                            label: const Text("Done"),
-                            onPressed: () {
-                                if(_formKey.currentState!.validate()) _submit();
-                            }
-                        )
-                    ],
+        return OrientationBuilder(
+            builder: (context, orientation) => Scaffold(
+                appBar: WindowFrameAppBar(
+                    title: "Image manager",
+                    appBar: AppBar(
+                        title: Text("${isEditing ? "Edit" : "Add"} image"),
+                        actions: [
+                            TextButton.icon(
+                                icon: const Icon(Icons.check),
+                                label: const Text("Done"),
+                                onPressed: () {
+                                    if(_formKey.currentState!.validate()) _submit();
+                                }
+                            )
+                        ],
+                    ),
                 ),
-            ),
-            body: Form(
-                key: _formKey,
-                child: ListView(
-                    padding: const EdgeInsets.all(16.0),
-                    children: [
-                        ImageUploadForm(
-                            onChanged: (value) => setState(() => loadedImage = value),
-                            validator: (value) {
-                                if (value == null || value.isEmpty) return 'Please select an image';
-                                return null;
-                            },
-                            currentValue: loadedImage,
-                        ),
-                        const SizedBox(height: 16,),
-                        Wrap(
-                            alignment: WrapAlignment.spaceBetween,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                                const Header("Tags", padding: EdgeInsets.zero),
-                                TextButton(
-                                    onPressed: (loadedImage.isEmpty || isGeneratingTags) ? null : fetchTags, 
-                                    child: Wrap(
-                                        spacing: 8,
-                                        children: [
-                                            const Icon(CupertinoIcons.sparkles),
-                                            isGeneratingTags ? const Text("Generating...") : const Text("Generate tags")
-                                        ],
+                body: Form(
+                    key: _formKey,
+                    child: ListView(
+                        padding: const EdgeInsets.all(16.0),
+                        children: [
+                            ImageUploadForm(
+                                onChanged: (value) => setState(() => loadedImage = value),
+                                validator: (value) {
+                                    if (value == null || value.isEmpty) return 'Please select an image';
+                                    return null;
+                                },
+                                currentValue: loadedImage,
+                                orientation: orientation,
+                            ),
+                            const SizedBox(height: 16,),
+                            Wrap(
+                                alignment: WrapAlignment.spaceBetween,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                    const Header("Tags", padding: EdgeInsets.zero),
+                                    TextButton(
+                                        onPressed: (loadedImage.isEmpty || isGeneratingTags) ? null : fetchTags, 
+                                        child: Wrap(
+                                            spacing: 8,
+                                            children: [
+                                                const Icon(CupertinoIcons.sparkles),
+                                                isGeneratingTags ? const Text("Generating...") : const Text("Generate tags")
+                                            ],
+                                        )
                                     )
-                                )
-                            ],
-                        ),
-                        TagField(
-                            controller: tagController,
-                            decoration: const InputDecoration(
-                                labelText: "General",
+                                ],
                             ),
-                            style: const TextStyle(color: SpecificTagsColors.generic),
-                            validator: (value) => validateTagTexts(value, "generic"),
-                        ),
-                        TagField(
-                            controller: artistTagController,
-                            decoration: const InputDecoration(
-                                labelText: "Artist(s)"
+                            TagField(
+                                controller: tagController,
+                                decoration: const InputDecoration(
+                                    labelText: "General",
+                                ),
+                                style: const TextStyle(color: SpecificTagsColors.generic),
+                                validator: (value) => validateTagTexts(value, "generic"),
                             ),
-                            type: "artist",
-                            validator: (value) => validateTagTexts(value, "artist"),
-                            style: const TextStyle(color: SpecificTagsColors.artist),
-                        ),
-                        TagField(
-                            controller: characterTagController,
-                            decoration: const InputDecoration(
-                                labelText: "Character(s)"
+                            TagField(
+                                controller: artistTagController,
+                                decoration: const InputDecoration(
+                                    labelText: "Artist(s)"
+                                ),
+                                type: "artist",
+                                validator: (value) => validateTagTexts(value, "artist"),
+                                style: const TextStyle(color: SpecificTagsColors.artist),
                             ),
-                            type: "character",
-                            validator: (value) => validateTagTexts(value, "character"),
-                            style: const TextStyle(color: SpecificTagsColors.character),
-                        ),
-                        TagField(
-                            controller: copyrightTagController,
-                            decoration: const InputDecoration(
-                                labelText: "Copyright"
+                            TagField(
+                                controller: characterTagController,
+                                decoration: const InputDecoration(
+                                    labelText: "Character(s)"
+                                ),
+                                type: "character",
+                                validator: (value) => validateTagTexts(value, "character"),
+                                style: const TextStyle(color: SpecificTagsColors.character),
                             ),
-                            type: "copyright",
-                            validator: (value) => validateTagTexts(value, "copyright"),
-                            style: const TextStyle(color: SpecificTagsColors.copyright),
-                        ),
-                        TagField(
-                            controller: speciesTagController,
-                            decoration: const InputDecoration(
-                                labelText: "Species"
+                            TagField(
+                                controller: copyrightTagController,
+                                decoration: const InputDecoration(
+                                    labelText: "Copyright"
+                                ),
+                                type: "copyright",
+                                validator: (value) => validateTagTexts(value, "copyright"),
+                                style: const TextStyle(color: SpecificTagsColors.copyright),
                             ),
-                            type: "species",
-                            validator: (value) => validateTagTexts(value, "species"),
-                            style: const TextStyle(color: SpecificTagsColors.species),
-                        ),
-                        
-                        const Header("Rating"),
-                        ListTile(
-                            title: Text(switch(rating) {
-                                Rating.safe => "Safe",
-                                Rating.questionable => "Questionable",
-                                Rating.explicit => "Explicit",
-                                Rating.illegal => "Illegal",
-                                _ => "None"
-                            }),
-                            onTap: () async {
-                                final choosenRating = await showDialog(
-                                    context: context,
-                                    builder: (_) => RatingChooserDialog(selected: rating, hasNull: true,)
-                                );
-                                if(choosenRating == null) return;
-                                else if(choosenRating == "None") setState(() => rating = null);
-                                else setState(() => rating = choosenRating);
-                            },
-                        ),
-
-                        const Header("Sources"),
-                        ListStringTextInput(
-                            addButton: const Text("Add source"),
-                            onChanged: (list) => setState(() => urlList = list),
-                            canBeEmpty: true,
-                            defaultValue: urlList,
-                            formValidator: (value) {
-                                if(value == null || value.isEmpty) return "Please either remove the URL or fill this field";
-                                return null;
-                            },
-                        )
-                    ],
-                ),
-            )
+                            TagField(
+                                controller: speciesTagController,
+                                decoration: const InputDecoration(
+                                    labelText: "Species"
+                                ),
+                                type: "species",
+                                validator: (value) => validateTagTexts(value, "species"),
+                                style: const TextStyle(color: SpecificTagsColors.species),
+                            ),
+                            
+                            const Header("Rating"),
+                            ListTile(
+                                title: Text(switch(rating) {
+                                    Rating.safe => "Safe",
+                                    Rating.questionable => "Questionable",
+                                    Rating.explicit => "Explicit",
+                                    Rating.illegal => "Illegal",
+                                    _ => "None"
+                                }),
+                                onTap: () async {
+                                    final choosenRating = await showDialog(
+                                        context: context,
+                                        builder: (_) => RatingChooserDialog(selected: rating, hasNull: true,)
+                                    );
+                                    if(choosenRating == null) return;
+                                    else if(choosenRating == "None") setState(() => rating = null);
+                                    else setState(() => rating = choosenRating);
+                                },
+                            ),
+            
+                            const Header("Sources"),
+                            ListStringTextInput(
+                                addButton: const Text("Add source"),
+                                onChanged: (list) => setState(() => urlList = list),
+                                canBeEmpty: true,
+                                defaultValue: urlList,
+                                formValidator: (value) {
+                                    if(value == null || value.isEmpty) return "Please either remove the URL or fill this field";
+                                    return null;
+                                },
+                            )
+                        ],
+                    ),
+                )
+            ),
         );
     }
 }
 
 class ImageUploadForm extends StatelessWidget {
-    const ImageUploadForm({super.key, required this.onChanged, required this.validator, this.currentValue = ""});
+    const ImageUploadForm({super.key, required this.onChanged, required this.validator, this.currentValue = "", this.orientation = Orientation.portrait});
     
     final ValueChanged<String> onChanged;
     final FormFieldValidator<String> validator;
     final String currentValue;
+    final Orientation orientation;
     
     @override
     Widget build(BuildContext context) {
@@ -304,10 +308,12 @@ class ImageUploadForm extends StatelessWidget {
             initialValue: currentValue,
             validator: validator,
             builder: (FormFieldState state) {
-                return Column(
+                return Flex(
+                    direction: orientation == Orientation.portrait ? Axis.vertical : Axis.horizontal,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                         Container(
-                            constraints: const BoxConstraints(maxHeight: 400),
+                            constraints: BoxConstraints(maxHeight: 400, maxWidth: orientation == Orientation.landscape ? 400 : double.infinity),
                             child: DottedBorder(
                                 strokeWidth: 2,
                                 borderType: BorderType.RRect,
@@ -341,12 +347,21 @@ class ImageUploadForm extends StatelessWidget {
                         ),
                         if(!state.value.isEmpty) Padding(
                             padding: const EdgeInsets.all(8),
-                            child: FileInfo(File(state.value),
-                                onCompressed: (compressed) {
-                                    state.didChange(compressed.path);
-                                    onChanged(compressed.path);
-                                }
-                            )
+                            child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                                    child: Container(
+                                    constraints: BoxConstraints(
+                                        minHeight: 80,
+                                        maxWidth: orientation == Orientation.landscape ? MediaQuery.of(context).size.width / 3 : double.infinity //bad code
+                                    ),
+                                    child: FileInfo(File(state.value),
+                                        onCompressed: (compressed) {
+                                            state.didChange(compressed.path);
+                                            onChanged(compressed.path);
+                                        }
+                                    ),
+                                ),
+                            ),
                         ),
                         if(state.hasError) Text(state.errorText!, style: TextStyle(color: Theme.of(context).colorScheme.error),)
                     ],
