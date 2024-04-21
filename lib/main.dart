@@ -77,19 +77,41 @@ final router = GoRouter(
                                     }
                                 ),
                                 GoRoute(path: "recent", redirect: (_, __) => '/search',),
-                                GoRoute(path: "view/:id",
-                                    builder: (context, state)  {
+                                ShellRoute(
+                                    builder: (context, state, child) {
                                         final String? id = state.pathParameters["id"];
                                         if (id == null) return Text("Invalid ID $id");
+                                        
                                         return BooruLoader( builder: (_, booru) => BooruImageLoader(
                                             booru: booru,
                                             id: id,
                                             builder: (context, image) {
-                                                return ImageView(image: image);
+                                                return ImageViewShell(image: image, shouldShowImageOnPortrait: state.fullPath == "/view/:id", child: child,);
                                             }
                                         ));
-                                    }
-                                ),
+                                    },
+                                    routes: [
+                                        GoRoute(path: "view/:id",
+                                            builder: (context, state) {
+                                                final String? id = state.pathParameters["id"];
+                                                if (id == null) return Text("Invalid ID $id");
+                                                
+                                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                                    booru: booru,
+                                                    id: id,
+                                                    builder: (context, image) {
+                                                        return ImageViewProprieties(image);
+                                                    }
+                                                ));
+                                            },
+                                            // routes: [
+                                            //     GoRoute(path: "notes",
+                                                    
+                                            //     )
+                                            // ]
+                                        ),
+                                    ]
+                                )
                             ]
                         ),
                         GoRoute(path: "zoom_image/:id",

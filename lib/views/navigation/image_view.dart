@@ -17,10 +17,12 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:media_kit/media_kit.dart'; // Provides [Player], [Media], [Playlist] etc.
 import 'package:media_kit_video/media_kit_video.dart'; // Provides [VideoController] & [Video] etc.        
 
-class ImageView extends StatelessWidget {
-    const ImageView({super.key, required this.image});
+class ImageViewShell extends StatelessWidget {
+    const ImageViewShell({super.key, required this.image, required this.child, this.shouldShowImageOnPortrait = false});
 
     final BooruImage image;
+    final Widget child;
+    final bool shouldShowImageOnPortrait;
 
     @override
     Widget build(BuildContext context) {
@@ -29,8 +31,8 @@ class ImageView extends StatelessWidget {
                 if(orientation == Orientation.portrait) {
                     return ListView(
                         children: [
-                            ImageViewDisplay(image),
-                            ImageViewProprieties(image, renderObject: context.findRenderObject())
+                            if(shouldShowImageOnPortrait) ImageViewDisplay(image),
+                            child
                         ],
                     );
                 } else {
@@ -41,11 +43,7 @@ class ImageView extends StatelessWidget {
                             ),
                             ConstrainedBox(
                                 constraints: const BoxConstraints(maxWidth: 400.0),
-                                child: ListView(
-                                    children: [
-                                        ImageViewProprieties(image, renderObject: context.findRenderObject(),)
-                                    ],
-                                )
+                                child: child
                             )
                             
                         ],
@@ -234,10 +232,9 @@ class _ImageViewZoomState extends State<ImageViewZoom> {
 }
 
 class ImageViewProprieties extends StatefulWidget {
-    const ImageViewProprieties(this.image, {super.key, this.renderObject});
+    const ImageViewProprieties(this.image, {super.key});
     
     final BooruImage image;
-    final RenderObject? renderObject;
     
     @override
     State<StatefulWidget> createState() => _ImageViewProprietiesState();
@@ -246,6 +243,16 @@ class ImageViewProprieties extends StatefulWidget {
 class _ImageViewProprietiesState extends State<ImageViewProprieties> {
     late final TextStyle linkText = TextStyle(color: Theme.of(context).colorScheme.primary, decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.primary);
     late LongPressDownDetails longPress;
+
+    late RenderObject ro;
+
+    @override
+    void initState() {
+        super.initState();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+            ro = context.findRenderObject()!;
+        });
+    }
 
     void openContextMenu({required Offset offset, required String url}) {
         final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
@@ -285,30 +292,30 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                         if (tags["artist"] != null && tags["artist"]!.isNotEmpty) ...[
                                             const SmallHeader("Artist", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["artist"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.artist, renderObject: widget.renderObject,);
+                                                return Tag(e, color: SpecificTagsColors.artist, renderObject: ro,);
                                             }).toList())
                                         ],
                                         if (tags["character"] != null && tags["character"]!.isNotEmpty) ...[
                                             const SmallHeader("Character", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["character"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.character, renderObject: widget.renderObject,);
+                                                return Tag(e, color: SpecificTagsColors.character, renderObject: ro,);
                                             }).toList())
                                         ],
                                         if (tags["copyright"] != null && tags["copyright"]!.isNotEmpty) ...[
                                             const SmallHeader("Copyright", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["copyright"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.copyright, renderObject: widget.renderObject,);
+                                                return Tag(e, color: SpecificTagsColors.copyright, renderObject: ro,);
                                             }).toList())
                                         ],
                                         if (tags["species"] != null && tags["species"]!.isNotEmpty) ...[
                                             const SmallHeader("Species", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["species"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.species, renderObject: widget.renderObject,);
+                                                return Tag(e, color: SpecificTagsColors.species, renderObject: ro,);
                                             }).toList())
                                         ],
                                         const SmallHeader("Generic", padding: EdgeInsets.only(top: 4)),
                                         Wrap(children: List.from(tags["generic"]!..sort()).map((e) {
-                                            return Tag(e, renderObject: widget.renderObject,);
+                                            return Tag(e, renderObject: ro,);
                                         }).toList())
                                     ],
                                 );
@@ -337,7 +344,6 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                             children: ListTile.divideTiles(
                                 context: context,
                                 tiles: widget.image.sources!.map((url) {
-                                    final ro = widget.renderObject ?? context.findRenderObject()!;
                                     final uri = Uri.parse(url);
                                     return MouseRegion(
                                         cursor: SystemMouseCursors.click,
