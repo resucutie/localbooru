@@ -5,6 +5,7 @@ import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
+import 'package:localbooru/components/tag.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/get_website.dart';
@@ -43,7 +44,9 @@ class ImageViewShell extends StatelessWidget {
                             ),
                             ConstrainedBox(
                                 constraints: const BoxConstraints(maxWidth: 400.0),
-                                child: child
+                                child: ListView(
+                                    children: [child],
+                                )
                             )
                             
                         ],
@@ -158,79 +161,6 @@ class VideoViewState extends State<VideoView> {
     }
 }
 
-class ImageViewZoom extends StatefulWidget {
-    const ImageViewZoom(this.image, {super.key});
-
-    final BooruImage image;
-  
-    @override
-    State<ImageViewZoom> createState() => _ImageViewZoomState();
-}
-
-class _ImageViewZoomState extends State<ImageViewZoom> {
-    final Color _appBarColor = const Color.fromARGB(150, 0, 0, 0);
-
-    PhotoViewController controller = PhotoViewController();
-
-    @override
-    void dispose() {
-        controller.dispose();
-        super.dispose();
-    }
-
-    @override
-    Widget build(BuildContext context) {
-        return Theme(
-            data: ThemeData.dark(),
-            child: Scaffold(
-                extendBodyBehindAppBar: true,
-                backgroundColor: Colors.transparent,
-                appBar: WindowFrameAppBar(
-                    title: "Zoom",
-                    backgroundColor: _appBarColor,
-                    appBar: AppBar(
-                        backgroundColor: _appBarColor,
-                        elevation: 0,
-                        title: Text(widget.image.filename),
-                        actions: [
-                            PopupMenuButton(
-                                itemBuilder: (context) => imageShareItems(widget.image),
-                            )
-                        ],
-                    ),
-                ),
-                body: Listener(
-                    onPointerSignal:(event) {
-                        if(event is PointerScrollEvent) {
-                            double scrollBy = .15;
-                            if(!event.scrollDelta.dy.isNegative) {
-                                if((controller.scale ?? 1) <= .1) return;
-                                scrollBy = -scrollBy;
-                            }
-                            controller.scale = (controller.scale ?? 1) * (1 + scrollBy);
-                            controller.position = Offset(controller.position.dx * (1 + scrollBy), controller.position.dy * (1 + scrollBy));
-                        }
-                    },
-                    child: GestureDetector(
-                        onVerticalDragEnd: (details) {
-                            if(details.velocity.pixelsPerSecond.dy.abs() > 0) context.pop();
-                        },
-                        child: PhotoViewGestureDetectorScope(
-                            axis: Axis.vertical,
-                            child: PhotoView(
-                                imageProvider: FileImage(widget.image.getImage()),
-                                heroAttributes: const PhotoViewHeroAttributes(tag: "detailed"),
-                                minScale: .1,
-                                controller: controller,
-                            ),
-                        ),
-                    )
-                )
-            ),
-        );
-    }
-}
-
 class ImageViewProprieties extends StatefulWidget {
     const ImageViewProprieties(this.image, {super.key});
     
@@ -292,30 +222,30 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                         if (tags["artist"] != null && tags["artist"]!.isNotEmpty) ...[
                                             const SmallHeader("Artist", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["artist"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.artist, renderObject: ro,);
+                                                return Tag(e, color: SpecificTagsColors.artist, renderObject: ro, onTap: () => context.push("/search/?tag=$e"),);
                                             }).toList())
                                         ],
                                         if (tags["character"] != null && tags["character"]!.isNotEmpty) ...[
                                             const SmallHeader("Character", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["character"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.character, renderObject: ro,);
+                                                return Tag(e, color: SpecificTagsColors.character, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
                                         ],
                                         if (tags["copyright"] != null && tags["copyright"]!.isNotEmpty) ...[
                                             const SmallHeader("Copyright", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["copyright"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.copyright, renderObject: ro,);
+                                                return Tag(e, color: SpecificTagsColors.copyright, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
                                         ],
                                         if (tags["species"] != null && tags["species"]!.isNotEmpty) ...[
                                             const SmallHeader("Species", padding: EdgeInsets.only(top: 4)),
                                             Wrap(children: List.from(tags["species"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.species, renderObject: ro,);
+                                                return Tag(e, color: SpecificTagsColors.species, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
                                         ],
                                         const SmallHeader("Generic", padding: EdgeInsets.only(top: 4)),
                                         Wrap(children: List.from(tags["generic"]!..sort()).map((e) {
-                                            return Tag(e, renderObject: ro,);
+                                            return Tag(e, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                         }).toList())
                                     ],
                                 );
@@ -337,7 +267,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                     
                     const SizedBox(height: 16,),
                     if(widget.image.sources != null && widget.image.sources!.isNotEmpty) Card(
-                        clipBehavior: Clip.hardEdge,
+                        clipBehavior: Clip.antiAlias,
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -366,12 +296,29 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
 
                     const SizedBox(height: 16,),
                     Card(
+                        clipBehavior: Clip.antiAlias,
+                        child: ListTile(
+                            title: const SmallHeader("Notes", padding: EdgeInsets.zero,),
+                            subtitle: SizedBox(
+                                height: 100,
+                                child: widget.image.note == null
+                                    ? const Text("Click here to set a note", style: TextStyle(color: Colors.grey),)
+                                    : Text(widget.image.note!),
+                            ),
+                            onTap: () => context.push("/view/${widget.image.id}/note"),
+                        ),
+                    ),
+
+                    // FilledButton(onPressed: () => context.push("/view/${widget.image.id}/note"), child: Text("notes")),
+
+                    const SizedBox(height: 16,),
+                    Card(
                         child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 16.0),
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                    const SmallHeader("Information:", padding: EdgeInsets.only(bottom: 4),),
+                                    const SmallHeader("Information", padding: EdgeInsets.only(bottom: 4),),
                                     FileInfo(widget.image.getImage())
                                 ],
                             ),
@@ -379,59 +326,6 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                     )
                 ],
             ),
-        );
-    }
-}
-
-class Tag extends StatefulWidget {
-    const Tag(this.tag, {super.key, this.color = SpecificTagsColors.generic, this.renderObject});
-
-    final String tag;
-    final Color color;
-    final RenderObject? renderObject;
-
-    @override
-    State<Tag> createState() => _TagState();
-}
-class _TagState extends State<Tag> {
-    bool _isHovering = false;
-    late LongPressDownDetails longPress;
-
-    void openContextMenu({required Offset offset, required String tag}) {
-        final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
-        showMenu(
-            context: context,
-            position: RelativeRect.fromRect(
-                Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
-                Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
-            ),
-            items: [
-                PopupMenuItem(
-                    enabled: false,
-                    height: 16,
-                    child: Text(tag, maxLines: 1),
-                ),
-                ...tagItems(tag, context)
-            ]
-        );
-    }
-
-    @override
-    Widget build(BuildContext context) {
-        return GestureDetector(
-            onTap: () => context.push("/search/?tag=${widget.tag}"),
-            onLongPress: () => openContextMenu(offset: getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: widget.renderObject ?? context.findRenderObject()!), tag: widget.tag),
-            onLongPressDown: (details) => longPress = details,
-            onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: widget.renderObject ?? context.findRenderObject()!), tag: widget.tag),
-            child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                onEnter: (details) => setState(() => _isHovering = true),
-                onExit: (details) => setState(() => _isHovering = false),
-                child: Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Text(widget.tag, style: TextStyle(color: widget.color, decoration: _isHovering ? TextDecoration.underline : null, decorationColor: widget.color)),
-                ),
-            )
         );
     }
 }

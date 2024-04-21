@@ -72,7 +72,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                     leading: !_isHome() ? IconButton(
                         icon: Icon(isApple() ? Icons.arrow_back_ios_new : Icons.arrow_back),
                         onPressed: () {
-                            if(context.canPop()) context.pop();
+                            context.pop();
                         },
                     ) : null,
                     actions: [

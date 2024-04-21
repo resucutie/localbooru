@@ -17,6 +17,7 @@ import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
 import 'package:localbooru/views/navigation/index.dart';
 import 'package:localbooru/views/navigation/tag_browse.dart';
+import 'package:localbooru/views/navigation/zoomed_view.dart';
 import 'package:localbooru/views/set_booru.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/settings/booru_settings/index.dart';
@@ -104,37 +105,39 @@ final router = GoRouter(
                                                     }
                                                 ));
                                             },
-                                            // routes: [
-                                            //     GoRoute(path: "notes",
-                                                    
-                                            //     )
-                                            // ]
+                                            routes: [
+                                                GoRoute(path: "note",
+                                                    builder: (context, state) {
+                                                        return Text("tes(t)ão");
+                                                    },
+                                                )
+                                            ]
                                         ),
                                     ]
                                 )
                             ]
                         ),
                         GoRoute(path: "zoom_image/:id",
-                                    pageBuilder: (context, state) {
-                                        final String? id = state.pathParameters["id"];
-                                        if (id == null) return MaterialPage(child: Text("Invalid ID $id"));
-                                        return CustomTransitionPage(
-                                            transitionDuration: const Duration(milliseconds: 200),
-                                            key: state.pageKey,
-                                            child: BooruLoader(builder: (_, booru) => BooruImageLoader(
-                                                booru: booru,
-                                                id: id,
-                                                builder: (context, image) => ImageViewZoom(image),
-                                            )),
-                                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                                return FadeTransition(
-                                                    opacity: animation,
-                                                    child: child,
-                                                );
-                                            },
+                            pageBuilder: (context, state) {
+                                final String? id = state.pathParameters["id"];
+                                if (id == null) return MaterialPage(child: Text("Invalid ID $id"));
+                                return CustomTransitionPage(
+                                    transitionDuration: const Duration(milliseconds: 200),
+                                    key: state.pageKey,
+                                    child: BooruLoader(builder: (_, booru) => BooruImageLoader(
+                                        booru: booru,
+                                        id: id,
+                                        builder: (context, image) => ImageViewZoom(image),
+                                    )),
+                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                        return FadeTransition(
+                                            opacity: animation,
+                                            child: child,
                                         );
-                                    }
-                                ),
+                                    },
+                                );
+                            }
+                        ),
                     ]
                 ),
                 // navigation
