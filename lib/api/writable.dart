@@ -54,6 +54,23 @@ Future<BooruImage> addImage({required File imageFile,
     return (await booru.getImage(id))!;
 }
 
+Future<void> editNote(String id, String? note) async {
+    final Booru booru = await getCurrentBooru();
+
+    // add to json
+    Map raw = await booru.getRawInfo();
+    List files = raw["files"];
+
+    int index = files.indexWhere((e) => e["id"] == id);
+    if (index < 0) throw "Does not exist";
+    else {
+        if(note == null) raw["files"][index].remove("note");
+        else raw["files"][index]["note"] = note;
+    }
+
+    await writeSettings(booru.path, raw);
+}
+
 Future<void> writeSpecificTags(Map<String, List<String>> specificTags) async {
     final Booru booru = await getCurrentBooru();
 
