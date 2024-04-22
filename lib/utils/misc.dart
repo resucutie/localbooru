@@ -1,5 +1,7 @@
 import 'dart:math' as m;
 
+import 'package:flutter/material.dart';
+
 String formatSize(int bytes) {
     const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
     var i = (m.log(bytes) / m.log(1000)).floor();
@@ -37,5 +39,21 @@ bool rangeMatch(double num, String pattern) {
         return double.parse(min) < num;
     } else {
         return false;
+    }
+}
+
+class Throttler {
+    final Duration duration;
+
+    bool canRun = true;
+
+    Throttler(this.duration);
+
+    void run(void Function() action) {
+        canRun = false;
+        Future.delayed(duration).then((_) {
+            if(!canRun) action();
+            canRun = true;
+        });
     }
 }

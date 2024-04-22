@@ -108,7 +108,10 @@ final router = GoRouter(
                                             routes: [
                                                 GoRoute(path: "note",
                                                     builder: (context, state) {
-                                                        return Text("tes(t)ão");
+                                                        final String? id = state.pathParameters["id"];
+                                                        if(id == null || int.tryParse(id) == null) return Text("Invalid ID $id");
+                                                        
+                                                        return NotesView(id: int.parse(id));
                                                     },
                                                 )
                                             ]

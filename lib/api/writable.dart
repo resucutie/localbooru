@@ -64,7 +64,7 @@ Future<void> editNote(String id, String? note) async {
     int index = files.indexWhere((e) => e["id"] == id);
     if (index < 0) throw "Does not exist";
     else {
-        if(note == null) raw["files"][index].remove("note");
+        if(note == null || note.isEmpty) raw["files"][index].remove("note");
         else raw["files"][index]["note"] = note;
     }
 

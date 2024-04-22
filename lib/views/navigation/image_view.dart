@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,7 @@ import 'package:localbooru/components/tag.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/get_website.dart';
+import 'package:localbooru/utils/misc.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
@@ -300,7 +303,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                         child: ListTile(
                             title: const SmallHeader("Notes", padding: EdgeInsets.zero,),
                             subtitle: SizedBox(
-                                height: 100,
+                                height: 50,
                                 child: widget.image.note == null
                                     ? const Text("Click here to set a note", style: TextStyle(color: Colors.grey),)
                                     : Text(widget.image.note!),
@@ -326,6 +329,59 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                     )
                 ],
             ),
+        );
+    }
+}
+
+class NotesView extends StatefulWidget {
+    const NotesView({super.key, required this.id});
+
+    final int id;
+
+    @override
+    State<NotesView> createState() => _NotesViewState();
+}
+
+class _NotesViewState extends State<NotesView> {
+    final controller = TextEditingController();
+    Timer? _debounce;
+
+    @override
+    void initState() {
+        super.initState();
+        setText();
+    }
+
+    void setText() async {
+        final booru = await getCurrentBooru();
+        final image = await booru.getImage(widget.id.toString());
+        controller.text = image!.note ?? "";
+    }
+    
+    @override
+    Widget build(context) {
+        return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                const Header("Note", padding: EdgeInsets.only(bottom: 16),),
+                TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.multiline,
+                    minLines: 10,
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                        hintText: 'Insert a note',
+                        border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                        if (_debounce?.isActive ?? false) _debounce?.cancel();
+                        _debounce = Timer(const Duration(seconds: 1), () {
+                            debugPrint("debounced");
+                            editNote(widget.id.toString(), value);
+                        });
+                    },
+                ),
+            ],
         );
     }
 }
