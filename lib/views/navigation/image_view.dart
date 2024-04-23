@@ -8,14 +8,11 @@ import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/tag.dart';
-import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/get_website.dart';
-import 'package:localbooru/utils/misc.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
-import 'package:photo_view/photo_view.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:media_kit/media_kit.dart'; // Provides [Player], [Media], [Playlist] etc.
@@ -47,8 +44,15 @@ class ImageViewShell extends StatelessWidget {
                             ),
                             ConstrainedBox(
                                 constraints: const BoxConstraints(maxWidth: 400.0),
-                                child: ListView(
-                                    children: [child],
+                                child: LayoutBuilder(
+                                    builder: (context, constrains) {
+                                        return SingleChildScrollView(
+                                            child: ConstrainedBox(
+                                                constraints: constrains.copyWith(minHeight: constrains.maxHeight, maxHeight: double.infinity, minWidth: 400),
+                                                child: child,
+                                            ),
+                                        );
+                                    }
                                 )
                             )
                             
