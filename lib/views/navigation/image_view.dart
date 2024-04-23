@@ -174,7 +174,6 @@ class ImageViewProprieties extends StatefulWidget {
 }
 
 class _ImageViewProprietiesState extends State<ImageViewProprieties> {
-    late final TextStyle linkText = TextStyle(color: Theme.of(context).colorScheme.primary, decoration: TextDecoration.underline, decorationColor: Theme.of(context).colorScheme.primary);
     late LongPressDownDetails longPress;
 
     late RenderObject ro;
@@ -285,10 +284,10 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                             onLongPressDown: (details) => longPress = details,
                                             onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: ro), url: url),
                                             child: ListTile(
-                                                leading: getWebsiteIcon(uri, color: Theme.of(context).colorScheme.primary) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
+                                                leading: getWebsiteIcon(uri) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
                                                 onTap: () => launchUrlString(url),
-                                                title: Text(getWebsiteFormalType(uri) ?? "Website"),
-                                                subtitle: Text(url, style: linkText)
+                                                title: SmallHeader(getWebsiteFormalType(uri) ?? uri.host, padding: EdgeInsets.zero,),
+                                                subtitle: Text(url)
                                             ),
                                         )
                                     );
@@ -302,8 +301,9 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                         clipBehavior: Clip.antiAlias,
                         child: ListTile(
                             title: const SmallHeader("Notes", padding: EdgeInsets.zero,),
-                            subtitle: SizedBox(
-                                height: 50,
+                            leading: Icon(Icons.notes, color: Theme.of(context).colorScheme.primary,),
+                            subtitle: ConstrainedBox(
+                                constraints: const BoxConstraints(maxHeight: 60, minHeight: 30),
                                 child: widget.image.note == null
                                     ? const Text("Click here to set a note", style: TextStyle(color: Colors.grey),)
                                     : Text(widget.image.note!),
@@ -316,16 +316,11 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
 
                     const SizedBox(height: 16,),
                     Card(
-                        child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 16.0),
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                    const SmallHeader("Information", padding: EdgeInsets.only(bottom: 4),),
-                                    FileInfo(widget.image.getImage())
-                                ],
-                            ),
-                        ),
+                        child: ListTile(
+                            title: const SmallHeader("File information", padding: EdgeInsets.only(bottom: 4),),
+                            leading: Icon(Icons.info, color: Theme.of(context).colorScheme.primary,),
+                            subtitle: FileInfo(widget.image.getImage())
+                        )
                     )
                 ],
             ),
