@@ -10,9 +10,11 @@ import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/radio_dialogs.dart';
+import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
+import 'package:mime/mime.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageManagerView extends StatefulWidget {
@@ -338,6 +340,7 @@ class ImageUploadForm extends StatelessWidget {
                                             if(state.value.isEmpty) {
                                                 return const Icon(Icons.add);
                                             } else {
+                                                if(lookupMimeType(state.value)!.startsWith("video/")) return IgnorePointer(child: VideoView(state.value),);
                                                 return Image.file(File(state.value));
                                             }
                                         },),

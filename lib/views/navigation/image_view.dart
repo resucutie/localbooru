@@ -8,6 +8,7 @@ import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/tag.dart';
+import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/get_website.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
@@ -126,44 +127,6 @@ class _ImageViewDisplayState extends State<ImageViewDisplay> {
                         ),
                     ),
                 ),
-        );
-    }
-}
-
-class VideoView extends StatefulWidget {
-  const VideoView(this.path, {Key? key}) : super(key: key);
-  
-  final String path;
-  
-  @override
-  State<VideoView> createState() => VideoViewState();
-}
-
-class VideoViewState extends State<VideoView> {
-    late final player = Player();
-
-    late final controller = VideoController(player);
-
-    @override
-    void initState() {
-        super.initState();
-
-        player.open(Media(widget.path), play: lookupMimeType(widget.path) == "image/gif");
-        player.setPlaylistMode(PlaylistMode.single);
-    }
-
-    @override
-    void dispose() {
-        player.dispose();
-        super.dispose();
-    }
-
-    @override
-    Widget build(BuildContext context) {
-        return SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.width,
-            child: Video(controller: controller, fill: Colors.transparent),
         );
     }
 }
