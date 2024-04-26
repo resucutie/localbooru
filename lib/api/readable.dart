@@ -50,7 +50,8 @@ class Booru {
             tags: fileToCheck["tags"],
             rating: rating,
             note: fileToCheck["note"],
-            sources: List<String>.from(fileToCheck["sources"] ?? [])
+            sources: List<String>.from(fileToCheck["sources"] ?? []),
+            relatedImages: List<String>.from(fileToCheck["relatedImages"] ?? []),
         );
     }
 
@@ -156,18 +157,21 @@ class Booru {
     }
 }
 
+typedef ImageID = String;
+
 class BooruImage {
-    BooruImage({required this.id, required this.path, required this.tags, this.sources, this.rating, this.note}) {
+    BooruImage({required this.id, required this.path, required this.tags, this.sources, this.rating, this.note, this.relatedImages}) {
         filename = p.basename(path);
     }
 
-    String id;
+    ImageID id;
     String path;
     String filename = "";
     String tags;
     String? note;
     Rating? rating;
     List<String>? sources;
+    List<ImageID>? relatedImages;
 
     File getImage() => File(path);
 }

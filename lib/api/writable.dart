@@ -6,10 +6,11 @@ Future writeSettings(String path, Map raw) async {
 }
 
 Future<BooruImage> addImage({required File imageFile,
-    String? id,
+    ImageID? id,
     String tags = "",
     Rating? rating,
-    List<String> sources = const []
+    List<String> sources = const [],
+    List<ImageID> relatedImages = const [],
 }) async {
     final Booru booru = await getCurrentBooru();
 
@@ -40,7 +41,8 @@ Future<BooruImage> addImage({required File imageFile,
         "filename": p.basename(copiedFile.path),
         "tags": tags,
         if(ratingString != null) "rating": ratingString,
-        "sources": sources
+        "sources": sources,
+        "related": relatedImages
     };
     
     int index = files.indexWhere((e) => e["id"] == id);
