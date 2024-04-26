@@ -1,8 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/window_frame.dart';
+import 'package:path/path.dart' as p;
 
 const setupScreenText = """
 This is where you select or create a new booru folder.
@@ -56,7 +60,19 @@ class SetBooruScreen extends StatelessWidget{
                                             onPressed: () async {
                                                 String? output = await FilePicker.platform.getDirectoryPath();
                                                 if(output == null) return;
-                                                setBooru(output);
+                                                final File repoinfo = File(p.join(output, "repoinfo.json"));
+                                                if(!(await repoinfo.exists() && await Directory(p.join(output, "files")).exists())) {
+                                                    if(context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("This booru either does not contain repoinfo.json or the files folder. Please pick a valid booru")));
+                                                    return;
+                                                }
+                                                try{
+                                                    final Map<String, dynamic> raw = jsonDecode(await repoinfo.readAsString());
+                                                    if(!isValidBooruModel(raw)) throw "it doesn't contain valid props";
+                                                } catch(e) {
+                                                    if(context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("repoinfo.json is corrupted, please fix it")));
+                                                    return;
+                                                }
+                                                await setBooru(output);
                                                 if (context.mounted) context.go("/home");
                                             },
                                         ),
