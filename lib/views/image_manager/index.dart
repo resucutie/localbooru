@@ -168,20 +168,17 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     Widget build(BuildContext context) {
         return OrientationBuilder(
             builder: (context, orientation) => Scaffold(
-                appBar: WindowFrameAppBar(
-                    title: "Image manager",
-                    appBar: AppBar(
-                        title: Text("${isEditing ? "Edit" : "Add"} image"),
-                        actions: [
-                            TextButton.icon(
-                                icon: const Icon(Icons.check),
-                                label: const Text("Done"),
-                                onPressed: () {
-                                    if(_formKey.currentState!.validate()) _submit();
-                                }
-                            )
-                        ],
-                    ),
+                appBar: AppBar(
+                    title: Text("${isEditing ? "Edit" : "Add"} image"),
+                    actions: [
+                        TextButton.icon(
+                            icon: const Icon(Icons.check),
+                            label: const Text("Done"),
+                            onPressed: () {
+                                if(_formKey.currentState!.validate()) _submit();
+                            }
+                        )
+                    ],
                 ),
                 body: Form(
                     key: _formKey,

@@ -68,11 +68,11 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                 if (pages == 0) return const Center(child: Text("nothing to see here!"));
 
                                 return Scrollbar(
-                                    thumbVisibility: isDestkop(),
-                                    trackVisibility: isDestkop(),
+                                    thumbVisibility: isDesktop(),
+                                    trackVisibility: isDesktop(),
                                     controller: _whyDoWeHaveToAddThis,
                                     child: Padding(
-                                        padding: EdgeInsets.only(right: isDestkop() ? 14.0 : 0),
+                                        padding: EdgeInsets.only(right: isDesktop() ? 14.0 : 0),
                                         child: CustomScrollView(
                                             controller: _whyDoWeHaveToAddThis,
                                             scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),

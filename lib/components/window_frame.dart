@@ -6,44 +6,48 @@ import 'package:localbooru/utils/platform_tools.dart';
 import 'package:titlebar_buttons/titlebar_buttons.dart';
 
 class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final double height;
-  final AppBar? appBar;
-  final String title;
-  final Color? backgroundColor;
+    final double height;
+    final AppBar? appBar;
+    final String title;
+    final Color? backgroundColor;
 
-  const WindowFrameAppBar({super.key, this.height = 32.0, this.appBar, this.title = "LocalBooru", this.backgroundColor});
+    const WindowFrameAppBar({super.key, this.height = 32.0, this.appBar, this.title = "LocalBooru", this.backgroundColor});
 
-  @override
-  Widget build(BuildContext context) {
-    if (!isDestkop()) return appBar ?? const SizedBox(height: 0);
-    return Column(
-        children: [
-            WindowTitleBarBox(
-                child: Container(
-                    color: backgroundColor,
-                    child: Row(
-                        children: [
-                            if(Platform.isMacOS) const WindowButtons(),
-                            Expanded(
-                                child: MoveWindow(
-                                    child: Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 6.00, horizontal: 16.00),
-                                        child: Text(title)
-                                    ),
-                                )
-                            ),
-                            if(!Platform.isMacOS) const WindowButtons()
-                        ],
-                    ),
-                )
-            ),
-            if(appBar != null) appBar!,
-        ],
+    @override
+    Widget build(BuildContext context) {
+        if (!isDesktop()) return appBar ?? const SizedBox(height: 0);
+        return Column(
+            children: [
+                WindowTitleBarBox(
+                    child: Container(
+                        color: backgroundColor,
+                        child: Row(
+                            children: [
+                                if(Platform.isMacOS) const WindowButtons(),
+                                Expanded(
+                                    child: MoveWindow(
+                                        child: Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: 6.00, horizontal: 16.00),
+                                            child: Text(title)
+                                        ),
+                                    )
+                                ),
+                                if(!Platform.isMacOS) const WindowButtons()
+                            ],
+                        ),
+                    )
+                ),
+                if(appBar != null) appBar!,
+            ],
+        );
+    }
+
+    @override
+    Size get preferredSize => Size.fromHeight(
+        appBar == null
+            ? appWindow.titleBarHeight
+            : AppBar().preferredSize.height + appWindow.titleBarHeight
     );
-  }
-
-  @override
-  Size get preferredSize => Size.fromHeight(AppBar().preferredSize.height + (isDestkop() ? height : 0));
 }
 
 class WindowButtons extends StatelessWidget {

@@ -5,6 +5,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/components/builders.dart';
+import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
@@ -52,10 +53,10 @@ final router = GoRouter(
             },
             routes: [
                 ShellRoute(
-                    builder: (context, state, child) => HeroControllerScope(
-                        controller: MaterialApp.createMaterialHeroController(),
-                        child: child,
-                    ),
+                    builder: (context, state, child) => isDesktop() ? Scaffold(
+                        appBar: const WindowFrameAppBar(),
+                        body: child,
+                    ) : child,
                     routes: [
                         ShellRoute( //main nav shell
                             builder: (context, state, child) => BrowseScreen(uri: state.uri, child: child),
@@ -82,7 +83,7 @@ final router = GoRouter(
                                     builder: (context, state, child) {
                                         final String? id = state.pathParameters["id"];
                                         if (id == null) return Text("Invalid ID $id");
-                                        
+                                                
                                         return BooruLoader( builder: (_, booru) => BooruImageLoader(
                                             booru: booru,
                                             id: id,
@@ -96,7 +97,7 @@ final router = GoRouter(
                                             builder: (context, state) {
                                                 final String? id = state.pathParameters["id"];
                                                 if (id == null) return Text("Invalid ID $id");
-                                                
+                                                        
                                                 return BooruLoader( builder: (_, booru) => BooruImageLoader(
                                                     booru: booru,
                                                     id: id,
@@ -110,7 +111,7 @@ final router = GoRouter(
                                                     builder: (context, state) {
                                                         final String? id = state.pathParameters["id"];
                                                         if(id == null || int.tryParse(id) == null) return Text("Invalid ID $id");
-                                                        
+                                                                
                                                         return NotesView(id: int.parse(id));
                                                     },
                                                 )
@@ -120,138 +121,138 @@ final router = GoRouter(
                                 )
                             ]
                         ),
-                        GoRoute(path: "zoom_image/:id",
-                            pageBuilder: (context, state) {
-                                final String? id = state.pathParameters["id"];
-                                if (id == null) return MaterialPage(child: Text("Invalid ID $id"));
-                                return CustomTransitionPage(
-                                    transitionDuration: const Duration(milliseconds: 200),
-                                    key: state.pageKey,
-                                    child: BooruLoader(builder: (_, booru) => BooruImageLoader(
-                                        booru: booru,
-                                        id: id,
-                                        builder: (context, image) => ImageViewZoom(image),
-                                    )),
-                                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                        return FadeTransition(
-                                            opacity: animation,
-                                            child: child,
-                                        );
-                                    },
-                                );
-                            }
-                        ),
-                    ]
-                ),
-                // navigation
+                        // navigation
 
 
-                // image add
-                GoRoute(path: "manage_image",
-                    builder: (context, state) {
-                        return const ImageManagerView(shouldOpenRecents: true,);
-                    },
-                    routes: [
-                        GoRoute(path: "internal/:id",
+                        // image add
+                        GoRoute(path: "manage_image",
                             builder: (context, state) {
-                                final String? id = state.pathParameters["id"];
-                                if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
-                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
-                                    booru: booru,
-                                    id: id,
-                                    builder: (context, image) {
+                                return const ImageManagerView(shouldOpenRecents: true,);
+                            },
+                            routes: [
+                                GoRoute(path: "internal/:id",
+                                    builder: (context, state) {
+                                        final String? id = state.pathParameters["id"];
+                                        if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
+                                        return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                            booru: booru,
+                                            id: id,
+                                            builder: (context, image) {
+                                                return FutureBuilder(
+                                                    future: PresetImage.fromExistingImage(image),
+                                                    builder: (context, snapshot) {
+                                                        if(snapshot.hasData) {
+                                                            return ImageManagerView(preset: snapshot.data);
+                                                        }
+                                                        return const Center(child: CircularProgressIndicator());
+                                                    },
+                                                );
+                                            }
+                                        ));
+                                    },
+                                ),
+                                GoRoute(path: "path/:path", name:"drag_path",
+                                    builder: (context, state) {
+                                        final String? path = state.pathParameters["path"];
+                                        if(path == null) return const Text("Invalid URL");
+                                        final file = File(path);
+                                        if(!File(path).existsSync()) return const Text("Path does not exist");
+                                        return ImageManagerView(preset: PresetImage(image: file));
+                                    },
+                                ),
+                                GoRoute(path: "url/:url", name:"download_url",
+                                    builder: (context, state) {
+                                        final String url = state.pathParameters["url"]!;
                                         return FutureBuilder(
-                                            future: PresetImage.fromExistingImage(image),
+                                            future: PresetImage.urlToPreset(url),
                                             builder: (context, snapshot) {
                                                 if(snapshot.hasData) {
                                                     return ImageManagerView(preset: snapshot.data);
                                                 }
-                                                return const Center(child: CircularProgressIndicator());
+                                                if(snapshot.hasError) {
+                                                    if(snapshot.error.toString() == "Unknown file type" || snapshot.error.toString() == "Not a URL") {
+                                                        Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                                                            context.pop();
+                                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
+                                                        });
+                                                    } else {
+                                                        throw snapshot.error!;
+                                                    }
+                                                }
+                                                return const ImageManagerLoadingScreen();
                                             },
                                         );
-                                    }
-                                ));
-                            },
-                        ),
-                        GoRoute(path: "path/:path", name:"drag_path",
-                            builder: (context, state) {
-                                final String? path = state.pathParameters["path"];
-                                if(path == null) return const Text("Invalid URL");
-                                final file = File(path);
-                                if(!File(path).existsSync()) return const Text("Path does not exist");
-                                return ImageManagerView(preset: PresetImage(image: file));
-                            },
-                        ),
-                        GoRoute(path: "url/:url", name:"download_url",
-                            builder: (context, state) {
-                                final String url = state.pathParameters["url"]!;
-                                return FutureBuilder(
-                                    future: PresetImage.urlToPreset(url),
-                                    builder: (context, snapshot) {
-                                        if(snapshot.hasData) {
-                                            return ImageManagerView(preset: snapshot.data);
-                                        }
-                                        if(snapshot.hasError) {
-                                            if(snapshot.error.toString() == "Unknown file type" || snapshot.error.toString() == "Not a URL") {
-                                                Future.delayed(const Duration(milliseconds: 1)).then((value) {
-                                                    context.pop();
-                                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
-                                                });
-                                            } else {
-                                                throw snapshot.error!;
-                                            }
-                                        }
-                                        return const ImageManagerLoadingScreen();
                                     },
-                                );
-                            },
-                        )
-                    ]
-                ),
+                                )
+                            ]
+                        ),
 
-                // settings
-                ShellRoute(
-                    builder: (context, state, child) => SettingsShell(child: child),
-                    routes: [
-                        GoRoute(path: "settings",
-                            builder: (context, state) => const SettingsHome(),
+                        // settings
+                        ShellRoute(
+                            builder: (context, state, child) => SettingsShell(child: child),
                             routes: [
-                                GoRoute(path: "overall_settings",
-                                    builder: (context, state) => SharedPreferencesBuilder(
-                                        builder: (context, prefs) => OverallSettings(prefs: prefs)
-                                    ),
-                                ),
-                                GoRoute(path: "booru",
-                                    builder: (context, state) => SharedPreferencesBuilder(
-                                        builder: (context, prefs) => BooruLoader(
-                                            builder: (context, booru) => BooruSettings(prefs: prefs, booru: booru,),
-                                        )
-                                    ),
+                                GoRoute(path: "settings",
+                                    builder: (context, state) => const SettingsHome(),
                                     routes: [
-                                        GoRoute(path: "tag_types",
-                                            builder: (context, state) => BooruLoader(
-                                                builder: (context, booru) => TagTypesSettings(booru: booru),
+                                        GoRoute(path: "overall_settings",
+                                            builder: (context, state) => SharedPreferencesBuilder(
+                                                builder: (context, prefs) => OverallSettings(prefs: prefs)
                                             ),
-                                    )
+                                        ),
+                                        GoRoute(path: "booru",
+                                            builder: (context, state) => SharedPreferencesBuilder(
+                                                builder: (context, prefs) => BooruLoader(
+                                                    builder: (context, booru) => BooruSettings(prefs: prefs, booru: booru,),
+                                                )
+                                            ),
+                                            routes: [
+                                                GoRoute(path: "tag_types",
+                                                    builder: (context, state) => BooruLoader(
+                                                        builder: (context, booru) => TagTypesSettings(booru: booru),
+                                                    ),
+                                            )
+                                            ]
+                                        )
                                     ]
                                 )
                             ]
-                        )
+                        ),
+
+                        // initial setup stuff
+                        GoRoute(path: "permissions",
+                            builder: (context, state) => const PermissionsScreen(),
+                        ),
+                        GoRoute(path: "setbooru",
+                            builder: (context, state) => const SetBooruScreen(),
+                        ),
+                        GoRoute(path: "about",
+                            builder: (context, state) => const AboutScreen(),
+                        ),
+                        GoRoute(path: "playground",
+                            builder: (context, state) => const TestPlaygroundScreen(),
+                        ),
                     ]
                 ),
-
-                // initial setup stuff
-                GoRoute(path: "permissions",
-                    builder: (context, state) => const PermissionsScreen(),
-                ),
-                GoRoute(path: "setbooru",
-                    builder: (context, state) => const SetBooruScreen(),
-                ),
-                GoRoute(path: "about",
-                    builder: (context, state) => const AboutScreen(),
-                ),
-                GoRoute(path: "playground",
-                    builder: (context, state) => const TestPlaygroundScreen(),
+                GoRoute(path: "zoom_image/:id",
+                    pageBuilder: (context, state) {
+                        final String? id = state.pathParameters["id"];
+                        if (id == null) return MaterialPage(child: Text("Invalid ID $id"));
+                        return CustomTransitionPage(
+                            transitionDuration: const Duration(milliseconds: 200),
+                            key: state.pageKey,
+                            child: BooruLoader(builder: (_, booru) => BooruImageLoader(
+                                booru: booru,
+                                id: id,
+                                builder: (context, image) => ImageViewZoom(image),
+                            )),
+                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                );
+                            },
+                        );
+                    }
                 ),
             ]
         ),
@@ -263,7 +264,7 @@ void main() async {
 
     MediaKit.ensureInitialized();
 
-    if(isDestkop()) {
+    if(isDesktop()) {
         doWhenWindowReady(() {
             appWindow.size = const Size(1280, 720);
             appWindow.minSize = const Size(420, 260);

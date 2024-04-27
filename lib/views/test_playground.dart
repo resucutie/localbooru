@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/compressor.dart';
 import 'package:localbooru/utils/misc.dart';
 
@@ -37,11 +36,8 @@ class _TestPlaygroundScreenState extends State<TestPlaygroundScreen> {
     @override
     Widget build(context) {
         return Scaffold(
-            appBar: WindowFrameAppBar(
-                title: "Playground",
-                appBar: AppBar(
-                    title: const Text("Playground"),
-                ),
+            appBar: AppBar(
+                title: const Text("Playground"),
             ),
             body: _data != null ? FutureBuilder(
                 future: _data,

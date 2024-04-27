@@ -56,49 +56,47 @@ class _BrowseScreenState extends State<BrowseScreen> {
     @override
     Widget build(BuildContext context) {
         return Scaffold(
-            appBar: WindowFrameAppBar(
-                appBar: AppBar(
-                    title: Builder(
-                        builder: (builder) {
-                            final String title = _getTitle(widget.uri);
-                            final String? subtitle = _getSubtitle(widget.uri);
-                            return ListTile(
-                                title: Text(title, style: const TextStyle(fontSize: 20.0), textAlign: isApple() ? TextAlign.center : TextAlign.start),
-                                subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 14.0), textAlign: isApple() ? TextAlign.center : TextAlign.start) : null,
-                                contentPadding: EdgeInsets.zero,
-                            );
-                        }
-                    ),
-                    leading: !_isHome() ? IconButton(
-                        icon: Icon(isApple() ? Icons.arrow_back_ios_new : Icons.arrow_back),
-                        onPressed: () {
-                            context.pop();
-                        },
-                    ) : null,
-                    actions: [
-                        IconButton(
-                            icon: _isOnView() ? const Icon(Icons.edit) : const Icon(Icons.add),
-                            tooltip: "${_isOnView() ? "Edit" : "Add"} image",
-                            onPressed: () {
-                                if(_isOnView()) {
-                                    final String id = widget.uri.pathSegments[1];
-                                    context.push("/manage_image/internal/$id");
-                                } else {
-                                    context.push("/manage_image");
-                                }
-                            },
-                        ),
-                        Builder(builder: (context) {
-                            if(widget.uri.path.contains("/view")) {
-                                final String id = widget.uri.pathSegments[1];
-                                return BooruLoader(builder: (_, booru) => BooruImageLoader(booru: booru, id: id,
-                                    builder: (context, image) => BrowseScreenPopupMenuButton(image: image),
-                                ));
-                            }
-                            return const BrowseScreenPopupMenuButton();
-                        })
-                    ],
+            appBar: AppBar(
+                title: Builder(
+                    builder: (builder) {
+                        final String title = _getTitle(widget.uri);
+                        final String? subtitle = _getSubtitle(widget.uri);
+                        return ListTile(
+                            title: Text(title, style: const TextStyle(fontSize: 20.0), textAlign: isApple() ? TextAlign.center : TextAlign.start),
+                            subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 14.0), textAlign: isApple() ? TextAlign.center : TextAlign.start) : null,
+                            contentPadding: EdgeInsets.zero,
+                        );
+                    }
                 ),
+                leading: !_isHome() ? IconButton(
+                    icon: Icon(isApple() ? Icons.arrow_back_ios_new : Icons.arrow_back),
+                    onPressed: () {
+                        context.pop();
+                    },
+                ) : null,
+                actions: [
+                    IconButton(
+                        icon: _isOnView() ? const Icon(Icons.edit) : const Icon(Icons.add),
+                        tooltip: "${_isOnView() ? "Edit" : "Add"} image",
+                        onPressed: () {
+                            if(_isOnView()) {
+                                final String id = widget.uri.pathSegments[1];
+                                context.push("/manage_image/internal/$id");
+                            } else {
+                                context.push("/manage_image");
+                        }
+                        },
+                    ),
+                    Builder(builder: (context) {
+                        if(widget.uri.path.contains("/view")) {
+                            final String id = widget.uri.pathSegments[1];
+                            return BooruLoader(builder: (_, booru) => BooruImageLoader(booru: booru, id: id,
+                                builder: (context, image) => BrowseScreenPopupMenuButton(image: image),
+                            ));
+                        }
+                        return const BrowseScreenPopupMenuButton();
+                    })
+                ],
             ),
             drawer: Drawer(
                 child: Builder(

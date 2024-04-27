@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/window_frame.dart';
+import 'package:localbooru/utils/platform_tools.dart';
 import 'package:photo_view/photo_view.dart';
 
 class ImageViewZoom extends StatefulWidget {
@@ -28,25 +29,26 @@ class _ImageViewZoomState extends State<ImageViewZoom> {
 
     @override
     Widget build(BuildContext context) {
+        final AppBar appBar = AppBar(
+            backgroundColor: _appBarColor,
+            elevation: 0,
+            title: Text(widget.image.filename),
+            actions: [
+                PopupMenuButton(
+                    itemBuilder: (context) => imageShareItems(widget.image),
+                )
+            ],
+        );
         return Theme(
             data: ThemeData.dark(),
             child: Scaffold(
                 extendBodyBehindAppBar: true,
                 backgroundColor: Colors.transparent,
-                appBar: WindowFrameAppBar(
-                    title: "Zoom",
+                appBar: isDesktop() ? WindowFrameAppBar(
+                    title: "LocalBooru",
                     backgroundColor: _appBarColor,
-                    appBar: AppBar(
-                        backgroundColor: _appBarColor,
-                        elevation: 0,
-                        title: Text(widget.image.filename),
-                        actions: [
-                            PopupMenuButton(
-                                itemBuilder: (context) => imageShareItems(widget.image),
-                            )
-                        ],
-                    ),
-                ),
+                    appBar: appBar
+                ) : appBar,
                 body: Listener(
                     onPointerSignal:(event) {
                         if(event is PointerScrollEvent) {

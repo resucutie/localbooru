@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/get_website.dart';
 import 'package:string_validator/string_validator.dart';
 
@@ -10,10 +9,8 @@ class ImageManagerLoadingScreen extends StatelessWidget {
     @override
     Widget build(context) {
         return Scaffold(
-            appBar: WindowFrameAppBar(title: "Image manager",
-                appBar: AppBar(
-                    title: const Text("Add image"),
-                ),
+            appBar: AppBar(
+                title: const Text("Add image"),
             ),
             body: const Center(
                 child: Wrap(

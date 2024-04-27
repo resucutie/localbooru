@@ -2,7 +2,7 @@
 
 import 'dart:io';
 
-bool isDestkop () {
+bool isDesktop () {
     return Platform.isLinux || Platform.isMacOS || Platform.isWindows;
 }
 
