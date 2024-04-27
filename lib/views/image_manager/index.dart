@@ -36,6 +36,8 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     final copyrightTagController = TextEditingController();
     final speciesTagController = TextEditingController();
 
+    final totallyNotTemporary = TextEditingController();
+
     bool isEditing = false;
     bool isGeneratingTags = false;
     
@@ -55,6 +57,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             if(preset.image != null) loadedImage = preset.image!.path;
             if(preset.sources != null) urlList = preset.sources!;
             rating = preset.rating;
+            if(preset.relatedImages != null) totallyNotTemporary.text = preset.relatedImages?.join(" ") ?? "";
 
             if(preset.tags != null) {
                 tagController.text = preset.tags!["generic"]?.join(" ") ?? "";
@@ -87,7 +90,8 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             tags: allTags.join(" "),
             sources: urlList,
             rating: rating,
-            id: widget.preset?.replaceID
+            id: widget.preset?.replaceID,
+            relatedImages: totallyNotTemporary.text.split(" ")
         );
         await addSpecificTags(artistTags, type: "artist");
         await addSpecificTags(characterTags, type: "character");
@@ -198,7 +202,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 alignment: WrapAlignment.spaceBetween,
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
-                                    const Header("Tags", padding: EdgeInsets.zero),
+                                    const SmallHeader("Tags", padding: EdgeInsets.zero),
                                     TextButton(
                                         onPressed: (loadedImage.isEmpty || isGeneratingTags) ? null : fetchTags, 
                                         child: Wrap(
@@ -256,7 +260,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 style: const TextStyle(color: SpecificTagsColors.species),
                             ),
                             
-                            const Header("Rating"),
+                            const SmallHeader("Rating", padding: EdgeInsets.only(top: 16.0)),
                             ListTile(
                                 title: Text(switch(rating) {
                                     Rating.safe => "Safe",
@@ -276,7 +280,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 },
                             ),
             
-                            const Header("Sources"),
+                            const SmallHeader("Sources", padding: EdgeInsets.only(top: 16.0),),
                             ListStringTextInput(
                                 addButton: const Text("Add source"),
                                 onChanged: (list) => setState(() => urlList = list),
@@ -286,6 +290,11 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                     if(value == null || value.isEmpty) return "Please either remove the URL or fill this field";
                                     return null;
                                 },
+                            ),
+
+                            const SmallHeader("Related images", padding: EdgeInsets.only(top: 16.0)),
+                            TextFormField(
+                                controller: totallyNotTemporary,
                             )
                         ],
                     ),

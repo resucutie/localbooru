@@ -10,7 +10,7 @@ Future<BooruImage> addImage({required File imageFile,
     String tags = "",
     Rating? rating,
     List<String> sources = const [],
-    List<ImageID> relatedImages = const [],
+    List<ImageID>? relatedImages = const [],
 }) async {
     final Booru booru = await getCurrentBooru();
 

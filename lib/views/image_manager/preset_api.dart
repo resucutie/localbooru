@@ -15,13 +15,14 @@ final cache = DefaultCacheManager();
 
 
 class PresetImage {
-    const PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating});
+    const PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages});
 
     final File? image;
     final Map<String, List<String>>? tags;
     final List<String>? sources;
     final Rating? rating;
-    final String? replaceID;
+    final ImageID? replaceID;
+    final List<ImageID>? relatedImages;
 
     static Future<PresetImage> fromExistingImage(BooruImage image) async {
         final Booru booru = await getCurrentBooru();
@@ -31,7 +32,8 @@ class PresetImage {
             sources: image.sources,
             tags: await booru.separateTagsByType(image.tags.split(" ")),
             rating: image.rating,
-            replaceID: image.id
+            replaceID: image.id,
+            relatedImages: image.relatedImages
         );
     }
 
