@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/views/navigation/index.dart';
 
 class HomePage extends StatefulWidget {
     const HomePage({super.key});
@@ -21,63 +22,77 @@ class _HomePageState extends State<HomePage> {
 
     @override
     Widget build(BuildContext context) {
-        return OrientationBuilder(builder: (context, orientation) {
-            return LayoutBuilder(builder: (context, constraints) {
-                return SingleChildScrollView(
-                    child: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        constraints: BoxConstraints(minWidth: constraints.maxWidth, minHeight: constraints.maxHeight),
-                        child: IntrinsicHeight(
-                            child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                    const SizedBox(height: 64),
-                                    const LocalBooruHeader(),
-                                    const SizedBox(height: 32),
-                                    SearchTag(
-                                        onSearch: (_) => _onSearch(),
-                                        controller: _searchController,
-                                        showSearchButton: false,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Wrap(
-                                        direction: Axis.horizontal,
-                                        spacing: orientation == Orientation.landscape ? 16 : 8,
-                                        children: [
-                                            OutlinedButton.icon(
-                                                onPressed: () => context.push("/recent"),
-                                                    label: const Text("Recent posts"),
-                                                icon: const Icon(Icons.history)
-                                            ),
-                                            orientation == Orientation.landscape ? FilledButton.icon(
-                                                onPressed: _onSearch,
-                                                label: const Text("Search"),
-                                                icon: const Icon(Icons.search)
-                                            ) : IconButton.filled(
+        return Scaffold(
+            appBar: AppBar(
+                title: const Text("Home"),
+                actions: [
+                    IconButton(
+                        icon: const Icon(Icons.add),
+                        tooltip: "Add image",
+                        onPressed: () => context.push("/manage_image")
+                    ),
+                    const BrowseScreenPopupMenuButton()
+                ],
+            ),
+            drawer: const DefaultDrawer(),
+            body: OrientationBuilder(builder: (context, orientation) {
+                return LayoutBuilder(builder: (context, constraints) {
+                    return SingleChildScrollView(
+                        child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            constraints: BoxConstraints(minWidth: constraints.maxWidth, minHeight: constraints.maxHeight),
+                            child: IntrinsicHeight(
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                        const SizedBox(height: 64),
+                                        const LocalBooruHeader(),
+                                        const SizedBox(height: 32),
+                                        SearchTag(
+                                            onSearch: (_) => _onSearch(),
+                                            controller: _searchController,
+                                            showSearchButton: false,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Wrap(
+                                            direction: Axis.horizontal,
+                                            spacing: orientation == Orientation.landscape ? 16 : 8,
+                                            children: [
+                                                OutlinedButton.icon(
+                                                    onPressed: () => context.push("/recent"),
+                                                        label: const Text("Recent posts"),
+                                                    icon: const Icon(Icons.history)
+                                                ),
+                                                orientation == Orientation.landscape ? FilledButton.icon(
                                                     onPressed: _onSearch,
-                                                icon: const Icon(Icons.search),
-                                                // color: Theme.of(context).colorScheme.primary,
-                                            ),
-                                        ],
-                                    ),
-                                    const SizedBox(height: 32),
-                                    const ImageDisplay(),
-                                    const SizedBox(height: 16),
-                                    const Spacer(),
-                                    BooruLoader(
-                                        builder: (context, booru) => SelectableText(booru.path,
-                                            style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                                color: Theme.of(context).hintColor
+                                                    label: const Text("Search"),
+                                                    icon: const Icon(Icons.search)
+                                                ) : IconButton.filled(
+                                                        onPressed: _onSearch,
+                                                    icon: const Icon(Icons.search),
+                                                    // color: Theme.of(context).colorScheme.primary,
+                                                ),
+                                            ],
+                                        ),
+                                        const SizedBox(height: 32),
+                                        const ImageDisplay(),
+                                        const SizedBox(height: 16),
+                                        const Spacer(),
+                                        BooruLoader(
+                                            builder: (context, booru) => SelectableText(booru.path,
+                                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                                    color: Theme.of(context).hintColor
+                                                ),
                                             ),
                                         ),
-                                    ),
-                                ]
-                            ),
+                                    ]
+                                ),
+                            )
                         )
-                    )
-                );
-            });
-        });
+                    );
+                });
+            }),
+        );
     }
 }
 

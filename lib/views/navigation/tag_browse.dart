@@ -9,6 +9,7 @@ import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/navigation/home.dart';
+import 'package:localbooru/views/navigation/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GalleryViewer extends StatefulWidget {
@@ -54,64 +55,84 @@ class _GalleryViewerState extends State<GalleryViewer> {
 
     @override
     Widget build(BuildContext context) {
+        return Scaffold(
+            body: FutureBuilder<Map>(
+                future: _obtainResults(),
+                builder: (context, snapshot) {
+                    if(snapshot.hasData) {
+                        int pages = snapshot.data!["indexLength"];
+                        SharedPreferences prefs = snapshot.data!["sharedPrefs"];
 
-        return Column(
-            children: [
-                Expanded(
-                    child: FutureBuilder<Map>(
-                        future: _obtainResults(),
-                        builder: (context, snapshot) {
-                            if(snapshot.hasData) {
-                                int pages = snapshot.data!["indexLength"];
-                                SharedPreferences prefs = snapshot.data!["sharedPrefs"];
+                        if (pages == 0) return const Center(child: Text("nothing to see here!"));
 
-                                if (pages == 0) return const Center(child: Text("nothing to see here!"));
-
-                                return Scrollbar(
-                                    thumbVisibility: isDesktop(),
-                                    trackVisibility: isDesktop(),
+                        return Scrollbar(
+                            thumbVisibility: isDesktop(),
+                            trackVisibility: isDesktop(),
+                            controller: _whyDoWeHaveToAddThis,
+                            child: Padding(
+                                padding: EdgeInsets.only(right: isDesktop() ? 14.0 : 0),
+                                child: CustomScrollView(
                                     controller: _whyDoWeHaveToAddThis,
-                                    child: Padding(
-                                        padding: EdgeInsets.only(right: isDesktop() ? 14.0 : 0),
-                                        child: CustomScrollView(
-                                            controller: _whyDoWeHaveToAddThis,
-                                            scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                                            slivers: [
-                                                SliverPersistentHeader(
-                                                    delegate: SearchBarHeaderDelegate(onSearch: (_) => _onSearch(), searchController: _searchController),
-                                                    pinned: true,
+                                    scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                                    slivers: [
+                                        SliverAppBar(
+                                            iconTheme: IconThemeData(
+                                                shadows: const [Shadow(blurRadius: 10, color: Colors.black), Shadow(blurRadius: 5, color: Colors.black)],
+                                                color: Theme.of(context).colorScheme.onBackground
+                                            ),
+                                            floating: true,
+                                            snap: true,
+                                            pinned: isDesktop(),
+                                            forceMaterialTransparency: true,
+                                            actions: [
+                                                IconButton(
+                                                    icon: const Icon(Icons.add),
+                                                    tooltip: "Add image",
+                                                    onPressed: () => context.push("/manage_image")
                                                 ),
-                                                SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
-                                                SliverRepoGrid(
-                                                    images: snapshot.data!["images"],
-                                                    onPressed: (image) => context.push("/view/${image.id}"),
-                                                    autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
-                                                    dragOutside: true,
+                                                const BrowseScreenPopupMenuButton()
+                                            ],
+                                            title: Container(
+                                                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                                constraints: BoxConstraints(maxWidth: isDesktop() ? 560 : double.infinity, maxHeight: 72.0),
+                                                child: SearchTag(
+                                                    onSearch: (_) => _onSearch(),
+                                                    controller: _searchController,
+                                                    isFullScreen: false,
                                                 ),
-                                                SliverToBoxAdapter(child: PageDisplay(
-                                                    currentPage: _currentIndex,
-                                                    pages: pages,
-                                                    onSelect: (selectedPage) {
-                                                        if(widget.routeNavigation) {
-                                                            context.push("/search?tag=${widget.tags}&index=$selectedPage");
-                                                        } else {
-                                                            setState(() => _currentIndex = selectedPage);
-                                                            Scrollable.ensureVisible(scrollToTop.currentContext!);
-                                                        }
-                                                    },
-                                                )),
-                                            ]
+                                            ),
                                         ),
-                                    ),
-                                );
-                            } else if(snapshot.hasError) {
-                                throw snapshot.error!;
-                            }
-                            return const Center(child: CircularProgressIndicator());
-                        }
-                    )
-                )
-            ],
+                                        // SliverPersistentHeader(
+                                        //     delegate: SearchBarHeaderDelegate(onSearch: (_) => _onSearch(), searchController: _searchController),
+                                        //     pinned: true,
+                                        // ),
+                                        SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
+                                        SliverRepoGrid(
+                                            images: snapshot.data!["images"],
+                                            onPressed: (image) => context.push("/view/${image.id}"),
+                                            autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
+                                            dragOutside: true,
+                                        ),
+                                        SliverToBoxAdapter(child: PageDisplay(
+                                            currentPage: _currentIndex,
+                                            pages: pages,
+                                            onSelect: (selectedPage) {
+                                                if(widget.routeNavigation) {
+                                                    context.push("/search?tag=${widget.tags}&index=$selectedPage");
+                                                } else {
+                                                    setState(() => _currentIndex = selectedPage);
+                                                    Scrollable.ensureVisible(scrollToTop.currentContext!);
+                                                }
+                                            },
+                                        )),
+                                    ]
+                                ),
+                            ),
+                        );
+                    } else if(snapshot.hasError) throw snapshot.error!;
+                    return const Center(child: CircularProgressIndicator());
+                }
+            )
         );
     }
 }

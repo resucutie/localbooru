@@ -12,6 +12,7 @@ import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/get_website.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
+import 'package:localbooru/views/navigation/index.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
@@ -28,39 +29,59 @@ class ImageViewShell extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
-        return OrientationBuilder(
-            builder: (context, orientation) {
-                if(orientation == Orientation.portrait) {
-                    return ListView(
-                        children: [
-                            if(shouldShowImageOnPortrait) ImageViewDisplay(image),
-                            child
-                        ],
-                    );
-                } else {
-                    return Row(
-                        children: [
-                            Expanded(
-                                child: ImageViewDisplay(image)
-                            ),
-                            ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 400.0),
-                                child: LayoutBuilder(
-                                    builder: (context, constrains) {
-                                        return SingleChildScrollView(
-                                            child: ConstrainedBox(
-                                                constraints: constrains.copyWith(minHeight: constrains.maxHeight, maxHeight: double.infinity, minWidth: 400),
-                                                child: child,
-                                            ),
-                                        );
-                                    }
+        return Scaffold(
+            appBar: AppBar(
+                title: ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text("Image", style: TextStyle(fontSize: 20.0)),
+                    subtitle: Text("ID ${image.id}", style: const TextStyle(fontSize: 14.0)),
+                ),
+                leading: BackButton(
+                    onPressed: context.pop,
+                ), 
+                actions: [
+                    IconButton(
+                        icon: const Icon(Icons.edit),
+                        tooltip: "Edit image",
+                        onPressed: () => context.push("/manage_image/internal/${image.id}")
+                    ),
+                    const BrowseScreenPopupMenuButton()
+                ],
+            ),
+            body: OrientationBuilder(
+                builder: (context, orientation) {
+                    if(orientation == Orientation.portrait) {
+                        return ListView(
+                            children: [
+                                if(shouldShowImageOnPortrait) ImageViewDisplay(image),
+                                child
+                            ],
+                        );
+                    } else {
+                        return Row(
+                            children: [
+                                Expanded(
+                                    child: ImageViewDisplay(image)
+                                ),
+                                ConstrainedBox(
+                                    constraints: const BoxConstraints(maxWidth: 400.0),
+                                    child: LayoutBuilder(
+                                        builder: (context, constrains) {
+                                            return SingleChildScrollView(
+                                                child: ConstrainedBox(
+                                                    constraints: constrains.copyWith(minHeight: constrains.maxHeight, maxHeight: double.infinity, minWidth: 400),
+                                                    child: child,
+                                                ),
+                                            );
+                                        }
+                                    )
                                 )
-                            )
-                            
-                        ],
-                    );
-                }
-            },
+                                
+                            ],
+                        );
+                    }
+                },
+            ),
         );
     }
 }

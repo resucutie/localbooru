@@ -56,7 +56,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
     @override
     Widget build(BuildContext context) {
         return Scaffold(
-            appBar: AppBar(
+            appBar: true ? null : AppBar(
                 title: Builder(
                     builder: (builder) {
                         final String title = _getTitle(widget.uri);
@@ -98,93 +98,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                     })
                 ],
             ),
-            drawer: Drawer(
-                child: Builder(
-                    builder: (context) => ListView(
-                        padding: EdgeInsets.zero,
-                        children: <Widget>[
-                            SizedBox(height: MediaQuery.of(context).viewPadding.top),
-                            const Padding(
-                                padding: EdgeInsets.all(16),
-                                child: Text("LocalBooru", style: TextStyle(
-                                    fontSize: 20.0
-                                )),
-                            ),
-
-                            ListTile(
-                                title: const Text("Add image"),
-                                leading: const Icon(Icons.add),
-                                onTap: () {
-                                    Scaffold.of(context).closeDrawer();
-                                    context.push("/manage_image");
-                                },
-                            ),
-                            ListTile(
-                                title: const Text("Import from service"),
-                                leading: const Icon(Icons.link),
-                                onTap: () {
-                                    Scaffold.of(context).closeDrawer();
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                            return const InsertURLDialog();
-                                        },
-                                    );
-                                },
-                            ),
-                            ListTile(
-                                title: const Text("Settings"),
-                                leading: const Icon(Icons.settings),
-                                onTap: () {
-                                    Scaffold.of(context).closeDrawer();
-                                    context.push("/settings");
-                                },
-                            ),
-
-                            if(kDebugMode) ...[
-                                const Divider(),
-                                const Padding(
-                                    padding: EdgeInsets.only(left: 16.0, top: 16.0),
-                                    child: Text("Dev mode"),
-                                ),
-                                ListTile(
-                                    title: const Text("Playground"),
-                                    onTap: () {
-                                        Scaffold.of(context).closeDrawer();
-                                        context.push("/playground");
-                                    },
-                                ),
-                                ListTile(
-                                    title: const Text("Go to permissions screen"),
-                                    onTap: () {
-                                        Scaffold.of(context).closeDrawer();
-                                        context.push("/permissions");
-                                    },
-                                ),
-                                ListTile(
-                                    title: const Text("Go to set booru screen"),
-                                    onTap: () {
-                                        Scaffold.of(context).closeDrawer();
-                                        context.push("/setbooru");
-                                    },
-                                ),
-                                ListTile(
-                                    title: const Text("Desktop size"),
-                                    onTap: () {
-                                        appWindow.size = const Size(1280, 720);
-                                    },
-                                ),
-                                ListTile(
-                                    title: const Text("Phone size"),
-                                    onTap: () {
-                                        appWindow.size = const Size(320, 840);
-                                    },
-                                ),
-                            ]
-                        ],
-                    ),
-                ),
-            ),
+            drawer: const DefaultDrawer(),
             body: DropRegion(
                 formats: Formats.standardFormats,
                 child: Stack(
@@ -202,7 +116,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                                         borderType: BorderType.RRect,
                                         color: Theme.of(context).colorScheme.primary,
                                         strokeCap: StrokeCap.round,
-                                        dashPattern: [32, 16],
+                                        dashPattern: const [32, 16],
                                         child: Padding(
                                             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 9.0),
                                             child: ClipRRect(
@@ -257,6 +171,99 @@ class _BrowseScreenState extends State<BrowseScreen> {
     }
 }
 
+class DefaultDrawer extends StatelessWidget {
+    const DefaultDrawer({super.key});
+
+    @override
+    Widget build(context) {
+        return Drawer(
+            child: Builder(
+                builder: (context) => ListView(
+                    padding: EdgeInsets.zero,
+                    children: <Widget>[
+                        SizedBox(height: MediaQuery.of(context).viewPadding.top),
+                        const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Text("LocalBooru", style: TextStyle(
+                                fontSize: 20.0
+                            )),
+                        ),
+                        ListTile(
+                                title: const Text("Add image"),
+                            leading: const Icon(Icons.add),
+                            onTap: () {
+                                Scaffold.of(context).closeDrawer();
+                                context.push("/manage_image");
+                            },
+                        ),
+                        ListTile(
+                            title: const Text("Import from service"),
+                            leading: const Icon(Icons.link),
+                            onTap: () {
+                                Scaffold.of(context).closeDrawer();
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                        return const InsertURLDialog();
+                                    },
+                                );
+                            },
+                        ),
+                        ListTile(
+                            title: const Text("Settings"),
+                            leading: const Icon(Icons.settings),
+                            onTap: () {
+                                Scaffold.of(context).closeDrawer();
+                                context.push("/settings");
+                            },
+                        ),
+                        if(kDebugMode) ...[
+                                const Divider(),
+                            const Padding(
+                                padding: EdgeInsets.only(left: 16.0, top: 16.0),
+                                child: Text("Dev mode"),
+                            ),
+                            ListTile(
+                                title: const Text("Playground"),
+                                onTap: () {
+                                        Scaffold.of(context).closeDrawer();
+                                    context.push("/playground");
+                                },
+                            ),
+                            ListTile(
+                                title: const Text("Go to permissions screen"),
+                                onTap: () {
+                                    Scaffold.of(context).closeDrawer();
+                                    context.push("/permissions");
+                                },
+                                ),
+                            ListTile(
+                                title: const Text("Go to set booru screen"),
+                                onTap: () {
+                                    Scaffold.of(context).closeDrawer();
+                                    context.push("/setbooru");
+                                },
+                            ),
+                            ListTile(
+                                title: const Text("Desktop size"),
+                                    onTap: () {
+                                    appWindow.size = const Size(1280, 720);
+                                },
+                            ),
+                            ListTile(
+                                title: const Text("Phone size"),
+                                onTap: () {
+                                    appWindow.size = const Size(320, 840);
+                                },
+                            ),
+                        ]
+                    ],
+                ),
+            ),
+        );
+    }
+}
+
 class BrowseScreenPopupMenuButton extends StatelessWidget {
     const BrowseScreenPopupMenuButton({super.key, this.image});
 
@@ -265,6 +272,7 @@ class BrowseScreenPopupMenuButton extends StatelessWidget {
     @override
     Widget build(context) {
         return PopupMenuButton(
+            // child: Icon(Icons.more_vert),
             itemBuilder: (context) {
                 final List<PopupMenuEntry> filteredList = booruItems();
                 if(image != null) {
