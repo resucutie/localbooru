@@ -59,7 +59,7 @@ final router = GoRouter(
                     ) : child,
                     routes: [
                         ShellRoute( //main nav shell
-                            builder: (context, state, child) => BrowseScreen(uri: state.uri, child: child),
+                            builder: (context, state, child) => AddImageDropRegion(child: child),
                             routes: [
                                 GoRoute(path: "home",
                                     builder: (context, state) => const HomePage(),
