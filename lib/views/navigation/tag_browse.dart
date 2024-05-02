@@ -25,6 +25,8 @@ class GalleryViewer extends StatefulWidget {
 }
 
 class _GalleryViewerState extends State<GalleryViewer> {
+    late Future<Map> _resultObtainFuture;
+
     final SearchController _searchController = SearchController();
     final ScrollController _whyDoWeHaveToAddThis = ScrollController();
     void _onSearch () => context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
@@ -38,6 +40,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
         super.initState();
         _currentIndex = widget.index;
         _searchController.text = widget.tags;
+        _resultObtainFuture = _obtainResults();
     }
 
     Future<Map> _obtainResults() async {
@@ -55,17 +58,17 @@ class _GalleryViewerState extends State<GalleryViewer> {
 
     @override
     Widget build(BuildContext context) {
-        return Scaffold(
-            body: FutureBuilder<Map>(
-                future: _obtainResults(),
-                builder: (context, snapshot) {
-                    if(snapshot.hasData) {
-                        int pages = snapshot.data!["indexLength"];
-                        SharedPreferences prefs = snapshot.data!["sharedPrefs"];
+        return FutureBuilder<Map>(
+            future: _resultObtainFuture,
+            builder: (context, snapshot) {
+                if(snapshot.hasData) {
+                    int pages = snapshot.data!["indexLength"];
+                    SharedPreferences prefs = snapshot.data!["sharedPrefs"];
 
-                        if (pages == 0) return const Center(child: Text("nothing to see here!"));
+                    if (pages == 0) return const Center(child: Text("nothing to see here!"));
 
-                        return Scrollbar(
+                    return Scaffold(
+                        body: Scrollbar(
                             thumbVisibility: isDesktop(),
                             trackVisibility: isDesktop(),
                             controller: _whyDoWeHaveToAddThis,
@@ -95,10 +98,13 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                             title: Container(
                                                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                                                 constraints: BoxConstraints(maxWidth: isDesktop() ? 560 : double.infinity, maxHeight: 72.0),
-                                                child: SearchTag(
-                                                    onSearch: (_) => _onSearch(),
-                                                    controller: _searchController,
-                                                    isFullScreen: false,
+                                                child: IconTheme(
+                                                    data: IconThemeData(color: Theme.of(context).colorScheme.onBackground),
+                                                    child: SearchTag(
+                                                        onSearch: (_) => _onSearch(),
+                                                        controller: _searchController,
+                                                        isFullScreen: false,
+                                                    ),
                                                 ),
                                             ),
                                         ),
@@ -128,11 +134,11 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                     ]
                                 ),
                             ),
-                        );
-                    } else if(snapshot.hasError) throw snapshot.error!;
-                    return const Center(child: CircularProgressIndicator());
-                }
-            )
+                        )
+                    );
+                } else if(snapshot.hasError) throw snapshot.error!;
+                return const Center(child: CircularProgressIndicator());
+            }
         );
     }
 }
