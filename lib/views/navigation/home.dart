@@ -97,13 +97,16 @@ class _HomePageState extends State<HomePage> {
 }
 
 class SearchTag extends StatefulWidget {
-    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.isFullScreen, this.showSearchButton = true});
+    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.isFullScreen, this.showSearchButton = true, this.showShadow = false, this.leading = const Icon(Icons.search), this.padding = const EdgeInsets.only(left: 16.0, right: 10.0)});
 
     final String defaultText;
     final Function(String value) onSearch;
     final SearchController? controller;
     final bool? isFullScreen;
     final bool showSearchButton;
+    final bool showShadow;
+    final Widget? leading;
+    final EdgeInsetsGeometry? padding;
 
     @override
     State<SearchTag> createState() => _SearchTagState();
@@ -126,17 +129,17 @@ class _SearchTagState extends State<SearchTag> {
             builder: (context, controller) => SearchBar(
                 controller: controller,
                 hintText: "Type a tag",
-                padding: const MaterialStatePropertyAll<EdgeInsets>(
-                    EdgeInsets.only(left: 16.0, right: 10.0)
-                ),
+                padding: MaterialStatePropertyAll(widget.padding),
                 onSubmitted: widget.onSearch,
                 onTap: controller.openView,
                 onChanged: (_) => controller.openView(),
-                leading: const Icon(Icons.search),
+                leading: widget.leading,
                 trailing: [
                     if(controller.text.isNotEmpty) IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
                     if(widget.showSearchButton) SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
-                ]
+                ],
+                elevation: const MaterialStatePropertyAll(2.5),
+                shadowColor: widget.showShadow ? null : const MaterialStatePropertyAll(Colors.transparent),
             ),
             suggestionsBuilder: (context, controller) async {
                 Booru booru = await getCurrentBooru();

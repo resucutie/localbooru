@@ -67,74 +67,85 @@ class _GalleryViewerState extends State<GalleryViewer> {
 
                     if (pages == 0) return const Center(child: Text("nothing to see here!"));
 
-                    return Scaffold(
-                        body: Scrollbar(
-                            thumbVisibility: isDesktop(),
-                            trackVisibility: isDesktop(),
-                            controller: _whyDoWeHaveToAddThis,
-                            child: Padding(
-                                padding: EdgeInsets.only(right: isDesktop() ? 14.0 : 0),
-                                child: CustomScrollView(
+                    return OrientationBuilder(
+                        builder: (context, orientation) {
+                            return Scaffold(
+                                body: Scrollbar(
+                                    thumbVisibility: isDesktop(),
+                                    trackVisibility: isDesktop(),
                                     controller: _whyDoWeHaveToAddThis,
-                                    scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                                    slivers: [
-                                        SliverAppBar(
-                                            iconTheme: IconThemeData(
-                                                shadows: const [Shadow(blurRadius: 10, color: Colors.black), Shadow(blurRadius: 5, color: Colors.black)],
-                                                color: Theme.of(context).colorScheme.onBackground
-                                            ),
-                                            floating: true,
-                                            snap: true,
-                                            pinned: isDesktop(),
-                                            forceMaterialTransparency: true,
-                                            actions: [
-                                                IconButton(
-                                                    icon: const Icon(Icons.add),
-                                                    tooltip: "Add image",
-                                                    onPressed: () => context.push("/manage_image")
-                                                ),
-                                                const BrowseScreenPopupMenuButton()
-                                            ],
-                                            title: Container(
-                                                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                                                constraints: BoxConstraints(maxWidth: isDesktop() ? 560 : double.infinity, maxHeight: 72.0),
-                                                child: IconTheme(
-                                                    data: IconThemeData(color: Theme.of(context).colorScheme.onBackground),
-                                                    child: SearchTag(
-                                                        onSearch: (_) => _onSearch(),
-                                                        controller: _searchController,
-                                                        isFullScreen: false,
+                                    child: Padding(
+                                        padding: EdgeInsets.only(right: isDesktop() ? 14.0 : 0),
+                                        child: CustomScrollView(
+                                            controller: _whyDoWeHaveToAddThis,
+                                            scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                                            slivers: [
+                                                SliverAppBar(
+                                                    iconTheme: IconThemeData(
+                                                        shadows: const [Shadow(blurRadius: 10, color: Colors.black), Shadow(blurRadius: 5, color: Colors.black)],
+                                                        color: Theme.of(context).colorScheme.onBackground
+                                                    ),
+                                                    floating: true,
+                                                    snap: true,
+                                                    pinned: isDesktop(),
+                                                    forceMaterialTransparency: true,
+                                                    titleSpacing: 0,
+                                                    automaticallyImplyLeading: false,
+                                                    actions: [
+                                                        IconButton(
+                                                            icon: const Icon(Icons.add),
+                                                            tooltip: "Add image",
+                                                            onPressed: () => context.push("/manage_image")
+                                                        ),
+                                                        const BrowseScreenPopupMenuButton()
+                                                    ],
+                                                    title: Container(
+                                                        padding: const EdgeInsets.all(16.0),
+                                                        constraints: BoxConstraints(maxWidth: isDesktop() ? 560 : double.infinity, maxHeight: 72.0),
+                                                        child: IconTheme(
+                                                            data: IconThemeData(color: Theme.of(context).colorScheme.onBackground),
+                                                            child: SearchTag(
+                                                                onSearch: (_) => _onSearch(),
+                                                                controller: _searchController,
+                                                                showSearchButton: orientation == Orientation.landscape,
+                                                                leading: const Padding(
+                                                                    padding: EdgeInsets.only(right: 12.0),
+                                                                    child: BackButton(),
+                                                                ),
+                                                                padding: const EdgeInsets.only(left: 0, bottom: 2),
+                                                            ),
+                                                        ),
                                                     ),
                                                 ),
-                                            ),
+                                                // SliverPersistentHeader(
+                                                //     delegate: SearchBarHeaderDelegate(onSearch: (_) => _onSearch(), searchController: _searchController),
+                                                //     pinned: true,
+                                                // ),
+                                                SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
+                                                SliverRepoGrid(
+                                                    images: snapshot.data!["images"],
+                                                    onPressed: (image) => context.push("/view/${image.id}"),
+                                                    autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
+                                                    dragOutside: true,
+                                                ),
+                                                SliverToBoxAdapter(child: PageDisplay(
+                                                    currentPage: _currentIndex,
+                                                    pages: pages,
+                                                    onSelect: (selectedPage) {
+                                                        if(widget.routeNavigation) {
+                                                            context.push("/search?tag=${widget.tags}&index=$selectedPage");
+                                                        } else {
+                                                            setState(() => _currentIndex = selectedPage);
+                                                            Scrollable.ensureVisible(scrollToTop.currentContext!);
+                                                        }
+                                                    },
+                                                )),
+                                            ]
                                         ),
-                                        // SliverPersistentHeader(
-                                        //     delegate: SearchBarHeaderDelegate(onSearch: (_) => _onSearch(), searchController: _searchController),
-                                        //     pinned: true,
-                                        // ),
-                                        SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
-                                        SliverRepoGrid(
-                                            images: snapshot.data!["images"],
-                                            onPressed: (image) => context.push("/view/${image.id}"),
-                                            autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
-                                            dragOutside: true,
-                                        ),
-                                        SliverToBoxAdapter(child: PageDisplay(
-                                            currentPage: _currentIndex,
-                                            pages: pages,
-                                            onSelect: (selectedPage) {
-                                                if(widget.routeNavigation) {
-                                                    context.push("/search?tag=${widget.tags}&index=$selectedPage");
-                                                } else {
-                                                    setState(() => _currentIndex = selectedPage);
-                                                    Scrollable.ensureVisible(scrollToTop.currentContext!);
-                                                }
-                                            },
-                                        )),
-                                    ]
-                                ),
-                            ),
-                        )
+                                    ),
+                                )
+                            );
+                      }
                     );
                 } else if(snapshot.hasError) throw snapshot.error!;
                 return const Center(child: CircularProgressIndicator());
