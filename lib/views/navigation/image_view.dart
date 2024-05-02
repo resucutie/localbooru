@@ -45,7 +45,7 @@ class ImageViewShell extends StatelessWidget {
                         tooltip: "Edit image",
                         onPressed: () => context.push("/manage_image/internal/${image.id}")
                     ),
-                    const BrowseScreenPopupMenuButton()
+                    BrowseScreenPopupMenuButton(image: image,)
                 ],
             ),
             body: OrientationBuilder(
