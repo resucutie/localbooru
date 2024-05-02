@@ -58,6 +58,14 @@ class _GalleryViewerState extends State<GalleryViewer> {
 
     @override
     Widget build(BuildContext context) {
+        final actions = [
+            IconButton(
+                icon: const Icon(Icons.add),
+                tooltip: "Add image",
+                onPressed: () => context.push("/manage_image"),
+            ),
+            const BrowseScreenPopupMenuButton()
+        ];
         return FutureBuilder<Map>(
             future: _resultObtainFuture,
             builder: (context, snapshot) {
@@ -81,39 +89,32 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                             scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
                                             slivers: [
                                                 SliverAppBar(
-                                                    iconTheme: IconThemeData(
-                                                        shadows: const [Shadow(blurRadius: 10, color: Colors.black), Shadow(blurRadius: 5, color: Colors.black)],
-                                                        color: Theme.of(context).colorScheme.onBackground
-                                                    ),
                                                     floating: true,
                                                     snap: true,
                                                     pinned: isDesktop(),
                                                     forceMaterialTransparency: true,
                                                     titleSpacing: 0,
                                                     automaticallyImplyLeading: false,
-                                                    actions: [
-                                                        IconButton(
-                                                            icon: const Icon(Icons.add),
-                                                            tooltip: "Add image",
-                                                            onPressed: () => context.push("/manage_image")
-                                                        ),
-                                                        const BrowseScreenPopupMenuButton()
-                                                    ],
+                                                    actions: orientation != Orientation.landscape ? null : [Padding(
+                                                      padding: const EdgeInsets.only(right: 8),
+                                                      child: Wrap(
+                                                          direction: Axis.horizontal,
+                                                          spacing: 8,
+                                                          children: actions.map((e) => CircleAvatar(backgroundColor: Theme.of(context).colorScheme.background, child: e,)).toList(),
+                                                      ),
+                                                    )],
                                                     title: Container(
                                                         padding: const EdgeInsets.all(16.0),
-                                                        constraints: BoxConstraints(maxWidth: isDesktop() ? 560 : double.infinity, maxHeight: 72.0),
-                                                        child: IconTheme(
-                                                            data: IconThemeData(color: Theme.of(context).colorScheme.onBackground),
-                                                            child: SearchTag(
-                                                                onSearch: (_) => _onSearch(),
-                                                                controller: _searchController,
-                                                                showSearchButton: orientation == Orientation.landscape,
-                                                                leading: const Padding(
-                                                                    padding: EdgeInsets.only(right: 12.0),
-                                                                    child: BackButton(),
-                                                                ),
-                                                                padding: const EdgeInsets.only(left: 0, bottom: 2),
+                                                        constraints: const BoxConstraints(maxWidth: 560, maxHeight: 74),
+                                                        child: SearchTag(
+                                                            onSearch: (_) => _onSearch(),
+                                                            controller: _searchController,
+                                                            actions: orientation == Orientation.portrait ? actions : [IconButton(onPressed: _onSearch, icon: const Icon(Icons.search))],
+                                                            leading: const Padding(
+                                                                padding: EdgeInsets.only(right: 12.0),
+                                                                child: BackButton(),
                                                             ),
+                                                            padding: const EdgeInsets.only(left: 0, bottom: 2),
                                                         ),
                                                     ),
                                                 ),
