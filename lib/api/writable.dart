@@ -113,7 +113,7 @@ Map<String, dynamic> rebase(Map<String, dynamic> raw) {
         file["id"] = index.toString();
 
         file["tags"] = (file["tags"] as String).split(" ")
-            .where((tag) => !tag.contains(":")) //remove any metatags on the tags
+            .where((tag) => !TagText(tag).isMetatag()) //remove any metatags on the tags
             .join(" ");
 
         files[index] = file as dynamic;

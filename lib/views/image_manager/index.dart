@@ -142,19 +142,22 @@ class _ImageManagerViewState extends State<ImageManagerView> {
 
     String? validateTagTexts(String? value, String type) {
         if(value == null || value.isNotEmpty) {
+            final splitValue = value?.split(" ") ?? [];
             // check for overlaps
             List hasOverlap = [false, ""];
 
-            if(type != "generic" && !hasOverlap[0]) hasOverlap = [tagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "generic"];
-            if(type != "artist" && !hasOverlap[0]) hasOverlap = [artistTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "artist"];
-            if(type != "character" && !hasOverlap[0]) hasOverlap = [characterTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "character"];
-            if(type != "copyright" && !hasOverlap[0]) hasOverlap = [copyrightTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "copyright"];
-            if(type != "species" && !hasOverlap[0]) hasOverlap = [speciesTagController.text.split(" ").toSet().intersection((value?.split(" ") ?? []).toSet()).isNotEmpty, "species"];
+            if(type != "generic" && !hasOverlap[0]) hasOverlap = [tagController.text.split(" ").toSet().intersection(splitValue.toSet()).isNotEmpty, "generic"];
+            if(type != "artist" && !hasOverlap[0]) hasOverlap = [artistTagController.text.split(" ").toSet().intersection(splitValue.toSet()).isNotEmpty, "artist"];
+            if(type != "character" && !hasOverlap[0]) hasOverlap = [characterTagController.text.split(" ").toSet().intersection(splitValue.toSet()).isNotEmpty, "character"];
+            if(type != "copyright" && !hasOverlap[0]) hasOverlap = [copyrightTagController.text.split(" ").toSet().intersection(splitValue.toSet()).isNotEmpty, "copyright"];
+            if(type != "species" && !hasOverlap[0]) hasOverlap = [speciesTagController.text.split(" ").toSet().intersection(splitValue.toSet()).isNotEmpty, "species"];
             
             if(hasOverlap[0]) return "Overlapping tags exists with the ${hasOverlap[1]} field";
             
             //check for metatags
-            if(value!.contains(":")) return "Metatags cannot be added";
+            for(final tag in splitValue) {
+                if(TagText(tag).isMetatag()) return "Metatags cannot be added";
+            }
         }
 
         // check if it is empty
