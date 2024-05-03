@@ -5,6 +5,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/components/builders.dart';
+import 'package:localbooru/components/desktop_left_drawer.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
@@ -58,43 +59,32 @@ final router = GoRouter(
                         body: child,
                     ) : child,
                     routes: [
-                        ShellRoute( //main nav shell
-                            builder: (context, state, child) => AddImageDropRegion(child: child),
+                        ShellRoute(
+                            builder: (context, state, child) => MediaQuery.of(context).orientation == Orientation.landscape ? DesktopHousing(routeUri: state.uri, child: child,) : child,
                             routes: [
-                                GoRoute(path: "home",
-                                    builder: (context, state) => const HomePage(),
-                                ),
-                                GoRoute(path: "search",
-                                    builder: (context, state) {
-                                        final String tags = state.uri.queryParameters["tag"] ?? "";
-                                        final String? index = state.uri.queryParameters["index"];
-                                        return BooruLoader(
-                                            builder: (context, booru) => GalleryViewer(
-                                                booru: booru,
-                                                tags: tags,
-                                                index: int.parse(index ?? "0"),
-                                                routeNavigation: true,
-                                            ),
-                                        );
-                                    }
-                                ),
-                                GoRoute(path: "recent", redirect: (_, __) => '/search',),
-                                ShellRoute(
-                                    builder: (context, state, child) {
-                                        final String? id = state.pathParameters["id"];
-                                        if (id == null) return Text("Invalid ID $id");
-                                                
-                                        return BooruLoader( builder: (_, booru) => BooruImageLoader(
-                                            booru: booru,
-                                            id: id,
-                                            builder: (context, image) {
-                                                return ImageViewShell(image: image, shouldShowImageOnPortrait: state.fullPath == "/view/:id", child: child,);
-                                            }
-                                        ));
-                                    },
+                                ShellRoute( //main nav shell
+                                    builder: (context, state, child) => AddImageDropRegion(child: child),
                                     routes: [
-                                        GoRoute(path: "view/:id",
+                                        GoRoute(path: "home",
+                                            builder: (context, state) => const HomePage(),
+                                        ),
+                                        GoRoute(path: "search",
                                             builder: (context, state) {
+                                                final String tags = state.uri.queryParameters["tag"] ?? "";
+                                                final String? index = state.uri.queryParameters["index"];
+                                                return BooruLoader(
+                                                    builder: (context, booru) => GalleryViewer(
+                                                        booru: booru,
+                                                        tags: tags,
+                                                        index: int.parse(index ?? "0"),
+                                                        routeNavigation: true,
+                                                    ),
+                                                );
+                                            }
+                                        ),
+                                        GoRoute(path: "recent", redirect: (_, __) => '/search',),
+                                        ShellRoute(
+                                            builder: (context, state, child) {
                                                 final String? id = state.pathParameters["id"];
                                                 if (id == null) return Text("Invalid ID $id");
                                                         
@@ -102,119 +92,138 @@ final router = GoRouter(
                                                     booru: booru,
                                                     id: id,
                                                     builder: (context, image) {
-                                                        return ImageViewProprieties(image);
+                                                        return ImageViewShell(image: image, shouldShowImageOnPortrait: state.fullPath == "/view/:id", child: child,);
                                                     }
                                                 ));
                                             },
                                             routes: [
-                                                GoRoute(path: "note",
+                                                GoRoute(path: "view/:id",
                                                     builder: (context, state) {
                                                         final String? id = state.pathParameters["id"];
-                                                        if(id == null || int.tryParse(id) == null) return Text("Invalid ID $id");
+                                                        if (id == null) return Text("Invalid ID $id");
                                                                 
-                                                        return NotesView(id: int.parse(id));
+                                                        return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                                            booru: booru,
+                                                            id: id,
+                                                            builder: (context, image) {
+                                                                return ImageViewProprieties(image);
+                                                            }
+                                                        ));
                                                     },
-                                                )
+                                                    routes: [
+                                                        GoRoute(path: "note",
+                                                            builder: (context, state) {
+                                                                final String? id = state.pathParameters["id"];
+                                                                if(id == null || int.tryParse(id) == null) return Text("Invalid ID $id");
+                                                                        
+                                                                return NotesView(id: int.parse(id));
+                                                            },
+                                                        )
+                                                    ]
+                                                ),
                                             ]
-                                        ),
+                                        )
                                     ]
-                                )
-                            ]
-                        ),
-                        // navigation
+                                ),
+                                // navigation
 
 
-                        // image add
-                        GoRoute(path: "manage_image",
-                            builder: (context, state) {
-                                return const ImageManagerView(shouldOpenRecents: true,);
-                            },
-                            routes: [
-                                GoRoute(path: "internal/:id",
+                                // image add
+                                GoRoute(path: "manage_image",
                                     builder: (context, state) {
-                                        final String? id = state.pathParameters["id"];
-                                        if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
-                                        return BooruLoader( builder: (_, booru) => BooruImageLoader(
-                                            booru: booru,
-                                            id: id,
-                                            builder: (context, image) {
+                                        return const ImageManagerView(shouldOpenRecents: true,);
+                                    },
+                                    routes: [
+                                        GoRoute(path: "internal/:id",
+                                            builder: (context, state) {
+                                                final String? id = state.pathParameters["id"];
+                                                if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
+                                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                                    booru: booru,
+                                                    id: id,
+                                                    builder: (context, image) {
+                                                        return FutureBuilder(
+                                                            future: PresetImage.fromExistingImage(image),
+                                                            builder: (context, snapshot) {
+                                                                if(snapshot.hasData) {
+                                                                    return ImageManagerView(preset: snapshot.data);
+                                                                }
+                                                                return const Center(child: CircularProgressIndicator());
+                                                            },
+                                                        );
+                                                    }
+                                                ));
+                                            },
+                                        ),
+                                        GoRoute(path: "path/:path", name:"drag_path",
+                                            builder: (context, state) {
+                                                final String? path = state.pathParameters["path"];
+                                                if(path == null) return const Text("Invalid URL");
+                                                final file = File(path);
+                                                if(!File(path).existsSync()) return const Text("Path does not exist");
+                                                return ImageManagerView(preset: PresetImage(image: file));
+                                            },
+                                        ),
+                                        GoRoute(path: "url/:url", name:"download_url",
+                                            builder: (context, state) {
+                                                final String url = state.pathParameters["url"]!;
                                                 return FutureBuilder(
-                                                    future: PresetImage.fromExistingImage(image),
+                                                    future: PresetImage.urlToPreset(url),
                                                     builder: (context, snapshot) {
                                                         if(snapshot.hasData) {
                                                             return ImageManagerView(preset: snapshot.data);
                                                         }
-                                                        return const Center(child: CircularProgressIndicator());
+                                                        if(snapshot.hasError) {
+                                                            if(snapshot.error.toString() == "Unknown file type" || snapshot.error.toString() == "Not a URL") {
+                                                                Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                                                                    context.pop();
+                                                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
+                                                                });
+                                                            } else {
+                                                                throw snapshot.error!;
+                                                            }
+                                                        }
+                                                        return const ImageManagerLoadingScreen();
                                                     },
                                                 );
-                                            }
-                                        ));
-                                    },
-                                ),
-                                GoRoute(path: "path/:path", name:"drag_path",
-                                    builder: (context, state) {
-                                        final String? path = state.pathParameters["path"];
-                                        if(path == null) return const Text("Invalid URL");
-                                        final file = File(path);
-                                        if(!File(path).existsSync()) return const Text("Path does not exist");
-                                        return ImageManagerView(preset: PresetImage(image: file));
-                                    },
-                                ),
-                                GoRoute(path: "url/:url", name:"download_url",
-                                    builder: (context, state) {
-                                        final String url = state.pathParameters["url"]!;
-                                        return FutureBuilder(
-                                            future: PresetImage.urlToPreset(url),
-                                            builder: (context, snapshot) {
-                                                if(snapshot.hasData) {
-                                                    return ImageManagerView(preset: snapshot.data);
-                                                }
-                                                if(snapshot.hasError) {
-                                                    if(snapshot.error.toString() == "Unknown file type" || snapshot.error.toString() == "Not a URL") {
-                                                        Future.delayed(const Duration(milliseconds: 1)).then((value) {
-                                                            context.pop();
-                                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
-                                                        });
-                                                    } else {
-                                                        throw snapshot.error!;
-                                                    }
-                                                }
-                                                return const ImageManagerLoadingScreen();
                                             },
-                                        );
-                                    },
-                                )
-                            ]
-                        ),
+                                        )
+                                    ]
+                                ),
 
-                        // settings
-                        ShellRoute(
-                            builder: (context, state, child) => SettingsShell(child: child),
-                            routes: [
-                                GoRoute(path: "settings",
-                                    builder: (context, state) => const SettingsHome(),
+                                // settings
+                                ShellRoute(
+                                    builder: (context, state, child) => SettingsShell(child: child),
                                     routes: [
-                                        GoRoute(path: "overall_settings",
-                                            builder: (context, state) => SharedPreferencesBuilder(
-                                                builder: (context, prefs) => OverallSettings(prefs: prefs)
-                                            ),
-                                        ),
-                                        GoRoute(path: "booru",
-                                            builder: (context, state) => SharedPreferencesBuilder(
-                                                builder: (context, prefs) => BooruLoader(
-                                                    builder: (context, booru) => BooruSettings(prefs: prefs, booru: booru,),
-                                                )
-                                            ),
+                                        GoRoute(path: "settings",
+                                            builder: (context, state) => const SettingsHome(),
                                             routes: [
-                                                GoRoute(path: "tag_types",
-                                                    builder: (context, state) => BooruLoader(
-                                                        builder: (context, booru) => TagTypesSettings(booru: booru),
+                                                GoRoute(path: "overall_settings",
+                                                    builder: (context, state) => SharedPreferencesBuilder(
+                                                        builder: (context, prefs) => OverallSettings(prefs: prefs)
                                                     ),
-                                            )
+                                                ),
+                                                GoRoute(path: "booru",
+                                                    builder: (context, state) => SharedPreferencesBuilder(
+                                                        builder: (context, prefs) => BooruLoader(
+                                                            builder: (context, booru) => BooruSettings(prefs: prefs, booru: booru,),
+                                                        )
+                                                    ),
+                                                    routes: [
+                                                        GoRoute(path: "tag_types",
+                                                            builder: (context, state) => BooruLoader(
+                                                                builder: (context, booru) => TagTypesSettings(booru: booru),
+                                                            ),
+                                                    )
+                                                    ]
+                                                )
                                             ]
                                         )
                                     ]
-                                )
+                                ),
+                                GoRoute(path: "about",
+                                    builder: (context, state) => const AboutScreen(),
+                                ),
                             ]
                         ),
 
@@ -224,9 +233,6 @@ final router = GoRouter(
                         ),
                         GoRoute(path: "setbooru",
                             builder: (context, state) => const SetBooruScreen(),
-                        ),
-                        GoRoute(path: "about",
-                            builder: (context, state) => const AboutScreen(),
                         ),
                         GoRoute(path: "playground",
                             builder: (context, state) => const TestPlaygroundScreen(),

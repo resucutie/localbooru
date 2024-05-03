@@ -105,94 +105,122 @@ class _AddImageDropRegionState extends State<AddImageDropRegion> {
 }
 
 class DefaultDrawer extends StatelessWidget {
-    const DefaultDrawer({super.key});
+    const DefaultDrawer({super.key, this.displayTitle = true, this.disableAddImage = false, this.disableSettings = false, this.desktopView = false, this.disableRecent = false});
+
+    final bool displayTitle;
+    final bool disableAddImage;
+    final bool disableSettings;
+    final bool disableRecent;
+    final bool desktopView;
 
     @override
     Widget build(context) {
-        return Drawer(
-            child: Builder(
-                builder: (context) => ListView(
-                    padding: EdgeInsets.zero,
-                    children: <Widget>[
-                        SizedBox(height: MediaQuery.of(context).viewPadding.top),
-                        const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Text("LocalBooru", style: TextStyle(
-                                fontSize: 20.0
-                            )),
-                        ),
-                        ListTile(
-                                title: const Text("Add image"),
-                            leading: const Icon(Icons.add),
-                            onTap: () {
-                                Scaffold.of(context).closeDrawer();
-                                context.push("/manage_image");
-                            },
-                        ),
-                        ListTile(
-                            title: const Text("Import from service"),
-                            leading: const Icon(Icons.link),
-                            onTap: () {
-                                Scaffold.of(context).closeDrawer();
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                        return const InsertURLDialog();
-                                    },
-                                );
-                            },
-                        ),
-                        ListTile(
-                            title: const Text("Settings"),
-                            leading: const Icon(Icons.settings),
-                            onTap: () {
-                                Scaffold.of(context).closeDrawer();
-                                context.push("/settings");
-                            },
-                        ),
-                        if(kDebugMode) ...[
-                                const Divider(),
-                            const Padding(
-                                padding: EdgeInsets.only(left: 16.0, top: 16.0),
-                                child: Text("Dev mode"),
-                            ),
-                            ListTile(
-                                title: const Text("Playground"),
-                                onTap: () {
-                                        Scaffold.of(context).closeDrawer();
-                                    context.push("/playground");
-                                },
-                            ),
-                            ListTile(
-                                title: const Text("Go to permissions screen"),
-                                onTap: () {
-                                    Scaffold.of(context).closeDrawer();
-                                    context.push("/permissions");
-                                },
-                                ),
-                            ListTile(
-                                title: const Text("Go to set booru screen"),
-                                onTap: () {
-                                    Scaffold.of(context).closeDrawer();
-                                    context.push("/setbooru");
-                                },
-                            ),
-                            ListTile(
-                                title: const Text("Desktop size"),
-                                    onTap: () {
-                                    appWindow.size = const Size(1280, 720);
-                                },
-                            ),
-                            ListTile(
-                                title: const Text("Phone size"),
-                                onTap: () {
-                                    appWindow.size = const Size(320, 840);
-                                },
-                            ),
-                        ]
-                    ],
+        return ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+                SizedBox(height: MediaQuery.of(context).viewPadding.top),
+                if(displayTitle) const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Text("LocalBooru",
+                        style: TextStyle(
+                            fontSize: 20.0
+                        )
+                    ),
                 ),
-            ),
+                if(desktopView) ...[
+                    ListTile(
+                        title: const Text("Home"),
+                        leading: const Icon(Icons.home),
+                        // enabled: !disableAddImage,
+                        onTap: () {
+                            Scaffold.of(context).closeDrawer();
+                            context.go("/home");
+                        },
+                    ),
+                    ListTile(
+                        title: const Text("Recent"),
+                        leading: const Icon(Icons.history),
+                        enabled: !disableRecent,
+                        onTap: () {
+                            Scaffold.of(context).closeDrawer();
+                            context.push("/recent");
+                        },
+                    ),
+                    const Divider(),
+                ],
+                ListTile(
+                    title: const Text("Add image"),
+                    leading: const Icon(Icons.add),
+                    enabled: !disableAddImage,
+                    onTap: () {
+                        Scaffold.of(context).closeDrawer();
+                        context.push("/manage_image");
+                    },
+                ),
+                ListTile(
+                    title: const Text("Import from service"),
+                    leading: const Icon(Icons.link),
+                    enabled: !disableAddImage,
+                    onTap: () {
+                        Scaffold.of(context).closeDrawer();
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                                return const InsertURLDialog();
+                            },
+                        );
+                    },
+                ),
+                ListTile(
+                    title: const Text("Settings"),
+                    leading: const Icon(Icons.settings),
+                    enabled: !disableSettings,
+                    onTap: () {
+                        Scaffold.of(context).closeDrawer();
+                        context.push("/settings");
+                    },
+                ),
+                if(kDebugMode) ...[
+                    const Divider(),
+                    const Padding(
+                        padding: EdgeInsets.only(left: 16.0, top: 16.0),
+                        child: Text("Dev mode"),
+                    ),
+                    ListTile(
+                        title: const Text("Playground"),
+                        onTap: () {
+                            Scaffold.of(context).closeDrawer();
+                            context.push("/playground");
+                        },
+                    ),
+                    ListTile(
+                        title: const Text("Go to permissions screen"),
+                        onTap: () {
+                            Scaffold.of(context).closeDrawer();
+                            context.push("/permissions");
+                        },
+                    ),
+                    ListTile(
+                        title: const Text("Go to set booru screen"),
+                        onTap: () {
+                            Scaffold.of(context).closeDrawer();
+                            context.push("/setbooru");
+                        },
+                    ),
+                    ListTile(
+                        title: const Text("Desktop size"),
+                        onTap: () {
+                            appWindow.size = const Size(1280, 720);
+                        },
+                    ),
+                    ListTile(
+                        title: const Text("Phone size"),
+                        onTap: () {
+                            appWindow.size = const Size(320, 840);
+                        },
+                    ),
+                ]
+            ],
         );
     }
 }

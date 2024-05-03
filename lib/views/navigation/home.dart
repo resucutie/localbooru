@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/navigation/index.dart';
 
 class HomePage extends StatefulWidget {
@@ -34,10 +35,10 @@ class _HomePageState extends State<HomePage> {
                     const BrowseScreenPopupMenuButton()
                 ],
             ),
-            drawer: const DefaultDrawer(),
-            body: OrientationBuilder(builder: (context, orientation) {
-                return LayoutBuilder(builder: (context, constraints) {
-                    return SingleChildScrollView(
+            drawer: MediaQuery.of(context).orientation == Orientation.portrait ? const Drawer(child: DefaultDrawer()) : null,
+            body: OrientationBuilder(
+                builder: (context, orientation) => LayoutBuilder(
+                    builder: (context, constraints) => SingleChildScrollView(
                         child: Container(
                             padding: const EdgeInsets.all(8.0),
                             constraints: BoxConstraints(minWidth: constraints.maxWidth, minHeight: constraints.maxHeight),
@@ -89,9 +90,9 @@ class _HomePageState extends State<HomePage> {
                                 ),
                             )
                         )
-                    );
-                });
-            }),
+                    )
+                )
+            ),
         );
     }
 }
