@@ -100,7 +100,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                       child: Wrap(
                                                           direction: Axis.horizontal,
                                                           spacing: 8,
-                                                          children: actions.map((e) => CircleAvatar(backgroundColor: Theme.of(context).colorScheme.background, child: e,)).toList(),
+                                                          children: actions.map((e) => CircleAvatar(backgroundColor: Theme.of(context).colorScheme.surfaceVariant, child: e,)).toList(),
                                                       ),
                                                     )],
                                                     title: Container(
