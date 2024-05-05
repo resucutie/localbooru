@@ -3,8 +3,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
+import 'package:localbooru/components/counter.dart';
+import 'package:localbooru/components/drawer.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/platform_tools.dart';
+import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/views/navigation/index.dart';
 
 class HomePage extends StatefulWidget {
@@ -75,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                             ],
                                         ),
-                                        const SizedBox(height: 32),
+                                        const SizedBox(height: 56),
                                         const ImageDisplay(),
                                         const SizedBox(height: 16),
                                         const Spacer(),
@@ -236,17 +239,29 @@ class LocalBooruHeader extends StatelessWidget {
     }
 }
 
-class ImageDisplay extends StatelessWidget {
+class ImageDisplay extends StatefulWidget {
     const ImageDisplay({super.key});
+
+    @override
+    State<ImageDisplay> createState() => _ImageDisplayState();
+}
+class _ImageDisplayState extends State<ImageDisplay>{
+    late Future<int> _future;
+
+    @override
+    void initState() {
+        super.initState();
+        _future = (() async => await (await getCurrentBooru()).getListLength())();
+    }
     
     @override
     Widget build(context) {
-        return BooruLoader(
-            builder: (context, booru) => FutureBuilder(
-                future: booru.getListLength(),
+        return SharedPreferencesBuilder(
+            builder: (context, prefs) => FutureBuilder(
+                future: _future,
                 builder: (context, snapshot) {
                     if(snapshot.hasData) {
-                        return Text("With ${snapshot.data} posts");
+                        return StyleCounter(number: 1234567890,);
                     }
                     if(snapshot.hasError) throw snapshot.error!;
                     return const CircularProgressIndicator();

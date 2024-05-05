@@ -5,7 +5,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/components/builders.dart';
-import 'package:localbooru/components/desktop_left_drawer.dart';
+import 'package:localbooru/components/drawer.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';

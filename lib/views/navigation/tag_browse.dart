@@ -115,7 +115,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                                 padding: EdgeInsets.only(right: 12.0),
                                                                 child: BackButton(),
                                                             ),
-                                                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                                                            padding: const EdgeInsets.symmetric(horizontal: 12).add(const EdgeInsets.only(bottom: 2)),
                                                         ),
                                                     ),
                                                 ),

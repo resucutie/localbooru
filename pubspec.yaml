@@ -116,6 +116,17 @@ flutter:
     - assets/websites/gelbooru.svg
     - assets/websites/twitter.svg
     - assets/websites/deviantart.svg
+
+    - assets/counter/baba/0.gif
+    - assets/counter/baba/1.gif
+    - assets/counter/baba/2.gif
+    - assets/counter/baba/3.gif
+    - assets/counter/baba/4.gif
+    - assets/counter/baba/5.gif
+    - assets/counter/baba/6.gif
+    - assets/counter/baba/7.gif
+    - assets/counter/baba/8.gif
+    - assets/counter/baba/9.gif
     
     - pubspec.yaml # reading itself
 
