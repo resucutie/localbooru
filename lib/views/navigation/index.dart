@@ -105,16 +105,17 @@ class _AddImageDropRegionState extends State<AddImageDropRegion> {
 }
 
 class DefaultDrawer extends StatelessWidget {
-    const DefaultDrawer({super.key, this.displayTitle = true, this.disableAddImage = false, this.disableSettings = false, this.desktopView = false, this.disableRecent = false});
+    const DefaultDrawer({super.key, this.activeView, this.displayTitle = true, this.desktopView = false});
 
     final bool displayTitle;
-    final bool disableAddImage;
-    final bool disableSettings;
-    final bool disableRecent;
     final bool desktopView;
+    final String? activeView;
 
     @override
     Widget build(context) {
+        Color? assertSelected(String selectorView) {
+            if(activeView == selectorView) return Theme.of(context).colorScheme.primary;
+        }
         return ListView(
             padding: EdgeInsets.zero,
             children: <Widget>[
@@ -129,38 +130,41 @@ class DefaultDrawer extends StatelessWidget {
                 ),
                 if(desktopView) ...[
                     ListTile(
+                        textColor: assertSelected("home"),
+                        iconColor: assertSelected("home"),
                         title: const Text("Home"),
                         leading: const Icon(Icons.home),
-                        // enabled: !disableAddImage,
-                        onTap: () {
+                        onTap: activeView != "home" ? () {
                             Scaffold.of(context).closeDrawer();
                             context.go("/home");
-                        },
+                        } : null,
                     ),
                     ListTile(
-                        title: const Text("Recent"),
-                        leading: const Icon(Icons.history),
-                        enabled: !disableRecent,
-                        onTap: () {
+                        textColor: assertSelected("recent") ?? assertSelected("search"),
+                        iconColor: assertSelected("recent") ?? assertSelected("search"),
+                        title: const Text("Search"),
+                        leading: const Icon(Icons.search),
+                        onTap: activeView != "recent" && activeView != "search" ? () {
                             Scaffold.of(context).closeDrawer();
                             context.push("/recent");
-                        },
+                        } : null,
                     ),
                     const Divider(),
                 ],
                 ListTile(
+                    textColor: assertSelected("manage_image"),
+                    iconColor: assertSelected("manage_image"),
                     title: const Text("Add image"),
                     leading: const Icon(Icons.add),
-                    enabled: !disableAddImage,
-                    onTap: () {
+                    onTap: activeView != "manage_image" ? () {
                         Scaffold.of(context).closeDrawer();
                         context.push("/manage_image");
-                    },
+                    } : null,
                 ),
                 ListTile(
                     title: const Text("Import from service"),
                     leading: const Icon(Icons.link),
-                    enabled: !disableAddImage,
+                    enabled: activeView != "manage_image",
                     onTap: () {
                         Scaffold.of(context).closeDrawer();
                         showDialog(
@@ -172,13 +176,14 @@ class DefaultDrawer extends StatelessWidget {
                     },
                 ),
                 ListTile(
+                    textColor: assertSelected("settings"),
+                    iconColor: assertSelected("settings"),
                     title: const Text("Settings"),
                     leading: const Icon(Icons.settings),
-                    enabled: !disableSettings,
-                    onTap: () {
+                    onTap: activeView != "settings" ? () {
                         Scaffold.of(context).closeDrawer();
                         context.push("/settings");
-                    },
+                    } : null,
                 ),
                 if(kDebugMode) ...[
                     const Divider(),

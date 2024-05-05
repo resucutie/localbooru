@@ -3,11 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:localbooru/views/navigation/index.dart';
 
-final alternativeRoutes = {
-    "add": ["manage_image"],
-    "settings": ["settings", "about"],
-};
-
 class DesktopHousing extends StatelessWidget {
     const DesktopHousing({super.key, required this.child, required this.routeUri});
 
@@ -22,10 +17,8 @@ class DesktopHousing extends StatelessWidget {
                     constraints: const BoxConstraints(maxWidth: 270),
                     child: DefaultDrawer(
                         displayTitle: false,
-                        disableAddImage: alternativeRoutes["add"]!.contains(routeUri.pathSegments[0]),
-                        disableSettings: alternativeRoutes["settings"]!.contains(routeUri.pathSegments[0]),
+                        activeView: routeUri.pathSegments[0],
                         desktopView: true,
-                        disableRecent: routeUri.path == "/search",
                     )
                 ),
                 // const SizedBox(width: 4),
