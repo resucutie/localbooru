@@ -95,6 +95,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                     forceMaterialTransparency: true,
                                                     titleSpacing: 0,
                                                     automaticallyImplyLeading: false,
+                                                    toolbarHeight: orientation == Orientation.portrait ? 96 : 56,
                                                     actions: orientation != Orientation.landscape ? null : [Padding(
                                                       padding: const EdgeInsets.only(right: 8),
                                                       child: Wrap(
@@ -105,7 +106,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                     )],
                                                     title: Container(
                                                         padding: const EdgeInsets.all(16.0),
-                                                        constraints: const BoxConstraints(maxWidth: 560, maxHeight: 74),
+                                                        constraints: orientation == Orientation.landscape ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
                                                         child: SearchTag(
                                                             onSearch: (_) => _onSearch(),
                                                             controller: _searchController,
@@ -114,7 +115,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                                 padding: EdgeInsets.only(right: 12.0),
                                                                 child: BackButton(),
                                                             ),
-                                                            padding: const EdgeInsets.only(left: 0, bottom: 2),
+                                                            padding: const EdgeInsets.symmetric(horizontal: 12),
                                                         ),
                                                     ),
                                                 ),
