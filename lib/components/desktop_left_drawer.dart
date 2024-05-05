@@ -30,25 +30,13 @@ class DesktopHousing extends StatelessWidget {
                 ),
                 // const SizedBox(width: 4),
                 Container(
-                    foregroundDecoration: BoxDecoration(
-                        border: Border(
-                            left: BorderSide(color: Theme.of(context).dividerColor, width: 2),
-                            top: BorderSide(color: Theme.of(context).dividerColor, width: 2)
-                        ),
-                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(30))
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - (270 + 2), maxHeight: MediaQuery.of(context).size.height - 2),
+                    clipBehavior: Clip.antiAlias,
+                    decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.only(topLeft: Radius.circular(28))
                     ),
-                    child: Padding(
-                        padding: const EdgeInsets.only(left: 2, top: 2),
-                        child: Container(
-                            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - (270 + 2), maxHeight: MediaQuery.of(context).size.height - 2),
-                            clipBehavior: Clip.antiAlias,
-                            decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.only(topLeft: Radius.circular(28))
-                            ),
-                            child: child
-                        ),
-                    ),
-                )
+                    child: child
+                ),
             ],
         );
     }

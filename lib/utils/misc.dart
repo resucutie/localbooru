@@ -1,6 +1,7 @@
 import 'dart:math' as m;
 
 import 'package:flutter/material.dart';
+import 'package:material_color_utilities/palettes/core_palette.dart';
 
 String formatSize(int bytes) {
     const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
@@ -56,4 +57,9 @@ class Throttler {
             canRun = true;
         });
     }
+}
+
+Color getSurfaceDim(ColorScheme colorSceheme) {
+    CorePalette p = CorePalette.of(colorSceheme.primary.value);
+    return Color(p.neutral.get(colorSceheme.brightness == Brightness.dark ? 6 : 87));
 }

@@ -9,6 +9,7 @@ import 'package:localbooru/components/desktop_left_drawer.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
+import 'package:localbooru/utils/misc.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
 import 'package:localbooru/views/about.dart';
@@ -55,6 +56,7 @@ final router = GoRouter(
             routes: [
                 ShellRoute(
                     builder: (context, state, child) => isDesktop() ? Scaffold(
+                        backgroundColor: getSurfaceDim(Theme.of(context).colorScheme),
                         appBar: const WindowFrameAppBar(),
                         body: child,
                     ) : child,
@@ -375,12 +377,12 @@ class _AppState extends State<App> {
         ColorScheme darkColorScheme;
 
         if (monet && lightDynamic != null && darkDynamic != null) {
-            lightColorScheme = lightDynamic.harmonized();
+            lightColorScheme = lightDynamic.harmonized().copyWith();
             darkColorScheme = darkDynamic.harmonized();
         } else {
             // Otherwise, use fallback schemes.
             lightColorScheme = ColorScheme.fromSeed(
-                seedColor: _brandColor
+                seedColor: _brandColor,
             );
             darkColorScheme = ColorScheme.fromSeed(
                 seedColor: _brandColor,
@@ -389,8 +391,8 @@ class _AppState extends State<App> {
         }
 
         return {
-            "light": ThemeData.from(colorScheme: lightColorScheme),
-            "dark": ThemeData.from(colorScheme: darkColorScheme),
+            "light": ThemeData.from(colorScheme: lightColorScheme, useMaterial3: true),
+            "dark": ThemeData.from(colorScheme: darkColorScheme, useMaterial3: true),
         };
     }
 }

@@ -12,9 +12,8 @@ class SettingsShell extends StatelessWidget {
         return Scaffold(
             appBar: AppBar(
                 title: const Text("Settings"),
-                leading: IconButton(
+                leading: BackButton(
                     onPressed: () {if(context.canPop()) context.pop();}, // Handle your on tap here.
-                    icon: const Icon(Icons.arrow_back),
                 ),
             ),
             body: child,
