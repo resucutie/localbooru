@@ -27,6 +27,7 @@ class _OverallSettingsState extends State<OverallSettings> {
     late bool _update;
     late bool _gif_video;
     late String _theme;
+    late String _counter;
 
     bool isSettingModified(String setting) {
         return widget.prefs.get(setting) != null && widget.prefs.get(setting) != settingsDefaults[setting];
@@ -50,6 +51,7 @@ class _OverallSettingsState extends State<OverallSettings> {
         _update = widget.prefs.getBool("update") ?? settingsDefaults["update"];
         _gif_video = widget.prefs.getBool("gif_video") ?? settingsDefaults["gif_video"];
         _theme = widget.prefs.getString("theme") ?? settingsDefaults["theme"];
+        _counter = widget.prefs.getString("counter") ?? settingsDefaults["counter"];
     }
 
     Future<void> onChangeTheme() async {
@@ -61,6 +63,16 @@ class _OverallSettingsState extends State<OverallSettings> {
         widget.prefs.setString("theme", choosenTheme);
         themeListener.update();
         setState(() => _theme = choosenTheme);
+    }
+
+    Future<void> onChangeCounter() async {
+        final choosenCounter = await showDialog<String>(
+            context: context,
+            builder: (_) => CounterChangerDialog(counter: widget.prefs.getString("counter") ?? settingsDefaults["counter"])
+        );
+        if(choosenCounter == null) return;
+        widget.prefs.setString("counter", choosenCounter);
+        setState(() => _counter = choosenCounter);
     }
 
     @override
@@ -192,6 +204,12 @@ class _OverallSettingsState extends State<OverallSettings> {
                         themeListener.update();
                         setState(() => _monetTheme = value);
                     }
+                ),
+                ListTile(
+                    title: const Text("Counter"),
+                    subtitle: Text(_counter),
+                    leading: const Icon(Icons.onetwothree),
+                    onTap: onChangeCounter,
                 ),
 
                 const SmallHeader("Behavior"),
