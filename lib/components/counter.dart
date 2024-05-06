@@ -18,10 +18,9 @@ final Map<String, List<ImageProvider>> displays = {
 };
 
 class StyleCounter extends StatelessWidget {
-    const StyleCounter({super.key, required this.number, this.display = "baba", this.width = 48, this.height = 48});
+    const StyleCounter({super.key, required this.number, this.display = "baba", this.height = 56});
 
     final int number;
-    final double width;
     final double height;
     final String display;
 
@@ -33,7 +32,6 @@ class StyleCounter extends StatelessWidget {
             alignment: WrapAlignment.center,
             children: number.toString().trim().split("").map((e) => Image(
                 image: displays[display]![int.parse(e)],
-                width: width,
                 height: height,
                 fit: BoxFit.contain,
                 filterQuality: FilterQuality.none,

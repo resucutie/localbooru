@@ -85,7 +85,7 @@ class CounterChangerDialog extends StatelessWidget {
                                 Text("- ${counterType.value}", style: TextStyle(color: Theme.of(context).disabledColor),),
                             ],
                         ),
-                        subtitle: Wrap(children: [StyleCounter(number: 1234567890, height: 30, width: 30, display: counterType.key)]),
+                        subtitle: Wrap(children: [StyleCounter(number: 1234567890, height: 30, display: counterType.key)]),
                 
                         onChanged: (value) => Navigator.of(context).pop(value),
                     )).toList(),
