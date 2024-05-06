@@ -277,7 +277,8 @@ void main() async {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                     const Text("An error happened:\n"),
-                    Text(details.exception.toString())
+                    Text(details.exception.toString()),
+                    Text(details.stack.toString())
                 ],
             ),
         );

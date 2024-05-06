@@ -129,7 +129,7 @@ Future<PresetImage> e621ToPreset(String url) async {
 
     return PresetImage(
         image: downloadedFileInfo.file,
-        sources: [...((postRes["sources"] as List<String>?)?.where((e) => !e.startsWith("-")) ?? []), [uri.origin, uri.path].join("")],
+        sources: [...(postRes["sources"] ?? []).where((e) => !e.startsWith("-")), [uri.origin, uri.path].join("")],
         tags: {
             "generic": List<String>.from(postRes["tags"]["general"]),
             "artist": List<String>.from(postRes["tags"]["artist"]),
