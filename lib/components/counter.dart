@@ -18,7 +18,7 @@ final Map<String, List<ImageProvider>> displays = {
 };
 
 class StyleCounter extends StatelessWidget {
-    const StyleCounter({super.key, required this.number, this.display = "baba", this.height = 56});
+    const StyleCounter({super.key, required this.number, this.display = "baba", this.height = 48});
 
     final int number;
     final double height;
