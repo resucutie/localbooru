@@ -328,6 +328,7 @@ class NotesView extends StatefulWidget {
 class _NotesViewState extends State<NotesView> {
     final controller = TextEditingController();
     Timer? _debounce;
+    late String hi;
 
     @override
     void initState() {
@@ -346,7 +347,7 @@ class _NotesViewState extends State<NotesView> {
         return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                const Header("Note", padding: EdgeInsets.only(bottom: 16),),
+                Header(hi, padding: EdgeInsets.only(bottom: 16),),
                 TextField(
                     controller: controller,
                     keyboardType: TextInputType.multiline,

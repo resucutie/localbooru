@@ -268,6 +268,21 @@ final router = GoRouter(
 );
 
 void main() async {
+    // custom error screen because release just yeets the error messages in favor of a gray screen
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+        return Material(
+            color: Colors.red,
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                    const Text("An error happened:\n"),
+                    Text(details.exception.toString())
+                ],
+            ),
+        );
+    };
+
     runApp(const App());
 
     MediaKit.ensureInitialized();
