@@ -157,13 +157,13 @@ class _SearchTagState extends State<SearchTag> {
                 final currentTags = List<String>.from(controller.text.split(" "));
 
                 final filteredTags = List<String>.from(tags)..addAll(tagsToAddToSearch)..retainWhere((s){
-                    return currentTags.last.isEmpty || (s.contains(TagText(currentTags.last).text) && !currentTags.contains(s));
+                    return currentTags.last.isEmpty || s.contains(TagText(currentTags.last).text);
                 });
 
                 final specialTags = await booru.separateTagsByType(filteredTags);
 
                 return specialTags.entries.map((type) => type.value.map((tag) {
-                    final isMetatag = tag.contains(":");
+                    final isMetatag = tag.contains(":") && tag.split(":").first.isNotEmpty;
                     return ListTile(
                         title: Text(tag,
                             style: TextStyle(
