@@ -157,7 +157,7 @@ class _SearchTagState extends State<SearchTag> {
                 final currentTags = List<String>.from(controller.text.split(" "));
 
                 final filteredTags = List<String>.from(tags)..addAll(tagsToAddToSearch)..retainWhere((s){
-                    return s.contains(TagText(currentTags.last).text) && !currentTags.contains(s);
+                    return currentTags.last.isEmpty || (s.contains(TagText(currentTags.last).text) && !currentTags.contains(s));
                 });
 
                 final specialTags = await booru.separateTagsByType(filteredTags);
