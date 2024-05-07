@@ -393,28 +393,31 @@ class _NotesViewState extends State<NotesView> {
     
     @override
     Widget build(context) {
-        return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-                const Header("Note", padding: EdgeInsets.only(bottom: 16),),
-                TextField(
-                    controller: controller,
-                    keyboardType: TextInputType.multiline,
-                    minLines: 10,
-                    maxLines: null,
-                    decoration: const InputDecoration(
-                        hintText: 'Insert a note',
-                        border: OutlineInputBorder(),
+        return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                    const Header("Note", padding: EdgeInsets.only(bottom: 16),),
+                    TextField(
+                        controller: controller,
+                        keyboardType: TextInputType.multiline,
+                        minLines: 10,
+                        maxLines: null,
+                        decoration: const InputDecoration(
+                            hintText: 'Insert a note',
+                            border: OutlineInputBorder(),
+                        ),
+                        onChanged: (value) {
+                            if (_debounce?.isActive ?? false) _debounce?.cancel();
+                            _debounce = Timer(const Duration(seconds: 1), () {
+                                debugPrint("debounced");
+                                editNote(widget.id.toString(), value);
+                            });
+                        },
                     ),
-                    onChanged: (value) {
-                        if (_debounce?.isActive ?? false) _debounce?.cancel();
-                        _debounce = Timer(const Duration(seconds: 1), () {
-                            debugPrint("debounced");
-                            editNote(widget.id.toString(), value);
-                        });
-                    },
-                ),
-            ],
+                ],
+            ),
         );
     }
 }
