@@ -13,7 +13,7 @@ final Map<String, dynamic> settingsDefaults = {
     "thumbnail_quality": 2.0,
     "update": true,
     "gif_video": false,
-    "counter": "baba",
+    "counter": "squares",
 };
 
 final Map<String, dynamic> defaultFileInfoJson = {

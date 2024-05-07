@@ -127,6 +127,16 @@ flutter:
     - assets/counter/baba/7.gif
     - assets/counter/baba/8.gif
     - assets/counter/baba/9.gif
+    - assets/counter/squares/0.svg
+    - assets/counter/squares/1.svg
+    - assets/counter/squares/2.svg
+    - assets/counter/squares/3.svg
+    - assets/counter/squares/4.svg
+    - assets/counter/squares/5.svg
+    - assets/counter/squares/6.svg
+    - assets/counter/squares/7.svg
+    - assets/counter/squares/8.svg
+    - assets/counter/squares/9.svg
     
     - pubspec.yaml # reading itself
 
