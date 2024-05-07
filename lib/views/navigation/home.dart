@@ -60,12 +60,15 @@ class _HomePageState extends State<HomePage> {
                                         const SizedBox(height: 16),
                                         Wrap(
                                             direction: Axis.horizontal,
-                                            spacing: orientation == Orientation.landscape ? 16 : 8,
+                                            spacing: 8,
                                             children: [
                                                 OutlinedButton.icon(
                                                     onPressed: () => context.push("/recent"),
-                                                        label: const Text("Recent posts"),
-                                                    icon: const Icon(Icons.history)
+                                                    label: const Text("Recent posts"),
+                                                    icon: const Icon(Icons.history),
+                                                    style: orientation == Orientation.portrait ? OutlinedButton.styleFrom(
+                                                        minimumSize: const Size(0, 48)
+                                                    ) : null,
                                                 ),
                                                 orientation == Orientation.landscape ? FilledButton.icon(
                                                     onPressed: _onSearch,
