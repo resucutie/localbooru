@@ -4,9 +4,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
+import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/components/tag.dart';
 import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/utils/constants.dart';
@@ -46,39 +48,44 @@ class ImageViewShell extends StatelessWidget {
                     BrowseScreenPopupMenuButton(image: image,)
                 ],
             ),
-            body: OrientationBuilder(
-                builder: (context, orientation) {
-                    if(orientation == Orientation.portrait) {
-                        return ListView(
-                            children: [
-                                if(shouldShowImageOnPortrait) ImageViewDisplay(image),
-                                child
-                            ],
-                        );
-                    } else {
-                        return Row(
-                            children: [
-                                Expanded(
-                                    child: ImageViewDisplay(image)
-                                ),
-                                ConstrainedBox(
-                                    constraints: const BoxConstraints(maxWidth: 400.0),
-                                    child: LayoutBuilder(
-                                        builder: (context, constrains) {
-                                            return SingleChildScrollView(
-                                                child: ConstrainedBox(
-                                                    constraints: constrains.copyWith(minHeight: constrains.maxHeight, maxHeight: double.infinity, minWidth: 400),
-                                                    child: child,
-                                                ),
-                                            );
-                                        }
+            body: ScrollConfiguration(
+                behavior: const MaterialScrollBehavior().copyWith(
+                    dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.trackpad, PointerDeviceKind.stylus},
+                ),
+                child: OrientationBuilder(
+                    builder: (context, orientation) {
+                        if(orientation == Orientation.portrait) {
+                            return ListView(
+                                children: [
+                                    if(shouldShowImageOnPortrait) ImageViewDisplay(image),
+                                    child
+                                ],
+                            );
+                        } else {
+                            return Row(
+                                children: [
+                                    Expanded(
+                                        child: ImageViewDisplay(image)
+                                    ),
+                                    ConstrainedBox(
+                                        constraints: const BoxConstraints(maxWidth: 400.0),
+                                        child: LayoutBuilder(
+                                            builder: (context, constrains) {
+                                                return SingleChildScrollView(
+                                                    child: ConstrainedBox(
+                                                        constraints: constrains.copyWith(minHeight: constrains.maxHeight, maxHeight: double.infinity, minWidth: 400),
+                                                        child: child,
+                                                    ),
+                                                );
+                                            }
+                                        )
                                     )
-                                )
-                                
-                            ],
-                        );
-                    }
-                },
+                                    
+                                ],
+                            );
+                        }
+                    },
+                ),
             ),
         );
     }
@@ -252,35 +259,82 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                             _ => widget.image.rating!.name
                         })
                     ],
-                    
-                    const SizedBox(height: 16,),
-                    if(widget.image.sources.isNotEmpty) Card(
-                        clipBehavior: Clip.antiAlias,
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: ListTile.divideTiles(
-                                context: context,
-                                tiles: widget.image.sources.map((url) {
-                                    final uri = Uri.parse(url);
-                                    return MouseRegion(
-                                        cursor: SystemMouseCursors.click,
-                                        child: GestureDetector(
-                                            onLongPress: () => openContextMenu(offset: getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: ro), url: url),
-                                            onLongPressDown: (details) => longPress = details,
-                                            onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: ro), url: url),
-                                            child: ListTile(
-                                                leading: getWebsiteIcon(uri) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
-                                                onTap: () => launchUrlString(url),
-                                                title: SmallHeader(getWebsiteFormalType(uri) ?? uri.host, padding: EdgeInsets.zero,),
-                                                subtitle: Text(url)
+
+                    if(widget.image.relatedImages.isNotEmpty) ...[
+                        const SizedBox(height: 16,),
+                        Card(
+                            clipBehavior: Clip.antiAlias,
+                            child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                width: double.infinity,
+                                child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        const SmallHeader("Related images", padding: EdgeInsets.only(bottom: 8, left: 16),),
+                                        SizedBox(
+                                            height: 100,
+                                            child: BooruLoader(
+                                                builder: (context, booru) => ListView.separated(
+                                                    scrollDirection: Axis.horizontal,
+                                                    itemCount: widget.image.relatedImages.length,
+                                                    separatorBuilder: (context, index) => const SizedBox(width: 8,),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                                                    itemBuilder: (context, index) {
+                                                        final imageId = widget.image.relatedImages[index];
+                                                        return MouseRegion(
+                                                            cursor: MaterialStateMouseCursor.clickable,
+                                                            child: GestureDetector(
+                                                                onTap: () => context.push("/view/$imageId"),
+                                                                child: BooruImageLoader(
+                                                                    booru: booru,
+                                                                    id: imageId,
+                                                                    builder: (context, relatedImage) => ImageGrid(
+                                                                        image: relatedImage,
+                                                                        resizeSize: 200,
+                                                                    ), 
+                                                                ),
+                                                            ),
+                                                        );
+                                                    }
+                                                )
                                             ),
                                         )
-                                    );
-                                }).toList()
-                            ).toList()
+                                    ],
+                                ),
+                            )
                         ),
-                    ),
+                    ],
+                    
+                    if(widget.image.sources.isNotEmpty) ...[
+                        const SizedBox(height: 16,),
+                        Card(
+                            clipBehavior: Clip.antiAlias,
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: ListTile.divideTiles(
+                                    context: context,
+                                    tiles: widget.image.sources.map((url) {
+                                        final uri = Uri.parse(url);
+                                        return MouseRegion(
+                                            cursor: SystemMouseCursors.click,
+                                            child: GestureDetector(
+                                                onLongPress: () => openContextMenu(offset: getOffsetRelativeToBox(offset: longPress.globalPosition, renderObject: ro), url: url),
+                                                onLongPressDown: (details) => longPress = details,
+                                                onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: ro), url: url),
+                                                child: ListTile(
+                                                    leading: getWebsiteIcon(uri) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
+                                                    onTap: () => launchUrlString(url),
+                                                    title: SmallHeader(getWebsiteFormalType(uri) ?? uri.host, padding: EdgeInsets.zero,),
+                                                    subtitle: Text(url)
+                                                ),
+                                            )
+                                        );
+                                    }).toList()
+                                ).toList()
+                            ),
+                        ),
+                    ],
 
                     const SizedBox(height: 16,),
                     Card(
@@ -297,8 +351,6 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                             onTap: () => context.push("/view/${widget.image.id}/note"),
                         ),
                     ),
-
-                    // FilledButton(onPressed: () => context.push("/view/${widget.image.id}/note"), child: Text("notes")),
 
                     const SizedBox(height: 16,),
                     Card(
