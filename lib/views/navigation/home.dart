@@ -6,7 +6,6 @@ import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/counter.dart';
 import 'package:localbooru/components/drawer.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/views/navigation/index.dart';
 

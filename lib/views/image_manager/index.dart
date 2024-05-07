@@ -11,7 +11,6 @@ import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/radio_dialogs.dart';
 import 'package:localbooru/components/video_view.dart';
-import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:mime/mime.dart';

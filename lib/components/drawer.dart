@@ -1,14 +1,11 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/image_manager/peripherals.dart';
-import 'package:localbooru/views/navigation/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DesktopHousing extends StatelessWidget {
@@ -54,6 +51,7 @@ class DefaultDrawer extends StatelessWidget {
     Widget build(context) {
         Color? assertSelected(String selectorView) {
             if(activeView == selectorView) return Theme.of(context).colorScheme.primary;
+            return null;
         }
         return ListView(
             padding: EdgeInsets.zero,

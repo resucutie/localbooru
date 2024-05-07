@@ -17,8 +17,6 @@ import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:media_kit/media_kit.dart'; // Provides [Player], [Media], [Playlist] etc.
-import 'package:media_kit_video/media_kit_video.dart'; // Provides [VideoController] & [Video] etc.        
 
 class ImageViewShell extends StatelessWidget {
     const ImageViewShell({super.key, required this.image, required this.child, this.shouldShowImageOnPortrait = false});
@@ -256,14 +254,14 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                     ],
                     
                     const SizedBox(height: 16,),
-                    if(widget.image.sources != null && widget.image.sources!.isNotEmpty) Card(
+                    if(widget.image.sources.isNotEmpty) Card(
                         clipBehavior: Clip.antiAlias,
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: ListTile.divideTiles(
                                 context: context,
-                                tiles: widget.image.sources!.map((url) {
+                                tiles: widget.image.sources.map((url) {
                                     final uri = Uri.parse(url);
                                     return MouseRegion(
                                         cursor: SystemMouseCursors.click,
@@ -328,7 +326,6 @@ class NotesView extends StatefulWidget {
 class _NotesViewState extends State<NotesView> {
     final controller = TextEditingController();
     Timer? _debounce;
-    late String hi;
 
     @override
     void initState() {
@@ -347,7 +344,7 @@ class _NotesViewState extends State<NotesView> {
         return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                Header(hi, padding: EdgeInsets.only(bottom: 16),),
+                const Header("Note", padding: EdgeInsets.only(bottom: 16),),
                 TextField(
                     controller: controller,
                     keyboardType: TextInputType.multiline,
