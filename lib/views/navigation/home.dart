@@ -101,7 +101,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class SearchTag extends StatefulWidget {
-    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.isFullScreen, this.actions, this.showShadow = false, this.leading = const Icon(Icons.search), this.padding = const EdgeInsets.only(left: 16.0, right: 10.0)});
+    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.isFullScreen, this.actions, this.showShadow = false, this.leading = const Icon(Icons.search), this.padding = const EdgeInsets.only(left: 16.0, right: 10.0), this.backgroundColor, this.elevation});
 
     final String defaultText;
     final Function(String value) onSearch;
@@ -111,6 +111,8 @@ class SearchTag extends StatefulWidget {
     final bool showShadow;
     final Widget? leading;
     final EdgeInsetsGeometry? padding;
+    final Color? backgroundColor;
+    final double? elevation;
 
     @override
     State<SearchTag> createState() => _SearchTagState();
@@ -143,8 +145,9 @@ class _SearchTagState extends State<SearchTag> {
                     if(widget.actions == null) SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
                     else ...widget.actions!
                 ],
-                elevation: const MaterialStatePropertyAll(2.5),
+                elevation: MaterialStatePropertyAll(widget.elevation),
                 shadowColor: widget.showShadow ? null : const MaterialStatePropertyAll(Colors.transparent),
+                backgroundColor: MaterialStatePropertyAll<Color?>(widget.backgroundColor),
             ),
             suggestionsBuilder: (context, controller) async {
                 Booru booru = await getCurrentBooru();

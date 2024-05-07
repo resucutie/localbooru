@@ -92,11 +92,11 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                     floating: true,
                                                     snap: true,
                                                     pinned: isDesktop(),
-                                                    forceMaterialTransparency: true,
+                                                    forceMaterialTransparency: orientation == Orientation.landscape,
                                                     titleSpacing: 0,
                                                     automaticallyImplyLeading: false,
-                                                    toolbarHeight: orientation == Orientation.portrait ? 96 : 56,
-                                                    actions: orientation != Orientation.landscape ? null : [Padding(
+                                                    toolbarHeight: 56,
+                                                    actions: orientation != Orientation.landscape ? actions : [Padding(
                                                       padding: const EdgeInsets.only(right: 8),
                                                       child: Wrap(
                                                           direction: Axis.horizontal,
@@ -105,17 +105,19 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                       ),
                                                     )],
                                                     title: Container(
-                                                        padding: const EdgeInsets.all(16.0),
+                                                        padding: orientation == Orientation.landscape ? const EdgeInsets.all(16.0) : null,
                                                         constraints: orientation == Orientation.landscape ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
                                                         child: SearchTag(
                                                             onSearch: (_) => _onSearch(),
                                                             controller: _searchController,
-                                                            actions: orientation == Orientation.portrait ? actions : [IconButton(onPressed: _onSearch, icon: const Icon(Icons.search))],
+                                                            actions: orientation == Orientation.portrait ? [] : [IconButton(onPressed: _onSearch, icon: const Icon(Icons.search))],
                                                             leading: const Padding(
                                                                 padding: EdgeInsets.only(right: 12.0),
                                                                 child: BackButton(),
                                                             ),
                                                             padding: const EdgeInsets.symmetric(horizontal: 12).add(const EdgeInsets.only(bottom: 2)),
+                                                            backgroundColor: orientation == Orientation.portrait ? Colors.transparent : null,
+                                                            elevation: orientation == Orientation.portrait ? 0 : null,
                                                         ),
                                                     ),
                                                 ),
