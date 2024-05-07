@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:localbooru/components/counter.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/radio_dialogs.dart';
 import 'package:localbooru/utils/constants.dart';
@@ -73,6 +76,7 @@ class _OverallSettingsState extends State<OverallSettings> {
         if(choosenCounter == null) return;
         widget.prefs.setString("counter", choosenCounter);
         setState(() => _counter = choosenCounter);
+        counterListener.update();
     }
 
     @override
@@ -208,7 +212,7 @@ class _OverallSettingsState extends State<OverallSettings> {
                 ListTile(
                     title: const Text("Counter"),
                     subtitle: Text(_counter),
-                    leading: const Icon(Icons.onetwothree),
+                    leading: StyleCounter(number: Random().nextInt(10), height: 24, display: _counter,),
                     onTap: onChangeCounter,
                 ),
 

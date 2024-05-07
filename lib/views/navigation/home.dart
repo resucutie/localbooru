@@ -6,6 +6,7 @@ import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/counter.dart';
 import 'package:localbooru/components/drawer.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/views/navigation/index.dart';
 
@@ -246,24 +247,49 @@ class LocalBooruHeader extends StatelessWidget {
     }
 }
 
-class ImageDisplay extends StatelessWidget {
+class ImageDisplay extends StatefulWidget {
     const ImageDisplay({super.key});
+
+    @override
+    State<ImageDisplay> createState() => _ImageDisplayState();
+}
+
+class _ImageDisplayState extends State<ImageDisplay> {
+    late Future<int> _futureNumber;
+
+    @override
+    void initState() {
+        super.initState();
+        counterListener.addListener(updateCounter);
+        updateCounter();
+    }
+
+    @override
+    void dispose() {
+        counterListener.removeListener(updateCounter);
+        super.dispose();
+    }
+
+    void updateCounter() async {
+        final booru = await getCurrentBooru();
+        setState(() {
+            _futureNumber = booru.getListLength();
+        });
+    }
 
     @override
     Widget build(context) {
         return SharedPreferencesBuilder(
-            builder: (context, prefs) => BooruLoader(
-                builder: (context, booru) => FutureBuilder(
-                    future: booru.getListLength(),
-                    builder: (context, snapshot) {
-                        if(snapshot.hasData) {
-                            return StyleCounter(number: snapshot.data!, display: prefs.getString("counter") ?? settingsDefaults["counter"],);
-                        }
-                        if(snapshot.hasError) throw snapshot.error!;
-                        return const CircularProgressIndicator();
-                    },
-                )
-            ),
+            builder: (context, prefs) => FutureBuilder(
+                future: _futureNumber,
+                builder: (context, snapshot) {
+                     if(snapshot.hasData) {
+                        return StyleCounter(number: snapshot.data!, display: prefs.getString("counter") ?? settingsDefaults["counter"],);
+                    }
+                    if(snapshot.hasError) throw snapshot.error!;
+                    return const CircularProgressIndicator();
+                },
+            )
         );
     }
 }

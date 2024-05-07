@@ -9,7 +9,7 @@ final Map<String, List<String>> displays = {
 };
 
 class StyleCounter extends StatelessWidget {
-    const StyleCounter({super.key, required this.number, this.display = "baba", this.height = 48});
+    const StyleCounter({super.key, required this.number, this.display = "squares", this.height = 48});
 
     final int number;
     final double height;
