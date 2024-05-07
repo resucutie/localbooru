@@ -242,33 +242,23 @@ class LocalBooruHeader extends StatelessWidget {
     }
 }
 
-class ImageDisplay extends StatefulWidget {
+class ImageDisplay extends StatelessWidget {
     const ImageDisplay({super.key});
 
     @override
-    State<ImageDisplay> createState() => _ImageDisplayState();
-}
-class _ImageDisplayState extends State<ImageDisplay>{
-    late Future<int> _future;
-
-    @override
-    void initState() {
-        super.initState();
-        _future = (() async => await (await getCurrentBooru()).getListLength())();
-    }
-    
-    @override
     Widget build(context) {
         return SharedPreferencesBuilder(
-            builder: (context, prefs) => FutureBuilder(
-                future: _future,
-                builder: (context, snapshot) {
-                    if(snapshot.hasData) {
-                        return StyleCounter(number: snapshot.data!, display: prefs.getString("counter") ?? settingsDefaults["counter"],);
-                    }
-                    if(snapshot.hasError) throw snapshot.error!;
-                    return const CircularProgressIndicator();
-                },
+            builder: (context, prefs) => BooruLoader(
+                builder: (context, booru) => FutureBuilder(
+                    future: booru.getListLength(),
+                    builder: (context, snapshot) {
+                        if(snapshot.hasData) {
+                            return StyleCounter(number: snapshot.data!, display: prefs.getString("counter") ?? settingsDefaults["counter"],);
+                        }
+                        if(snapshot.hasError) throw snapshot.error!;
+                        return const CircularProgressIndicator();
+                    },
+                )
             ),
         );
     }
