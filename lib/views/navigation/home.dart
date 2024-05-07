@@ -156,30 +156,32 @@ class _SearchTagState extends State<SearchTag> {
                 List<String> tags = await booru.getAllTags();
                 final currentTags = List<String>.from(controller.text.split(" "));
 
-                final filteredTags = List<String>.from(tags)..retainWhere((s){
-                    return s.contains(currentTags.last) && !currentTags.contains(s);
+                final filteredTags = List<String>.from(tags)..addAll(tagsToAddToSearch)..retainWhere((s){
+                    return s.contains(TagText(currentTags.last).text) && !currentTags.contains(s);
                 });
 
-                var specialTags = await booru.separateTagsByType(filteredTags);
-                specialTags["meta"] = tagsToAddToSearch;
+                final specialTags = await booru.separateTagsByType(filteredTags);
 
-                return specialTags.entries.map((type) => type.value.map((tag) => ListTile(
-                    title: Text(tag,
-                        style: TextStyle(
-                            color: !(type.key == "meta") ? SpecificTagsColors.getColor(type.key) : null,
-                            fontWeight: type.key == "meta" ? FontWeight.bold : null
+                return specialTags.entries.map((type) => type.value.map((tag) {
+                    final isMetatag = tag.contains(":");
+                    return ListTile(
+                        title: Text(tag,
+                            style: TextStyle(
+                                color: !isMetatag ? SpecificTagsColors.getColor(type.key) : null,
+                                fontWeight: isMetatag ? FontWeight.bold : null
+                            ),
                         ),
-                    ),
-                    onTap: () {
-                        List endResult = List.from(currentTags);
-                        endResult.removeLast();
-                        endResult.add(tag);
-                        setState(() {
-                            if(tag.endsWith(":")) controller.text = endResult.join(" ");
-                            else controller.text = "${endResult.join(" ")} ";
-                        });
-                    },
-                ))).expand((i) => i);
+                        onTap: () {
+                            List endResult = List.from(currentTags);
+                            endResult.removeLast();
+                            endResult.add(tag);
+                            setState(() {
+                                if(isMetatag) controller.text = endResult.join(" ");
+                                else controller.text = "${endResult.join(" ")} ";
+                            });
+                        },
+                    );
+                })).expand((i) => i);
             },
             viewTrailing: [
                 IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
