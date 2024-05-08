@@ -62,6 +62,19 @@ List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildConte
         ),
     ];
 }
+
+List<PopupMenuEntry> multipleImageManagementItems(List<BooruImage> images, {required BuildContext context}) {
+    return [
+        PopupMenuItem(
+            child: Text("Delete images", style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            // onTap: () => showDialog(context: context,
+            //     builder: (context) => DeleteImageDialogue(id: image.id)
+            // )
+        ),
+    ];
+}
+
+
 class DeleteImageDialogue extends StatelessWidget {
     const DeleteImageDialogue({super.key, required this.id});
 

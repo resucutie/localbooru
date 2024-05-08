@@ -56,21 +56,23 @@ class _GalleryViewerState extends State<GalleryViewer> {
                 Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
                 Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
             ),
-            items: <PopupMenuEntry<dynamic>>[
-                PopupMenuItem(
-                    child: ListTile(
-                        title: const Text("Select"),
-                        trailing: Icon(_selectedImages.contains(image.id) ? Icons.check_box : Icons.check_box_outline_blank),
-                    ),
-                    onTap: () => toggleImageSelection(image.id),
-                ),
-                const PopupMenuDivider(),
-                ...imageShareItems(image),
-                const PopupMenuDivider(),
-                ...imageManagementItems(image, context: context),
-            ]
+            items: singleContextMenuItems(image)
         );
     }
+
+    List<PopupMenuEntry<dynamic>> singleContextMenuItems(BooruImage image) => [
+        PopupMenuItem(
+            child: ListTile(
+                title: const Text("Select"),
+                trailing: Icon(_selectedImages.contains(image.id) ? Icons.check_box : Icons.check_box_outline_blank),
+            ),
+            onTap: () => toggleImageSelection(image.id),
+        ),
+        const PopupMenuDivider(),
+        ...imageShareItems(image),
+        const PopupMenuDivider(),
+        ...imageManagementItems(image, context: context),
+    ];
 
     void toggleImageSelection(ImageID imageID) {
         setState(() {
@@ -169,8 +171,20 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                                 leading: CloseButton(onPressed: () => setState(() {
                                                                     _selectedImages = [];
                                                                 }),),
-                                                                actions: actions,
-                                                                title: Text("Selected ${_selectedImages.length}")
+                                                                actions: [
+                                                                    if(_selectedImages.length == 1) IconButton(
+                                                                        icon: const Icon(Icons.edit),
+                                                                        onPressed: () {
+                                                                            context.push("/manage_image/internal/${_selectedImages[0]}");
+                                                                            setState(() => _selectedImages = []);
+                                                                        },
+                                                                    ),
+                                                                    PopupMenuButton(itemBuilder: (context) {
+                                                                        if(_selectedImages.length == 1) return singleContextMenuItems(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0]));
+                                                                        return [];
+                                                                    })
+                                                                ],
+                                                                title: Text("${_selectedImages.length} Selected")
                                                             ),
                                                 ),
                                                 SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
@@ -183,6 +197,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                     autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
                                                     dragOutside: _selectedImages.isEmpty,
                                                     onContextMenu: openContextMenu,
+                                                    onLongPress: (image) => toggleImageSelection(image.id),
                                                     selectedElements: _selectedImages,
                                                 ),
                                                 SliverToBoxAdapter(child: PageDisplay(

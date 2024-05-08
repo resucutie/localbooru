@@ -13,10 +13,11 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 
 class SliverRepoGrid extends StatefulWidget {
-    const SliverRepoGrid({super.key, required this.images, this.onPressed, this.onContextMenu, this.autoadjustColumns, this.imageQualityScale, this.dragOutside = false, this.selectedElements = const []});
+    const SliverRepoGrid({super.key, required this.images, this.onPressed, this.onLongPress, this.onContextMenu, this.autoadjustColumns, this.imageQualityScale, this.dragOutside = false, this.selectedElements = const []});
 
     final List<BooruImage> images;
     final Function(BooruImage image)? onPressed;
+    final Function(BooruImage image)? onLongPress;
     final Function(Offset offset, BooruImage image)? onContextMenu;
     final int? autoadjustColumns;
     final double? imageQualityScale;
@@ -71,7 +72,7 @@ class _SliverRepoGridState extends State<SliverRepoGrid> {
                         builder: (_, prefs) {
                             final Widget dragWidget = GestureDetector(
                                 onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
-                                onLongPress: () {if(widget.onContextMenu != null) widget.onContextMenu!(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!), image);},
+                                onLongPress: () {if(widget.onLongPress != null) widget.onLongPress!(image);},
                                 onLongPressDown: (tap) => longTap = tap,
                                 onSecondaryTapDown: (tap) {if(widget.onContextMenu != null) widget.onContextMenu!(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!), image);},
                                 child: ImageGrid(
