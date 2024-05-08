@@ -82,30 +82,30 @@ class _SliverRepoGridState extends State<SliverRepoGrid> {
                     }
                     return SharedPreferencesBuilder(
                         builder: (_, prefs) {
-                            final Widget dragWidget = ImageGrid(image: image, resizeSize: resizeSize * (prefs.getDouble("thumbnail_quality") ?? settingsDefaults["thumbnail_quality"]),);
+                            final Widget dragWidget = GestureDetector(
+                                onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
+                                onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!)),
+                                onLongPressDown: (tap) => longTap = tap,
+                                onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
+                                child: ImageGrid(image: image, resizeSize: resizeSize * (prefs.getDouble("thumbnail_quality") ?? settingsDefaults["thumbnail_quality"]),)
+                            );
                             return Padding(
                                 padding: const EdgeInsets.all(4.0),
                                 child: MouseRegion(
                                     cursor: SystemMouseCursors.click,
-                                    child: GestureDetector(
-                                        onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
-                                        onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!)),
-                                        onLongPressDown: (tap) => longTap = tap,
-                                        onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
-                                        child: !widget.dragOutside ? dragWidget : DragItemWidget(
-                                            dragItemProvider: (request) {
-                                                final item = DragItem(
-                                                    localData: {'context': "image_grid"},
-                                                    suggestedName: image.filename
-                                                );
-                                                final format = SuperFormats.getFormatFromFileExtension(p.extension(image.filename));
-                                                // debugPrint("$format");
-                                                if(format != null) item.add(format.lazy(() async => await image.getImage().readAsBytes()));
-                                                return item;
-                                            },
-                                            allowedOperations: () => [DropOperation.copy],
-                                            child: DraggableWidget(child: dragWidget),
-                                        )
+                                    child: !widget.dragOutside ? dragWidget : DragItemWidget(
+                                        dragItemProvider: (request) {
+                                            final item = DragItem(
+                                                localData: {'context': "image_grid"},
+                                                suggestedName: image.filename
+                                            );
+                                            final format = SuperFormats.getFormatFromFileExtension(p.extension(image.filename));
+                                            // debugPrint("$format");
+                                            if(format != null) item.add(format.lazy(image.getImage().readAsBytes));
+                                            return item;
+                                        },
+                                        allowedOperations: () => [DropOperation.copy],
+                                        child: DraggableWidget(child: dragWidget),
                                     )
                                 ),
                             );
