@@ -54,21 +54,31 @@ class _ImageInfoBuilderState extends State<ImageInfoBuilder> {
     }   
 }
 
-
-class BooruLoader extends StatelessWidget {
+class BooruLoader extends StatefulWidget {
     const BooruLoader({super.key, required this.builder});
-
     final Widget Function(BuildContext context, Booru booru) builder;
-    
+
+    @override
+    State<BooruLoader> createState() => _BooruLoaderState();
+}
+class _BooruLoaderState extends State<BooruLoader> {
+    late Future<Booru> booru;
+
+    @override
+    void initState() {
+        super.initState();
+        booru = getCurrentBooru();
+    }
+
     @override
     Widget build(BuildContext context) {
         return ListenableBuilder(listenable: booruUpdateListener,
             builder: (_, __) {
                 return FutureBuilder<Booru>(
-                    future: getCurrentBooru(),
+                    future: booru,
                     builder: (context, AsyncSnapshot<Booru> snapshot) {
                         if(snapshot.hasData) {
-                            return builder(context, snapshot.data!);
+                            return widget.builder(context, snapshot.data!);
                         } else if(snapshot.hasError) {
                             throw snapshot.error!;
                         }

@@ -174,7 +174,6 @@ class ServiceActionsDialogue extends StatelessWidget {
 }
 
 Offset getOffsetRelativeToBox({required Offset offset, required RenderObject renderObject}) {
-    debugPrint(globalToLocal(renderObject, offset).toString());
     return globalToLocal(renderObject, offset);
 }
 

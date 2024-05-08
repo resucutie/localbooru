@@ -13,13 +13,15 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 
 class SliverRepoGrid extends StatefulWidget {
-    const SliverRepoGrid({super.key, required this.images, this.onPressed, this.autoadjustColumns, this.imageQualityScale, this.dragOutside = false});
+    const SliverRepoGrid({super.key, required this.images, this.onPressed, this.onContextMenu, this.autoadjustColumns, this.imageQualityScale, this.dragOutside = false, this.selectedElements = const []});
 
     final List<BooruImage> images;
     final Function(BooruImage image)? onPressed;
+    final Function(Offset offset, BooruImage image)? onContextMenu;
     final int? autoadjustColumns;
     final double? imageQualityScale;
     final bool dragOutside;
+    final List<ImageID> selectedElements;
 
     @override
     State<SliverRepoGrid> createState() => _SliverRepoGridState();
@@ -65,29 +67,19 @@ class _SliverRepoGridState extends State<SliverRepoGrid> {
                     crossAxisCount: columns,
                 ),
                 delegate: SliverChildListDelegate(widget.images.map((image) {
-                    void openContextMenu(Offset offset) {
-                        final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
-                        showMenu(
-                            context: context,
-                            position: RelativeRect.fromRect(
-                                Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
-                                Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
-                            ),
-                            items: [
-                                ...imageShareItems(image),
-                                const PopupMenuDivider(),
-                                ...imageManagementItems(image, context: context),
-                            ]
-                        );
-                    }
                     return SharedPreferencesBuilder(
                         builder: (_, prefs) {
                             final Widget dragWidget = GestureDetector(
                                 onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
-                                onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!)),
+                                onLongPress: () {if(widget.onContextMenu != null) widget.onContextMenu!(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!), image);},
                                 onLongPressDown: (tap) => longTap = tap,
-                                onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!)),
-                                child: ImageGrid(image: image, resizeSize: resizeSize * (prefs.getDouble("thumbnail_quality") ?? settingsDefaults["thumbnail_quality"]),)
+                                onSecondaryTapDown: (tap) {if(widget.onContextMenu != null) widget.onContextMenu!(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!), image);},
+                                child: ImageGrid(
+                                    image: image,
+                                    resizeSize: resizeSize * (prefs.getDouble("thumbnail_quality") ?? settingsDefaults["thumbnail_quality"]),
+                                    selected: widget.selectedElements.contains(image.id),
+                                    showSelectionCheckbox: widget.selectedElements.isNotEmpty,
+                                )
                             );
                             return Padding(
                                 padding: const EdgeInsets.all(4.0),
@@ -118,9 +110,11 @@ class _SliverRepoGridState extends State<SliverRepoGrid> {
 }
 
 class ImageGrid extends StatefulWidget {
-    const ImageGrid({super.key, required this.image, this.resizeSize});
+    const ImageGrid({super.key, required this.image, this.resizeSize, this.selected = false, this.showSelectionCheckbox = false});
     final BooruImage image;
     final double? resizeSize;
+    final bool selected;
+    final bool showSelectionCheckbox;
 
     @override
     State<ImageGrid> createState() => _ImageGridState();
@@ -147,27 +141,32 @@ class _ImageGridState extends State<ImageGrid> {
     Widget build(context) {
         return Stack(
             children: [
-                AspectRatio(
-                    aspectRatio: 1,
-                    child: FutureBuilder(
-                        future: imageThumbnail,
-                        builder: (context, snapshot) {
-                            if(snapshot.hasData) {
-                                final thumbnail = snapshot.data!;
-                                final hasResize = widget.resizeSize != null;
-                                final ImageProvider provider = hasResize ? ResizeImage(FileImage(thumbnail),
-                                    width: widget.resizeSize!.ceil(),
-                                    height: widget.resizeSize!.ceil(),
-                                    policy: ResizeImagePolicy.fit
-                                ) : FileImage(thumbnail) as ImageProvider;
-                                return Image(
-                                    image: provider,
-                                    fit: BoxFit.cover,
-                                );
-                            }
-                            return const Center(child: CircularProgressIndicator(),);
-                        },
-                    )
+                AnimatedScale(
+                    scale: widget.selected ? 0.85 : 1,
+                    duration: const Duration(milliseconds: 100),
+                    curve: Curves.easeOut,
+                    child: AspectRatio(
+                        aspectRatio: 1,
+                        child: FutureBuilder(
+                            future: imageThumbnail,
+                            builder: (context, snapshot) {
+                                if(snapshot.hasData) {
+                                    final thumbnail = snapshot.data!;
+                                    final hasResize = widget.resizeSize != null;
+                                    final ImageProvider provider = hasResize ? ResizeImage(FileImage(thumbnail),
+                                        width: widget.resizeSize!.ceil(),
+                                        height: widget.resizeSize!.ceil(),
+                                        policy: ResizeImagePolicy.fit
+                                    ) : FileImage(thumbnail) as ImageProvider;
+                                    return Image(
+                                        image: provider,
+                                        fit: BoxFit.cover,
+                                    );
+                                }
+                                return const Center(child: CircularProgressIndicator(),);
+                            },
+                        )
+                    ),
                 ),
                 if(getType(widget.image.filename) != "image") Positioned(
                     child: Container(
@@ -184,6 +183,25 @@ class _ImageGridState extends State<ImageGrid> {
                             ),
                         ),
                     ),
+                ),
+                if(widget.selected || widget.showSelectionCheckbox) Positioned(
+                    top: 8,
+                    right: 8,
+                    child: widget.selected
+                        ? CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            child: const Icon(Icons.check, color: Colors.black, size: 20,),
+                        )
+                        : Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade400.withOpacity(0.7), width: 2.5)
+                                
+                            ),
+                        )
                 ),
             ],
         );

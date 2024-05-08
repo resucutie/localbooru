@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 
 class GalleryViewer extends StatefulWidget {
     const GalleryViewer({super.key, required this.booru, this.tags = "", this.index = 0, this.routeNavigation = false});
@@ -29,11 +31,12 @@ class _GalleryViewerState extends State<GalleryViewer> {
 
     final SearchController _searchController = SearchController();
     final ScrollController _whyDoWeHaveToAddThis = ScrollController();
-    void _onSearch () => context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
 
     final scrollToTop = GlobalKey();
     
     late int _currentIndex;
+
+    List<ImageID> _selectedImages = [];
 
     @override
     void initState() {
@@ -41,6 +44,39 @@ class _GalleryViewerState extends State<GalleryViewer> {
         _currentIndex = widget.index;
         _searchController.text = widget.tags;
         _resultObtainFuture = _obtainResults();
+    }
+
+    void _onSearch () => context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
+
+    void openContextMenu(Offset offset, BooruImage image) {
+        final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
+        showMenu(
+            context: context,
+            position: RelativeRect.fromRect(
+                Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
+                Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
+            ),
+            items: <PopupMenuEntry<dynamic>>[
+                PopupMenuItem(
+                    child: ListTile(
+                        title: const Text("Select"),
+                        trailing: Icon(_selectedImages.contains(image.id) ? Icons.check_box : Icons.check_box_outline_blank),
+                    ),
+                    onTap: () => toggleImageSelection(image.id),
+                ),
+                const PopupMenuDivider(),
+                ...imageShareItems(image),
+                const PopupMenuDivider(),
+                ...imageManagementItems(image, context: context),
+            ]
+        );
+    }
+
+    void toggleImageSelection(ImageID imageID) {
+        setState(() {
+            if(_selectedImages.contains(imageID)) _selectedImages.remove(imageID);
+            else _selectedImages.add(imageID);
+        });
     }
 
     Future<Map> _obtainResults() async {
@@ -88,49 +124,66 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                             controller: _whyDoWeHaveToAddThis,
                                             scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
                                             slivers: [
-                                                SliverAppBar(
-                                                    floating: true,
-                                                    snap: true,
-                                                    pinned: isDesktop(),
-                                                    forceMaterialTransparency: orientation == Orientation.landscape,
-                                                    titleSpacing: 0,
-                                                    automaticallyImplyLeading: false,
-                                                    toolbarHeight: 56,
-                                                    actions: orientation != Orientation.landscape ? actions : [Padding(
-                                                      padding: const EdgeInsets.only(right: 8),
-                                                      child: Wrap(
-                                                          direction: Axis.horizontal,
-                                                          spacing: 8,
-                                                          children: actions.map((e) => CircleAvatar(backgroundColor: Theme.of(context).colorScheme.surfaceVariant, child: e,)).toList(),
-                                                      ),
-                                                    )],
-                                                    title: Container(
-                                                        padding: orientation == Orientation.landscape ? const EdgeInsets.all(16.0) : null,
-                                                        constraints: orientation == Orientation.landscape ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
-                                                        child: SearchTag(
-                                                            onSearch: (_) => _onSearch(),
-                                                            controller: _searchController,
-                                                            actions: orientation == Orientation.portrait ? [] : [IconButton(onPressed: _onSearch, icon: const Icon(Icons.search))],
-                                                            leading: const Padding(
-                                                                padding: EdgeInsets.only(right: 12.0),
-                                                                child: BackButton(),
+                                                SliverAnimatedSwitcher(
+                                                    duration: kThemeAnimationDuration,
+                                                    child: _selectedImages.isEmpty
+                                                        ? SliverAppBar(
+                                                                key: const ValueKey("normal"),
+                                                                floating: true,
+                                                                snap: true,
+                                                                pinned: isDesktop(),
+                                                                forceMaterialTransparency: orientation == Orientation.landscape,
+                                                                titleSpacing: 0,
+                                                                automaticallyImplyLeading: false,
+                                                                actions: orientation != Orientation.landscape ? actions : [Padding(
+                                                                    padding: const EdgeInsets.only(right: 8),
+                                                                    child: Wrap(
+                                                                        direction: Axis.horizontal,
+                                                                        spacing: 8,
+                                                                        children: actions.map((e) => CircleAvatar(backgroundColor: Theme.of(context).colorScheme.surfaceVariant, child: e,)).toList(),
+                                                                    ),
+                                                                )],
+                                                                title: Container(
+                                                                    padding: orientation == Orientation.landscape ? const EdgeInsets.all(16.0) : null,
+                                                                    constraints: orientation == Orientation.landscape ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
+                                                                    child: SearchTag(
+                                                                        onSearch: (_) => _onSearch(),
+                                                                        controller: _searchController,
+                                                                        actions: orientation == Orientation.portrait ? [] : [IconButton(onPressed: _onSearch, icon: const Icon(Icons.search))],
+                                                                        leading: const Padding(
+                                                                            padding: EdgeInsets.only(right: 12.0),
+                                                                            child: BackButton(),
+                                                                        ),
+                                                                        padding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 2)),
+                                                                        backgroundColor: orientation == Orientation.portrait ? Colors.transparent : null,
+                                                                        elevation: orientation == Orientation.portrait ? 0 : null,
+                                                                    ),
+                                                                ),
+                                                            )
+                                                        : SliverAppBar(
+                                                                key: const ValueKey("elements selected"),
+                                                                floating: true,
+                                                                snap: true,
+                                                                pinned: true,
+                                                                forceElevated: true,
+                                                                leading: CloseButton(onPressed: () => setState(() {
+                                                                    _selectedImages = [];
+                                                                }),),
+                                                                actions: actions,
+                                                                title: Text("Selected ${_selectedImages.length}")
                                                             ),
-                                                            padding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 2)),
-                                                            backgroundColor: orientation == Orientation.portrait ? Colors.transparent : null,
-                                                            elevation: orientation == Orientation.portrait ? 0 : null,
-                                                        ),
-                                                    ),
                                                 ),
-                                                // SliverPersistentHeader(
-                                                //     delegate: SearchBarHeaderDelegate(onSearch: (_) => _onSearch(), searchController: _searchController),
-                                                //     pinned: true,
-                                                // ),
                                                 SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
                                                 SliverRepoGrid(
                                                     images: snapshot.data!["images"],
-                                                    onPressed: (image) => context.push("/view/${image.id}"),
+                                                    onPressed: (image) {
+                                                        if(_selectedImages.isNotEmpty) toggleImageSelection(image.id);
+                                                        else context.push("/view/${image.id}");
+                                                    },
                                                     autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
-                                                    dragOutside: true,
+                                                    dragOutside: _selectedImages.isEmpty,
+                                                    onContextMenu: openContextMenu,
+                                                    selectedElements: _selectedImages,
                                                 ),
                                                 SliverToBoxAdapter(child: PageDisplay(
                                                     currentPage: _currentIndex,
@@ -264,15 +317,6 @@ class _PageDisplayState extends State<PageDisplay> {
                         ),
                     ),
                 )
-                    // child: ListView.separated(
-                    //     itemCount: widget.pages,
-                    //     scrollDirection: Axis.horizontal,
-                    //     padding: const EdgeInsets.all(8.0),
-                    //     shrinkWrap: true,
-                    //     separatorBuilder: (context, index) => const SizedBox(width: 8),
-                    //     itemBuilder: (context, index) {
-                    //     }
-                    // ),
             ),
         );
     }

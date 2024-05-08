@@ -73,6 +73,7 @@ dependencies:
   ffmpeg_cli: ^0.3.0
   super_drag_and_drop: ^0.8.5
   material_color_utilities: ^0.8.0
+  sliver_tools: ^0.2.12
 dependency_overrides:
   media_kit_native_event_loop:
     git:
