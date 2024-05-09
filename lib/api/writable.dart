@@ -1,8 +1,8 @@
 part of localbooru_api;
 
-Future writeSettings(String path, Map raw) async {
+Future writeSettings(String path, Map raw, {bool notify = true}) async {
     await File(p.join(path, "repoinfo.json")).writeAsString(const JsonEncoder.withIndent('  ').convert(raw));
-    booruUpdateListener.update();
+    if(notify) booruUpdateListener.update();
 }
 
 Future<BooruImage> addImage({required File imageFile,
@@ -136,7 +136,7 @@ Map<String, dynamic> rebase(Map<String, dynamic> raw) {
     return raw;
 }
 
-Future removeImage(String id) async {
+Future removeImage(String id, {bool notify = true}) async {
     final Booru booru = await getCurrentBooru();
     final BooruImage? image = await booru.getImage(id);
     if(image == null) throw "Image $id does not exist";
@@ -149,7 +149,7 @@ Future removeImage(String id) async {
     files.removeWhere((e) => e["id"] == id);
     raw["files"] = files;
     
-    await writeSettings(booru.path, rebase(raw));
+    await writeSettings(booru.path, rebase(raw), notify: notify);
 
     // remove file
     await file.delete();

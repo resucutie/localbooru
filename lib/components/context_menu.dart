@@ -48,7 +48,7 @@ List<PopupMenuEntry> imageShareItems(BooruImage image) {
     ];
 }
 
-List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildContext context}) {
+List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildContext context, bool doulbeExitOnDelete = false}) {
     return [
         PopupMenuItem(
             child: const Text("Edit image metadata"),
@@ -56,9 +56,15 @@ List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildConte
         ),
         PopupMenuItem(
             child: Text("Delete image", style: TextStyle(color: Theme.of(context).colorScheme.error)),
-            onTap: () => showDialog(context: context,
-                builder: (context) => DeleteImageDialogue(id: image.id)
-            )
+            onTap: () async {
+                final res = await showDialog<bool>(context: context,
+                    builder: (context) => const DeleteImageDialogue()
+                );
+                if(res == true) {
+                    if(context.mounted && doulbeExitOnDelete) context.pop(); //second to close viewer
+                    await removeImage(image.id);
+                }
+            }
         ),
     ];
 }
@@ -67,18 +73,24 @@ List<PopupMenuEntry> multipleImageManagementItems(List<BooruImage> images, {requ
     return [
         PopupMenuItem(
             child: Text("Delete images", style: TextStyle(color: Theme.of(context).colorScheme.error)),
-            // onTap: () => showDialog(context: context,
-            //     builder: (context) => DeleteImageDialogue(id: image.id)
-            // )
+            onTap: () async {
+                final res = await showDialog<bool>(context: context,
+                    builder: (context) => const DeleteImageDialogue()
+                );
+                if(res == true) {
+                    for(final image in images) {
+                        await removeImage(image.id, notify: false);
+                        booruUpdateListener.update();
+                    }
+                }
+            }
         ),
     ];
 }
 
 
 class DeleteImageDialogue extends StatelessWidget {
-    const DeleteImageDialogue({super.key, required this.id});
-
-    final String id;
+    const DeleteImageDialogue({super.key});
 
     @override
     Widget build(BuildContext context) {
@@ -89,11 +101,7 @@ class DeleteImageDialogue extends StatelessWidget {
                 TextButton(onPressed: Navigator.of(context).pop, child: const Text("No")),
                 TextButton(
                     child: const Text("Yes"), 
-                    onPressed: () async {
-                        Navigator.of(context).pop(); //first to close menu
-                        context.pop(); //second to close viewer
-                        await removeImage(id);
-                    }
+                    onPressed: () => Navigator.of(context).pop(true)
                 ),
             ],
         );

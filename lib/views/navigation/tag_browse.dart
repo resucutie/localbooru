@@ -8,6 +8,7 @@ import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/index.dart';
@@ -43,7 +44,22 @@ class _GalleryViewerState extends State<GalleryViewer> {
         super.initState();
         _currentIndex = widget.index;
         _searchController.text = widget.tags;
-        _resultObtainFuture = _obtainResults();
+        updateImages();
+
+        booruUpdateListener.addListener(updateImages);
+    }
+
+    @override
+    void dispose() {
+        booruUpdateListener.removeListener(updateImages);
+        super.dispose();
+    }
+
+    void updateImages() {
+        debugPrint("helo");
+        setState(() {
+            _resultObtainFuture = _obtainResults();
+        });
     }
 
     void _onSearch () => context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
@@ -60,7 +76,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
         );
     }
 
-    List<PopupMenuEntry<dynamic>> singleContextMenuItems(BooruImage image) => [
+    List<PopupMenuEntry> singleContextMenuItems(BooruImage image) => [
         PopupMenuItem(
             child: ListTile(
                 title: const Text("Select"),
@@ -110,9 +126,9 @@ class _GalleryViewerState extends State<GalleryViewer> {
                 if(snapshot.hasData) {
                     int pages = snapshot.data!["indexLength"];
                     SharedPreferences prefs = snapshot.data!["sharedPrefs"];
-
+        
                     if (pages == 0) return const Center(child: Text("nothing to see here!"));
-
+        
                     return OrientationBuilder(
                         builder: (context, orientation) {
                             return Scaffold(
@@ -168,9 +184,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                                 snap: true,
                                                                 pinned: true,
                                                                 forceElevated: true,
-                                                                leading: CloseButton(onPressed: () => setState(() {
-                                                                    _selectedImages = [];
-                                                                }),),
+                                                                leading: CloseButton(onPressed: () => setState(() => _selectedImages = []),),
                                                                 actions: [
                                                                     if(_selectedImages.length == 1) IconButton(
                                                                         icon: const Icon(Icons.edit),
@@ -181,8 +195,9 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                                     ),
                                                                     PopupMenuButton(itemBuilder: (context) {
                                                                         if(_selectedImages.length == 1) return singleContextMenuItems(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0]));
+                                                                        else if(_selectedImages.length > 1) return multipleImageManagementItems(snapshot.data!["images"].where((element) => _selectedImages.contains(element.id)).toList(), context: context);
                                                                         return [];
-                                                                    })
+                                                                    }, onSelected: (value) => setState(() => _selectedImages = []))
                                                                 ],
                                                                 title: Text("${_selectedImages.length} Selected")
                                                             ),
@@ -217,7 +232,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                     ),
                                 )
                             );
-                      }
+                        }
                     );
                 } else if(snapshot.hasError) throw snapshot.error!;
                 return const Center(child: CircularProgressIndicator());

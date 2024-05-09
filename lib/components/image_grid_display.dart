@@ -37,13 +37,6 @@ class _SliverRepoGridState extends State<SliverRepoGrid> {
         if(mime.startsWith("image/gif")) return "gif";
         return "image";
     }
-    @override
-    void dispose() {
-        // clear memory leak
-        PaintingBinding.instance.imageCache.clear();
-        PaintingBinding.instance.imageCache.clearLiveImages();
-        super.dispose();
-    }
   
     @override
     Widget build(BuildContext context) {
@@ -69,6 +62,7 @@ class _SliverRepoGridState extends State<SliverRepoGrid> {
                 ),
                 delegate: SliverChildListDelegate(widget.images.map((image) {
                     return SharedPreferencesBuilder(
+                        key: ValueKey(image.id), //fun fact: 
                         builder: (_, prefs) {
                             final Widget dragWidget = GestureDetector(
                                 onTap: () {if(widget.onPressed != null) widget.onPressed!(image);},
