@@ -16,12 +16,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class GalleryViewer extends StatefulWidget {
-    const GalleryViewer({super.key, required this.booru, this.tags = "", this.index = 0, this.routeNavigation = false});
+    const GalleryViewer({super.key, required this.booru, this.tags = "", this.index = 0, this.routeNavigation = false, this.selectionMode = false, this.onSelect});
 
     final Booru booru;
     final String tags;
     final int index;
     final bool routeNavigation;
+    final bool selectionMode;
+    final void Function(List<ImageID>)? onSelect;
 
     @override
     State<GalleryViewer> createState() => _GalleryViewerState();
@@ -56,7 +58,6 @@ class _GalleryViewerState extends State<GalleryViewer> {
     }
 
     void updateImages() {
-        debugPrint("helo");
         setState(() {
             _resultObtainFuture = _obtainResults();
         });
@@ -95,11 +96,14 @@ class _GalleryViewerState extends State<GalleryViewer> {
             if(_selectedImages.contains(imageID)) _selectedImages.remove(imageID);
             else _selectedImages.add(imageID);
         });
+        if(widget.onSelect != null) widget.onSelect!(_selectedImages);
     }
 
     Future<Map> _obtainResults() async {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         int indexSize = prefs.getInt("page_size") ?? settingsDefaults["page_size"];
+
+        debugPrint(widget.tags);
 
         int indexLength = await widget.booru.getIndexNumberLength(widget.tags, size: indexSize);
         List<BooruImage> images = await widget.booru.searchByTags(widget.tags, index: _currentIndex, size: indexSize);
@@ -109,6 +113,8 @@ class _GalleryViewerState extends State<GalleryViewer> {
             "sharedPrefs": prefs
         };
     }
+
+    bool isInSelection() => widget.selectionMode || _selectedImages.isNotEmpty;
 
     @override
     Widget build(BuildContext context) {
@@ -142,9 +148,9 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                             controller: _whyDoWeHaveToAddThis,
                                             scrollBehavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
                                             slivers: [
-                                                SliverAnimatedSwitcher(
+                                                if(!widget.selectionMode) SliverAnimatedSwitcher(
                                                     duration: kThemeAnimationDuration,
-                                                    child: _selectedImages.isEmpty
+                                                    child: !isInSelection()
                                                         ? SliverAppBar(
                                                                 key: const ValueKey("normal"),
                                                                 floating: true,
@@ -175,45 +181,49 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                                         padding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 2)),
                                                                         backgroundColor: orientation == Orientation.portrait ? Colors.transparent : null,
                                                                         elevation: orientation == Orientation.portrait ? 0 : null,
+                                                                        hint: "Search",
                                                                     ),
                                                                 ),
                                                             )
                                                         : SliverAppBar(
-                                                                key: const ValueKey("elements selected"),
-                                                                floating: true,
-                                                                snap: true,
-                                                                pinned: true,
-                                                                forceElevated: true,
-                                                                leading: CloseButton(onPressed: () => setState(() => _selectedImages = []),),
-                                                                actions: [
-                                                                    if(_selectedImages.length == 1) IconButton(
-                                                                        icon: const Icon(Icons.edit),
-                                                                        onPressed: () {
-                                                                            context.push("/manage_image/internal/${_selectedImages[0]}");
-                                                                            setState(() => _selectedImages = []);
-                                                                        },
-                                                                    ),
-                                                                    PopupMenuButton(itemBuilder: (context) {
-                                                                        if(_selectedImages.length == 1) return singleContextMenuItems(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0]));
-                                                                        else if(_selectedImages.length > 1) return multipleImageManagementItems(snapshot.data!["images"].where((element) => _selectedImages.contains(element.id)).toList(), context: context);
-                                                                        return [];
-                                                                    }, onSelected: (value) => setState(() => _selectedImages = []))
-                                                                ],
-                                                                title: Text("${_selectedImages.length} Selected")
-                                                            ),
+                                                            key: const ValueKey("elements selected"),
+                                                            floating: true,
+                                                            snap: true,
+                                                            pinned: true,
+                                                            forceElevated: true,
+                                                            automaticallyImplyLeading: false,
+                                                            leading: CloseButton(onPressed: () => setState(() => _selectedImages = []),),
+                                                            actions: [
+                                                                if(_selectedImages.length == 1) IconButton(
+                                                                    icon: const Icon(Icons.edit),
+                                                                    onPressed: () {
+                                                                        context.push("/manage_image/internal/${_selectedImages[0]}");
+                                                                        setState(() => _selectedImages = []);
+                                                                    },
+                                                                ),
+                                                                PopupMenuButton(itemBuilder: (context) {
+                                                                    if(_selectedImages.length == 1) return singleContextMenuItems(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0]));
+                                                                    else if(_selectedImages.length > 1) return multipleImageManagementItems(snapshot.data!["images"].where((element) => _selectedImages.contains(element.id)).toList(), context: context);
+                                                                    return [];
+                                                                }, onSelected: (value) => setState(() => _selectedImages = []))
+                                                            ],
+                                                            title: Text("${_selectedImages.length} Selected")
+                                                        ),
                                                 ),
                                                 SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
                                                 SliverRepoGrid(
+                                                    key: ValueKey("$_currentIndex"),
                                                     images: snapshot.data!["images"],
                                                     onPressed: (image) {
-                                                        if(_selectedImages.isNotEmpty) toggleImageSelection(image.id);
+                                                        if(isInSelection()) toggleImageSelection(image.id);
                                                         else context.push("/view/${image.id}");
                                                     },
                                                     autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
-                                                    dragOutside: _selectedImages.isEmpty,
+                                                    dragOutside: !isInSelection(),
                                                     onContextMenu: openContextMenu,
                                                     onLongPress: (image) => toggleImageSelection(image.id),
                                                     selectedElements: _selectedImages,
+                                                    isSelection: isInSelection(),
                                                 ),
                                                 SliverToBoxAdapter(child: PageDisplay(
                                                     currentPage: _currentIndex,
@@ -222,7 +232,8 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                         if(widget.routeNavigation) {
                                                             context.push("/search?tag=${widget.tags}&index=$selectedPage");
                                                         } else {
-                                                            setState(() => _currentIndex = selectedPage);
+                                                            _currentIndex = selectedPage;
+                                                            updateImages();
                                                             Scrollable.ensureVisible(scrollToTop.currentContext!);
                                                         }
                                                     },
@@ -348,6 +359,101 @@ class _PageDisplayState extends State<PageDisplay> {
                     ),
                 )
             ),
+        );
+    }
+}
+
+Future<List<ImageID>?> openSelectionDialog({required BuildContext context}) async {
+    final booru = await getCurrentBooru();
+
+    if(!context.mounted) return null;
+
+    final res = await showDialog<List<ImageID>>(
+        context: context,
+        builder: (context) => SelectDialog(booru: booru,)
+    );
+    return res;
+}
+
+class SelectDialog extends StatefulWidget {
+    const SelectDialog({super.key, required this.booru});
+
+    final Booru booru;
+
+    @override
+    State<SelectDialog> createState() => _SelectDialogState();
+}
+class _SelectDialogState extends State<SelectDialog> {
+    final SearchController controller = SearchController();
+
+    List<ImageID> imageIDs = [];
+
+    String tags = "";
+
+    void onSearch() {
+        setState(() {
+            tags = controller.text;
+        });
+        debugPrint(tags);
+    }
+
+    @override
+    Widget build(context) {
+        return OrientationBuilder(
+            builder: (context, orientation) {
+                return AlertDialog(
+                    // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    elevation: 0,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 24)),
+                    titlePadding: const EdgeInsets.all(8),
+                    clipBehavior: Clip.antiAlias,
+                    titleTextStyle: const TextStyle(
+                        fontSize: 18
+                    ),
+                    title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                            Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Text("Selected: ${imageIDs.length}"),
+                            ),
+                            Container(
+                                constraints: const BoxConstraints(maxHeight: 44),
+                                child: SearchTag(
+                                    controller: controller,
+                                    onSearch: (value) => onSearch(),
+                                    hint: "Select elements",
+                                    leading: const Padding(
+                                        padding: EdgeInsets.only(right: 12.0, left: 8),
+                                        child: Icon(Icons.search),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                ),
+                            ),
+                        ],
+                    ),
+                    actions: [
+                        TextButton(
+                            onPressed: Navigator.of(context).pop,
+                            child: const Text("Cancel"),
+                        ),
+                        TextButton(
+                            child: const Text("Select"),
+                            onPressed: () => Navigator.of(context).pop(imageIDs),
+                        )
+                    ],
+                    content: SizedBox(
+                        width: MediaQuery.of(context).size.width * (orientation == Orientation.landscape ? 0.6 : 1),
+                        child: GalleryViewer(
+                            key: ValueKey(tags),
+                            booru: widget.booru,
+                            selectionMode: true,
+                            tags: tags,
+                            onSelect: (p0) => setState(() => imageIDs = p0),
+                        ),
+                    ),
+                );
+            }
         );
     }
 }

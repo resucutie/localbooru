@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
                                         SearchTag(
                                             onSearch: (_) => _onSearch(),
                                             controller: _searchController,
-                                            // actions: const [],
+                                            hint: "Type a tag",
                                         ),
                                         const SizedBox(height: 16),
                                         Wrap(
@@ -104,9 +104,9 @@ class _HomePageState extends State<HomePage> {
 }
 
 class SearchTag extends StatefulWidget {
-    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.isFullScreen, this.actions, this.showShadow = false, this.leading = const Icon(Icons.search), this.padding = const EdgeInsets.only(left: 16.0, right: 10.0), this.backgroundColor, this.elevation});
+    const SearchTag({super.key, this.hint, required this.onSearch, this.controller, this.isFullScreen, this.actions, this.showShadow = false, this.leading = const Icon(Icons.search), this.padding = const EdgeInsets.only(left: 16.0, right: 10.0), this.backgroundColor, this.elevation});
 
-    final String defaultText;
+    final String? hint;
     final Function(String value) onSearch;
     final SearchController? controller;
     final bool? isFullScreen;
@@ -137,7 +137,7 @@ class _SearchTagState extends State<SearchTag> {
             searchController: _controller,
             builder: (context, controller) => SearchBar(
                 controller: controller,
-                hintText: "Type a tag",
+                hintText: widget.hint,
                 padding: MaterialStatePropertyAll(widget.padding),
                 onSubmitted: widget.onSearch,
                 onTap: controller.openView,

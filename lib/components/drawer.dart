@@ -6,6 +6,7 @@ import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/image_manager/peripherals.dart';
+import 'package:localbooru/views/navigation/tag_browse.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DesktopHousing extends StatelessWidget {
@@ -150,6 +151,13 @@ class DefaultDrawer extends StatelessWidget {
                             if (theme == "dark") await prefs.setString("theme", "light");
                             else await prefs.setString("theme", "dark");
                             themeListener.update();
+                        },
+                    ),
+                    ListTile(
+                        title: const Text("Open picker"),
+                        onTap: () async {
+                            final stuff = await openSelectionDialog(context: context);
+                            debugPrint("$stuff");
                         },
                     ),
                     ListTile(

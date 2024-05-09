@@ -13,7 +13,7 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 
 class SliverRepoGrid extends StatefulWidget {
-    const SliverRepoGrid({super.key, required this.images, this.onPressed, this.onLongPress, this.onContextMenu, this.autoadjustColumns, this.imageQualityScale, this.dragOutside = false, this.selectedElements = const []});
+    const SliverRepoGrid({super.key, required this.images, this.onPressed, this.onLongPress, this.onContextMenu, this.autoadjustColumns, this.imageQualityScale, this.dragOutside = false, this.selectedElements = const [], this.isSelection = false});
 
     final List<BooruImage> images;
     final Function(BooruImage image)? onPressed;
@@ -23,6 +23,7 @@ class SliverRepoGrid extends StatefulWidget {
     final double? imageQualityScale;
     final bool dragOutside;
     final List<ImageID> selectedElements;
+    final bool isSelection;
 
     @override
     State<SliverRepoGrid> createState() => _SliverRepoGridState();
@@ -73,7 +74,7 @@ class _SliverRepoGridState extends State<SliverRepoGrid> {
                                     image: image,
                                     resizeSize: resizeSize * (prefs.getDouble("thumbnail_quality") ?? settingsDefaults["thumbnail_quality"]),
                                     selected: widget.selectedElements.contains(image.id),
-                                    showSelectionCheckbox: widget.selectedElements.isNotEmpty,
+                                    showSelectionCheckbox: widget.isSelection,
                                 )
                             );
                             return Padding(
