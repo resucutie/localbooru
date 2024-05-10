@@ -7,12 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
+import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/components/radio_dialogs.dart';
 import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
+import 'package:localbooru/views/navigation/tag_browse.dart';
 import 'package:mime/mime.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -45,6 +48,8 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     List<String> urlList = [];
     String loadedImage = "";
 
+    List<ImageID> relatedImages = [];
+
     @override
     void initState() {
         super.initState();
@@ -56,7 +61,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             if(preset.image != null) loadedImage = preset.image!.path;
             if(preset.sources != null) urlList = preset.sources!;
             rating = preset.rating;
-            if(preset.relatedImages != null) totallyNotTemporary.text = preset.relatedImages?.join(" ") ?? "";
+            if(preset.relatedImages != null) relatedImages = preset.relatedImages ?? [];
 
             if(preset.tags != null) {
                 tagController.text = preset.tags!["generic"]?.join(" ") ?? "";
@@ -90,7 +95,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
             sources: urlList,
             rating: rating,
             id: widget.preset?.replaceID,
-            relatedImages: totallyNotTemporary.text.split(" ")
+            relatedImages: relatedImages
         );
         await addSpecificTags(artistTags, type: "artist");
         await addSpecificTags(characterTags, type: "character");
@@ -292,9 +297,72 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                             ),
 
                             const SmallHeader("Related images", padding: EdgeInsets.only(top: 16.0)),
-                            TextFormField(
-                                controller: totallyNotTemporary,
-                            )
+                            Card(
+                                clipBehavior: Clip.antiAlias,
+                                child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    width: double.infinity,
+                                    child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                            SizedBox(
+                                                height: 125,
+                                                child: BooruLoader(
+                                                    builder: (context, booru) => ListView(
+                                                        scrollDirection: Axis.horizontal,
+                                                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                                                        children: [
+                                                            ...relatedImages.map((e) => [BooruImageLoader(
+                                                                key: ValueKey(e),
+                                                                booru: booru,
+                                                                id: e,
+                                                                builder: (context, relatedImage) => ClipRRect(
+                                                                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                                                    clipBehavior: Clip.antiAliasWithSaveLayer,
+                                                                    child: MouseRegion(
+                                                                        cursor: MaterialStateMouseCursor.clickable,
+                                                                        child: GestureDetector(
+                                                                            onTap: () => setState(() => relatedImages.remove(e)),
+                                                                            child: Stack(
+                                                                                children: [
+                                                                                    ImageGrid(
+                                                                                        image: relatedImage,
+                                                                                        resizeSize: 300,
+                                                                                    ),
+                                                                                    Positioned(
+                                                                                        top: 0, left: 0, bottom: 0, right: 0,
+                                                                                        child: Container(
+                                                                                            color: Colors.black.withOpacity(0.6),
+                                                                                            child: const Center(
+                                                                                                child: Icon(Icons.delete_outline, size: 28,),
+                                                                                            ),
+                                                                                        )
+                                                                                    ),
+                                                                                ],
+                                                                            ),
+                                                                        ),
+                                                                    ),
+                                                                ), 
+                                                            ), const SizedBox(width: 12,)],).expand((i) => i),
+
+                                                            IconButton(
+                                                                icon: const Icon(Icons.add),
+                                                                onPressed: () async {
+                                                                    final imageList = await openSelectionDialog(context: context);
+                                                                    if(imageList == null) return;
+                                                                    setState(() {
+                                                                        relatedImages = imageList;
+                                                                    });
+                                                                }, 
+                                                            )
+                                                        ]
+                                                    )
+                                                ),
+                                            )
+                                        ],
+                                    ),
+                                )
+                            ),
                         ],
                     ),
                 )

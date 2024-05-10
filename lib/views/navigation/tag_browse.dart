@@ -405,7 +405,7 @@ class _SelectDialogState extends State<SelectDialog> {
                     // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                     elevation: 0,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 24)),
-                    titlePadding: const EdgeInsets.all(8),
+                    titlePadding: const EdgeInsets.all(16).subtract(const EdgeInsets.only(bottom: 8)),
                     clipBehavior: Clip.antiAlias,
                     titleTextStyle: const TextStyle(
                         fontSize: 18
@@ -413,16 +413,16 @@ class _SelectDialogState extends State<SelectDialog> {
                     title: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                            Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Text("Selected: ${imageIDs.length}"),
-                            ),
+                            // Padding(
+                            //     padding: const EdgeInsets.all(16.0),
+                            //     child: Text("Selected: ${imageIDs.length}"),
+                            // ),
                             Container(
                                 constraints: const BoxConstraints(maxHeight: 44),
                                 child: SearchTag(
                                     controller: controller,
                                     onSearch: (value) => onSearch(),
-                                    hint: "Select elements",
+                                    hint: imageIDs.isNotEmpty ? "Selected: ${imageIDs.length}" : "Select elements",
                                     leading: const Padding(
                                         padding: EdgeInsets.only(right: 12.0, left: 8),
                                         child: Icon(Icons.search),
