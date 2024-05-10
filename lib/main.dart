@@ -55,11 +55,11 @@ final router = GoRouter(
             },
             routes: [
                 ShellRoute(
-                    builder: (context, state, child) => isDesktop() ? Scaffold(
+                    builder: (context, state, child) => Scaffold(
                         backgroundColor: getSurfaceDim(Theme.of(context).colorScheme),
-                        appBar: const WindowFrameAppBar(),
+                        appBar: isDesktop() ? const WindowFrameAppBar() : null,
                         body: child,
-                    ) : child,
+                    ),
                     routes: [
                         ShellRoute(
                             builder: (context, state, child) => MediaQuery.of(context).orientation == Orientation.landscape ? DesktopHousing(routeUri: state.uri, child: child,) : child,
