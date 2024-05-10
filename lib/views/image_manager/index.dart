@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
@@ -306,7 +307,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                             SizedBox(
-                                                height: 125,
+                                                height: 80,
                                                 child: BooruLoader(
                                                     builder: (context, booru) => ListView(
                                                         scrollDirection: Axis.horizontal,
@@ -317,7 +318,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                                                 booru: booru,
                                                                 id: e,
                                                                 builder: (context, relatedImage) => ClipRRect(
-                                                                    borderRadius: const BorderRadius.all(Radius.circular(24)),
+                                                                    borderRadius: const BorderRadius.all(Radius.circular(12)),
                                                                     clipBehavior: Clip.antiAliasWithSaveLayer,
                                                                     child: MouseRegion(
                                                                         cursor: MaterialStateMouseCursor.clickable,
@@ -345,19 +346,29 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                                                 ), 
                                                             ), const SizedBox(width: 12,)],).expand((i) => i),
 
-                                                            IconButton(
-                                                                icon: const Icon(Icons.add),
-                                                                onPressed: () async {
-                                                                    final imageList = await openSelectionDialog(
-                                                                        context: context,
-                                                                        selectedImages: relatedImages,
-                                                                        excludeImages: widget.preset?.replaceID != null ? [widget.preset!.replaceID!] : null
-                                                                    );
-                                                                    if(imageList == null) return;
-                                                                    setState(() {
-                                                                        relatedImages = imageList;
-                                                                    });
-                                                                }, 
+                                                            AspectRatio(
+                                                                aspectRatio: 1,
+                                                                child: IconButton(
+                                                                    icon: const Icon(Icons.add),
+                                                                    style: IconButton.styleFrom(
+                                                                        backgroundColor: Colors.black.withOpacity(0.4),
+                                                                        hoverColor: Colors.black.withOpacity(0.1),
+                                                                        shape: RoundedRectangleBorder(
+                                                                            borderRadius: BorderRadius.circular(12)
+                                                                        )
+                                                                    ),
+                                                                    onPressed: () async {
+                                                                        final imageList = await openSelectionDialog(
+                                                                            context: context,
+                                                                            selectedImages: relatedImages,
+                                                                            excludeImages: widget.preset?.replaceID != null ? [widget.preset!.replaceID!] : null
+                                                                        );
+                                                                        if(imageList == null) return;
+                                                                        setState(() {
+                                                                            relatedImages = imageList;
+                                                                        });
+                                                                    }, 
+                                                                ),
                                                             )
                                                         ]
                                                     )

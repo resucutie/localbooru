@@ -284,17 +284,17 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                     children: [
                                         const SmallHeader("Related images", padding: EdgeInsets.only(bottom: 8, left: 16),),
                                         SizedBox(
-                                            height: 100,
+                                            height: 80,
                                             child: BooruLoader(
                                                 builder: (context, booru) => ListView.separated(
                                                     scrollDirection: Axis.horizontal,
                                                     itemCount: widget.image.relatedImages.length,
-                                                    separatorBuilder: (context, index) => const SizedBox(width: 8,),
+                                                    separatorBuilder: (context, index) => const SizedBox(width: 12,),
                                                     padding: const EdgeInsets.symmetric(horizontal: 16),
                                                     itemBuilder: (context, index) {
                                                         final imageId = widget.image.relatedImages[index];
                                                         return ClipRRect(
-                                                            borderRadius: const BorderRadius.all(Radius.circular(14)),
+                                                            borderRadius: const BorderRadius.all(Radius.circular(10)),
                                                             child: MouseRegion(
                                                                 cursor: MaterialStateMouseCursor.clickable,
                                                                 child: GestureDetector(
