@@ -281,17 +281,20 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                     padding: const EdgeInsets.symmetric(horizontal: 16),
                                                     itemBuilder: (context, index) {
                                                         final imageId = widget.image.relatedImages[index];
-                                                        return MouseRegion(
-                                                            cursor: MaterialStateMouseCursor.clickable,
-                                                            child: GestureDetector(
-                                                                onTap: () => context.push("/view/$imageId"),
-                                                                child: BooruImageLoader(
-                                                                    booru: booru,
-                                                                    id: imageId,
-                                                                    builder: (context, relatedImage) => ImageGrid(
-                                                                        image: relatedImage,
-                                                                        resizeSize: 200,
-                                                                    ), 
+                                                        return ClipRRect(
+                                                            borderRadius: const BorderRadius.all(Radius.circular(14)),
+                                                            child: MouseRegion(
+                                                                cursor: MaterialStateMouseCursor.clickable,
+                                                                child: GestureDetector(
+                                                                    onTap: () => context.push("/view/$imageId"),
+                                                                    child: BooruImageLoader(
+                                                                        booru: booru,
+                                                                        id: imageId,
+                                                                        builder: (context, relatedImage) => ImageGrid(
+                                                                            image: relatedImage,
+                                                                            resizeSize: 200,
+                                                                        ), 
+                                                                    ),
                                                                 ),
                                                             ),
                                                         );

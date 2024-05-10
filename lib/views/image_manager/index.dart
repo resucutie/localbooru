@@ -296,7 +296,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                 },
                             ),
 
-                            const SmallHeader("Related images", padding: EdgeInsets.only(top: 16.0)),
+                            const SmallHeader("Related images", padding: EdgeInsets.only(top: 16.0, bottom: 8)),
                             Card(
                                 clipBehavior: Clip.antiAlias,
                                 child: Container(
@@ -317,7 +317,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                                                 booru: booru,
                                                                 id: e,
                                                                 builder: (context, relatedImage) => ClipRRect(
-                                                                    borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                                                    borderRadius: const BorderRadius.all(Radius.circular(24)),
                                                                     clipBehavior: Clip.antiAliasWithSaveLayer,
                                                                     child: MouseRegion(
                                                                         cursor: MaterialStateMouseCursor.clickable,
