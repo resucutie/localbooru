@@ -16,7 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class GalleryViewer extends StatefulWidget {
-    const GalleryViewer({super.key, required this.booru, this.tags = "", this.index = 0, this.routeNavigation = false, this.selectionMode = false, this.onSelect});
+    const GalleryViewer({super.key, required this.booru, this.tags = "", this.index = 0, this.routeNavigation = false, this.selectionMode = false, this.onSelect, this.selectedImages});
 
     final Booru booru;
     final String tags;
@@ -24,6 +24,7 @@ class GalleryViewer extends StatefulWidget {
     final bool routeNavigation;
     final bool selectionMode;
     final void Function(List<ImageID>)? onSelect;
+    final List<ImageID>? selectedImages;
 
     @override
     State<GalleryViewer> createState() => _GalleryViewerState();
@@ -46,6 +47,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
         super.initState();
         _currentIndex = widget.index;
         _searchController.text = widget.tags;
+        _selectedImages = widget.selectedImages ?? [];
         updateImages();
 
         booruUpdateListener.addListener(updateImages);
@@ -190,8 +192,9 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                             floating: true,
                                                             snap: true,
                                                             pinned: true,
-                                                            forceElevated: true,
+                                                            // forceElevated: true,
                                                             automaticallyImplyLeading: false,
+                                                            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                                                             leading: CloseButton(onPressed: () => setState(() => _selectedImages = []),),
                                                             actions: [
                                                                 if(_selectedImages.length == 1) IconButton(
@@ -363,22 +366,24 @@ class _PageDisplayState extends State<PageDisplay> {
     }
 }
 
-Future<List<ImageID>?> openSelectionDialog({required BuildContext context}) async {
+Future<List<ImageID>?> openSelectionDialog({required BuildContext context, List<ImageID>? selectedImages, List<ImageID>? excludeImages,}) async {
     final booru = await getCurrentBooru();
 
     if(!context.mounted) return null;
 
     final res = await showDialog<List<ImageID>>(
         context: context,
-        builder: (context) => SelectDialog(booru: booru,)
+        builder: (context) => SelectDialog(booru: booru, selectedImages: selectedImages, excludeImages: excludeImages,)
     );
     return res;
 }
 
 class SelectDialog extends StatefulWidget {
-    const SelectDialog({super.key, required this.booru});
+    const SelectDialog({super.key, required this.booru, this.selectedImages, this.excludeImages});
 
     final Booru booru;
+    final List<ImageID>? selectedImages;
+    final List<ImageID>? excludeImages;
 
     @override
     State<SelectDialog> createState() => _SelectDialogState();
@@ -389,6 +394,12 @@ class _SelectDialogState extends State<SelectDialog> {
     List<ImageID> imageIDs = [];
 
     String tags = "";
+
+    @override
+    void initState() {
+        super.initState();
+        imageIDs = widget.selectedImages ?? [];
+    }
 
     void onSearch() {
         setState(() {
@@ -448,8 +459,9 @@ class _SelectDialogState extends State<SelectDialog> {
                             key: ValueKey(tags),
                             booru: widget.booru,
                             selectionMode: true,
-                            tags: tags,
-                            onSelect: (p0) => setState(() => imageIDs = p0),
+                            tags: [tags, ...(widget.excludeImages ?? []).map((e) => "-id:$e")].join(" "),
+                            selectedImages: imageIDs,
+                            onSelect: (images) => setState(() => imageIDs = images),
                         ),
                     ),
                 );

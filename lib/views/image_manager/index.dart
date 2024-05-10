@@ -348,7 +348,11 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                                                             IconButton(
                                                                 icon: const Icon(Icons.add),
                                                                 onPressed: () async {
-                                                                    final imageList = await openSelectionDialog(context: context);
+                                                                    final imageList = await openSelectionDialog(
+                                                                        context: context,
+                                                                        selectedImages: relatedImages,
+                                                                        excludeImages: widget.preset?.replaceID != null ? [widget.preset!.replaceID!] : null
+                                                                    );
                                                                     if(imageList == null) return;
                                                                     setState(() {
                                                                         relatedImages = imageList;
