@@ -271,9 +271,8 @@ class _ImageDisplayState extends State<ImageDisplay> {
     }
 
     void updateCounter() async {
-        final booru = await getCurrentBooru();
         setState(() {
-            _futureNumber = booru.getListLength();
+            _futureNumber = (() async => (await getCurrentBooru()).getListLength())();
         });
     }
 
