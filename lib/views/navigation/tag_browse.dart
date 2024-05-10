@@ -213,7 +213,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                 else context.push("/view/${image.id}");
                                             },
                                             autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
-                                            dragOutside: !isInSelection(),
+                                            dragOutside: !isMobile(),
                                             onContextMenu: openContextMenu,
                                             onLongPress: (image) => toggleImageSelection(image.id),
                                             selectedElements: _selectedImages,
