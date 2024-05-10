@@ -252,23 +252,17 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                     if(widget.image.rating != null) ...[
                         const SizedBox(height: 16,),
                         Card(
-                            child: Container(
-                                padding: const EdgeInsets.all(16),
-                                width: double.infinity,
-                                child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                        const SmallHeader("Rating", padding: EdgeInsets.only(bottom: 8),),
-                                        Text(switch(widget.image.rating) {
-                                            Rating.safe => "Safe",
-                                            Rating.questionable => "Questionable",
-                                            Rating.explicit => "Explicit",
-                                            Rating.illegal => "Illegal",
-                                            _ => widget.image.rating!.name
-                                        })
-                                    ],
-                                ),
-                            ),
+                            child: ListTile(
+                                title: const SmallHeader("Rating", padding: EdgeInsets.zero,),
+                                leading: Icon(getRatingIcon(widget.image.rating!), color: Theme.of(context).colorScheme.primary),
+                                subtitle: Text(switch(widget.image.rating) {
+                                    Rating.safe => "Safe",
+                                    Rating.questionable => "Questionable",
+                                    Rating.explicit => "Explicit",
+                                    Rating.illegal => "Illegal",
+                                    _ => widget.image.rating!.name
+                                }),
+                            )
                         )
                     ],
 

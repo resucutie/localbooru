@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:localbooru/api/index.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
@@ -100,4 +102,14 @@ class SuperFormats {
             _ => null
         };
     }
+}
+
+IconData getRatingIcon(Rating? rating) {
+    return switch(rating) {
+        Rating.safe => Icons.shield,
+        Rating.questionable => Icons.question_mark_rounded,
+        Rating.explicit => Icons.explicit,
+        Rating.illegal => Icons.gavel,
+        _ => Icons.clear
+    };
 }

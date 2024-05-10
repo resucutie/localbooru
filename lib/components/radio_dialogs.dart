@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/counter.dart';
+import 'package:localbooru/utils/constants.dart';
 
 class RatingChooserDialog extends StatelessWidget {
     const RatingChooserDialog({super.key, this.selected, this.hasNull = false, this.title = const Text("Rating")});
@@ -20,7 +21,13 @@ class RatingChooserDialog extends StatelessWidget {
                     for (final rating in [if(hasNull) null, Rating.safe, Rating.questionable, Rating.explicit, Rating.illegal]) RadioListTile(
                         groupValue: selected,
                         value: rating,
-                        title: Text(rating == null ? "None" : rating.name.replaceFirstMapped(rating.name[0], (match) => rating.name[0].toUpperCase())),
+                        title: Wrap(
+                            spacing: 8,
+                            children: [
+                                Icon(getRatingIcon(rating)),
+                                Text(rating == null ? "None" : rating.name.replaceFirstMapped(rating.name[0], (match) => rating.name[0].toUpperCase())),
+                            ],
+                        ),
                         onChanged: (value) => Navigator.of(context).pop(value ?? "None"),
                     ),
                 ],
