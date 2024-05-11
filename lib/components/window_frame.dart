@@ -50,8 +50,14 @@ class WindowFrameAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
 }
 
-class WindowButtons extends StatelessWidget {
+class WindowButtons extends StatefulWidget {
     const WindowButtons({super.key});
+
+    @override
+    State<WindowButtons> createState() => _WindowButtonsState();
+}
+class _WindowButtonsState extends State<WindowButtons> {
+    bool isMaximized = false;
 
     @override
     Widget build(BuildContext context) {
@@ -77,7 +83,14 @@ class WindowButtons extends StatelessWidget {
         );
         final anyPlatformButtons = [
             MinimizeWindowButton(colors: buttonColors),
-            MaximizeWindowButton(colors: buttonColors),
+            WindowButton(
+                colors: buttonColors,
+                iconBuilder: (buttonContext) => !isMaximized ? RestoreIcon(color: buttonContext.iconColor) : MaximizeIcon(color: buttonContext.iconColor),
+                onPressed: () {
+                    setState(() => isMaximized = appWindow.isMaximized);
+                    appWindow.maximizeOrRestore();
+                },
+            ),
             CloseWindowButton(colors: closeButtonColors)
         ];
 
