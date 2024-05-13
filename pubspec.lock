@@ -280,6 +280,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_windowmanager:
+    dependency: "direct main"
+    description:
+      name: flutter_windowmanager
+      sha256: b4d0bc06f6777952b729c0cdb7ce9ad1ecabd8b8b1cb0acb57a36621457dab1b
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   gif_view:
     dependency: "direct main"
     description:
@@ -344,6 +352,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.19.0"
   irondash_engine_context:
     dependency: transitive
     description:
@@ -408,6 +424,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  local_auth:
+    dependency: "direct main"
+    description:
+      name: local_auth
+      sha256: "280421b416b32de31405b0a25c3bd42dfcef2538dfbb20c03019e02a5ed55ed0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
+  local_auth_android:
+    dependency: transitive
+    description:
+      name: local_auth_android
+      sha256: e0e5b1ea247c5a0951c13a7ee13dc1beae69750e6a2e1910d1ed6a3cd4d56943
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.38"
+  local_auth_darwin:
+    dependency: transitive
+    description:
+      name: local_auth_darwin
+      sha256: "959145a4cf6f0de745b9ec9ac60101270eb4c5b8b7c2a0470907014adc1c618d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.0"
+  local_auth_platform_interface:
+    dependency: transitive
+    description:
+      name: local_auth_platform_interface
+      sha256: "1b842ff177a7068442eae093b64abe3592f816afd2a533c0ebcdbe40f9d2075a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.10"
+  local_auth_windows:
+    dependency: transitive
+    description:
+      name: local_auth_windows
+      sha256: "505ba3367ca781efb1c50d3132e44a2446bccc4163427bc203b9b4d8994d97ea"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.10"
   logging:
     dependency: transitive
     description:

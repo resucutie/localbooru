@@ -144,6 +144,13 @@ class DefaultDrawer extends StatelessWidget {
                         },
                     ),
                     ListTile(
+                        title: const Text("Go to biometric lock screen"),
+                        onTap: () {
+                            Scaffold.of(context).closeDrawer();
+                            forceLockScreenListener.forceEnable();
+                        },
+                    ),
+                    ListTile(
                         title: const Text("Toggle theme"),
                         onTap: () async {
                             final prefs = await SharedPreferences.getInstance();

@@ -21,3 +21,10 @@ class CounterListener with ChangeNotifier {
     }
 }
 CounterListener counterListener = CounterListener();
+
+class ForceLockScreenListener with ChangeNotifier {
+    void forceEnable() {
+        notifyListeners();
+    }
+}
+ForceLockScreenListener forceLockScreenListener = ForceLockScreenListener();

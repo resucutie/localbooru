@@ -16,6 +16,7 @@ import 'package:localbooru/views/about.dart';
 import 'package:localbooru/views/image_manager/peripherals.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:localbooru/views/image_manager/index.dart';
+import 'package:localbooru/views/lock.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
 import 'package:localbooru/views/navigation/index.dart';
@@ -58,7 +59,7 @@ final router = GoRouter(
                     builder: (context, state, child) => Scaffold(
                         backgroundColor: getSurfaceDim(Theme.of(context).colorScheme),
                         appBar: isDesktop() ? const WindowFrameAppBar() : null,
-                        body: child,
+                        body: LockScreen(child: child),
                     ),
                     routes: [
                         ShellRoute(
@@ -271,7 +272,7 @@ void main() async {
     // custom error screen because release just yeets the error messages in favor of a gray screen
     ErrorWidget.builder = (FlutterErrorDetails details) {
         return Material(
-            color: Colors.red,
+            color: const Color.fromARGB(255, 255, 0, 0),
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,

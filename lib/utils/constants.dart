@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/utils/platform_tools.dart';
@@ -16,6 +15,7 @@ final Map<String, dynamic> settingsDefaults = {
     "update": true,
     "gif_video": false,
     "counter": "squares",
+    "auth_lock": false,
 };
 
 final Map<String, dynamic> defaultFileInfoJson = {

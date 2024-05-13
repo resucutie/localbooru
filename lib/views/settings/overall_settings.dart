@@ -3,11 +3,13 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:localbooru/components/counter.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/radio_dialogs.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
+import 'package:localbooru/utils/platform_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OverallSettings extends StatefulWidget {
@@ -28,9 +30,12 @@ class _OverallSettingsState extends State<OverallSettings> {
     late double _thumbnailQuality;
     late bool _monetTheme;
     late bool _update;
-    late bool _gif_video;
+    late bool _gifVideo;
+    late bool _authLock;
     late String _theme;
     late String _counter;
+
+    bool isAuthLockOptionEnabled = false;
 
     bool isSettingModified(String setting) {
         return widget.prefs.get(setting) != null && widget.prefs.get(setting) != settingsDefaults[setting];
@@ -52,9 +57,14 @@ class _OverallSettingsState extends State<OverallSettings> {
         _pageSizeController.text = (widget.prefs.getInt("page_size") ?? settingsDefaults["page_size"]).toString();
         _monetTheme = widget.prefs.getBool("monet") ?? settingsDefaults["monet"];
         _update = widget.prefs.getBool("update") ?? settingsDefaults["update"];
-        _gif_video = widget.prefs.getBool("gif_video") ?? settingsDefaults["gif_video"];
+        _gifVideo = widget.prefs.getBool("gif_video") ?? settingsDefaults["gif_video"];
         _theme = widget.prefs.getString("theme") ?? settingsDefaults["theme"];
         _counter = widget.prefs.getString("counter") ?? settingsDefaults["counter"];
+        _authLock = widget.prefs.getBool("auth_lock") ?? settingsDefaults["auth_lock"];
+
+        LocalAuthentication().isDeviceSupported().then((value) => setState(() {
+            isAuthLockOptionEnabled = value && isMobile();
+        }));
     }
 
     Future<void> onChangeTheme() async {
@@ -221,10 +231,20 @@ class _OverallSettingsState extends State<OverallSettings> {
                     title: const Text("Display GIFs as videos"),
                     secondary: const Icon(Icons.gif),
                     subtitle: const Text("It will add video controllers to GIFs"),
-                    value: _gif_video,
+                    value: _gifVideo,
                     onChanged: (value) {
                         widget.prefs.setBool("gif_video", value);
-                        setState(() => _gif_video = value);
+                        setState(() => _gifVideo = value);
+                    }
+                ),
+                if(isAuthLockOptionEnabled) SwitchListTile(
+                    title: const Text("Enable biometric hideout"),
+                    secondary: const Icon(Icons.fingerprint),
+                    subtitle: const Text("Hide content under a lock screen whenever the app is put in background"),
+                    value: _authLock,
+                    onChanged: (value) {
+                        widget.prefs.setBool("auth_lock", value);
+                        setState(() => _authLock = value);
                     }
                 ),
                 const SmallHeader("Other"),
