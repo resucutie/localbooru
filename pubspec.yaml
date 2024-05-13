@@ -75,7 +75,6 @@ dependencies:
   material_color_utilities: ^0.8.0
   sliver_tools: ^0.2.12
   local_auth: ^2.2.0
-  flutter_windowmanager: ^0.2.0
 dependency_overrides:
   media_kit_native_event_loop:
     git:

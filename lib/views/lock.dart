@@ -48,11 +48,14 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
         super.didChangeAppLifecycleState(state);
         debugPrint("$state");
         final prefs = await SharedPreferences.getInstance();
-        if(state == AppLifecycleState.paused
-            && await auth.isDeviceSupported()
+        if(!(await auth.isDeviceSupported()
             && isMobile()
             && (prefs.getBool("auth_lock") ?? settingsDefaults["auth_lock"])
-        ) enableLock();
+        )) return;
+
+        if(state != AppLifecycleState.resumed) {
+            enableLock();
+        }
     }
 
     @override
