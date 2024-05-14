@@ -51,13 +51,15 @@ Some of the parameters that we choose to homenage are:
 - Great person overall
 
 ### What is a booru?
-A booru is a collection of images that are organized by multiple tags, so you can check specific artwork that you desire. It also has the benefit to preserve the image sources and as such increase discoverability
+A booru is a collection of images that are organized by multiple tags, so you can check specific artwork that you desire. It also has the benefit to preserve the image sources and as such increase discoverability.
+
+On LocalBooru, we call a booru a folder made by LocalBooru that contains all the images and the tags stored.
 
 ### How does the autotagging works?
-Easy: it just fetches [Danbooru's autotagger](https://autotagger.donmai.us/). Including the autotagger inside the application is a no-go because it will require installing depedencies such as python on the project, and will increase a lot the application's size. If you want to make it work
+Easy: it just fetches [Danbooru's autotagger](https://autotagger.donmai.us/). Including the autotagger inside the application is a no-go because it will require installing depedencies such as python on the project, and will increase a lot the application's size. If you're wondering why is it that imprecise, blame them.
 
 ### Can I import my previous image collection?
-Not so easily. The main issue is with adding tags, as it fetches a website to do that. You can make it exclusively local by selfhosting the autotagger and pointing
+Not so easily. The main issue is with adding tags, and files do not come with tags built in. You have to manually add the images at the moment. Due to how unreliable autotagging is, it is for the best to not include at the moment a way to automate it
 
 ### What are the avaiable search methods?
 `tag` - Exclude every image without that tag  
@@ -70,12 +72,13 @@ Not so easily. The main issue is with adding tags, as it fetches a website to do
 - e621/e926
 - Gelbooru 0.2.0 to 0.2.5
 - Twitter (using [fxtwitter](https://fxtwitter.com) to gather data)
-- Fur Affinity ((using [fxraffinity](https://fxraffinity.net) to gather data)
+- Fur Affinity (using [fxraffinity](https://fxraffinity.net) to gather data)
 - Deviantart
 - Any URL that returns an image or video
 
 We still have to add:
 - Pixiv (we cant obtain the data using its API without log in information and we cant webscrap it because of it blocking NSFW content)
+- Instagram
 - Gelbooru 0.1 (not a necessity, the reason that it is considered is because rule34.us is the only popular website that uses 0.1)
 
 ## To-do
@@ -94,5 +97,5 @@ We still have to add:
 - [ ] Mass import from local image collections
 - [x] Tag suggestion
 - [x] Material You
-- [ ] Support for multiple file formats
+- [x] Support for multiple file formats
 - [ ] Multi booru support
