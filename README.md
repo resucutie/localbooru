@@ -17,9 +17,9 @@
 - Android
 - Linux
 - Windows
-- macOS
 
 ### Planned platforms
+- macOS
 - iOS (Sideloading)
 
 ## Install
