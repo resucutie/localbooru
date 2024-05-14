@@ -48,11 +48,16 @@ class _AboutScreenState extends State<AboutScreen>{
                             ),
                             const Text("Made with love by A user"),
                             const SizedBox(height: 32),
-                            Row(
+                            Wrap(
+                                spacing: 8,
                                 children: [
                                     IconButton(
                                         icon: SvgPicture.asset("assets/github.svg", width: 24, height: 24, color: Theme.of(context).hintColor),
                                         onPressed: () => launchUrlString("https://github.com/resucutie/localbooru"),
+                                    ),
+                                    IconButton(
+                                        icon: SvgPicture.asset("assets/discord.svg", width: 24, height: 24, color: Theme.of(context).hintColor),
+                                        onPressed: () => launchUrlString("https://discord.gg/mYuUKunj"),
                                     ),
                                 ],
                             )
