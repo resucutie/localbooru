@@ -6,6 +6,11 @@
 <p align="center">
     This is a cross platform local booru collection that exclusively works on your local storage, without selfhosting.
 </p>
+<p align="center">
+    <img src="https://img.shields.io/github/issues/resucutie/localbooru?style=for-the-badge&color=673AB7"/>
+    <img src="https://img.shields.io/github/issues-pr/resucutie/localbooru?style=for-the-badge&color=673AB7"/>
+    <a href="https://discord.gg/mYuUKunj"><img src="https://img.shields.io/badge/check%20our%20discord%20server-673AB7?style=for-the-badge"/></a>
+</p>
 
 
 ## Targetted platforms
