@@ -133,9 +133,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                 if(snapshot.hasData) {
                     int pages = snapshot.data!["indexLength"];
                     SharedPreferences prefs = snapshot.data!["sharedPrefs"];
-        
-                    if (pages == 0) return const Center(child: Text("nothing to see here!"));
-        
+                
                     return OrientationBuilder(
                         builder: (context, orientation) {
                             return Scaffold(
@@ -205,33 +203,36 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                 ),
                                         ),
                                         SliverToBoxAdapter(child: SizedBox(key:scrollToTop, height: 0.0)),
-                                        SliverRepoGrid(
-                                            key: ValueKey("$_currentIndex"),
-                                            images: snapshot.data!["images"],
-                                            onPressed: (image) {
-                                                if(isInSelection()) toggleImageSelection(image.id);
-                                                else context.push("/view/${image.id}");
-                                            },
-                                            autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
-                                            dragOutside: !isMobile(),
-                                            onContextMenu: openContextMenu,
-                                            onLongPress: (image) => toggleImageSelection(image.id),
-                                            selectedElements: _selectedImages,
-                                            isSelection: isInSelection(),
-                                        ),
-                                        SliverToBoxAdapter(child: PageDisplay(
-                                            currentPage: _currentIndex,
-                                            pages: pages,
-                                            onSelect: (selectedPage) {
-                                                if(widget.routeNavigation) {
-                                                    context.push("/search?tag=${widget.tags}&index=$selectedPage");
-                                                } else {
-                                                    _currentIndex = selectedPage;
-                                                    updateImages();
-                                                    Scrollable.ensureVisible(scrollToTop.currentContext!);
-                                                }
-                                            },
-                                        )),
+                                        if (pages == 0) const SliverFillRemaining(child: Center(child: Text("nothing to see here!")))
+                                        else ...[
+                                            SliverRepoGrid(
+                                                key: ValueKey("$_currentIndex"),
+                                                images: snapshot.data!["images"],
+                                                onPressed: (image) {
+                                                    if(isInSelection()) toggleImageSelection(image.id);
+                                                    else context.push("/view/${image.id}");
+                                                },
+                                                autoadjustColumns: prefs.getInt("grid_size") ?? settingsDefaults["grid_size"],
+                                                dragOutside: !isMobile(),
+                                                onContextMenu: openContextMenu,
+                                                onLongPress: (image) => toggleImageSelection(image.id),
+                                                selectedElements: _selectedImages,
+                                                isSelection: isInSelection(),
+                                            ),
+                                            SliverToBoxAdapter(child: PageDisplay(
+                                                currentPage: _currentIndex,
+                                                pages: pages,
+                                                onSelect: (selectedPage) {
+                                                    if(widget.routeNavigation) {
+                                                        context.push("/search?tag=${widget.tags}&index=$selectedPage");
+                                                    } else {
+                                                        _currentIndex = selectedPage;
+                                                        updateImages();
+                                                        Scrollable.ensureVisible(scrollToTop.currentContext!);
+                                                    }
+                                                },
+                                            )),
+                                        ],
                                     ]
                                 ),
                             );
