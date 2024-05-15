@@ -37,7 +37,8 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<bool> hasExternalStoragePerms() async{
-    if (isMobile()) return await Permission.manageExternalStorage.status.isGranted;
+    final permission = await getStoragePermission();
+    if (isMobile()) return await permission.status.isGranted;
     return true;
 }
 

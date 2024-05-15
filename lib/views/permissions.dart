@@ -1,3 +1,4 @@
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -28,7 +29,9 @@ class _PermissionsScreenState extends State<PermissionsScreen>{
                                 label: const Text("Give storage permissions"),
                                 icon: const Icon(Icons.folder),
                                 onPressed: () async {
-                                    final status = await Permission.manageExternalStorage.request();
+                                    final permission = await getStoragePermission();
+                                    final status = await permission.request();
+                                    
                                     if (status.isDenied || status.isPermanentlyDenied || status.isRestricted) {
                                         if (context.mounted) {
                                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -46,4 +49,16 @@ class _PermissionsScreenState extends State<PermissionsScreen>{
             )
         );
     }
+}
+
+Future<Permission> getStoragePermission() async {
+    AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
+    Permission permissionToRequest;
+    
+    if (androidInfo.version.sdkInt >= 32) {
+        permissionToRequest = Permission.manageExternalStorage;
+    } else {
+        permissionToRequest = Permission.storage;
+    }
+    return permissionToRequest;
 }
