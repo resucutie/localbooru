@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -52,13 +54,9 @@ class _PermissionsScreenState extends State<PermissionsScreen>{
 }
 
 Future<Permission> getStoragePermission() async {
-    AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
-    Permission permissionToRequest;
-    
-    if (androidInfo.version.sdkInt >= 32) {
-        permissionToRequest = Permission.manageExternalStorage;
+    if (Platform.isAndroid && (await DeviceInfoPlugin().androidInfo).version.sdkInt >= 32) {
+        return Permission.manageExternalStorage;
     } else {
-        permissionToRequest = Permission.storage;
+        return Permission.storage;
     }
-    return permissionToRequest;
 }
