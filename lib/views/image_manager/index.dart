@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/app_bar_linear_progress.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
@@ -43,6 +44,7 @@ class _ImageManagerViewState extends State<ImageManagerView> {
 
     bool isEditing = false;
     bool isGeneratingTags = false;
+    bool isSaving = false;
     
     Rating? rating;
 
@@ -182,11 +184,17 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                         TextButton.icon(
                             icon: const Icon(Icons.check),
                             label: const Text("Done"),
-                            onPressed: () {
-                                if(_formKey.currentState!.validate()) _submit();
-                            }
-                        )
+                            onPressed: !isSaving ? () {
+                                if(_formKey.currentState!.validate()) {
+                                    setState(() {
+                                        isSaving = true;
+                                    });
+                                    _submit();
+                                };
+                            } : null
+                        ),
                     ],
+                    bottom: isSaving ? AppBarLinearProgressIndicator() : null,
                 ),
                 body: Form(
                     key: _formKey,
