@@ -215,30 +215,80 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                         if (tags["artist"] != null && tags["artist"]!.isNotEmpty) ...[
-                                            const SmallHeader("Artist", padding: EdgeInsets.only(top: 4)),
+                                            const Padding(
+                                                padding: EdgeInsets.only(bottom: 2),
+                                                child: Wrap(
+                                                    spacing: 4,
+                                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                                    children: [
+                                                        Icon(SpecificTagsIcons.artist, color: SpecificTagsColors.artist, size: 20,),
+                                                        Text("Artist", style: TextStyle(color: SpecificTagsColors.artist, fontSize: 16),),
+                                                    ],
+                                                ),
+                                            ),
                                             Wrap(children: List.from(tags["artist"]!..sort()).map((e) {
                                                 return Tag(e, color: SpecificTagsColors.artist, renderObject: ro, onTap: () => context.push("/search/?tag=$e"),);
                                             }).toList())
                                         ],
                                         if (tags["character"] != null && tags["character"]!.isNotEmpty) ...[
-                                            const SmallHeader("Character", padding: EdgeInsets.only(top: 4)),
+                                            const Padding(
+                                                padding: EdgeInsets.only(top: 8, bottom: 2),
+                                                child: Wrap(
+                                                    spacing: 4,
+                                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                                    children: [
+                                                        Icon(SpecificTagsIcons.character, color: SpecificTagsColors.character, size: 20,),
+                                                        Text("Character", style: TextStyle(color: SpecificTagsColors.character, fontSize: 16),),
+                                                    ],
+                                                ),
+                                            ),
                                             Wrap(children: List.from(tags["character"]!..sort()).map((e) {
                                                 return Tag(e, color: SpecificTagsColors.character, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
                                         ],
                                         if (tags["copyright"] != null && tags["copyright"]!.isNotEmpty) ...[
-                                            const SmallHeader("Copyright", padding: EdgeInsets.only(top: 4)),
+                                            const Padding(
+                                                padding: EdgeInsets.only(top: 8, bottom: 2),
+                                                child: Wrap(
+                                                    spacing: 4,
+                                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                                    children: [
+                                                        Icon(SpecificTagsIcons.copyright, color: SpecificTagsColors.copyright, size: 20,),
+                                                        Text("Copyright", style: TextStyle(color: SpecificTagsColors.copyright, fontSize: 16),),
+                                                    ],
+                                                ),
+                                            ),
                                             Wrap(children: List.from(tags["copyright"]!..sort()).map((e) {
                                                 return Tag(e, color: SpecificTagsColors.copyright, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
                                         ],
                                         if (tags["species"] != null && tags["species"]!.isNotEmpty) ...[
-                                            const SmallHeader("Species", padding: EdgeInsets.only(top: 4)),
+                                            const Padding(
+                                                padding: EdgeInsets.only(top: 8, bottom: 2),
+                                                child: Wrap(
+                                                    spacing: 4,
+                                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                                    children: [
+                                                        Icon(SpecificTagsIcons.species, color: SpecificTagsColors.species, size: 20,),
+                                                        Text("Species", style: TextStyle(color: SpecificTagsColors.species, fontSize: 16),),
+                                                    ],
+                                                ),
+                                            ),
                                             Wrap(children: List.from(tags["species"]!..sort()).map((e) {
                                                 return Tag(e, color: SpecificTagsColors.species, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
                                         ],
-                                        const SmallHeader("Generic", padding: EdgeInsets.only(top: 4)),
+                                        const Padding(
+                                            padding: EdgeInsets.only(top: 8, bottom: 2),
+                                            child: Wrap(
+                                                spacing: 4,
+                                                crossAxisAlignment: WrapCrossAlignment.center,
+                                                children: [
+                                                    Icon(SpecificTagsIcons.generic, color: SpecificTagsColors.generic, size: 20,),
+                                                    Text("Generic", style: TextStyle(color: SpecificTagsColors.generic, fontSize: 16),),
+                                                ],
+                                            ),
+                                        ),
                                         Wrap(children: List.from(tags["generic"]!..sort()).map((e) {
                                             return Tag(e, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                         }).toList())

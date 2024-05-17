@@ -87,20 +87,22 @@ final router = GoRouter(
                                             }
                                         ),
                                         GoRoute(path: "recent", redirect: (_, __) => '/search',),
-                                        ShellRoute(
-                                            builder: (context, state, child) {
-                                                final String? id = state.pathParameters["id"];
-                                                if (id == null) return Text("Invalid ID $id");
+                                        // ShellRoute(
+                                        //     builder: (context, state, child) {
+                                        //         final String? id = state.pathParameters["id"];
+                                        //         if (id == null) return Text("Invalid ID $id");
                                                         
-                                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
-                                                    booru: booru,
-                                                    id: id,
-                                                    builder: (context, image) {
-                                                        return ImageViewShell(image: image, shouldShowImageOnPortrait: state.fullPath == "/view/:id", child: child,);
-                                                    }
-                                                ));
-                                            },
-                                            routes: [
+                                        //         return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                        //             booru: booru,
+                                        //             id: id,
+                                        //             builder: (context, image) {
+                                        //                 return ImageViewShell(image: image, shouldShowImageOnPortrait: state.fullPath == "/view/:id", child: child,);
+                                        //             }
+                                        //         ));
+                                        //     },
+                                        //     routes: [
+                                        //     ]
+                                        // ),
                                                 GoRoute(path: "view/:id",
                                                     builder: (context, state) {
                                                         final String? id = state.pathParameters["id"];
@@ -110,7 +112,8 @@ final router = GoRouter(
                                                             booru: booru,
                                                             id: id,
                                                             builder: (context, image) {
-                                                                return ImageViewProprieties(image);
+                                                                return ImageViewShell(image: image, shouldShowImageOnPortrait: true, child: ImageViewProprieties(image),);
+                                                                // return ImageViewProprieties(image);
                                                             }
                                                         ));
                                                     },
@@ -125,8 +128,6 @@ final router = GoRouter(
                                                         )
                                                     ]
                                                 ),
-                                            ]
-                                        )
                                     ]
                                 ),
                                 // navigation
