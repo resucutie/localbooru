@@ -218,7 +218,7 @@ final router = GoRouter(
                                                             builder: (context, state) => BooruLoader(
                                                                 builder: (context, booru) => TagTypesSettings(booru: booru),
                                                             ),
-                                                    )
+                                                        )
                                                     ]
                                                 )
                                             ]
