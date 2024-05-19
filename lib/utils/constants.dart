@@ -81,7 +81,7 @@ class SpecificTagsColors {
 }
 
 class SpecificTagsIcons {
-    static const generic = Icons.emergency;
+    static const generic = Icons.sell;
     static const artist = Icons.palette;
     static const character = Icons.person;
     static const copyright = Icons.copyright;

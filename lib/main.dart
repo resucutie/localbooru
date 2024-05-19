@@ -103,31 +103,36 @@ final router = GoRouter(
                                         //     routes: [
                                         //     ]
                                         // ),
-                                                GoRoute(path: "view/:id",
+                                        GoRoute(path: "view/:id",
+                                            builder: (context, state) {
+                                                final String? id = state.pathParameters["id"];
+                                                if (id == null) return Text("Invalid ID $id");
+                                                        
+                                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                                    booru: booru,
+                                                    id: id,
+                                                    builder: (context, image) {
+                                                        return ImageViewShell(image: image, shouldShowImageOnPortrait: true, child: ImageViewProprieties(image),);
+                                                    }
+                                                ));
+                                            },
+                                            routes: [
+                                                GoRoute(path: "note",
                                                     builder: (context, state) {
                                                         final String? id = state.pathParameters["id"];
-                                                        if (id == null) return Text("Invalid ID $id");
-                                                                
+                                                        if(id == null || int.tryParse(id) == null) return Text("Invalid ID $id");
+
                                                         return BooruLoader( builder: (_, booru) => BooruImageLoader(
                                                             booru: booru,
                                                             id: id,
                                                             builder: (context, image) {
-                                                                return ImageViewShell(image: image, shouldShowImageOnPortrait: true, child: ImageViewProprieties(image),);
-                                                                // return ImageViewProprieties(image);
+                                                                return ImageViewShell(image: image, shouldShowImageOnPortrait: true, child: NotesView(id: int.parse(id)),);
                                                             }
                                                         ));
                                                     },
-                                                    routes: [
-                                                        GoRoute(path: "note",
-                                                            builder: (context, state) {
-                                                                final String? id = state.pathParameters["id"];
-                                                                if(id == null || int.tryParse(id) == null) return Text("Invalid ID $id");
-                                                                        
-                                                                return NotesView(id: int.parse(id));
-                                                            },
-                                                        )
-                                                    ]
-                                                ),
+                                                )
+                                            ]
+                                        ),
                                     ]
                                 ),
                                 // navigation

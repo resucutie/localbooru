@@ -165,10 +165,12 @@ class _SearchTagState extends State<SearchTag> {
 
                 return specialTags.entries.map((type) => type.value.map((tag) {
                     final isMetatag = tag.contains(":") && tag.split(":").first.isNotEmpty;
+                    final color = !isMetatag ? SpecificTagsColors.getColor(type.key) : null;
                     return ListTile(
+                        leading: Icon(!isMetatag ? SpecificTagsIcons.getIcon(type.key) : Icons.lightbulb, color: color,),
                         title: Text(tag,
                             style: TextStyle(
-                                color: !isMetatag ? SpecificTagsColors.getColor(type.key) : null,
+                                color: color,
                                 fontWeight: isMetatag ? FontWeight.bold : null
                             ),
                         ),
