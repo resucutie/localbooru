@@ -58,8 +58,3 @@ class Throttler {
         });
     }
 }
-
-Color getSurfaceDim(ColorScheme colorSceheme) {
-    CorePalette p = CorePalette.of(colorSceheme.primary.value);
-    return Color(p.neutral.get(colorSceheme.brightness == Brightness.dark ? 6 : 87));
-}
