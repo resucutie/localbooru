@@ -9,7 +9,6 @@ import 'package:localbooru/components/drawer.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
-import 'package:localbooru/utils/misc.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
 import 'package:localbooru/views/about.dart';
@@ -58,7 +57,7 @@ final router = GoRouter(
             routes: [
                 ShellRoute(
                     builder: (context, state, child) => Scaffold(
-                        backgroundColor: getSurfaceDim(Theme.of(context).colorScheme),
+                        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
                         appBar: isDesktop() ? const WindowFrameAppBar() : null,
                         body: LockScreen(child: child),
                     ),
