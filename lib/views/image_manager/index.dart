@@ -5,19 +5,22 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/app_bar_linear_progress.dart';
 import 'package:localbooru/components/builders.dart';
+import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/image_grid_display.dart';
-import 'package:localbooru/components/radio_dialogs.dart';
+import 'package:localbooru/components/dialogs/radio_dialogs.dart';
 import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/views/image_manager/image_upload.dart';
+import 'package:localbooru/views/image_manager/list_string_text_input.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
-import 'package:localbooru/views/navigation/tag_browse.dart';
+import 'package:localbooru/views/image_manager/related_images.dart';
+import 'package:localbooru/views/image_manager/tagfield.dart';
 import 'package:mime/mime.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -307,362 +310,25 @@ class _ImageManagerViewState extends State<ImageManagerView> {
                             ),
 
                             const SmallHeader("Related images", padding: EdgeInsets.only(top: 16.0, bottom: 8)),
-                            Card(
-                                clipBehavior: Clip.antiAlias,
-                                child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
-                                    width: double.infinity,
-                                    child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                            SizedBox(
-                                                height: 80,
-                                                child: BooruLoader(
-                                                    builder: (context, booru) => ListView(
-                                                        scrollDirection: Axis.horizontal,
-                                                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                                                        children: [
-                                                            ...relatedImages.map((e) => [BooruImageLoader(
-                                                                key: ValueKey(e),
-                                                                booru: booru,
-                                                                id: e,
-                                                                builder: (context, relatedImage) => ClipRRect(
-                                                                    borderRadius: const BorderRadius.all(Radius.circular(12)),
-                                                                    clipBehavior: Clip.antiAliasWithSaveLayer,
-                                                                    child: MouseRegion(
-                                                                        cursor: MaterialStateMouseCursor.clickable,
-                                                                        child: GestureDetector(
-                                                                            onTap: () => setState(() => relatedImages.remove(e)),
-                                                                            child: Stack(
-                                                                                children: [
-                                                                                    ImageGrid(
-                                                                                        image: relatedImage,
-                                                                                        resizeSize: 300,
-                                                                                    ),
-                                                                                    Positioned(
-                                                                                        top: 0, left: 0, bottom: 0, right: 0,
-                                                                                        child: Container(
-                                                                                            color: Colors.black.withOpacity(0.6),
-                                                                                            child: const Center(
-                                                                                                child: Icon(Icons.delete_outline, size: 28,),
-                                                                                            ),
-                                                                                        )
-                                                                                    ),
-                                                                                ],
-                                                                            ),
-                                                                        ),
-                                                                    ),
-                                                                ), 
-                                                            ), const SizedBox(width: 12,)],).expand((i) => i),
-
-                                                            AspectRatio(
-                                                                aspectRatio: 1,
-                                                                child: IconButton(
-                                                                    icon: const Icon(Icons.add),
-                                                                    style: IconButton.styleFrom(
-                                                                        backgroundColor: Colors.black.withOpacity(0.4),
-                                                                        hoverColor: Colors.black.withOpacity(0.1),
-                                                                        shape: RoundedRectangleBorder(
-                                                                            borderRadius: BorderRadius.circular(12)
-                                                                        )
-                                                                    ),
-                                                                    onPressed: () async {
-                                                                        final imageList = await openSelectionDialog(
-                                                                            context: context,
-                                                                            selectedImages: relatedImages,
-                                                                            excludeImages: widget.preset?.replaceID != null ? [widget.preset!.replaceID!] : null
-                                                                        );
-                                                                        if(imageList == null) return;
-                                                                        setState(() {
-                                                                            relatedImages = imageList;
-                                                                        });
-                                                                    }, 
-                                                                ),
-                                                            )
-                                                        ]
-                                                    )
-                                                ),
-                                            )
-                                        ],
-                                    ),
-                                )
-                            ),
+                            RelatedImagesCard(
+                                relatedImages: relatedImages,
+                                onRemove: (imageID) => setState(() => relatedImages.remove(imageID)),
+                                onAddButtonPress: () async {
+                                    final imageList = await openSelectionDialog(
+                                        context: context,
+                                        selectedImages: relatedImages,
+                                        excludeImages: widget.preset?.replaceID != null ? [widget.preset!.replaceID!] : null
+                                    );
+                                    if(imageList == null) return;
+                                    setState(() {
+                                        relatedImages = imageList;
+                                    });
+                                },
+                            )
                         ],
                     ),
                 )
             ),
-        );
-    }
-}
-
-class ImageUploadForm extends StatelessWidget {
-    const ImageUploadForm({super.key, required this.onChanged, required this.validator, this.currentValue = "", this.orientation = Orientation.portrait});
-    
-    final ValueChanged<String> onChanged;
-    final FormFieldValidator<String> validator;
-    final String currentValue;
-    final Orientation orientation;
-    
-    @override
-    Widget build(BuildContext context) {
-        return FormField<String>(
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            initialValue: currentValue,
-            validator: validator,
-            builder: (FormFieldState state) {
-                return Flex(
-                    direction: orientation == Orientation.portrait ? Axis.vertical : Axis.horizontal,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                        Container(
-                            constraints: BoxConstraints(maxHeight: 400, maxWidth: orientation == Orientation.landscape ? 400 : double.infinity),
-                            child: DottedBorder(
-                                strokeWidth: 2,
-                                borderType: BorderType.RRect,
-                                radius: const Radius.circular(24),
-                                color: state.hasError ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary,
-                                child: ClipRRect(
-                                    borderRadius: const BorderRadius.all(Radius.circular(22)),
-                                    child: TextButton(
-                                        style: TextButton.styleFrom(
-                                            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero,),
-                                            padding: EdgeInsets.zero,
-                                            minimumSize: const Size(100, 100),
-                                        ),
-                                        onPressed: () async {
-                                            FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media);
-                                            if (result != null) {
-                                                state.didChange(result.files.single.path);
-                                                onChanged(result.files.single.path!);
-                                            }
-                                        },
-                                        child: Builder(builder: (context) {
-                                            if(state.value.isEmpty) {
-                                                return const Icon(Icons.add);
-                                            } else {
-                                                if(lookupMimeType(state.value)!.startsWith("video/")) return IgnorePointer(child: VideoView(state.value),);
-                                                return Image.file(File(state.value));
-                                            }
-                                        },),
-                                    ),
-                                )
-                            ),
-                        ),
-                        if(!state.value.isEmpty) Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                                    child: Container(
-                                    constraints: BoxConstraints(
-                                        minHeight: 80,
-                                        maxWidth: orientation == Orientation.landscape ? MediaQuery.of(context).size.width / 3 : double.infinity //bad code
-                                    ),
-                                    child: FileInfo(File(state.value),
-                                        onCompressed: (compressed) {
-                                            state.didChange(compressed.path);
-                                            onChanged(compressed.path);
-                                        }
-                                    ),
-                                ),
-                            ),
-                        ),
-                        if(state.hasError) Text(state.errorText!, style: TextStyle(color: Theme.of(context).colorScheme.error),)
-                    ],
-                );
-            },
-        );
-    }
-}
-
-class TagField extends StatefulWidget {
-    const TagField({super.key, this.controller,  this.decoration, this.validator, this.style, this.type = "generic"});
-
-    final TextEditingController? controller;
-    final InputDecoration? decoration;
-    final FormFieldValidator<String>? validator;
-    final TextStyle? style;
-    final String type;
-
-    @override
-    State<TagField> createState() => _TagFieldState();
-}
-class _TagFieldState extends State<TagField> {
-    final FocusNode _focusNode = FocusNode();
-    late TextEditingController controller;
-    GlobalKey textboxKey = GlobalKey();
-
-    @override
-    void initState() {
-        super.initState();
-        controller = widget.controller ?? TextEditingController();
-    }
-
-    bool spawnAtBottom() {
-        if(textboxKey.currentContext == null) return true;
-        RenderBox textboxRenderBox = textboxKey.currentContext!.findRenderObject() as RenderBox;
-        double textboxPosY = textboxRenderBox.localToGlobal(Offset.zero).dy;
-        return textboxPosY <= (MediaQuery.of(context).size.height / 2);
-    }
-
-    @override
-    Widget build(context) {
-        return RawAutocomplete<String>(
-            textEditingController: controller,
-            focusNode: _focusNode,
-            optionsBuilder: (textEditingValue) async {
-                if (textEditingValue.text == '') {
-                    return const Iterable<String>.empty();
-                } else {
-                    List<String> tagList = textEditingValue.text.split(" ");
-                    List<String> restOfList = List.from(tagList);
-                    restOfList.removeLast();
-                    String tag = tagList.last;
-
-                    Booru currentBooru = await getCurrentBooru();
-                    List<String> allTags = await currentBooru.getAllTagsFromType(widget.type);
-
-                    List<String> matches = List.from(allTags);
-
-                    matches.retainWhere((s){
-                        return s.contains(tag) && !restOfList.contains(s) && s != tag;
-                    });
-                    return matches.map((e) => restOfList.isEmpty ? e : "${restOfList.join(" ")} $e").toList();
-                }
-            },
-            optionsViewBuilder: (context, onSelected, options) {
-                int highlightedIndex = AutocompleteHighlightedOption.of(context);
-                return Align(
-                    alignment: spawnAtBottom() ? Alignment.topCenter : Alignment.bottomCenter,
-                    child: Material(
-                        elevation: 4.0,
-                        child: Container(
-                            constraints: const BoxConstraints(maxHeight: 300),
-                            alignment: Alignment.bottomCenter,
-                            child: ListView.builder(
-                                itemCount: options.length,
-                                itemBuilder: (context, index) {
-                                    final currentOption = options.elementAt(index);
-                                    return ListTile(
-                                        title: Text(currentOption.split(" ").last),
-                                        onTap: () => onSelected(currentOption),
-                                        selected: highlightedIndex == index,
-                                        selectedColor: widget.style?.color,
-                                        selectedTileColor: widget.style?.color?.withOpacity(0.1),
-                                    );
-                                },
-                            ),
-                        )
-                    ),
-                );
-            },
-            optionsViewOpenDirection: spawnAtBottom() ? OptionsViewOpenDirection.down : OptionsViewOpenDirection.up,
-            fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
-                return TextFormField(
-                    key: textboxKey,
-                    controller: textController,
-                    focusNode: focusNode,
-                    decoration: widget.decoration,
-                    keyboardType: TextInputType.text,
-                    minLines: 1,
-                    maxLines: 6,
-                    inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\n')),],
-                    validator: widget.validator,
-                    style: widget.style,
-                    onFieldSubmitted: (value) {
-                        debugPrint(value);
-                        onFieldSubmitted();
-                    },
-                );
-            },
-        );
-    }
-}
-
-class ListStringTextInput extends StatefulWidget {
-    const ListStringTextInput({super.key, required this.onChanged, this.defaultValue = const [], this.canBeEmpty = false, this.formValidator, this.addButton = const Text("Add")});
-
-    final Function(List<String>) onChanged;
-    final List<String> defaultValue;
-    final FormFieldValidator<String>? formValidator;
-    final bool canBeEmpty;
-    final Widget addButton;
-
-    @override
-    State<ListStringTextInput> createState() => _ListStringTextInputState();
-}
-class _ListStringTextInputState extends State<ListStringTextInput> {
-    List<String> _currentValue = [];
-    List<TextEditingController> _editControllers = [];
-
-    final ScrollController _scrollController = ScrollController();
-
-    @override
-    void initState() {
-        super.initState();
-        _currentValue = List.from(widget.defaultValue); //attempt at making list changable
-        Future.delayed(const Duration(milliseconds: 1), _updateList);
-    }
-
-    void _updateList() {
-        for (final (index, textController) in _editControllers.indexed) {
-            textController.text = _currentValue[index];
-        }
-        widget.onChanged(_currentValue);
-    }
-
-    @override
-    Widget build(BuildContext context) {
-        return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-                Container(
-                    constraints: const BoxConstraints(maxHeight: 200),
-                    child: Scrollbar(
-                        thumbVisibility: true,
-                        controller: _scrollController,
-                        child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: _currentValue.length,
-                            controller: _scrollController,
-                            itemBuilder: (BuildContext context, index) {
-                                if((_editControllers.length - 1) < index) _editControllers.add(TextEditingController());
-
-                                final controller = _editControllers[index];
-
-                                return TextFormField(
-                                    controller: controller,
-                                    decoration: (widget.canBeEmpty || index != 0) ? InputDecoration(suffixIcon: IconButton(onPressed: () => setState(() {
-                                        controller.dispose();
-                                        _currentValue.removeAt(index);
-                                        _editControllers.removeAt(index);
-                                        _updateList();
-                                    }), icon: const Icon(Icons.remove))) : null,
-                                    validator: widget.formValidator,
-                                    onChanged: (value) {
-                                        setState(() => _currentValue[index] = value);
-                                        _updateList();
-                                    },
-                                    
-                                );
-                            }
-                        ),
-                    )
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                    title: widget.addButton,
-                    leading: const Icon(Icons.add),
-                    onTap: () async {
-                        setState(() => _currentValue.add(""));
-                        _updateList();
-                        Future.delayed(const Duration(milliseconds: 10), () => _scrollController.animateTo(
-                            _scrollController.position.maxScrollExtent,
-                            duration: const Duration(milliseconds: 150),
-                            curve: Curves.fastOutSlowIn,
-                        ));
-                    }, 
-                )
-            ],
         );
     }
 }

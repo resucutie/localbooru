@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:localbooru/components/counter.dart';
 import 'package:localbooru/components/headers.dart';
-import 'package:localbooru/components/radio_dialogs.dart';
+import 'package:localbooru/components/dialogs/radio_dialogs.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
