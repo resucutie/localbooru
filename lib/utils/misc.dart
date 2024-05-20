@@ -1,8 +1,5 @@
 import 'dart:math' as m;
 
-import 'package:flutter/material.dart';
-import 'package:material_color_utilities/palettes/core_palette.dart';
-
 String formatSize(int bytes) {
     const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
     var i = (m.log(bytes) / m.log(1000)).floor();
