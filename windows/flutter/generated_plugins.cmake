@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_windows
   dynamic_color
   irondash_engine_context
+  local_auth_windows
   media_kit_libs_windows_video
   media_kit_video
   permission_handler_windows

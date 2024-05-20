@@ -16,8 +16,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.4.1
-localbooru_codename: "Avogado 6"
+version: 1.5.0
+localbooru_codename: "Volpeon"
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
@@ -71,6 +71,11 @@ dependencies:
   vector_math: ^2.1.4
   photo_view: ^0.14.0
   ffmpeg_cli: ^0.3.0
+  super_drag_and_drop: ^0.8.5
+  material_color_utilities: ^0.8.0
+  sliver_tools: ^0.2.12
+  local_auth: ^2.2.0
+  device_info_plus: ^9.1.2
 dependency_overrides:
   media_kit_native_event_loop:
     git:
@@ -115,6 +120,28 @@ flutter:
     - assets/websites/gelbooru.svg
     - assets/websites/twitter.svg
     - assets/websites/deviantart.svg
+
+    - assets/counter/baba/0.gif
+    - assets/counter/baba/1.gif
+    - assets/counter/baba/2.gif
+    - assets/counter/baba/3.gif
+    - assets/counter/baba/4.gif
+    - assets/counter/baba/5.gif
+    - assets/counter/baba/6.gif
+    - assets/counter/baba/7.gif
+    - assets/counter/baba/8.gif
+    - assets/counter/baba/9.gif
+    - assets/counter/squares/0.svg
+    - assets/counter/squares/1.svg
+    - assets/counter/squares/2.svg
+    - assets/counter/squares/3.svg
+    - assets/counter/squares/4.svg
+    - assets/counter/squares/5.svg
+    - assets/counter/squares/6.svg
+    - assets/counter/squares/7.svg
+    - assets/counter/squares/8.svg
+    - assets/counter/squares/9.svg
+    - assets/Screenshot_1009.webp
     
     - pubspec.yaml # reading itself
 

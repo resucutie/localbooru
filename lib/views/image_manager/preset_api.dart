@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:localbooru/api/index.dart';
@@ -14,13 +15,14 @@ final cache = DefaultCacheManager();
 
 
 class PresetImage {
-    const PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating});
+    const PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages});
 
     final File? image;
     final Map<String, List<String>>? tags;
     final List<String>? sources;
     final Rating? rating;
-    final String? replaceID;
+    final ImageID? replaceID;
+    final List<ImageID>? relatedImages;
 
     static Future<PresetImage> fromExistingImage(BooruImage image) async {
         final Booru booru = await getCurrentBooru();
@@ -30,7 +32,8 @@ class PresetImage {
             sources: image.sources,
             tags: await booru.separateTagsByType(image.tags.split(" ")),
             rating: image.rating,
-            replaceID: image.id
+            replaceID: image.id,
+            relatedImages: image.relatedImages
         );
     }
 
@@ -48,6 +51,7 @@ class PresetImage {
             "twitter" => await twitterToPreset(url),
             "furaffinity" => await furaffinityToPreset(url),
             "deviantart" => await deviantartToPreset(url),
+            // "instagram" => await instagramToPreset(url),
             _ => await anyURLToPreset(url)
         };
         return preset;
@@ -125,7 +129,7 @@ Future<PresetImage> e621ToPreset(String url) async {
 
     return PresetImage(
         image: downloadedFileInfo.file,
-        sources: [...(postRes["sources"] ?? []), [uri.origin, uri.path].join("")],
+        sources: [...(postRes["sources"] ?? []).where((e) => !e.startsWith("-")), [uri.origin, uri.path].join("")],
         tags: {
             "generic": List<String>.from(postRes["tags"]["general"]),
             "artist": List<String>.from(postRes["tags"]["artist"]),
@@ -225,6 +229,27 @@ Future<PresetImage> twitterToPreset(String url) async {
         sources: [["https://x.com", uri.path].join("")],
         tags: {
             "artist": List<String>.from([uri.pathSegments[0].toLowerCase()]),
+        }
+    );
+}
+
+// twitter: instafix offers a url to give only the image. getting the artist is as easy as reading the first path segment
+Future<PresetImage> instagramToPreset(String url) async {
+    Uri uri = Uri.parse(url);
+    final fxReq = http.Request("Get", Uri.parse(["https://ddinstagram.com", uri.path].join()))..followRedirects = false;
+    final title = getMetaProperty(parse(fxReq.body), property: "twitter:title");
+
+    debugPrint(fxReq.body);
+
+    final downloadedFileInfo = await cache.downloadFile(["https://d.ddinstagram.com", uri.path].join());
+
+    debugPrint(downloadedFileInfo.file.path);
+    
+    return PresetImage(
+        image: downloadedFileInfo.file,
+        sources: [["https://instagram.com", uri.path].join("")],
+        tags: {
+            "artist": title != null ? [title.substring(1)] : [],
         }
     );
 }

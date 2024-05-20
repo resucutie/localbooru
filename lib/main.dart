@@ -1,21 +1,27 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/components/builders.dart';
+import 'package:localbooru/components/drawer.dart';
+import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
+import 'package:localbooru/utils/misc.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
 import 'package:localbooru/views/about.dart';
 import 'package:localbooru/views/image_manager/peripherals.dart';
 import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:localbooru/views/image_manager/index.dart';
+import 'package:localbooru/views/lock.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
 import 'package:localbooru/views/navigation/index.dart';
 import 'package:localbooru/views/navigation/tag_browse.dart';
+import 'package:localbooru/views/navigation/zoomed_view.dart';
 import 'package:localbooru/views/set_booru.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/settings/booru_settings/index.dart';
@@ -31,7 +37,8 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<bool> hasExternalStoragePerms() async{
-    if (isMobile()) return await Permission.manageExternalStorage.status.isGranted;
+    final permission = await getStoragePermission();
+    if (isMobile()) return await permission.status.isGranted;
     return true;
 }
 
@@ -50,170 +57,218 @@ final router = GoRouter(
             },
             routes: [
                 ShellRoute(
-                    builder: (context, state, child) => HeroControllerScope(
-                        controller: MaterialApp.createMaterialHeroController(),
-                        child: child,
+                    builder: (context, state, child) => Scaffold(
+                        backgroundColor: getSurfaceDim(Theme.of(context).colorScheme),
+                        appBar: isDesktop() ? const WindowFrameAppBar() : null,
+                        body: LockScreen(child: child),
                     ),
                     routes: [
-                        ShellRoute( //main nav shell
-                            builder: (context, state, child) => BrowseScreen(uri: state.uri, child: child),
+                        ShellRoute(
+                            builder: (context, state, child) => MediaQuery.of(context).orientation == Orientation.landscape ? DesktopHousing(routeUri: state.uri, child: child,) : child,
                             routes: [
-                                GoRoute(path: "home",
-                                    builder: (context, state) => const HomePage(),
-                                ),
-                                GoRoute(path: "search",
-                                    builder: (context, state) {
-                                        final String tags = state.uri.queryParameters["tag"] ?? "";
-                                        final String? index = state.uri.queryParameters["index"];
-                                        return BooruLoader(
-                                            builder: (context, booru) => GalleryViewer(
-                                                booru: booru,
-                                                tags: tags,
-                                                index: int.parse(index ?? "0"),
-                                                routeNavigation: true,
-                                            ),
-                                        );
-                                    }
-                                ),
-                                GoRoute(path: "recent", redirect: (_, __) => '/search',),
-                                GoRoute(path: "view/:id",
-                                    builder: (context, state)  {
-                                        final String? id = state.pathParameters["id"];
-                                        if (id == null) return Text("Invalid ID $id");
-                                        return BooruLoader( builder: (_, booru) => BooruImageLoader(
-                                            booru: booru,
-                                            id: id,
-                                            builder: (context, image) {
-                                                return ImageView(image: image);
+                                ShellRoute( //main nav shell
+                                    builder: (context, state, child) => AddImageDropRegion(child: child),
+                                    routes: [
+                                        GoRoute(path: "home",
+                                            builder: (context, state) => const HomePage(),
+                                        ),
+                                        GoRoute(path: "search",
+                                            builder: (context, state) {
+                                                final String tags = state.uri.queryParameters["tag"] ?? "";
+                                                final String? index = state.uri.queryParameters["index"];
+                                                return BooruLoader(
+                                                    builder: (context, booru) => GalleryViewer(
+                                                        booru: booru,
+                                                        tags: tags,
+                                                        index: int.parse(index ?? "0"),
+                                                        routeNavigation: true,
+                                                    ),
+                                                );
                                             }
-                                        ));
-                                    }
+                                        ),
+                                        GoRoute(path: "recent", redirect: (_, __) => '/search',),
+                                        // ShellRoute(
+                                        //     builder: (context, state, child) {
+                                        //         final String? id = state.pathParameters["id"];
+                                        //         if (id == null) return Text("Invalid ID $id");
+                                                        
+                                        //         return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                        //             booru: booru,
+                                        //             id: id,
+                                        //             builder: (context, image) {
+                                        //                 return ImageViewShell(image: image, shouldShowImageOnPortrait: state.fullPath == "/view/:id", child: child,);
+                                        //             }
+                                        //         ));
+                                        //     },
+                                        //     routes: [
+                                        //     ]
+                                        // ),
+                                        GoRoute(path: "view/:id",
+                                            builder: (context, state) {
+                                                final String? id = state.pathParameters["id"];
+                                                if (id == null) return Text("Invalid ID $id");
+                                                        
+                                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                                    booru: booru,
+                                                    id: id,
+                                                    builder: (context, image) {
+                                                        return ImageViewShell(image: image, shouldShowImageOnPortrait: true, child: ImageViewProprieties(image),);
+                                                    }
+                                                ));
+                                            },
+                                            routes: [
+                                                GoRoute(path: "note",
+                                                    builder: (context, state) {
+                                                        final String? id = state.pathParameters["id"];
+                                                        if(id == null || int.tryParse(id) == null) return Text("Invalid ID $id");
+
+                                                        return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                                            booru: booru,
+                                                            id: id,
+                                                            builder: (context, image) {
+                                                                return ImageViewShell(image: image, shouldShowImageOnPortrait: true, child: NotesView(id: int.parse(id)),);
+                                                            }
+                                                        ));
+                                                    },
+                                                )
+                                            ]
+                                        ),
+                                    ]
                                 ),
-                            ]
-                        ),
-                        GoRoute(path: "zoom_image/:id",
-                                    pageBuilder: (context, state) {
-                                        final String? id = state.pathParameters["id"];
-                                        if (id == null) return MaterialPage(child: Text("Invalid ID $id"));
-                                        return CustomTransitionPage(
-                                            transitionDuration: const Duration(milliseconds: 200),
-                                            key: state.pageKey,
-                                            child: BooruLoader(builder: (_, booru) => BooruImageLoader(
-                                                booru: booru,
-                                                id: id,
-                                                builder: (context, image) => ImageViewZoom(image),
-                                            )),
-                                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                                return FadeTransition(
-                                                    opacity: animation,
-                                                    child: child,
+                                // navigation
+
+
+                                // image add
+                                GoRoute(path: "manage_image",
+                                    builder: (context, state) {
+                                        return const ImageManagerView(shouldOpenRecents: true,);
+                                    },
+                                    routes: [
+                                        GoRoute(path: "internal/:id",
+                                            builder: (context, state) {
+                                                final String? id = state.pathParameters["id"];
+                                                if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
+                                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                                    booru: booru,
+                                                    id: id,
+                                                    builder: (context, image) {
+                                                        return FutureBuilder(
+                                                            future: PresetImage.fromExistingImage(image),
+                                                            builder: (context, snapshot) {
+                                                                if(snapshot.hasData) {
+                                                                    return ImageManagerView(preset: snapshot.data);
+                                                                }
+                                                                return const Center(child: CircularProgressIndicator());
+                                                            },
+                                                        );
+                                                    }
+                                                ));
+                                            },
+                                        ),
+                                        GoRoute(path: "path/:path", name:"drag_path",
+                                            builder: (context, state) {
+                                                final String? path = state.pathParameters["path"];
+                                                if(path == null) return const Text("Invalid URL");
+                                                final file = File(path);
+                                                if(!File(path).existsSync()) return const Text("Path does not exist");
+                                                return ImageManagerView(preset: PresetImage(image: file));
+                                            },
+                                        ),
+                                        GoRoute(path: "url/:url", name:"download_url",
+                                            builder: (context, state) {
+                                                final String url = state.pathParameters["url"]!;
+                                                return FutureBuilder(
+                                                    future: PresetImage.urlToPreset(url),
+                                                    builder: (context, snapshot) {
+                                                        if(snapshot.hasData) {
+                                                            return ImageManagerView(preset: snapshot.data);
+                                                        }
+                                                        if(snapshot.hasError) {
+                                                            if(snapshot.error.toString() == "Unknown file type" || snapshot.error.toString() == "Not a URL") {
+                                                                Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                                                                    context.pop();
+                                                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
+                                                                });
+                                                            } else {
+                                                                throw snapshot.error!;
+                                                            }
+                                                        }
+                                                        return const ImageManagerLoadingScreen();
+                                                    },
                                                 );
                                             },
-                                        );
-                                    }
+                                        )
+                                    ]
                                 ),
+
+                                // settings
+                                ShellRoute(
+                                    builder: (context, state, child) => SettingsShell(child: child),
+                                    routes: [
+                                        GoRoute(path: "settings",
+                                            builder: (context, state) => const SettingsHome(),
+                                            routes: [
+                                                GoRoute(path: "overall_settings",
+                                                    builder: (context, state) => SharedPreferencesBuilder(
+                                                        builder: (context, prefs) => OverallSettings(prefs: prefs)
+                                                    ),
+                                                ),
+                                                GoRoute(path: "booru",
+                                                    builder: (context, state) => SharedPreferencesBuilder(
+                                                        builder: (context, prefs) => BooruLoader(
+                                                            builder: (context, booru) => BooruSettings(prefs: prefs, booru: booru,),
+                                                        )
+                                                    ),
+                                                    routes: [
+                                                        GoRoute(path: "tag_types",
+                                                            builder: (context, state) => BooruLoader(
+                                                                builder: (context, booru) => TagTypesSettings(booru: booru),
+                                                            ),
+                                                        )
+                                                    ]
+                                                )
+                                            ]
+                                        )
+                                    ]
+                                ),
+                                GoRoute(path: "about",
+                                    builder: (context, state) => const AboutScreen(),
+                                ),
+                            ]
+                        ),
+
+                        // initial setup stuff
+                        GoRoute(path: "permissions",
+                            builder: (context, state) => const PermissionsScreen(),
+                        ),
+                        GoRoute(path: "setbooru",
+                            builder: (context, state) => const SetBooruScreen(),
+                        ),
+                        GoRoute(path: "playground",
+                            builder: (context, state) => const TestPlaygroundScreen(),
+                        ),
                     ]
                 ),
-                // navigation
-
-
-                // image add
-                GoRoute(path: "manage_image",
-                    builder: (context, state) {
-                        return const ImageManagerView(shouldOpenRecents: true,);
-                    },
-                    routes: [
-                        GoRoute(path: "internal/:id",
-                            builder: (context, state) {
-                                final String? id = state.pathParameters["id"];
-                                if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
-                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
-                                    booru: booru,
-                                    id: id,
-                                    builder: (context, image) {
-                                        return FutureBuilder(
-                                            future: PresetImage.fromExistingImage(image),
-                                            builder: (context, snapshot) {
-                                                if(snapshot.hasData) {
-                                                    return ImageManagerView(preset: snapshot.data);
-                                                }
-                                                return const Center(child: CircularProgressIndicator());
-                                            },
-                                        );
-                                    }
-                                ));
-                            },
-                        ),
-                        GoRoute(path: "url/:url", name:"download_url",
-                            builder: (context, state) {
-                                final String url = state.pathParameters["url"]!;
-                                return FutureBuilder(
-                                    future: PresetImage.urlToPreset(url),
-                                    builder: (context, snapshot) {
-                                        if(snapshot.hasData) {
-                                            return ImageManagerView(preset: snapshot.data);
-                                        }
-                                        if(snapshot.hasError) {
-                                            if(snapshot.error.toString() == "Unknown file type" || snapshot.error.toString() == "Not a URL") {
-                                                Future.delayed(const Duration(milliseconds: 1)).then((value) {
-                                                    context.pop();
-                                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
-                                                });
-                                            } else {
-                                                throw snapshot.error!;
-                                            }
-                                        }
-                                        return const ImageManagerLoadingScreen();
-                                    },
+                GoRoute(path: "zoom_image/:id",
+                    pageBuilder: (context, state) {
+                        final String? id = state.pathParameters["id"];
+                        if (id == null) return MaterialPage(child: Text("Invalid ID $id"));
+                        return CustomTransitionPage(
+                            transitionDuration: const Duration(milliseconds: 200),
+                            key: state.pageKey,
+                            child: BooruLoader(builder: (_, booru) => BooruImageLoader(
+                                booru: booru,
+                                id: id,
+                                builder: (context, image) => ImageViewZoom(image),
+                            )),
+                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
                                 );
                             },
-                        )
-                    ]
-                ),
-
-                // settings
-                ShellRoute(
-                    builder: (context, state, child) => SettingsShell(child: child),
-                    routes: [
-                        GoRoute(path: "settings",
-                            builder: (context, state) => const SettingsHome(),
-                            routes: [
-                                GoRoute(path: "overall_settings",
-                                    builder: (context, state) => SharedPreferencesBuilder(
-                                        builder: (context, prefs) => OverallSettings(prefs: prefs)
-                                    ),
-                                ),
-                                GoRoute(path: "booru",
-                                    builder: (context, state) => SharedPreferencesBuilder(
-                                        builder: (context, prefs) => BooruLoader(
-                                            builder: (context, booru) => BooruSettings(prefs: prefs, booru: booru,),
-                                        )
-                                    ),
-                                    routes: [
-                                        GoRoute(path: "tag_types",
-                                            builder: (context, state) => BooruLoader(
-                                                builder: (context, booru) => TagTypesSettings(booru: booru),
-                                            ),
-                                    )
-                                    ]
-                                )
-                            ]
-                        )
-                    ]
-                ),
-
-                // initial setup stuff
-                GoRoute(path: "permissions",
-                    builder: (context, state) => const PermissionsScreen(),
-                ),
-                GoRoute(path: "setbooru",
-                    builder: (context, state) => const SetBooruScreen(),
-                ),
-                GoRoute(path: "about",
-                    builder: (context, state) => const AboutScreen(),
-                ),
-                GoRoute(path: "playground",
-                    builder: (context, state) => const TestPlaygroundScreen(),
+                        );
+                    }
                 ),
             ]
         ),
@@ -221,11 +276,27 @@ final router = GoRouter(
 );
 
 void main() async {
+    // custom error screen because release just yeets the error messages in favor of a gray screen
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+        return Material(
+            color: const Color.fromARGB(255, 255, 0, 0),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                    const Text("An error happened:\n"),
+                    Text(details.exception.toString()),
+                    Text(details.stack.toString())
+                ],
+            ),
+        );
+    };
+
     runApp(const App());
 
     MediaKit.ensureInitialized();
 
-    if(isDestkop()) {
+    if(isDesktop()) {
         doWhenWindowReady(() {
             appWindow.size = const Size(1280, 720);
             appWindow.minSize = const Size(420, 260);
@@ -330,12 +401,12 @@ class _AppState extends State<App> {
         ColorScheme darkColorScheme;
 
         if (monet && lightDynamic != null && darkDynamic != null) {
-            lightColorScheme = lightDynamic.harmonized();
+            lightColorScheme = lightDynamic.harmonized().copyWith();
             darkColorScheme = darkDynamic.harmonized();
         } else {
             // Otherwise, use fallback schemes.
             lightColorScheme = ColorScheme.fromSeed(
-                seedColor: _brandColor
+                seedColor: _brandColor,
             );
             darkColorScheme = ColorScheme.fromSeed(
                 seedColor: _brandColor,
@@ -344,8 +415,8 @@ class _AppState extends State<App> {
         }
 
         return {
-            "light": ThemeData.from(colorScheme: lightColorScheme),
-            "dark": ThemeData.from(colorScheme: darkColorScheme),
+            "light": ThemeData.from(colorScheme: lightColorScheme, useMaterial3: true),
+            "dark": ThemeData.from(colorScheme: darkColorScheme, useMaterial3: true),
         };
     }
 }

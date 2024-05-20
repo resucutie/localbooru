@@ -1,6 +1,8 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:localbooru/components/window_frame.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionsScreen extends StatefulWidget{
@@ -14,11 +16,8 @@ class _PermissionsScreenState extends State<PermissionsScreen>{
     @override
     Widget build(BuildContext context) {
         return Scaffold (
-            appBar: WindowFrameAppBar(
-                title: "Setup",
-                appBar: AppBar(
-                    title: const Text("Permissions"),
-                )
+            appBar: AppBar(
+                title: const Text("Permissions"),
             ),
             body: Center(
                 child: Padding(
@@ -32,7 +31,9 @@ class _PermissionsScreenState extends State<PermissionsScreen>{
                                 label: const Text("Give storage permissions"),
                                 icon: const Icon(Icons.folder),
                                 onPressed: () async {
-                                    final status = await Permission.manageExternalStorage.request();
+                                    final permission = await getStoragePermission();
+                                    final status = await permission.request();
+                                    
                                     if (status.isDenied || status.isPermanentlyDenied || status.isRestricted) {
                                         if (context.mounted) {
                                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -49,5 +50,13 @@ class _PermissionsScreenState extends State<PermissionsScreen>{
                 )
             )
         );
+    }
+}
+
+Future<Permission> getStoragePermission() async {
+    if (Platform.isAndroid && (await DeviceInfoPlugin().androidInfo).version.sdkInt >= 32) {
+        return Permission.manageExternalStorage;
+    } else {
+        return Permission.storage;
     }
 }

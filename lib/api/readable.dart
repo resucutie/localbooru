@@ -49,7 +49,9 @@ class Booru {
             path: p.join(path, "files", fileToCheck["filename"]),
             tags: fileToCheck["tags"],
             rating: rating,
-            sources: List<String>.from(fileToCheck["sources"] ?? [])
+            note: fileToCheck["note"],
+            sources: List<String>.from(fileToCheck["sources"] ?? []),
+            relatedImages: List<String>.from(fileToCheck["related"] ?? []),
         );
     }
 
@@ -155,17 +157,21 @@ class Booru {
     }
 }
 
+typedef ImageID = String;
+
 class BooruImage {
-    BooruImage({required this.id, required this.path, required this.tags, this.sources, this.rating}) {
+    BooruImage({required this.id, required this.path, required this.tags, this.sources = const [], this.rating, this.note, this.relatedImages = const []}) {
         filename = p.basename(path);
     }
 
-    String id;
+    ImageID id;
     String path;
     String filename = "";
     String tags;
+    String? note;
     Rating? rating;
-    List<String>? sources;
+    List<String> sources;
+    List<ImageID> relatedImages;
 
     File getImage() => File(path);
 }

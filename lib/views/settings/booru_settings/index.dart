@@ -53,7 +53,8 @@ class _BooruSettingsState extends State<BooruSettings> {
                     leading: const Icon(Icons.refresh),
                     onTap: () async {
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Rebasing...")));
-                        await writeSettings(widget.booru.path, await widget.booru.rebaseRaw());
+                        final raw = await widget.booru.rebaseRaw();
+                        await writeSettings(widget.booru.path, raw);
                         if (context.mounted) {
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();    
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Rebased")));

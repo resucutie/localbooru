@@ -1,15 +1,16 @@
 part of localbooru_api;
 
-Future writeSettings(String path, Map raw) async {
+Future writeSettings(String path, Map raw, {bool notify = true}) async {
     await File(p.join(path, "repoinfo.json")).writeAsString(const JsonEncoder.withIndent('  ').convert(raw));
-    booruUpdateListener.update();
+    if(notify) booruUpdateListener.update();
 }
 
 Future<BooruImage> addImage({required File imageFile,
-    String? id,
+    ImageID? id,
     String tags = "",
     Rating? rating,
-    List<String> sources = const []
+    List<String> sources = const [],
+    List<ImageID> relatedImages = const [],
 }) async {
     final Booru booru = await getCurrentBooru();
 
@@ -40,7 +41,8 @@ Future<BooruImage> addImage({required File imageFile,
         "filename": p.basename(copiedFile.path),
         "tags": tags,
         if(ratingString != null) "rating": ratingString,
-        "sources": sources
+        "sources": sources,
+        "related": relatedImages
     };
     
     int index = files.indexWhere((e) => e["id"] == id);
@@ -52,6 +54,23 @@ Future<BooruImage> addImage({required File imageFile,
     await writeSettings(booru.path, raw);
 
     return (await booru.getImage(id))!;
+}
+
+Future<void> editNote(String id, String? note) async {
+    final Booru booru = await getCurrentBooru();
+
+    // add to json
+    Map raw = await booru.getRawInfo();
+    List files = raw["files"];
+
+    int index = files.indexWhere((e) => e["id"] == id);
+    if (index < 0) throw "Does not exist";
+    else {
+        if(note == null || note.isEmpty) raw["files"][index].remove("note");
+        else raw["files"][index]["note"] = note;
+    }
+
+    await writeSettings(booru.path, raw);
 }
 
 Future<void> writeSpecificTags(Map<String, List<String>> specificTags) async {
@@ -94,8 +113,9 @@ Map<String, dynamic> rebase(Map<String, dynamic> raw) {
         file["id"] = index.toString();
 
         file["tags"] = (file["tags"] as String).split(" ")
-            .where((tag) => !tag.contains(":")) //remove any metatags on the tags
+            .where((tag) => !TagText(tag).isMetatag()) //remove any metatags on the tags
             .join(" ");
+        file["related"] = (file["related"] ?? []).where((e) => int.tryParse(e) != null && files[int.parse(e)] != null).toList();
 
         files[index] = file as dynamic;
     }
@@ -116,7 +136,7 @@ Map<String, dynamic> rebase(Map<String, dynamic> raw) {
     return raw;
 }
 
-Future removeImage(String id) async {
+Future removeImage(String id, {bool notify = true}) async {
     final Booru booru = await getCurrentBooru();
     final BooruImage? image = await booru.getImage(id);
     if(image == null) throw "Image $id does not exist";
@@ -129,7 +149,7 @@ Future removeImage(String id) async {
     files.removeWhere((e) => e["id"] == id);
     raw["files"] = files;
     
-    await writeSettings(booru.path, rebase(raw));
+    await writeSettings(booru.path, rebase(raw), notify: notify);
 
     // remove file
     await file.delete();

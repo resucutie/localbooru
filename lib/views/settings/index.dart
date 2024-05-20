@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/update_checker.dart';
 
 class SettingsShell extends StatelessWidget {
@@ -11,14 +10,10 @@ class SettingsShell extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
         return Scaffold(
-            appBar: WindowFrameAppBar(
-                title: "Settings",
-                appBar: AppBar(
-                    title: const Text("Settings"),
-                    leading: IconButton(
-                        onPressed: () {if(context.canPop()) context.pop();}, // Handle your on tap here.
-                        icon: const Icon(Icons.arrow_back),
-                    ),
+            appBar: AppBar(
+                title: const Text("Settings"),
+                leading: BackButton(
+                    onPressed: () {if(context.canPop()) context.pop();}, // Handle your on tap here.
                 ),
             ),
             body: child,

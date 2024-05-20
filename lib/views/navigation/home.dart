@@ -3,7 +3,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
+import 'package:localbooru/components/counter.dart';
+import 'package:localbooru/components/drawer.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/listeners.dart';
+import 'package:localbooru/utils/shared_prefs_widget.dart';
+import 'package:localbooru/views/navigation/index.dart';
 
 class HomePage extends StatefulWidget {
     const HomePage({super.key});
@@ -21,74 +26,96 @@ class _HomePageState extends State<HomePage> {
 
     @override
     Widget build(BuildContext context) {
-        return OrientationBuilder(builder: (context, orientation) {
-            return LayoutBuilder(builder: (context, constraints) {
-                return SingleChildScrollView(
-                    child: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        constraints: BoxConstraints(minWidth: constraints.maxWidth, minHeight: constraints.maxHeight),
-                        child: IntrinsicHeight(
-                            child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                    const SizedBox(height: 64),
-                                    const LocalBooruHeader(),
-                                    const SizedBox(height: 32),
-                                    SearchTag(
-                                        onSearch: (_) => _onSearch(),
-                                        controller: _searchController,
-                                        showSearchButton: false,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Wrap(
-                                        direction: Axis.horizontal,
-                                        spacing: orientation == Orientation.landscape ? 16 : 8,
-                                        children: [
-                                            OutlinedButton.icon(
-                                                onPressed: () => context.push("/recent"),
+        return Scaffold(
+            appBar: AppBar(
+                // title: const Text("Home"),
+                actions: [
+                    IconButton(
+                        icon: const Icon(Icons.add),
+                        tooltip: "Add image",
+                        onPressed: () => context.push("/manage_image")
+                    ),
+                    const BrowseScreenPopupMenuButton()
+                ],
+            ),
+            drawer: MediaQuery.of(context).orientation == Orientation.portrait ? const Drawer(child: DefaultDrawer()) : null,
+            body: OrientationBuilder(
+                builder: (context, orientation) => LayoutBuilder(
+                    builder: (context, constraints) => SingleChildScrollView(
+                        child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            constraints: BoxConstraints(minWidth: constraints.maxWidth, minHeight: constraints.maxHeight),
+                            child: IntrinsicHeight(
+                                child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                        const SizedBox(height: 64),
+                                        const LocalBooruHeader(),
+                                        const SizedBox(height: 32),
+                                        SearchTag(
+                                            onSearch: (_) => _onSearch(),
+                                            controller: _searchController,
+                                            hint: "Type a tag",
+                                        ),
+                                        const SizedBox(height: 16),
+                                        Wrap(
+                                            direction: Axis.horizontal,
+                                            spacing: 8,
+                                            children: [
+                                                OutlinedButton.icon(
+                                                    onPressed: () => context.push("/recent"),
                                                     label: const Text("Recent posts"),
-                                                icon: const Icon(Icons.history)
-                                            ),
-                                            orientation == Orientation.landscape ? FilledButton.icon(
-                                                onPressed: _onSearch,
-                                                label: const Text("Search"),
-                                                icon: const Icon(Icons.search)
-                                            ) : IconButton.filled(
+                                                    icon: const Icon(Icons.history),
+                                                    style: orientation == Orientation.portrait ? OutlinedButton.styleFrom(
+                                                        minimumSize: const Size(0, 48)
+                                                    ) : null,
+                                                ),
+                                                orientation == Orientation.landscape ? FilledButton.icon(
                                                     onPressed: _onSearch,
-                                                icon: const Icon(Icons.search),
-                                                // color: Theme.of(context).colorScheme.primary,
-                                            ),
-                                        ],
-                                    ),
-                                    const SizedBox(height: 32),
-                                    const ImageDisplay(),
-                                    const SizedBox(height: 16),
-                                    const Spacer(),
-                                    BooruLoader(
-                                        builder: (context, booru) => SelectableText(booru.path,
-                                            style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                                color: Theme.of(context).hintColor
+                                                    label: const Text("Search"),
+                                                    icon: const Icon(Icons.search)
+                                                ) : IconButton.filled(
+                                                        onPressed: _onSearch,
+                                                    icon: const Icon(Icons.search),
+                                                    // color: Theme.of(context).colorScheme.primary,
+                                                ),
+                                            ],
+                                        ),
+                                        const SizedBox(height: 56),
+                                        const ImageDisplay(),
+                                        const SizedBox(height: 16),
+                                        const Spacer(),
+                                        BooruLoader(
+                                            builder: (context, booru) => SelectableText(booru.path,
+                                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                                    color: Theme.of(context).hintColor
+                                                ),
                                             ),
                                         ),
-                                    ),
-                                ]
-                            ),
+                                    ]
+                                ),
+                            )
                         )
                     )
-                );
-            });
-        });
+                )
+            ),
+        );
     }
 }
 
 class SearchTag extends StatefulWidget {
-    const SearchTag({super.key, this.defaultText = "", required this.onSearch, this.controller, this.isFullScreen, this.showSearchButton = true});
+    const SearchTag({super.key, this.hint, required this.onSearch, this.controller, this.isFullScreen, this.actions, this.showShadow = false, this.leading = const Icon(Icons.search), this.padding = const EdgeInsets.only(left: 16.0, right: 10.0), this.backgroundColor, this.elevation});
 
-    final String defaultText;
+    final String? hint;
     final Function(String value) onSearch;
     final SearchController? controller;
     final bool? isFullScreen;
-    final bool showSearchButton;
+    final List<Widget>? actions;
+    final bool showShadow;
+    final Widget? leading;
+    final EdgeInsetsGeometry? padding;
+    final Color? backgroundColor;
+    final double? elevation;
 
     @override
     State<SearchTag> createState() => _SearchTagState();
@@ -110,48 +137,54 @@ class _SearchTagState extends State<SearchTag> {
             searchController: _controller,
             builder: (context, controller) => SearchBar(
                 controller: controller,
-                hintText: "Type a tag",
-                padding: const MaterialStatePropertyAll<EdgeInsets>(
-                    EdgeInsets.only(left: 16.0, right: 10.0)
-                ),
+                hintText: widget.hint,
+                padding: MaterialStatePropertyAll(widget.padding),
                 onSubmitted: widget.onSearch,
                 onTap: controller.openView,
                 onChanged: (_) => controller.openView(),
-                leading: const Icon(Icons.search),
+                leading: widget.leading,
                 trailing: [
-                    if(controller.text.isNotEmpty) IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
-                    if(widget.showSearchButton) SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
-                ]
+                    // if(controller.text.isNotEmpty) IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
+                    if(widget.actions == null) SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
+                    else ...widget.actions!
+                ],
+                elevation: MaterialStatePropertyAll(widget.elevation),
+                shadowColor: widget.showShadow ? null : const MaterialStatePropertyAll(Colors.transparent),
+                backgroundColor: MaterialStatePropertyAll<Color?>(widget.backgroundColor),
             ),
             suggestionsBuilder: (context, controller) async {
                 Booru booru = await getCurrentBooru();
                 List<String> tags = await booru.getAllTags();
                 final currentTags = List<String>.from(controller.text.split(" "));
 
-                final filteredTags = List<String>.from(tags)..retainWhere((s){
-                    return s.contains(currentTags.last) && !currentTags.contains(s);
+                final filteredTags = List<String>.from(tags)..addAll(tagsToAddToSearch)..retainWhere((s){
+                    return currentTags.last.isEmpty || s.contains(TagText(currentTags.last).text);
                 });
 
-                var specialTags = await booru.separateTagsByType(filteredTags);
-                specialTags["meta"] = tagsToAddToSearch;
+                final specialTags = await booru.separateTagsByType(filteredTags);
 
-                return specialTags.entries.map((type) => type.value.map((tag) => ListTile(
-                    title: Text(tag,
-                        style: TextStyle(
-                            color: !(type.key == "meta") ? SpecificTagsColors.getColor(type.key) : null,
-                            fontWeight: type.key == "meta" ? FontWeight.bold : null
+                return specialTags.entries.map((type) => type.value.map((tag) {
+                    final isMetatag = tag.contains(":") && tag.split(":").first.isNotEmpty;
+                    final color = !isMetatag ? SpecificTagsColors.getColor(type.key) : null;
+                    return ListTile(
+                        leading: Icon(!isMetatag ? SpecificTagsIcons.getIcon(type.key) : Icons.lightbulb, color: color,),
+                        title: Text(tag,
+                            style: TextStyle(
+                                color: color,
+                                fontWeight: isMetatag ? FontWeight.bold : null
+                            ),
                         ),
-                    ),
-                    onTap: () {
-                        List endResult = List.from(currentTags);
-                        endResult.removeLast();
-                        endResult.add(tag);
-                        setState(() {
-                            if(tag.endsWith(":")) controller.text = endResult.join(" ");
-                            else controller.text = "${endResult.join(" ")} ";
-                        });
-                    },
-                ))).expand((i) => i);
+                        onTap: () {
+                            List endResult = List.from(currentTags);
+                            endResult.removeLast();
+                            endResult.add(tag);
+                            setState(() {
+                                if(isMetatag) controller.text = endResult.join(" ");
+                                else controller.text = "${endResult.join(" ")} ";
+                            });
+                        },
+                    );
+                })).expand((i) => i);
             },
             viewTrailing: [
                 IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
@@ -216,22 +249,48 @@ class LocalBooruHeader extends StatelessWidget {
     }
 }
 
-class ImageDisplay extends StatelessWidget {
+class ImageDisplay extends StatefulWidget {
     const ImageDisplay({super.key});
-    
+
+    @override
+    State<ImageDisplay> createState() => _ImageDisplayState();
+}
+
+class _ImageDisplayState extends State<ImageDisplay> {
+    late Future<int> _futureNumber;
+
+    @override
+    void initState() {
+        super.initState();
+        counterListener.addListener(updateCounter);
+        updateCounter();
+    }
+
+    @override
+    void dispose() {
+        counterListener.removeListener(updateCounter);
+        super.dispose();
+    }
+
+    void updateCounter() async {
+        setState(() {
+            _futureNumber = (() async => (await getCurrentBooru()).getListLength())();
+        });
+    }
+
     @override
     Widget build(context) {
-        return BooruLoader(
-            builder: (context, booru) => FutureBuilder(
-                future: booru.getListLength(),
+        return SharedPreferencesBuilder(
+            builder: (context, prefs) => FutureBuilder(
+                future: _futureNumber,
                 builder: (context, snapshot) {
-                    if(snapshot.hasData) {
-                        return Text("With ${snapshot.data} posts");
+                     if(snapshot.hasData) {
+                        return StyleCounter(number: snapshot.data!, display: prefs.getString("counter") ?? settingsDefaults["counter"],);
                     }
                     if(snapshot.hasError) throw snapshot.error!;
                     return const CircularProgressIndicator();
                 },
-            ),
+            )
         );
     }
 }

@@ -11,7 +11,7 @@ Future<AccuracyTagList> autoTag(File file) async {
     http.Response response = await http.Response.fromStream(await req.send());
 
     // process it
-    final AccuracyTagList tags = AccuracyTagList.from(jsonDecode(response.body)[0]["tags"])..removeWhere((tag, _) => tag.contains(":"));
+    final AccuracyTagList tags = AccuracyTagList.from(jsonDecode(response.body)[0]["tags"])..removeWhere((tag, _) => TagText(tag).isMetatag());
     return tags;
 }
 
@@ -40,7 +40,10 @@ class TagText {
         return null;
     }
 
-    bool isMetatag() => text.contains(":");
+    bool isMetatag() {
+        final split = text.split(":");
+        return split.length == 2 && split.first.isNotEmpty && split.last.isNotEmpty;
+    }
 }
 
 class Metatag {

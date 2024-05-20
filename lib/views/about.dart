@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:localbooru/components/window_frame.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:yaml/yaml.dart';
@@ -17,10 +16,7 @@ class _AboutScreenState extends State<AboutScreen>{
     @override
     Widget build(BuildContext context) {
         return Scaffold (
-            appBar: WindowFrameAppBar(
-                title: "About",
-                appBar: AppBar()
-            ),
+            appBar: AppBar(),
             body: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Center(
