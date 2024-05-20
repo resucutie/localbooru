@@ -376,14 +376,14 @@ class _AppState extends State<App> {
         if(isMobile()) {
             //shared media
             // Listen to media sharing coming from outside the app while the app is in the memory.
-            _intentSub = ReceiveSharingIntent.getMediaStream().listen(onShare, onError: (err) {
+            _intentSub = ReceiveSharingIntent.instance.getMediaStream().listen(onShare, onError: (err) {
                 debugPrint("getIntentDataStream error: $err");
             });
 
             // Get the media sharing coming from outside the app while the app is closed.
-            ReceiveSharingIntent.getInitialMedia().then((value) async {
+            ReceiveSharingIntent.instance.getInitialMedia().then((value) async {
                 if(value.isNotEmpty) await onShare(value);
-                ReceiveSharingIntent.reset();
+                ReceiveSharingIntent.instance.reset();
             });
         }
     }
