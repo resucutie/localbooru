@@ -75,6 +75,7 @@ dependencies:
   sliver_tools: ^0.2.12
   local_auth: ^2.2.0
   device_info_plus: ^10.1.0
+  flutter_windowmanager: ^0.2.0
 dependency_overrides:
   media_kit_native_event_loop:
     git:

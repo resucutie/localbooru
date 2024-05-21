@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
@@ -53,8 +54,14 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
         )) return;
 
         if(state != AppLifecycleState.resumed) {
-            enableLock();
+            await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+            if(state != AppLifecycleState.inactive) {
+                enableLock();
+            }
+        } else {
+            await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
         }
+
     }
 
     @override
