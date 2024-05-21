@@ -1,4 +1,3 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +7,7 @@ import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:window_manager/window_manager.dart';
 
 class DesktopHousing extends StatelessWidget {
     const DesktopHousing({super.key, required this.child, required this.routeUri});
@@ -170,13 +170,15 @@ class DefaultDrawer extends StatelessWidget {
                     ListTile(
                         title: const Text("Desktop size"),
                         onTap: () {
-                            appWindow.size = const Size(1280, 720);
+                            windowManager.setSize(const Size(1280, 720));
+                            // appWindow.size = const Size(1280, 720);
                         },
                     ),
                     ListTile(
                         title: const Text("Phone size"),
                         onTap: () {
-                            appWindow.size = const Size(320, 840);
+                            windowManager.setSize(const Size(320, 840));
+                            // appWindow.size = const Size(320, 840);
                         },
                     ),
                 ]

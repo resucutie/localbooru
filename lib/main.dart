@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/components/builders.dart';
@@ -34,6 +33,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/views/permissions.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:window_manager/window_manager.dart';
 
 Future<bool> hasExternalStoragePerms() async{
     final permission = await getStoragePermission();
@@ -58,7 +58,10 @@ final router = GoRouter(
                 ShellRoute(
                     builder: (context, state, child) => Scaffold(
                         backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                        appBar: isDesktop() ? const WindowFrameAppBar() : null,
+                        appBar: false ? const PreferredSize(
+                            preferredSize: Size.fromHeight(32),
+                            child: WindowFrameAppBar()
+                        ) : null,
                         body: LockScreen(child: child),
                     ),
                     routes: [
@@ -291,18 +294,37 @@ void main() async {
         );
     };
 
+    WidgetsFlutterBinding.ensureInitialized();
+    // Must add this line.
+    if(isDesktop()) {
+        await windowManager.ensureInitialized();
+
+        WindowOptions windowOptions = const WindowOptions(
+            size: Size(1280, 720),
+            minimumSize: Size(420, 260),
+            center: true,
+            backgroundColor: Colors.transparent,
+            skipTaskbar: false,
+            titleBarStyle: TitleBarStyle.normal
+        );
+        windowManager.waitUntilReadyToShow(windowOptions, () async {
+            await windowManager.show();
+            await windowManager.focus();
+        });
+    }
+
     runApp(const App());
 
     MediaKit.ensureInitialized();
 
-    if(isDesktop()) {
-        doWhenWindowReady(() {
-            appWindow.size = const Size(1280, 720);
-            appWindow.minSize = const Size(420, 260);
-            appWindow.alignment = Alignment.center;
-            appWindow.show();
-        });
-    }
+    // if(isDesktop()) {
+    //     doWhenWindowReady(() {
+    //         appWindow.size = const Size(1280, 720);
+    //         appWindow.minSize = const Size(420, 260);
+    //         appWindow.alignment = Alignment.center;
+    //         appWindow.show();
+    //     });
+    // }
 }
 
 class App extends StatefulWidget {
@@ -336,6 +358,7 @@ class _AppState extends State<App> {
                             darkTheme: theme["dark"],
                             themeMode: ThemeMode.values[themeModeIndex], 
                             routerConfig: router,
+                            debugShowCheckedModeBanner: false,
                         );
                     }
                 )

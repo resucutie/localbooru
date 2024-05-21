@@ -44,11 +44,12 @@ class _ImageViewZoomState extends State<ImageViewZoom> {
             child: Scaffold(
                 extendBodyBehindAppBar: true,
                 backgroundColor: Colors.transparent,
-                appBar: isDesktop() ? WindowFrameAppBar(
-                    title: "LocalBooru",
-                    backgroundColor: _appBarColor,
-                    appBar: appBar
-                ) : appBar,
+                // appBar: isDesktop() ? WindowFrameAppBar(
+                //     title: "LocalBooru",
+                //     backgroundColor: _appBarColor,
+                //     appBar: appBar
+                // ) : appBar,
+                appBar: appBar,
                 body: Listener(
                     onPointerSignal:(event) {
                         if(event is PointerScrollEvent) {
