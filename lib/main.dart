@@ -56,17 +56,23 @@ final router = GoRouter(
             },
             routes: [
                 ShellRoute(
-                    builder: (context, state, child) => Scaffold(
-                        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                        appBar: false ? const PreferredSize(
-                            preferredSize: Size.fromHeight(32),
-                            child: WindowFrameAppBar()
-                        ) : null,
-                        body: LockScreen(child: child),
+                    builder: (context, state, child) => SharedPreferencesBuilder(
+                        builder: (context, prefs) => Scaffold(
+                            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                            appBar: prefs.getBool("custom_frame") ?? settingsDefaults["custom_frame"] ? const PreferredSize(
+                                preferredSize: Size.fromHeight(32),
+                                child: WindowFrameAppBar()
+                            ) : null,
+                            body: LockScreen(child: child),
+                        ),
+                        loading: const SizedBox(height: 0,)
                     ),
                     routes: [
                         ShellRoute(
-                            builder: (context, state, child) => MediaQuery.of(context).orientation == Orientation.landscape ? DesktopHousing(routeUri: state.uri, child: child,) : child,
+                            builder: (context, state, child) => MediaQuery.of(context).orientation == Orientation.landscape ? SharedPreferencesBuilder(
+                                builder: (context, prefs) => DesktopHousing(routeUri: state.uri, roundedCorners: prefs.getBool("custom_frame") ?? settingsDefaults["custom_frame"], child: child,),
+                                loading: const SizedBox(height: 0,),
+                            ) : child,
                             routes: [
                                 ShellRoute( //main nav shell
                                     builder: (context, state, child) => AddImageDropRegion(child: child),
@@ -295,21 +301,24 @@ void main() async {
     };
 
     WidgetsFlutterBinding.ensureInitialized();
-    // Must add this line.
+    
     if(isDesktop()) {
         await windowManager.ensureInitialized();
+        final prefs = await SharedPreferences.getInstance();
 
-        WindowOptions windowOptions = const WindowOptions(
-            size: Size(1280, 720),
-            minimumSize: Size(420, 260),
+        WindowOptions windowOptions = WindowOptions(
+            size: const Size(1280, 720),
+            minimumSize: const Size(420, 260),
             center: true,
             backgroundColor: Colors.transparent,
             skipTaskbar: false,
-            titleBarStyle: TitleBarStyle.normal
+            titleBarStyle: prefs.getBool("custom_frame") ?? settingsDefaults["custom_frame"] ? TitleBarStyle.hidden : TitleBarStyle.normal
         );
+
         windowManager.waitUntilReadyToShow(windowOptions, () async {
             await windowManager.show();
             await windowManager.focus();
+
         });
     }
 

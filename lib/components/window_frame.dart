@@ -35,7 +35,6 @@ class WindowFrameAppBar extends StatelessWidget {
                 const WindowButtons()
             ],
         );
-                // if(appBar != null) appBar!,
     }
 }
 

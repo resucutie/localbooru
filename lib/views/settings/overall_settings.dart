@@ -32,6 +32,7 @@ class _OverallSettingsState extends State<OverallSettings> {
     late bool _update;
     late bool _gifVideo;
     late bool _authLock;
+    late bool _customFrame;
     late String _theme;
     late String _counter;
 
@@ -61,6 +62,7 @@ class _OverallSettingsState extends State<OverallSettings> {
         _theme = widget.prefs.getString("theme") ?? settingsDefaults["theme"];
         _counter = widget.prefs.getString("counter") ?? settingsDefaults["counter"];
         _authLock = widget.prefs.getBool("auth_lock") ?? settingsDefaults["auth_lock"];
+        _customFrame = widget.prefs.getBool("custom_frame") ?? settingsDefaults["custom_frame"];
 
         LocalAuthentication().isDeviceSupported().then((value) => setState(() {
             isAuthLockOptionEnabled = value && isMobile();
@@ -217,6 +219,17 @@ class _OverallSettingsState extends State<OverallSettings> {
                         widget.prefs.setBool("monet", value);
                         themeListener.update();
                         setState(() => _monetTheme = value);
+                    }
+                ),
+                if(hasWindowFrameNavigation()) SwitchListTile(
+                    title: const Text("Custom window frame"),
+                    secondary: const Icon(Icons.web_asset),
+                    subtitle: const Text("Show a custom window frame"),
+                    value: _customFrame,
+                    onChanged: (value) {
+                        widget.prefs.setBool("custom_frame", value);
+                        setState(() => _customFrame = value);
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Restart the app to take effect")));
                     }
                 ),
                 ListTile(

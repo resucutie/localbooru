@@ -10,10 +10,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 class DesktopHousing extends StatelessWidget {
-    const DesktopHousing({super.key, required this.child, required this.routeUri});
+    const DesktopHousing({super.key, required this.child, required this.routeUri, this.roundedCorners = false});
 
     final Widget child;
     final Uri routeUri;
+    final bool roundedCorners;
 
     @override
     Widget build(context) {
@@ -30,8 +31,8 @@ class DesktopHousing extends StatelessWidget {
                 // const SizedBox(width: 4),
                 Container(
                     constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 270, maxHeight: MediaQuery.of(context).size.height - 2),
-                    clipBehavior: isDesktop() ? Clip.antiAlias : Clip.none,
-                    decoration: isDesktop() ? const BoxDecoration(
+                    clipBehavior: roundedCorners ? Clip.antiAlias : Clip.none,
+                    decoration: roundedCorners ? const BoxDecoration(
                         borderRadius: BorderRadius.only(topLeft: Radius.circular(28))
                     ) : null,
                     child: child
