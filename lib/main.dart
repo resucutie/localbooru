@@ -35,6 +35,59 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
+void main() async {
+    // custom error screen because release just yeets the error messages in favor of a gray screen
+    ErrorWidget.builder = (FlutterErrorDetails details) {
+        return Material(
+            color: const Color.fromARGB(255, 255, 0, 0),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                    const Text("An error happened:\n"),
+                    Text(details.exception.toString()),
+                    Text(details.stack.toString())
+                ],
+            ),
+        );
+    };
+
+    WidgetsFlutterBinding.ensureInitialized();
+    
+    if(isDesktop()) {
+        await windowManager.ensureInitialized();
+        final prefs = await SharedPreferences.getInstance();
+
+        WindowOptions windowOptions = WindowOptions(
+            size: const Size(1280, 720),
+            minimumSize: const Size(420, 260),
+            center: true,
+            backgroundColor: Colors.transparent,
+            skipTaskbar: false,
+            titleBarStyle: prefs.getBool("custom_frame") ?? settingsDefaults["custom_frame"] ? TitleBarStyle.hidden : TitleBarStyle.normal
+        );
+
+        windowManager.waitUntilReadyToShow(windowOptions, () async {
+            await windowManager.show();
+            await windowManager.focus();
+
+        });
+    }
+
+    runApp(const App());
+
+    MediaKit.ensureInitialized();
+
+    // if(isDesktop()) {
+    //     doWhenWindowReady(() {
+    //         appWindow.size = const Size(1280, 720);
+    //         appWindow.minSize = const Size(420, 260);
+    //         appWindow.alignment = Alignment.center;
+    //         appWindow.show();
+    //     });
+    // }
+}
+
 Future<bool> hasExternalStoragePerms() async{
     final permission = await getStoragePermission();
     if (isMobile()) return await permission.status.isGranted;
@@ -282,59 +335,6 @@ final router = GoRouter(
         ),
     ]
 );
-
-void main() async {
-    // custom error screen because release just yeets the error messages in favor of a gray screen
-    ErrorWidget.builder = (FlutterErrorDetails details) {
-        return Material(
-            color: const Color.fromARGB(255, 255, 0, 0),
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                    const Text("An error happened:\n"),
-                    Text(details.exception.toString()),
-                    Text(details.stack.toString())
-                ],
-            ),
-        );
-    };
-
-    WidgetsFlutterBinding.ensureInitialized();
-    
-    if(isDesktop()) {
-        await windowManager.ensureInitialized();
-        final prefs = await SharedPreferences.getInstance();
-
-        WindowOptions windowOptions = WindowOptions(
-            size: const Size(1280, 720),
-            minimumSize: const Size(420, 260),
-            center: true,
-            backgroundColor: Colors.transparent,
-            skipTaskbar: false,
-            titleBarStyle: prefs.getBool("custom_frame") ?? settingsDefaults["custom_frame"] ? TitleBarStyle.hidden : TitleBarStyle.normal
-        );
-
-        windowManager.waitUntilReadyToShow(windowOptions, () async {
-            await windowManager.show();
-            await windowManager.focus();
-
-        });
-    }
-
-    runApp(const App());
-
-    MediaKit.ensureInitialized();
-
-    // if(isDesktop()) {
-    //     doWhenWindowReady(() {
-    //         appWindow.size = const Size(1280, 720);
-    //         appWindow.minSize = const Size(420, 260);
-    //         appWindow.alignment = Alignment.center;
-    //         appWindow.show();
-    //     });
-    // }
-}
 
 class App extends StatefulWidget {
     const App({super.key});
