@@ -1,27 +1,19 @@
 import 'dart:io';
 
-import 'package:dotted_border/dotted_border.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/app_bar_linear_progress.dart';
-import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
-import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/headers.dart';
-import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/components/dialogs/radio_dialogs.dart';
-import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/views/image_manager/image_upload.dart';
 import 'package:localbooru/views/image_manager/list_string_text_input.dart';
 import 'package:localbooru/views/image_manager/preset/index.dart';
 import 'package:localbooru/views/image_manager/related_images.dart';
 import 'package:localbooru/views/image_manager/tagfield.dart';
-import 'package:mime/mime.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageManagerView extends StatefulWidget {

@@ -1,7 +1,5 @@
 import 'dart:math' as m;
 
-import 'package:window_manager/window_manager.dart';
-
 String formatSize(int bytes) {
     const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
     var i = (m.log(bytes) / m.log(1000)).floor();

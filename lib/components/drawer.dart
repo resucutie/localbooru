@@ -5,7 +5,6 @@ import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/components/dialogs/textfield_dialogs.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
-import 'package:localbooru/utils/platform_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
