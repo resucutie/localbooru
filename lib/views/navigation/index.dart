@@ -1,10 +1,10 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/views/image_manager/preset_api.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
@@ -89,8 +89,8 @@ class _AddImageDropRegionState extends State<AddImageDropRegion> {
 
                 // late StreamSubscription ss;
                 reader.getFile(insertedFormat, (file) async {
-                        final fileExtension = insertedFormat.mimeTypes!.first.split("/")[1];
-                    final mmm = await cache.putFileStream("drag&Drop${file.fileName ?? ""}${file.fileSize}", file.getStream(), fileExtension: fileExtension);
+                    final fileExtension = insertedFormat.mimeTypes!.first.split("/")[1];
+                    final mmm = await DefaultCacheManager().putFileStream("drag&Drop${file.fileName ?? ""}${file.fileSize}", file.getStream(), fileExtension: fileExtension);
                     debugPrint(mmm.path);
                     if(context.mounted) GoRouter.of(context).pushNamed("drag_path", pathParameters: {"path": mmm.path});
                 }, onError: (error) {

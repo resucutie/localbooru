@@ -23,13 +23,16 @@ class _InsertURLDialogState extends State<InsertURLDialog> {
 
     @override
     Widget build(context) {
+        final website = getWebsiteByURL(Uri.parse(controller.text));
         return AlertDialog(
             title: const Text("Import from service"),
             content: Container(
                 constraints: const BoxConstraints(minWidth: 600),
                 child: TextField(
                     controller: controller,
-                    decoration: InputDecoration(icon: getWebsiteIcon(Uri.parse(controller.text))),
+                    decoration: InputDecoration(
+                        icon: website != null ? getWebsiteIcon(website) : null,
+                    ),
                     onSubmitted: (_) {
                         if(allowedToSend()) importFromService();
                     },

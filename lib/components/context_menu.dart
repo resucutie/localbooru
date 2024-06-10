@@ -186,7 +186,7 @@ class ServiceActionsDialogue extends StatelessWidget {
             ].map((e) => SimpleDialogOption(
                 onPressed: () => Navigator.of(context).pop(e[0]),
                 child: ListTile(
-                    leading: getWebsiteIcon(Uri.parse(e[1])) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
+                    leading: getWebsiteIcon(getWebsiteByURL(Uri.parse(e[1]))!) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
                     title: Text(e[0]),
                 ),
             )).toList(),

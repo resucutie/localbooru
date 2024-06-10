@@ -375,6 +375,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                     context: context,
                                     tiles: widget.image.sources.map((url) {
                                         final uri = Uri.parse(url);
+                                        final website = getWebsiteByURL(uri);
                                         return MouseRegion(
                                             cursor: SystemMouseCursors.click,
                                             child: GestureDetector(
@@ -382,9 +383,9 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                 onLongPressDown: (details) => longPress = details,
                                                 onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: ro), url: url),
                                                 child: ListTile(
-                                                    leading: getWebsiteIcon(uri) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
+                                                    leading: website != null ? getWebsiteIcon(website) : Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
                                                     onTap: () => launchUrlString(url),
-                                                    title: SmallHeader(getWebsiteFormalType(uri) ?? uri.host, padding: EdgeInsets.zero,),
+                                                    title: SmallHeader(website != null ? getWebsiteName(website) : uri.host, padding: EdgeInsets.zero,),
                                                     subtitle: Text(url)
                                                 ),
                                             )

@@ -1,62 +1,4 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:http/http.dart' as http;
-import 'package:localbooru/api/index.dart';
-import 'package:html/parser.dart' show parse;
-import 'package:localbooru/utils/get_meta_property.dart';
-import 'package:localbooru/utils/get_website.dart';
-import 'package:mime/mime.dart';
-import 'package:string_validator/string_validator.dart';
-
-final cache = DefaultCacheManager();
-
-
-class PresetImage {
-    const PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages});
-
-    final File? image;
-    final Map<String, List<String>>? tags;
-    final List<String>? sources;
-    final Rating? rating;
-    final ImageID? replaceID;
-    final List<ImageID>? relatedImages;
-
-    static Future<PresetImage> fromExistingImage(BooruImage image) async {
-        final Booru booru = await getCurrentBooru();
-        
-        return PresetImage(
-            image: File(image.path),
-            sources: image.sources,
-            tags: await booru.separateTagsByType(image.tags.split(" ")),
-            rating: image.rating,
-            replaceID: image.id,
-            relatedImages: image.relatedImages
-        );
-    }
-
-    static Future<PresetImage> urlToPreset(String url) async {
-        if(await File(url).exists()) return PresetImage(image: File(url));
-        
-        if(!isURL(url)) throw "Not a URL";
-
-        Uri uri = Uri.parse(url);
-        final preset = switch (getWebsite(uri)) {
-            "danbooru1" => await danbooru1ToPreset(url),
-            "danbooru2" => await danbooru2ToPreset(url),
-            "e621" => await e621ToPreset(url),
-            "gelbooru2" => await gelbooruToPreset(url),
-            "twitter" => await twitterToPreset(url),
-            "furaffinity" => await furaffinityToPreset(url),
-            "deviantart" => await deviantartToPreset(url),
-            // "instagram" => await instagramToPreset(url),
-            _ => await anyURLToPreset(url)
-        };
-        return preset;
-    }
-}
+part of "../index.dart";
 
 // danbooru 2: if you add .json at the end of the post url, it'll return the JSON of that post
 Future<PresetImage> danbooru2ToPreset(String url) async {
@@ -64,7 +6,7 @@ Future<PresetImage> danbooru2ToPreset(String url) async {
     final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final bodyRes = jsonDecode(res.body);
 
-    final downloadedFileInfo = await cache.downloadFile(bodyRes["file_url"]);
+    final downloadedFileInfo = await presetCache.downloadFile(bodyRes["file_url"]);
 
     return PresetImage(
         image: downloadedFileInfo.file,
@@ -86,7 +28,7 @@ Future<PresetImage> danbooru1ToPreset(String url) async {
     final res = await http.get(Uri.parse("${[uri.origin, "post.json?tags=id:$postID"].join("/")}.json"));
     final post = jsonDecode(res.body)[0];
 
-    final downloadedFileInfo = await cache.downloadFile(post["file_url"]);
+    final downloadedFileInfo = await presetCache.downloadFile(post["file_url"]);
 
     final webpage = await http.get(uri);
     final document = parse(webpage.body);
@@ -125,7 +67,7 @@ Future<PresetImage> e621ToPreset(String url) async {
     final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final postRes = jsonDecode(res.body)["post"];
 
-    final downloadedFileInfo = await cache.downloadFile(postRes["file"]["url"]);
+    final downloadedFileInfo = await presetCache.downloadFile(postRes["file"]["url"]);
 
     return PresetImage(
         image: downloadedFileInfo.file,
@@ -203,7 +145,7 @@ Future<PresetImage> gelbooruToPreset(String url) async {
         imageURL = post["file_url"];
     }
 
-    final downloadedFileInfo = await cache.downloadFile(imageURL);
+    final downloadedFileInfo = await presetCache.downloadFile(imageURL);
 
     return PresetImage(
         image: downloadedFileInfo.file,
@@ -214,97 +156,5 @@ Future<PresetImage> gelbooruToPreset(String url) async {
             "character": List<String>.from(tagList["character"]!),
             "copyright": List<String>.from(tagList["copyright"]!),
         }
-    );
-}
-
-// twitter: fxtwitter offers a url to give only the image. getting the artist is as easy as reading the first path segment
-Future<PresetImage> twitterToPreset(String url) async {
-    Uri uri = Uri.parse(url);
-    // final res = await http.get(Uri.parse(["https://d.fxtwitter.com", uri.path].join()));
-
-    final downloadedFileInfo = await cache.downloadFile(["https://d.fxtwitter.com", uri.path].join());
-    
-    return PresetImage(
-        image: downloadedFileInfo.file,
-        sources: [["https://x.com", uri.path].join("")],
-        tags: {
-            "artist": List<String>.from([uri.pathSegments[0].toLowerCase()]),
-        }
-    );
-}
-
-// twitter: instafix offers a url to give only the image. getting the artist is as easy as reading the first path segment
-Future<PresetImage> instagramToPreset(String url) async {
-    Uri uri = Uri.parse(url);
-    final fxReq = http.Request("Get", Uri.parse(["https://ddinstagram.com", uri.path].join()))..followRedirects = false;
-    final title = getMetaProperty(parse(fxReq.body), property: "twitter:title");
-
-    debugPrint(fxReq.body);
-
-    final downloadedFileInfo = await cache.downloadFile(["https://d.ddinstagram.com", uri.path].join());
-
-    debugPrint(downloadedFileInfo.file.path);
-    
-    return PresetImage(
-        image: downloadedFileInfo.file,
-        sources: [["https://instagram.com", uri.path].join("")],
-        tags: {
-            "artist": title != null ? [title.substring(1)] : [],
-        }
-    );
-}
-
-// furaffinity: it doesn't offer an api, but fxraffinity exists, and it bypasses the nsfw sign up wall, so we can extract its embed to
-// obtain its image. the url nor fxraffinity's embed gives any clue about the poster, but furryaffinity's website title, as well as its
-// embed title gives, so we just fetch those (and also bypasses the nsfw sign up wall)
-Future<PresetImage> furaffinityToPreset(String url) async {
-    Uri uri = Uri.parse(url);
-    final fxReq = http.Request("Get", Uri.parse(["https://fxraffinity.net", uri.path, "?full"].join()))..followRedirects = false;
-    final res = await http.Response.fromStream(await http.Client().send(fxReq));
-    final websiteRes = await http.get(Uri.parse(["https://furaffinity.net", uri.path].join()));
-
-    final fileUrl = getMetaProperty(parse(res.body), property: "og:image");
-    if(fileUrl == null) throw "Could not grab image";
-
-    final title = getMetaProperty(parse(websiteRes.body), property: "og:title");
-
-    final downloadedFileInfo = await cache.downloadFile(fileUrl);
-    
-    return PresetImage(
-        image: downloadedFileInfo.file,
-        sources: [["https://furaffinity.net", uri.path].join()],
-        tags: {
-            "artist": title != null ? [title.split(" ").last.toLowerCase()] : [],
-        }
-    );
-}
-
-// devianart: use their oEmbed API
-Future<PresetImage> deviantartToPreset(String url) async {
-    final res = await http.get(Uri.parse(["https://backend.deviantart.com/oembed?url=", url].join()));
-    final json = jsonDecode(res.body);
-
-    final downloadedFileInfo = await cache.downloadFile(json["url"]);
-    
-    return PresetImage(
-        image: downloadedFileInfo.file,
-        sources: [url],
-        tags: {
-            "artist": [json["author_name"].toLowerCase()],
-        }
-    );
-}
-
-// devianart: use their oEmbed API
-Future<PresetImage> anyURLToPreset(String url) async {
-    final downloadedFileInfo = await cache.downloadFile(url);
-
-    final mime = lookupMimeType(downloadedFileInfo.file.basename)!;
-
-    if(!(mime.startsWith("image/") || mime.startsWith("video/"))) throw "Unknown file type";
-    
-    return PresetImage(
-        image: downloadedFileInfo.file,
-        sources: [url],
     );
 }

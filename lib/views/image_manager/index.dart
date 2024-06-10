@@ -18,7 +18,7 @@ import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/views/image_manager/image_upload.dart';
 import 'package:localbooru/views/image_manager/list_string_text_input.dart';
-import 'package:localbooru/views/image_manager/preset_api.dart';
+import 'package:localbooru/views/image_manager/preset/index.dart';
 import 'package:localbooru/views/image_manager/related_images.dart';
 import 'package:localbooru/views/image_manager/tagfield.dart';
 import 'package:mime/mime.dart';
