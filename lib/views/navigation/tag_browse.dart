@@ -10,6 +10,7 @@ import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
+import 'package:localbooru/views/image_manager/preset/index.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -188,8 +189,8 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                     actions: [
                                                         if(_selectedImages.length == 1) IconButton(
                                                             icon: const Icon(Icons.edit),
-                                                            onPressed: () {
-                                                                context.push("/manage_image/internal/${_selectedImages[0]}");
+                                                            onPressed: () async {
+                                                                context.push("/manage_image", extra: await PresetImage.fromExistingImage(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0])));
                                                                 setState(() => _selectedImages = []);
                                                             },
                                                         ),

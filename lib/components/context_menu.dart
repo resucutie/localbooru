@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/utils/get_website.dart';
 import 'package:localbooru/utils/listeners.dart';
+import 'package:localbooru/views/image_manager/preset/index.dart';
 import 'package:open_file/open_file.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:super_clipboard/super_clipboard.dart';
@@ -52,7 +53,7 @@ List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildConte
     return [
         PopupMenuItem(
             child: const Text("Edit image metadata"),
-            onTap: () => context.push("/manage_image/internal/${image.id}")
+            onTap: () async => context.push("/manage_image", extra: await PresetImage.fromExistingImage(image))
         ),
         PopupMenuItem(
             child: Text("Delete image", style: TextStyle(color: Theme.of(context).colorScheme.error)),
