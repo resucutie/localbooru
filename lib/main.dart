@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +11,6 @@ import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
 import 'package:localbooru/views/about.dart';
-import 'package:localbooru/views/image_manager/peripherals.dart';
 import 'package:localbooru/views/image_manager/preset/index.dart';
 import 'package:localbooru/views/image_manager/index.dart';
 import 'package:localbooru/views/lock.dart';
@@ -207,63 +205,7 @@ final router = GoRouter(
                                             // shouldOpenRecents: true,
                                             preset: state.extra as PresetImage?,
                                         );
-                                    },
-                                    // routes: [
-                                    //     // GoRoute(path: "internal/:id",
-                                    //     //     builder: (context, state) {
-                                    //     //         final String? id = state.pathParameters["id"];
-                                    //     //         if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
-                                    //     //         return BooruLoader( builder: (_, booru) => BooruImageLoader(
-                                    //     //             booru: booru,
-                                    //     //             id: id,
-                                    //     //             builder: (context, image) {
-                                    //     //                 return FutureBuilder(
-                                    //     //                     future: PresetImage.fromExistingImage(image),
-                                    //     //                     builder: (context, snapshot) {
-                                    //     //                         if(snapshot.hasData) {
-                                    //     //                             return ImageManagerView(preset: snapshot.data);
-                                    //     //                         }
-                                    //     //                         return const Center(child: CircularProgressIndicator());
-                                    //     //                     },
-                                    //     //                 );
-                                    //     //             }
-                                    //     //         ));
-                                    //     //     },
-                                    //     // ),
-                                    //     // GoRoute(path: "path/:path", name:"drag_path",
-                                    //     //     builder: (context, state) {
-                                    //     //         final String? path = state.pathParameters["path"];
-                                    //     //         if(path == null) return const Text("Invalid URL");
-                                    //     //         final file = File(path);
-                                    //     //         if(!File(path).existsSync()) return const Text("Path does not exist");
-                                    //     //         return ImageManagerView(preset: PresetImage(image: file));
-                                    //     //     },
-                                    //     // ),
-                                    //     // GoRoute(path: "url/:url", name:"download_url",
-                                    //     //     builder: (context, state) {
-                                    //     //         final String url = state.pathParameters["url"]!;
-                                    //     //         return FutureBuilder(
-                                    //     //             future: PresetImage.urlToPreset(url),
-                                    //     //             builder: (context, snapshot) {
-                                    //     //                 if(snapshot.hasData) {
-                                    //     //                     return ImageManagerView(preset: snapshot.data);
-                                    //     //                 }
-                                    //     //                 if(snapshot.hasError) {
-                                    //     //                     if(snapshot.error.toString() == "Unknown file type" || snapshot.error.toString() == "Not a URL") {
-                                    //     //                         Future.delayed(const Duration(milliseconds: 1)).then((value) {
-                                    //     //                             context.pop();
-                                    //     //                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
-                                    //     //                         });
-                                    //     //                     } else {
-                                    //     //                         throw snapshot.error!;
-                                    //     //                     }
-                                    //     //                 }
-                                    //     //                 return const ImageManagerLoadingScreen();
-                                    //     //             },
-                                    //     //         );
-                                    //     //     },
-                                    //     // )
-                                    // ]
+                                    }
                                 ),
 
                                 // settings

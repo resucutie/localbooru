@@ -164,7 +164,7 @@ class DefaultDrawer extends StatelessWidget {
                         title: const Text("Go to biometric lock screen"),
                         onTap: () {
                             Scaffold.of(context).closeDrawer();
-                            forceLockScreenListener.forceEnable();
+                            lockListener.lock();
                         },
                     ),
                     ListTile(

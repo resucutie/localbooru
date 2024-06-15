@@ -10,7 +10,6 @@ import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-bool isLocked = false;
 
 class LockScreen extends StatefulWidget{
     const LockScreen({super.key, required this.child});
@@ -28,35 +27,70 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
     void initState() {
         super.initState();
         WidgetsBinding.instance.addObserver(this);
-        forceLockScreenListener.addListener(enableLock);
+        lockListener.addListener(updateUI);
+        importListener.addListener(showImportSnackBar);
     }
 
-    void enableLock() {
-        setState(() {
-            isLocked = true;
-        });
+    void updateUI() {
+        setState(() {});
+    }
+
+    void showImportSnackBar() async {
+        if(importListener.isImporting && lockListener.isLocked) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                dismissDirection: DismissDirection.up,
+                content: const Wrap(
+                    direction: Axis.horizontal,
+                    children: [
+                        Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            child: Text("Importing image"),
+                        ),
+                        ProgressIndicatorTheme(
+                            data: ProgressIndicatorThemeData(linearTrackColor: Colors.transparent),
+                            child: LinearProgressIndicator(),
+                        ),
+                    ],
+                ),
+                margin: EdgeInsets.only(
+                    bottom: MediaQuery.sizeOf(context).height - MediaQuery.viewPaddingOf(context).top - 60,
+                    left: 15,
+                    right: 15
+                ),
+                padding: EdgeInsets.zero,
+                duration: const Duration(days: 365),
+                showCloseIcon: true,
+                behavior: SnackBarBehavior.floating,
+            ));
+        } else {
+            // ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        }
     }
 
     @override
     void dispose() {
         WidgetsBinding.instance.removeObserver(this);
-        forceLockScreenListener.removeListener(enableLock);
+        lockListener.removeListener(updateUI);
+        importListener.removeListener(showImportSnackBar);
         super.dispose();
+    }
+
+    Future<bool> isAuthHideoutEnabled() async {
+        final prefs = await SharedPreferences.getInstance();
+        return isMobile()
+            && (prefs.getBool("auth_lock") ?? settingsDefaults["auth_lock"])
+            && await auth.isDeviceSupported();
     }
 
     @override
     void didChangeAppLifecycleState(AppLifecycleState state) async {
         super.didChangeAppLifecycleState(state);
-        final prefs = await SharedPreferences.getInstance();
-        if(!(isMobile()
-            && (prefs.getBool("auth_lock") ?? settingsDefaults["auth_lock"])
-            && await auth.isDeviceSupported()
-        )) return;
+        if(!(await isAuthHideoutEnabled())) return;
 
         if(state != AppLifecycleState.resumed) {
             await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
             if(state != AppLifecycleState.inactive) {
-                enableLock();
+                lockListener.lock();
             }
         } else {
             await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
@@ -66,7 +100,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
 
     @override
     Widget build(BuildContext context) {
-        return isLocked ? Scaffold (
+        return lockListener.isLocked ? Scaffold(
             body: Center(
                 child: Padding(
                     padding: const EdgeInsets.all(32.0),
@@ -89,7 +123,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
                                         final didAuthenticate = await auth.authenticate(
                                             localizedReason: "Booru is currently locked"
                                         );
-                                        if(didAuthenticate) setState(() => isLocked = false);
+                                        if(didAuthenticate) lockListener.unlock();
                                     } on PlatformException catch (error) {
                                         final String message = switch(error.code) {
                                             auth_error.otherOperatingSystem => "This system shouldn't have any support for authentication lock",

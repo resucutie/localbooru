@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/views/image_manager/preset/index.dart';
 
 class DownloadProgressDialog extends StatefulWidget {
@@ -30,8 +31,8 @@ class _DownloadProgressDialogState extends State<DownloadProgressDialog> {
 Future<PresetImage> openDownloadDialog(String url, {required BuildContext context,}) async {
     final future = PresetImage.urlToPreset(url);
 
-    late BuildContext modalContext;
-    showDialog(
+    BuildContext? modalContext;
+    if(!lockListener.isLocked) showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) {
@@ -40,8 +41,11 @@ Future<PresetImage> openDownloadDialog(String url, {required BuildContext contex
         }
     );
 
+    importListener.updateImportStatus(true);
+
     return await future.whenComplete(() {
-        Navigator.of(modalContext).pop();
+        if(modalContext != null) Navigator.of(modalContext!).pop();
+        importListener.updateImportStatus(false);
     });
 }
 
