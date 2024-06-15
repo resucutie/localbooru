@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/components/builders.dart';
+import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/components/drawer.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
@@ -207,62 +208,62 @@ final router = GoRouter(
                                             preset: state.extra as PresetImage?,
                                         );
                                     },
-                                    routes: [
-                                        // GoRoute(path: "internal/:id",
-                                        //     builder: (context, state) {
-                                        //         final String? id = state.pathParameters["id"];
-                                        //         if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
-                                        //         return BooruLoader( builder: (_, booru) => BooruImageLoader(
-                                        //             booru: booru,
-                                        //             id: id,
-                                        //             builder: (context, image) {
-                                        //                 return FutureBuilder(
-                                        //                     future: PresetImage.fromExistingImage(image),
-                                        //                     builder: (context, snapshot) {
-                                        //                         if(snapshot.hasData) {
-                                        //                             return ImageManagerView(preset: snapshot.data);
-                                        //                         }
-                                        //                         return const Center(child: CircularProgressIndicator());
-                                        //                     },
-                                        //                 );
-                                        //             }
-                                        //         ));
-                                        //     },
-                                        // ),
-                                        // GoRoute(path: "path/:path", name:"drag_path",
-                                        //     builder: (context, state) {
-                                        //         final String? path = state.pathParameters["path"];
-                                        //         if(path == null) return const Text("Invalid URL");
-                                        //         final file = File(path);
-                                        //         if(!File(path).existsSync()) return const Text("Path does not exist");
-                                        //         return ImageManagerView(preset: PresetImage(image: file));
-                                        //     },
-                                        // ),
-                                        GoRoute(path: "url/:url", name:"download_url",
-                                            builder: (context, state) {
-                                                final String url = state.pathParameters["url"]!;
-                                                return FutureBuilder(
-                                                    future: PresetImage.urlToPreset(url),
-                                                    builder: (context, snapshot) {
-                                                        if(snapshot.hasData) {
-                                                            return ImageManagerView(preset: snapshot.data);
-                                                        }
-                                                        if(snapshot.hasError) {
-                                                            if(snapshot.error.toString() == "Unknown file type" || snapshot.error.toString() == "Not a URL") {
-                                                                Future.delayed(const Duration(milliseconds: 1)).then((value) {
-                                                                    context.pop();
-                                                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
-                                                                });
-                                                            } else {
-                                                                throw snapshot.error!;
-                                                            }
-                                                        }
-                                                        return const ImageManagerLoadingScreen();
-                                                    },
-                                                );
-                                            },
-                                        )
-                                    ]
+                                    // routes: [
+                                    //     // GoRoute(path: "internal/:id",
+                                    //     //     builder: (context, state) {
+                                    //     //         final String? id = state.pathParameters["id"];
+                                    //     //         if(id == null || int.tryParse(id) == null) return const Text("Invalid route");
+                                    //     //         return BooruLoader( builder: (_, booru) => BooruImageLoader(
+                                    //     //             booru: booru,
+                                    //     //             id: id,
+                                    //     //             builder: (context, image) {
+                                    //     //                 return FutureBuilder(
+                                    //     //                     future: PresetImage.fromExistingImage(image),
+                                    //     //                     builder: (context, snapshot) {
+                                    //     //                         if(snapshot.hasData) {
+                                    //     //                             return ImageManagerView(preset: snapshot.data);
+                                    //     //                         }
+                                    //     //                         return const Center(child: CircularProgressIndicator());
+                                    //     //                     },
+                                    //     //                 );
+                                    //     //             }
+                                    //     //         ));
+                                    //     //     },
+                                    //     // ),
+                                    //     // GoRoute(path: "path/:path", name:"drag_path",
+                                    //     //     builder: (context, state) {
+                                    //     //         final String? path = state.pathParameters["path"];
+                                    //     //         if(path == null) return const Text("Invalid URL");
+                                    //     //         final file = File(path);
+                                    //     //         if(!File(path).existsSync()) return const Text("Path does not exist");
+                                    //     //         return ImageManagerView(preset: PresetImage(image: file));
+                                    //     //     },
+                                    //     // ),
+                                    //     // GoRoute(path: "url/:url", name:"download_url",
+                                    //     //     builder: (context, state) {
+                                    //     //         final String url = state.pathParameters["url"]!;
+                                    //     //         return FutureBuilder(
+                                    //     //             future: PresetImage.urlToPreset(url),
+                                    //     //             builder: (context, snapshot) {
+                                    //     //                 if(snapshot.hasData) {
+                                    //     //                     return ImageManagerView(preset: snapshot.data);
+                                    //     //                 }
+                                    //     //                 if(snapshot.hasError) {
+                                    //     //                     if(snapshot.error.toString() == "Unknown file type" || snapshot.error.toString() == "Not a URL") {
+                                    //     //                         Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                                    //     //                             context.pop();
+                                    //     //                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
+                                    //     //                         });
+                                    //     //                     } else {
+                                    //     //                         throw snapshot.error!;
+                                    //     //                     }
+                                    //     //                 }
+                                    //     //                 return const ImageManagerLoadingScreen();
+                                    //     //             },
+                                    //     //         );
+                                    //     //     },
+                                    //     // )
+                                    // ]
                                 ),
 
                                 // settings
@@ -404,7 +405,21 @@ class _AppState extends State<App> {
             if(uri == null) return;
             await Future.delayed(const Duration(milliseconds: 500));
             final routerContext = router.routerDelegate.navigatorKey.currentContext;
-            if(routerContext != null && routerContext.mounted) routerContext.pushNamed("download_url", pathParameters: {"url": uri.toString()});
+            if(routerContext != null && routerContext.mounted) {
+                openDownloadDialog(text, context: routerContext)
+                    .then((preset) {
+                        routerContext.push("/manage_image", extra: preset);
+                    })
+                    .onError((error, stack) {
+                        if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {
+                            Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
+                            });
+                        } else {
+                            throw error!;
+                        }
+                    });
+            }
         }
 
         if(isMobile()) {

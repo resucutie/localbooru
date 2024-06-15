@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/components/dialogs/textfield_dialogs.dart';
 import 'package:localbooru/utils/constants.dart';
@@ -103,14 +104,30 @@ class DefaultDrawer extends StatelessWidget {
                     title: const Text("Import from service"),
                     leading: const Icon(Icons.link),
                     enabled: activeView != "manage_image",
-                    onTap: () {
-                        Scaffold.of(context).closeDrawer();
-                        showDialog(
+                    onTap: () async {
+                        final url = await showDialog<String>(
                             context: context,
                             builder: (context) {
                                 return const InsertURLDialog();
                             },
                         );
+                        if(url != null && context.mounted) {
+                            openDownloadDialog(url, context: context)
+                                .then((preset) {
+                                    GoRouter.of(context).push("/manage_image", extra: preset);
+                                })
+                                .onError((error, stack) {
+                                    if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {
+                                        Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
+                                        });
+                                    } else {
+                                        throw error!;
+                                    }
+                                }).whenComplete(() {
+                                    Scaffold.of(context).closeDrawer();
+                                });
+                        }
                     },
                 ),
                 ListTile(
@@ -180,7 +197,7 @@ class DefaultDrawer extends StatelessWidget {
                             windowManager.setSize(const Size(320, 840));
                             // appWindow.size = const Size(320, 840);
                         },
-                    ),
+                    )
                 ]
             ],
         );

@@ -10,6 +10,8 @@ import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+bool isLocked = false;
+
 class LockScreen extends StatefulWidget{
     const LockScreen({super.key, required this.child});
 
@@ -20,8 +22,6 @@ class LockScreen extends StatefulWidget{
 }
 
 class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
-    bool isLocked = false;
-
     final LocalAuthentication auth = LocalAuthentication();
 
     @override

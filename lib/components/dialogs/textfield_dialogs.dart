@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 import 'package:localbooru/utils/get_website.dart';
 import 'package:string_validator/string_validator.dart';
 
@@ -13,8 +13,8 @@ class _InsertURLDialogState extends State<InsertURLDialog> {
     TextEditingController controller = TextEditingController();
 
     void importFromService() {
-        context.pushNamed("download_url", pathParameters: {"url": controller.text});
-        Navigator.of(context).pop();
+        // context.pushNamed("download_url", pathParameters: {"url": controller.text});
+        Navigator.of(context).pop(controller.text);
     }
 
     bool allowedToSend() {
