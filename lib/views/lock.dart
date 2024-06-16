@@ -94,8 +94,26 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
             }
         } else {
             await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
+            if(lockListener.isLocked) authToUnlock();
         }
 
+    }
+
+    void authToUnlock() async {
+        try {
+            final didAuthenticate = await auth.authenticate(
+                localizedReason: "Booru is currently locked"
+            );
+            if(didAuthenticate) lockListener.unlock();
+        } on PlatformException catch (error) {
+            final String message = switch(error.code) {
+                auth_error.otherOperatingSystem => "This system shouldn't have any support for authentication lock",
+                auth_error.notAvailable || auth_error.notEnrolled || auth_error.passcodeNotSet => "You don't have any auth system avaiable",
+                auth_error.lockedOut => "You tried too many times. Please wait till your system allows",
+                _ => error.message!
+            };
+            if(context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        }
     }
 
     @override
@@ -118,22 +136,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
                             FilledButton.icon(
                                 label: Text(Random().nextInt(100) == 69 ? "unlok" : "Unlock"),
                                 icon: const Icon(Icons.key),
-                                onPressed: () async {
-                                    try {
-                                        final didAuthenticate = await auth.authenticate(
-                                            localizedReason: "Booru is currently locked"
-                                        );
-                                        if(didAuthenticate) lockListener.unlock();
-                                    } on PlatformException catch (error) {
-                                        final String message = switch(error.code) {
-                                            auth_error.otherOperatingSystem => "This system shouldn't have any support for authentication lock",
-                                            auth_error.notAvailable || auth_error.notEnrolled || auth_error.passcodeNotSet => "You don't have any auth system avaiable",
-                                            auth_error.lockedOut => "You tried too many times. Please wait till your system allows",
-                                            _ => error.message!
-                                        };
-                                        if(context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-                                    }
-                                },
+                                onPressed: authToUnlock,
                             )
                         ]
                     ),
