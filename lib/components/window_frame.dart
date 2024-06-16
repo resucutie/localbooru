@@ -25,6 +25,7 @@ class WindowFrameAppBar extends StatelessWidget {
                             if(await windowManager.isMaximized()) windowManager.unmaximize();
                             else windowManager.maximize();
                         },
+                        onSecondaryTap: windowManager.popUpWindowMenu,
                         child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 6.00, horizontal: 16.00),
                             color: Colors.transparent,

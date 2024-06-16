@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/views/image_manager/preset/index.dart';
 
@@ -21,7 +20,10 @@ class _DownloadProgressDialogState extends State<DownloadProgressDialog> {
             title: Text("Importing"),
             content: SizedBox(
                 width: 500,
-                child: LinearProgressIndicator()
+                child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: LinearProgressIndicator(),
+                )
             ),
 
         );
