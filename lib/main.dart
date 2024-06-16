@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -342,25 +343,44 @@ class _AppState extends State<App> {
 
 
         Future<void> onShare(List<SharedMediaFile> value) async {
-            final String text = value[0].toMap()["path"];
-            final uri = Uri.tryParse(text);
-            if(uri == null) return;
             await Future.delayed(const Duration(milliseconds: 500));
             final routerContext = router.routerDelegate.navigatorKey.currentContext;
+
+            final sharedMedia = value[0];
+
+            debugPrint("hey i have a media");
+
             if(routerContext != null && routerContext.mounted) {
-                openDownloadDialog(text, context: routerContext)
-                    .then((preset) {
-                        routerContext.push("/manage_image", extra: preset);
-                    })
-                    .onError((error, stack) {
-                        if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {
-                            Future.delayed(const Duration(milliseconds: 1)).then((value) {
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
-                            });
-                        } else {
-                            throw error!;
-                        }
-                    });
+                switch(sharedMedia.type) {
+                    case SharedMediaType.file:
+                    case SharedMediaType.image:
+                    case SharedMediaType.video:
+                        routerContext.push("/manage_image", extra: PresetImage(
+                            image: File(sharedMedia.path)
+                        ));
+                        break;
+                    case SharedMediaType.text:
+                    case SharedMediaType.url:
+                        final String text = sharedMedia.path;
+                        final uri = Uri.tryParse(text);
+                        if(uri == null) return;
+                        importImageFromURL(text).then((preset) {
+                            routerContext.push("/manage_image", extra: preset);
+                        })
+                        .onError((error, stack) {
+                            if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {
+                                Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
+                                });
+                            } else {
+                                throw error!;
+                            }
+                        });
+                }
+            } else {
+                Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Could not add URL")));
+                });
             }
         }
 

@@ -30,23 +30,13 @@ class _DownloadProgressDialogState extends State<DownloadProgressDialog> {
     }
 }
 
-Future<PresetImage> openDownloadDialog(String url, {required BuildContext context,}) async {
+// TODO: move this elsewhere
+Future<PresetImage> importImageFromURL(String url) async {
     final future = PresetImage.urlToPreset(url);
-
-    BuildContext? modalContext;
-    if(!lockListener.isLocked) showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-            modalContext = context; //horror
-            return const DownloadProgressDialog();
-        }
-    );
 
     importListener.updateImportStatus(true);
 
     return await future.whenComplete(() {
-        if(modalContext != null) Navigator.of(modalContext!).pop();
         importListener.updateImportStatus(false);
     });
 }

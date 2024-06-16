@@ -111,8 +111,8 @@ class DefaultDrawer extends StatelessWidget {
                                 return const InsertURLDialog();
                             },
                         );
-                        if(url != null && context.mounted) {
-                            openDownloadDialog(url, context: context)
+                        if(url != null) {
+                            importImageFromURL(url)
                                 .then((preset) {
                                     GoRouter.of(context).push("/manage_image", extra: preset);
                                 })

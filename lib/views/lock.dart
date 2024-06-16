@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:local_auth/error_codes.dart' as auth_error;
@@ -22,6 +23,8 @@ class LockScreen extends StatefulWidget{
 
 class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
     final LocalAuthentication auth = LocalAuthentication();
+    
+    bool isImportProgressDialogOpen = false;
 
     @override
     void initState() {
@@ -36,34 +39,54 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
     }
 
     void showImportSnackBar() async {
-        if(importListener.isImporting && lockListener.isLocked) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                dismissDirection: DismissDirection.up,
-                content: const Wrap(
-                    direction: Axis.horizontal,
-                    children: [
-                        Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                            child: Text("Importing image"),
-                        ),
-                        ProgressIndicatorTheme(
-                            data: ProgressIndicatorThemeData(linearTrackColor: Colors.transparent),
-                            child: LinearProgressIndicator(),
-                        ),
-                    ],
-                ),
-                margin: EdgeInsets.only(
-                    bottom: MediaQuery.sizeOf(context).height - MediaQuery.viewPaddingOf(context).top - 60,
-                    left: 15,
-                    right: 15
-                ),
-                padding: EdgeInsets.zero,
-                duration: const Duration(days: 365),
-                showCloseIcon: true,
-                behavior: SnackBarBehavior.floating,
-            ));
+        if(importListener.isImporting) {
+            if(lockListener.isLocked) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    dismissDirection: DismissDirection.up,
+                    content: const Wrap(
+                        direction: Axis.horizontal,
+                        children: [
+                            Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                child: Text("Importing image"),
+                            ),
+                            ProgressIndicatorTheme(
+                                data: ProgressIndicatorThemeData(linearTrackColor: Colors.transparent),
+                                child: LinearProgressIndicator(),
+                            ),
+                        ],
+                    ),
+                    margin: EdgeInsets.only(
+                        bottom: MediaQuery.sizeOf(context).height - MediaQuery.viewPaddingOf(context).top - 60,
+                        left: 15,
+                        right: 15
+                    ),
+                    padding: EdgeInsets.zero,
+                    duration: const Duration(days: 365),
+                    showCloseIcon: true,
+                    behavior: SnackBarBehavior.floating,
+                ));
+            } else {
+                debugPrint("setting isImportProgressDialogOpen as true");
+                // BuildContext? modalContext;
+                isImportProgressDialogOpen = true;
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) {
+                        // modalContext = context; //horror
+                        // debugPrint("second $context");
+                        return const DownloadProgressDialog();
+                    }
+                );
+            }
         } else {
-            // ScaffoldMessenger.of(context).removeCurrentSnackBar();
+            debugPrint("hi $isImportProgressDialogOpen");
+            if(isImportProgressDialogOpen) {
+                Navigator.of(context).pop();
+                isImportProgressDialogOpen = false;
+            }
+            ScaffoldMessenger.of(context).removeCurrentSnackBar();
         }
     }
 
