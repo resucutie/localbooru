@@ -3,11 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:localbooru/api/index.dart';
 
 class TagField extends StatefulWidget {
-    const TagField({super.key, this.controller,  this.decoration, this.validator, this.style, this.type = "generic"});
+    const TagField({super.key, this.controller,  this.decoration, this.validator, this.style, this.type = "generic", this.onChanged});
 
     final TextEditingController? controller;
     final InputDecoration? decoration;
     final FormFieldValidator<String>? validator;
+    final void Function(String)? onChanged;
     final TextStyle? style;
     final String type;
 
@@ -100,6 +101,7 @@ class _TagFieldState extends State<TagField> {
                         debugPrint(value);
                         onFieldSubmitted();
                     },
+                    onChanged: widget.onChanged,
                 );
             },
         );

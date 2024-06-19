@@ -92,7 +92,7 @@ class _AddImageDropRegionState extends State<AddImageDropRegion> {
                 reader.getFile(insertedFormat, (file) async {
                     final fileExtension = insertedFormat.mimeTypes!.first.split("/")[1];
                     final draggedFile = await DefaultCacheManager().putFileStream("drag&Drop${file.fileName ?? ""}${file.fileSize}", file.getStream(), fileExtension: fileExtension);
-                    if(context.mounted) GoRouter.of(context).push("/manage_image", extra: PresetImage(image: draggedFile));
+                    if(context.mounted) GoRouter.of(context).push("/manage_image", extra: [PresetImage(image: draggedFile)]);
                 }, onError: (error) {
                     debugPrint('Error reading value $error');
                 });

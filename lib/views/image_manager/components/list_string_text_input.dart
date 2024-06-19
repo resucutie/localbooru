@@ -29,6 +29,10 @@ class _ListStringTextInputState extends State<ListStringTextInput> {
         for (final (index, textController) in _editControllers.indexed) {
             textController.text = _currentValue[index];
         }
+    }
+
+    void _uploadChanges() {
+        _uploadChanges();
         widget.onChanged(_currentValue);
     }
 
@@ -57,12 +61,12 @@ class _ListStringTextInputState extends State<ListStringTextInput> {
                                         controller.dispose();
                                         _currentValue.removeAt(index);
                                         _editControllers.removeAt(index);
-                                        _updateList();
+                                        _uploadChanges();
                                     }), icon: const Icon(Icons.remove))) : null,
                                     validator: widget.formValidator,
                                     onChanged: (value) {
                                         setState(() => _currentValue[index] = value);
-                                        _updateList();
+                                        _uploadChanges();
                                     },
                                     
                                 );
@@ -76,7 +80,7 @@ class _ListStringTextInputState extends State<ListStringTextInput> {
                     leading: const Icon(Icons.add),
                     onTap: () async {
                         setState(() => _currentValue.add(""));
-                        _updateList();
+                        _uploadChanges();
                         Future.delayed(const Duration(milliseconds: 10), () => _scrollController.animateTo(
                             _scrollController.position.maxScrollExtent,
                             duration: const Duration(milliseconds: 150),

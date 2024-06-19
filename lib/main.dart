@@ -13,7 +13,8 @@ import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
 import 'package:localbooru/views/about.dart';
 import 'package:localbooru/api/preset/index.dart';
-import 'package:localbooru/views/image_manager/index.dart';
+import 'package:localbooru/views/image_manager/form.dart';
+import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:localbooru/views/lock.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
@@ -202,9 +203,9 @@ final router = GoRouter(
                                 // image add
                                 GoRoute(path: "manage_image",
                                     builder: (context, state) {
-                                        return ImageManagerView(
+                                        return ImageManagerShell(
                                             // shouldOpenRecents: true,
-                                            preset: state.extra as PresetImage?,
+                                            defaultPresets: state.extra as List<PresetImage>?,
                                         );
                                     }
                                 ),
@@ -355,9 +356,9 @@ class _AppState extends State<App> {
                     case SharedMediaType.file:
                     case SharedMediaType.image:
                     case SharedMediaType.video:
-                        routerContext.push("/manage_image", extra: PresetImage(
+                        routerContext.push("/manage_image", extra: [PresetImage(
                             image: File(sharedMedia.path)
-                        ));
+                        )]);
                         break;
                     case SharedMediaType.text:
                     case SharedMediaType.url:
@@ -365,7 +366,7 @@ class _AppState extends State<App> {
                         final uri = Uri.tryParse(text);
                         if(uri == null) return;
                         importImageFromURL(text).then((preset) {
-                            routerContext.push("/manage_image", extra: preset);
+                            routerContext.push("/manage_image", extra: [preset]);
                         })
                         .onError((error, stack) {
                             if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {
