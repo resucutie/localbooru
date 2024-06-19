@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/views/image_manager/preset/index.dart';
+import 'package:localbooru/api/preset/index.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 

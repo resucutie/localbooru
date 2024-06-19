@@ -11,7 +11,7 @@ import 'package:localbooru/components/dialogs/radio_dialogs.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/views/image_manager/image_upload.dart';
 import 'package:localbooru/views/image_manager/list_string_text_input.dart';
-import 'package:localbooru/views/image_manager/preset/index.dart';
+import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/views/image_manager/related_images.dart';
 import 'package:localbooru/views/image_manager/tagfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,40 +72,24 @@ class _ImageManagerViewState extends State<ImageManagerView> {
     }
 
     void _submit() async {
-        final List<String> genericTags = tagController.text.split(" ");
-        final List<String> artistTags = artistTagController.text.split(" ");
-        final List<String> characterTags = characterTagController.text.split(" ");
-        final List<String> copyrightTags = copyrightTagController.text.split(" ");
-        final List<String> speciesTags = speciesTagController.text.split(" ");
-        final allTags = <String>[
-            ...genericTags,
-            ...artistTags,
-            ...characterTags,
-            ...copyrightTags,
-            ...speciesTags,
-        ].where((e) => e.isNotEmpty).toList();
-
-        // debugPrint(allTags.toString(), wrapWidth: 9999);
-
-        await addImage(
-            imageFile: File(loadedImage),
-            tags: allTags.join(" "),
+        await addImage(PresetImage(
+            image: File(loadedImage),
+            tags: {
+                "generic": tagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
+                "artist": artistTagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
+                "character": characterTagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
+                "copyright": copyrightTagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
+                "species": speciesTagController.text.split(" ").where((e) => e.isNotEmpty).toList()
+            },
             sources: urlList,
             rating: rating,
-            id: widget.preset?.replaceID,
+            replaceID: widget.preset?.replaceID,
             relatedImages: relatedImages
-        );
-        await addSpecificTags(artistTags, type: "artist");
-        await addSpecificTags(characterTags, type: "character");
-        await addSpecificTags(copyrightTags, type: "copyright");
-        await addSpecificTags(speciesTags, type: "species");
-
-        final Booru booru = await getCurrentBooru();
-        await writeSettings(booru.path, await booru.rebaseRaw());
+        ));
 
         if(context.mounted) {
             context.pop();
-            if(!widget.shouldOpenRecents) context.push("/recent");
+            if(true) context.push("/recent");
         }
     }
 

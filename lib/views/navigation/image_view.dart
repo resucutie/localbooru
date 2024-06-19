@@ -14,7 +14,7 @@ import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/get_website.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
-import 'package:localbooru/views/image_manager/preset/index.dart';
+import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/views/navigation/index.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;

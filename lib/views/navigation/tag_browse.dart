@@ -10,7 +10,7 @@ import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
-import 'package:localbooru/views/image_manager/preset/index.dart';
+import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';

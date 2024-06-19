@@ -20,6 +20,8 @@ part 'autodownload/other.dart';
 
 final presetCache = DefaultCacheManager();
 
+
+// presets are essentially a format that represents a BooruImage before it gets added
 class PresetImage {
     const PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages});
 

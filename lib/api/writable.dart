@@ -5,30 +5,39 @@ Future writeSettings(String path, Map raw, {bool notify = true}) async {
     if(notify) booruUpdateListener.update();
 }
 
-Future<BooruImage> addImage({required File imageFile,
-    ImageID? id,
-    String tags = "",
-    Rating? rating,
-    List<String> sources = const [],
-    List<ImageID> relatedImages = const [],
-}) async {
+Future<BooruImage> addImage(PresetImage preset) async {
     final Booru booru = await getCurrentBooru();
 
-    //copy image
+    if(preset.image is! File) throw "Preset does not contain a file";
+
+    // step 1: copy image
     File copiedFile;
-    if(p.dirname(imageFile.path) == p.join(booru.path, "files")) {
-        copiedFile = imageFile;
+    if(p.dirname(preset.image!.path) == p.join(booru.path, "files")) {
+        copiedFile = preset.image!;
     } else {
-        copiedFile = await imageFile.copy(p.join(booru.path, "files", p.basename(imageFile.path)));
+        copiedFile = await preset.image!.copy(p.join(booru.path, "files", p.basename(preset.image!.path)));
     }
 
-    // add to json
+    // step 2: add to json
     Map raw = await booru.getRawInfo();
     List files = raw["files"];
 
-    if(id == null || int.parse(id) > files.length) id = "${files.length}";
+    // determine id
+    String id = preset.replaceID == null || int.parse(preset.replaceID!) > files.length ? "${files.length}" : preset.replaceID!;
 
-    final String? ratingString = switch(rating) {
+    // set up tags
+    if(preset.tags == null) throw "Preset does not contain tags";
+    Set<String> tagSet = {};
+    for (MapEntry<String, List<String>> tagType in preset.tags!.entries) {
+        if(tagType.value.isNotEmpty) {
+            tagSet.addAll(tagType.value); //you can add values to sets
+            debugPrint("${tagType.key} ${tagType.value.length} $tagSet");
+            if(tagType.key != "generic") await addSpecificTags(tagType.value, type: tagType.key);
+        }
+    }
+    
+    // determine rating
+    final String? ratingString = switch(preset.rating) {
         Rating.safe => "safe",
         Rating.questionable => "questionable",
         Rating.explicit => "explicit",
@@ -36,15 +45,17 @@ Future<BooruImage> addImage({required File imageFile,
         _ => null
     };
 
+    // map to push
     Map toPush = {
         "id": id,
         "filename": p.basename(copiedFile.path),
-        "tags": tags,
+        "tags": tagSet.join(" "),
         if(ratingString != null) "rating": ratingString,
-        "sources": sources,
-        "related": relatedImages
+        "sources": preset.sources ?? [],
+        "related": preset.relatedImages ?? []
     };
     
+    // find if inputed id already exists, and if no add to its latest index, otherwise replace element on that id
     int index = files.indexWhere((e) => e["id"] == id);
     if (index < 0) files.add(toPush);
     else files[index] = toPush;

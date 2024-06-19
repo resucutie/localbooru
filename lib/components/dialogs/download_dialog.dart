@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localbooru/utils/listeners.dart';
-import 'package:localbooru/views/image_manager/preset/index.dart';
+import 'package:localbooru/api/preset/index.dart';
 
 class DownloadProgressDialog extends StatefulWidget {
     const DownloadProgressDialog({super.key});
