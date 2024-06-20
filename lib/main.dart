@@ -164,7 +164,7 @@ final router = GoRouter(
                                         //     },
                                         //     routes: [
                                         //     ]
-                                        // ),
+                                        // ), 
                                         GoRoute(path: "view/:id",
                                             builder: (context, state) {
                                                 final String? id = state.pathParameters["id"];
@@ -201,6 +201,7 @@ final router = GoRouter(
 
 
                                 // image add
+                                // i wish i could use shellroute for this but apparently i cant easily without making janky code
                                 GoRoute(path: "manage_image",
                                     builder: (context, state) {
                                         return ImageManagerShell(
@@ -315,7 +316,7 @@ class _AppState extends State<App> {
                             darkTheme: theme["dark"],
                             themeMode: ThemeMode.values[themeModeIndex], 
                             routerConfig: router,
-                            debugShowCheckedModeBanner: false,
+                            debugShowCheckedModeBanner: true,
                         );
                     }
                 )
@@ -348,8 +349,6 @@ class _AppState extends State<App> {
             final routerContext = router.routerDelegate.navigatorKey.currentContext;
 
             final sharedMedia = value[0];
-
-            debugPrint("hey i have a media");
 
             if(routerContext != null && routerContext.mounted) {
                 switch(sharedMedia.type) {
