@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:math' as m;
+
+final _rndSec = m.Random.secure();
 
 String formatSize(int bytes) {
     const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
@@ -54,6 +57,11 @@ class Throttler {
             canRun = true;
         });
     }
+}
+
+String getRandomString(int len) {
+    var values = List<int>.generate(len, (i) =>  _rndSec.nextInt(255));
+    return base64UrlEncode(values);
 }
 
 // int? titleBarHeight;

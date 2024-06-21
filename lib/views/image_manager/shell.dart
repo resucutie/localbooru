@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/components/app_bar_linear_progress.dart';
-import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/views/image_manager/form.dart';
 import 'package:localbooru/views/image_manager/general_collection_manager.dart';
 import 'package:path/path.dart' as p;
@@ -33,7 +32,10 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
     void initState() {
         super.initState();
 
-        presets = widget.defaultPresets ?? [const PresetImage()];
+        presets = (widget.defaultPresets ?? [PresetImage()]).map((preset) {
+            preset.uniqueKey = UniqueKey();
+            return preset;
+        }).toList();
     }
 
     @override
@@ -111,7 +113,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                     FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media);
                                     if (result != null) {
                                         for (PlatformFile file in result.files) {
-                                            if(file.path != null) presets.add(PresetImage(image: File(file.path!)));
+                                            if(file.path != null) presets.add(PresetImage(image: File(file.path!), uniqueKey: UniqueKey()));
                                         }
                                         setState(() => imagePage = presets.length - 1);
                                         _scaffoldKey.currentState!.closeEndDrawer();
@@ -129,7 +131,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                     for (final (index, preset) in presets.indexed) (() {
                         debugPrint("${presets.map((e) => e.image).toList()}");
                         return ImageManagerForm(
-                            key: ValueKey(index), // replace index by something else
+                            key: preset.uniqueKey, // replace index by something else
                             preset: preset,
                             onChanged: (preset) => setState(() => presets[index] = preset),
                             onErrorUpdate: (containsError) {

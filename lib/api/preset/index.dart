@@ -23,7 +23,7 @@ final presetCache = DefaultCacheManager();
 
 // presets are essentially a format that represents a BooruImage before it gets added
 class PresetImage {
-    const PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages});
+    PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages, this.uniqueKey});
 
     final File? image;
     final Map<String, List<String>>? tags;
@@ -31,6 +31,8 @@ class PresetImage {
     final Rating? rating;
     final ImageID? replaceID;
     final List<ImageID>? relatedImages;
+
+    UniqueKey? uniqueKey;
 
     static Future<PresetImage> fromExistingImage(BooruImage image) async {
         final Booru booru = await getCurrentBooru();
