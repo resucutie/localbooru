@@ -28,6 +28,8 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
     int savedImages = 0;
     int imagePage = 0;
 
+    bool isCorelated = false;
+
     @override
     void initState() {
         super.initState();
@@ -36,6 +38,28 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
             preset.uniqueKey = UniqueKey();
             return preset;
         }).toList();
+    }
+
+    void saveImages() async {
+        setState(() => isSaving = true);
+        
+        final booru = await getCurrentBooru();
+        final listLength = await booru.getListLength();
+        final futureImageIDs = presets.asMap().keys.map((e) => "${e + listLength}").toList();
+        
+        for (final (index, preset) in presets.indexed) {
+            debugPrint("isCorelated $isCorelated");
+            debugPrint("presets.length <= 1 ${presets.length <= 1}");
+            if(isCorelated && presets.length > 1) {
+                debugPrint("isCorelated was ran");
+                preset.relatedImages = futureImageIDs.where((e) => e != futureImageIDs[index]).toList();
+            }
+
+            await addImage(preset);
+            setState(() => savedImages++);
+        }
+        
+        if(context.mounted) context.pop();
     }
 
     @override
@@ -55,14 +79,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                         icon: const Icon(Icons.check),
                         label: const Text("Done"),
 
-                        onPressed: !isSaving && !hasError ? () async {
-                            setState(() => isSaving = true);
-                            for (final preset in presets) {
-                                await addImage(preset);
-                                setState(() => savedImages++);
-                            }
-                            if(context.mounted) context.pop();
-                        } : null
+                        onPressed: !isSaving && !hasError ? saveImages : null
                     ),
                 ],
                 bottom: isSaving ? AppBarLinearProgressIndicator(value: savedImages / presets.length,) : null,
@@ -127,9 +144,12 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
             body: IndexedStack(
                 index: imagePage + 1,
                 children: [
-                    const GeneralCollectionManagerScreen(),
+                    GeneralCollectionManagerScreen(
+                        corelated: isCorelated,
+                        onCorelatedChanged: (value) => setState(() => isCorelated = value),
+                    ),
                     for (final (index, preset) in presets.indexed) (() {
-                        debugPrint("${presets.map((e) => e.image).toList()}");
+                        // debugPrint("${presets.map((e) => e.image).toList()}");
                         return ImageManagerForm(
                             key: preset.uniqueKey, // replace index by something else
                             preset: preset,

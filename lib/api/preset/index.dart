@@ -25,12 +25,12 @@ final presetCache = DefaultCacheManager();
 class PresetImage {
     PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages, this.uniqueKey});
 
-    final File? image;
-    final Map<String, List<String>>? tags;
-    final List<String>? sources;
-    final Rating? rating;
-    final ImageID? replaceID;
-    final List<ImageID>? relatedImages;
+    File? image;
+    Map<String, List<String>>? tags;
+    List<String>? sources;
+    Rating? rating;
+    ImageID? replaceID;
+    List<ImageID>? relatedImages;
 
     UniqueKey? uniqueKey;
 
