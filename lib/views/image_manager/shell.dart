@@ -127,7 +127,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                 title: const Text("Add image"),
                                 leading: const Icon(Icons.add),
                                 onTap: () async {
-                                    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media);
+                                    FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
                                     if (result != null) {
                                         for (PlatformFile file in result.files) {
                                             if(file.path != null) presets.add(PresetImage(image: File(file.path!), uniqueKey: UniqueKey()));
