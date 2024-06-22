@@ -5,7 +5,54 @@ Future writeSettings(String path, Map raw, {bool notify = true}) async {
     if(notify) booruUpdateListener.update();
 }
 
-Future<BooruImage> addImage(PresetImage preset) async {
+Map<String, dynamic> rebase(Map<String, dynamic> raw) {
+    // check all files
+    if(raw["files"] == null) raw["files"] = defaultFileInfoJson["files"];
+    List files = raw["files"];
+    for(var (int index, Map file) in files.indexed) {
+        //recount all ids
+        file["id"] = index.toString();
+
+        file["tags"] = (file["tags"] as String).split(" ")
+            .where((tag) => !TagText(tag).isMetatag()) //remove any metatags on the tags
+            .join(" ");
+        file["related"] = (file["related"] ?? []).where((e) => int.tryParse(e) != null && files.elementAtOrNull(int.parse(e) - 1) != null).toList();
+
+        files[index] = file as dynamic;
+    }
+    raw["files"] = files;
+
+    // check specific tags
+    if(raw["specificTags"] == null) {
+        raw["specificTags"] = defaultFileInfoJson["specificTags"];
+    } else {
+        // clean empty types
+        for (final type in raw["specificTags"].keys) {
+            List<String> contents = List.from(raw["specificTags"][type]);
+            contents = contents.where((e) => e.isNotEmpty).toList();
+            raw["specificTags"][type] = contents;
+        }
+    }
+
+    // check collections
+    if(raw["collections"] == null) {
+        raw["collections"] = defaultFileInfoJson["collections"];
+    } else {
+        final List<Map<String, dynamic>> collections = List<Map<String, dynamic>>.from(raw["collections"]);
+        for (var (index, collection) in collections.indexed) {
+            //recount collections
+            collection["id"] = index.toString();
+
+            raw["collections"][index] = collection;
+        }
+    }
+
+    return raw;
+}
+
+
+
+Future<BooruImage> insertImage(PresetImage preset) async {
     final Booru booru = await getCurrentBooru();
 
     if(preset.image is! File) throw "Preset does not contain a file";
@@ -115,37 +162,6 @@ Future<void> addSpecificTags(List<String> tags, {required String type}) async {
     await writeSpecificTags(iLoveDartsTypeSystem);
 }
 
-Map<String, dynamic> rebase(Map<String, dynamic> raw) {
-    // check all files
-    if(raw["files"] == null) raw["files"] = [];
-    List files = raw["files"];
-    for(final (int index, Map file) in files.indexed) {
-        //recount all ids
-        file["id"] = index.toString();
-
-        file["tags"] = (file["tags"] as String).split(" ")
-            .where((tag) => !TagText(tag).isMetatag()) //remove any metatags on the tags
-            .join(" ");
-        file["related"] = (file["related"] ?? []).where((e) => int.tryParse(e) != null && files.elementAtOrNull(int.parse(e) - 1) != null).toList();
-
-        files[index] = file as dynamic;
-    }
-    raw["files"] = files;
-
-    // check specific tags
-    if(raw["specificTags"] == null) {
-        raw["specificTags"] = defaultFileInfoJson["specificTags"];
-    } else {
-        for (final type in raw["specificTags"].keys) {
-            List<String> contents = List.from(raw["specificTags"][type]);
-            contents = contents.where((e) => e.isNotEmpty).toList();
-            raw["specificTags"][type] = contents;
-        }
-    }
-
-    return raw;
-}
-
 Future removeImage(String id, {bool notify = true}) async {
     final Booru booru = await getCurrentBooru();
     final BooruImage? image = await booru.getImage(id);
@@ -163,5 +179,54 @@ Future removeImage(String id, {bool notify = true}) async {
 
     // remove file
     await file.delete();
+
+}
+
+
+
+Future<BooruCollection> insertCollection(PresetCollection preset) async {
+    final Booru booru = await getCurrentBooru();
+
+    if(preset.pages is! List<String>) throw "Preset does not contain pages";
+    if(preset.name == null) throw "Preset does not contain a name";
+
+    Map raw = await booru.getRawInfo();
+    List<Map<String, dynamic>> collections = List<Map<String, dynamic>>.from(raw["collections"]);
+
+    // determine id
+    String id = preset.id == null || int.parse(preset.id!) > collections.length ? "${collections.length}" : preset.id!;
+
+    // map to push
+    Map<String, dynamic> toPush = {
+        "id": id,
+        "pages": preset.pages,
+        "name": preset.name
+    };
+    
+    // find if inputed id already exists, and if no add to its latest index, otherwise replace element on that id
+    int index = collections.indexWhere((e) => e["id"] == id);
+    if (index < 0) collections.add(toPush);
+    else collections[index] = toPush;
+
+    raw["collections"] = collections;
+
+    await writeSettings(booru.path, raw);
+
+    return (await booru.getCollection(id))!;
+}
+
+Future removeCollection(CollectionID id, {bool notify = true}) async {
+    final Booru booru = await getCurrentBooru();
+    final collection = await booru.getCollection(id);
+    if(collection == null) throw "Image $id does not exist";
+
+    // remove file association
+    var raw = await booru.getRawInfo();
+    List collections = raw["collections"];
+
+    collections.removeWhere((e) => e["id"] == id);
+    raw["collections"] = collections;
+    
+    await writeSettings(booru.path, rebase(raw), notify: notify);
 
 }

@@ -21,6 +21,7 @@ final Map<String, dynamic> settingsDefaults = {
 
 final Map<String, dynamic> defaultFileInfoJson = {
     "files": [],
+    "collections": [],
     "specificTags": {
         "artist": [ // general tags
             "unknown_artist",

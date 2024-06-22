@@ -52,7 +52,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                 preset.relatedImages = futureImageIDs.where((e) => e != futureImageIDs[index]).toList();
             }
 
-            await addImage(preset);
+            await insertImage(preset);
             setState(() => savedImages++);
         }
         

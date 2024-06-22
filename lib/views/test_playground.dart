@@ -57,7 +57,7 @@ class _TestPlaygroundScreenState extends State<TestPlaygroundScreen> {
                         child: const Text("test webcrawing"),
                     ),
                     FilledButton(
-                        child: const Text("test collections"),
+                        child: const Text("test read collection"),
                         onPressed: () async {
                             final booru = await getCurrentBooru();
                             final collection = await booru.getCollection("0");
@@ -65,6 +65,35 @@ class _TestPlaygroundScreenState extends State<TestPlaygroundScreen> {
 
                             final foundCollection = await booru.obtainMatchingCollection("1");
                             debugPrint("${foundCollection.map((e) => e.name)}");
+                        },
+                    ),
+                    FilledButton(
+                        child: const Text("test write collection"),
+                        onPressed: () async {
+                            final booru = await getCurrentBooru();
+                            
+                            // creation
+                            final extracted = await insertCollection(PresetCollection(
+                                name: "Created collection",
+                                pages: ["0", "1"]
+                            ));
+                            final idCollection = extracted.id;
+                            BooruCollection? collection = await booru.getCollection(idCollection);
+                            debugPrint("${collection?.pages}");
+
+                            // override
+                            await insertCollection(PresetCollection(
+                                id: idCollection,
+                                name: "Created collection",
+                                pages: ["1", "3"]
+                            ));
+                            collection = await booru.getCollection(idCollection);
+                            debugPrint("${collection?.pages}");
+
+                            // deletion
+                            await removeCollection(idCollection);
+                            collection = await booru.getCollection(idCollection);
+                            debugPrint("$collection");
                         },
                     )
                 ],
