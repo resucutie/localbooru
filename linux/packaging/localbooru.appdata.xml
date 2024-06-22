@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>localbooru</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>GPL3</project_license>
+    <name>LocalBooru</name>
+    <summary>Cross platform local booru collection that exclusively works on local storage, without selfhosting</summary>
+    <description>
+        <p>This is a cross platform local booru collection that exclusively works on your local storage, without selfhosting.</p>
+    </description>
+    <launchable type="desktop-id">localbooru.desktop</launchable>
+    <url type="homepage">https://github.com/leanflutter/flutter_distributor/</url>
+    <screenshots>
+        <screenshot type="default">
+            <image>https://github.com/resucutie/localbooru/blob/dev/assets/promotional/banner%20+%20screenshot.png?raw=true</image>
+        </screenshot>
+    </screenshots>
+    <releases>
+        <release version="1.5.2" date="2024-06-16"/>
+    </releases>
+    <provides>
+        <id>localbooru.desktop</id>
+    </provides>
+    <content_rating type="oars-1.0" />
+    <developer id="io.github.resucutie">
+        <name>A user</name>
+    </developer>
+    <update_contact>resucutie@proton.me</update_contact>
+</component>

@@ -22,3 +22,5 @@ categories:
   - Awesome
 
 startup_notify: true
+
+metainfo: linux/packaging/localbooru.appdata.xml
