@@ -22,13 +22,12 @@ class Booru {
 
 
     Future<BooruImage?> getImage(String id) async {
-        final List files = (await getRawInfo())["files"];
+        final List<Map<String, dynamic>> files = List<Map<String, dynamic>>.from((await getRawInfo())["files"]);
         
         //check if metadata exists
         // if(!files.asMap().containsKey(id)) throw "File of index $id does not exist";
-        var fileToCheck = files.firstWhere((file) => file["id"] == id, orElse: () => null);
+        var fileToCheck = files.firstWhereOrNull((file) => file["id"] == id);
         if(fileToCheck == null) return null;
-        if(fileToCheck is! Map) throw "File  $id doesn't contain valid metadata";
         
         //cehck if metadata is valid
         final metadataToCheck = ["filename", "tags", "id"];
@@ -155,10 +154,36 @@ class Booru {
         result["generic"] = genericList;
         return result;
     }
+
+
+
+    Future<BooruCollection?> getCollection(CollectionID id) async {
+        final List<Map<String, dynamic>> collections = List<Map<String, dynamic>>.from((await getRawInfo())["collections"]);
+
+        final matchingCollection = collections.firstWhereOrNull((collection) => collection["id"] == id);
+        if(matchingCollection == null) return null;
+
+        final metadataToCheck = ["pages", "name", "id"];
+        for (String metadata in metadataToCheck) {
+            if(!matchingCollection.containsKey(metadata)) throw "Collection $id doesn't contain property $metadata";
+        }
+
+        return BooruCollection(
+            pages: List<ImageID>.from(matchingCollection["pages"]),
+            name: matchingCollection["name"] as String,
+            id: id
+        );
+    }
+    Future<List<BooruCollection>> obtainMatchingCollection(ImageID imageID) async {
+        final List<Map<String, dynamic>> collections = List<Map<String, dynamic>>.from((await getRawInfo())["collections"]);
+
+        final foundCollections = collections.where((collection) => List<ImageID>.from(collection["pages"]).contains(imageID));
+
+        return await Future.wait(foundCollections.map((collection) async => (await getCollection(collection["id"] as String))!));
+    }
 }
 
 typedef ImageID = String;
-
 class BooruImage {
     BooruImage({required this.id, required this.path, required this.tags, this.sources = const [], this.rating, this.note, this.relatedImages = const []}) {
         filename = p.basename(path);
@@ -174,6 +199,15 @@ class BooruImage {
     List<ImageID> relatedImages;
 
     File getImage() => File(path);
+}
+
+typedef CollectionID = String;
+class BooruCollection {
+    BooruCollection({required this.pages, required this.name, required this.id});
+
+    List<ImageID> pages;
+    String name;
+    CollectionID id;
 }
 
 enum Rating {safe, questionable, explicit, illegal}

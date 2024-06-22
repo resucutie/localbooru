@@ -76,6 +76,7 @@ dependencies:
   device_info_plus: ^10.1.0
   flutter_windowmanager: ^0.2.0
   window_manager: ^0.3.9
+  collection: ^1.18.0
 dependency_overrides:
   media_kit_native_event_loop:
     git:
