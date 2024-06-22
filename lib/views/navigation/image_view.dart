@@ -12,7 +12,6 @@ import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/components/tag.dart';
 import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/utils/get_website.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/views/navigation/index.dart';

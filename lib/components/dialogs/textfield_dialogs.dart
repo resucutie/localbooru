@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 // import 'package:go_router/go_router.dart';
-import 'package:localbooru/utils/get_website.dart';
+import 'package:localbooru/api/preset/index.dart';
 import 'package:string_validator/string_validator.dart';
 
 class InsertURLDialog extends StatefulWidget {

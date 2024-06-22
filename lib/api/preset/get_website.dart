@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+part of preset;
 
 abstract class Websites {}
 enum ServiceWebsites implements Websites {danbooru1, danbooru2, e621, gelbooru020, gelbooru025, gelbooru01, twitter, furAffinity, deviantArt, instagram}

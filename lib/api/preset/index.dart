@@ -5,11 +5,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:localbooru/api/index.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:localbooru/utils/get_meta_property.dart';
-import 'package:localbooru/utils/get_website.dart';
 import 'package:mime/mime.dart';
 import 'package:string_validator/string_validator.dart';
 
@@ -17,6 +17,7 @@ part 'autodownload/image_boards.dart';
 part 'autodownload/generic.dart';
 part 'autodownload/art_directed.dart';
 part 'autodownload/other.dart';
+part 'get_website.dart';
 
 final presetCache = DefaultCacheManager();
 
