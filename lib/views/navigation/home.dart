@@ -138,7 +138,7 @@ class _SearchTagState extends State<SearchTag> {
             builder: (context, controller) => SearchBar(
                 controller: controller,
                 hintText: widget.hint,
-                padding: MaterialStatePropertyAll(widget.padding),
+                padding: WidgetStatePropertyAll(widget.padding),
                 onSubmitted: widget.onSearch,
                 onTap: controller.openView,
                 onChanged: (_) => controller.openView(),
@@ -148,9 +148,9 @@ class _SearchTagState extends State<SearchTag> {
                     if(widget.actions == null) SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
                     else ...widget.actions!
                 ],
-                elevation: MaterialStatePropertyAll(widget.elevation),
-                shadowColor: widget.showShadow ? null : const MaterialStatePropertyAll(Colors.transparent),
-                backgroundColor: MaterialStatePropertyAll<Color?>(widget.backgroundColor),
+                elevation: WidgetStatePropertyAll(widget.elevation),
+                shadowColor: widget.showShadow ? null : const WidgetStatePropertyAll(Colors.transparent),
+                backgroundColor: WidgetStatePropertyAll<Color?>(widget.backgroundColor),
             ),
             suggestionsBuilder: (context, controller) async {
                 Booru booru = await getCurrentBooru();

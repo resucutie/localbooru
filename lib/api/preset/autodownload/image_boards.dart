@@ -25,7 +25,7 @@ Future<PresetImage> danbooru2ToPreset(String url) async {
 Future<PresetImage> danbooru1ToPreset(String url) async {
     Uri uri = Uri.parse(url);
     final postID = uri.pathSegments[2];
-    final res = await http.get(Uri.parse("${[uri.origin, "post.json?tags=id:$postID"].join("/")}.json"));
+    final res = await http.get(Uri.parse([uri.origin, "post/index.json?tags=id:$postID"].join("/")));
     final post = jsonDecode(res.body)[0];
 
     final downloadedFileInfo = await presetCache.downloadFile(post["file_url"]);

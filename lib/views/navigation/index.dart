@@ -79,23 +79,25 @@ class _AddImageDropRegionState extends State<AddImageDropRegion> {
             },
             onDropLeave: (p0) => setState(() => _isDragAndDrop = false),
             onPerformDrop: (event) async {
-                final item = event.session.items.first;
-                final reader = item.dataReader!;
-                debugPrint("got it, ${item.platformFormats}");
-                
-                final sentFormats = reader.getFormats(SuperFormats.all);
-                if(sentFormats.isEmpty) {ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown format dragged"))); return;}
-                final SimpleFileFormat insertedFormat = sentFormats[0] as SimpleFileFormat;
-                debugPrint("inserted format: $insertedFormat");
+                List<PresetImage> presets = [];
 
-                // late StreamSubscription ss;
-                reader.getFile(insertedFormat, (file) async {
-                    final fileExtension = insertedFormat.mimeTypes!.first.split("/")[1];
-                    final draggedFile = await DefaultCacheManager().putFileStream("drag&Drop${file.fileName ?? ""}${file.fileSize}", file.getStream(), fileExtension: fileExtension);
-                    if(context.mounted) GoRouter.of(context).push("/manage_image", extra: [PresetImage(image: draggedFile)]);
-                }, onError: (error) {
-                    debugPrint('Error reading value $error');
-                });
+                for (final item in event.session.items) {
+                    final reader = item.dataReader!;
+                    
+                    final sentFormats = reader.getFormats(SuperFormats.all);
+                    if(sentFormats.isEmpty) {ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown format dragged"))); return;}
+                    final SimpleFileFormat insertedFormat = sentFormats[0] as SimpleFileFormat;
+                    debugPrint("inserted format: $insertedFormat");
+
+                    reader.getFile(insertedFormat, (file) async {
+                        final fileExtension = insertedFormat.mimeTypes!.first.split("/")[1];
+                        final draggedFile = await DefaultCacheManager().putFileStream("drag&Drop${file.fileName ?? ""}${file.fileSize}", file.getStream(), fileExtension: fileExtension);
+                        presets.add(PresetImage(image: draggedFile));
+                        if(presets.length == event.session.items.length && context.mounted) GoRouter.of(context).push("/manage_image", extra: presets);
+                    }, onError: (error) {
+                        debugPrint('Error reading value $error');
+                    });
+                }
             },
         );
     }

@@ -6,7 +6,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:html/dom.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:localbooru/utils/get_meta_property.dart';
@@ -17,7 +19,8 @@ part 'autodownload/image_boards.dart';
 part 'autodownload/generic.dart';
 part 'autodownload/art_directed.dart';
 part 'autodownload/other.dart';
-part 'get_website.dart';
+part 'getter/index.dart';
+part 'getter/accurate.dart';
 
 final presetCache = DefaultCacheManager();
 
@@ -48,13 +51,18 @@ class PresetImage {
         );
     }
 
-    static Future<PresetImage> urlToPreset(String url) async {
+    static Future<PresetImage> urlToPreset(String url, {bool? accurate}) async {
         if(await File(url).exists()) return PresetImage(image: File(url));
         
         if(!isURL(url)) throw "Not a URL";
 
         Uri uri = Uri.parse(url);
-        final preset = switch (getWebsiteByURL(uri)) {
+
+        Websites? website;
+        if(accurate == true) website = await accurateGetWebsite(uri);
+        else website = getWebsiteByURL(uri);
+
+        final preset = switch (website) {
             ServiceWebsites.danbooru1 => await danbooru1ToPreset(url),
             ServiceWebsites.danbooru2 => await danbooru2ToPreset(url),
             ServiceWebsites.e621 => await e621ToPreset(url),
