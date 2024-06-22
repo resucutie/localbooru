@@ -29,7 +29,6 @@ bool rangeMatch(double num, String pattern) {
         return from <= num && to >= num;
     } else if(pattern[0] == ">") {
         final min = pattern.substring(1);
-        print("${double.tryParse(min) == null && double.tryParse(min.substring(1)) == null}");
         if(double.tryParse(min) == null && double.tryParse(min.substring(1)) == null) return false;
         if(min[0] == "=") return double.parse(min.substring(1)) >= num;
         return double.parse(min) > num;

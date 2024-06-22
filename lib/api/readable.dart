@@ -85,10 +85,11 @@ class Booru {
     Future<List> _doTagFiltering(String tags) async {
         final List<String> tagList = tags.split(" ").where((s) => s.isNotEmpty).toList();
         final List files = (await getRawInfo())["files"];
-        final List filteredFiles = files.where((file) {
-            if(tagList.isEmpty) return true;
-            return wouldImageBeSelected(inputTags: tagList, file: file);
-        }).toList();
+        List filteredFiles = [];
+        if(tagList.isEmpty) return files;
+        for (final file in files) {
+            if(await wouldImageBeSelected(inputTags: tagList, file: file)) filteredFiles.add(file);
+        }
 
         return filteredFiles;
     }

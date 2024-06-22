@@ -61,19 +61,37 @@ class Metatag {
     late String value;
 }
 
-bool wouldImageBeSelected({required List<String> inputTags, required Map file}) {
-    return
-        inputTags.any((tag) => tag.startsWith("+") ? doTagMatch(file: file, tag: TagText(tag)) : false)
-        || inputTags.where((t) => !t.startsWith("+")).every((tagSearch) {
-            final tag = TagText(tagSearch);
-            if(tag.obtainSelector() == "-") {
-                return !doTagMatch(file: file, tag: tag);
-            }
-            return doTagMatch(file: file, tag: tag);
-        });
+Future<bool> wouldImageBeSelected({required List<String> inputTags, required Map file}) async {
+    bool hasTagWithInclusion = await Future.wait(inputTags.where((t) => t.startsWith("+")).map((tagSearch) async {
+        debugPrint("File: ${file["id"]}; fileTags: ${file["tags"]}; searchTag: $tagSearch; doesItInclude: ${tagSearch.startsWith("+")}");
+        return await doTagMatch(file: file, tag: TagText(tagSearch));
+    })).then((results) => results.any((result) => result));
+    if (hasTagWithInclusion) return true;
+
+    bool hasTag = await Future.wait(inputTags.where((t) => !t.startsWith("+")).map((tagSearch) async {
+        final tag = TagText(tagSearch);
+        if (tag.obtainSelector() == "-") {
+            return !(await doTagMatch(file: file, tag: tag));
+        }
+        return await doTagMatch(file: file, tag: tag);
+    })).then((results) => results.every((result) => result));
+
+    return hasTag;
 }
 
-bool doTagMatch({required Map file, required TagText tag}) {
+// Future<bool> wouldImageBeSelected({required List<String> inputTags, required Map file}) async {
+//     return
+//         inputTags.any((tag) => tag.startsWith("+") ? (await doTagMatch(file: file, tag: TagText(tag))) : false)
+//         || inputTags.where((t) => !t.startsWith("+")).every((tagSearch) {
+//             final tag = TagText(tagSearch);
+//             if(tag.obtainSelector() == "-") {
+//                 return !(await doTagMatch(file: file, tag: tag));
+//             }
+//             return (await doTagMatch(file: file, tag: tag));
+//         });
+// }
+
+Future<bool> doTagMatch({required Map file, required TagText tag}) async {
     if(tag.isMetatag()) {
         final Metatag metatag = Metatag(tag);
         switch (metatag.selector) {
@@ -97,6 +115,11 @@ bool doTagMatch({required Map file, required TagText tag}) {
                 final List<String> sources = List<String>.from(file["sources"]);
                 return sources.any((source) => wildcardMatch(Uri.parse(source).host, metatag.value)) || 
                     (metatag.value == "none" && sources.isEmpty);
+            case "collection":
+                final booru = await getCurrentBooru();
+                final obtainedCollections = await booru.obtainMatchingCollection(file["id"]);
+                debugPrint("${file["id"]} $obtainedCollections");
+                return obtainedCollections.any((collection) => rangeMatch(double.parse(collection.id), metatag.value) || collection.id == metatag.value);
             default:
                 return false;
         }
