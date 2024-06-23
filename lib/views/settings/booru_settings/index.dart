@@ -39,12 +39,18 @@ class _BooruSettingsState extends State<BooruSettings> {
     Widget build(BuildContext context) {
         return ListView(
             children: [
-                const SmallHeader("Tag types"),
+                const SmallHeader("Elements"),
                 ListTile(
-                    title: const Text("Manage tag types"),
-                    subtitle: const Text("This is where you would set and unset tag types, in case you want, for example, make an artist tag a generic tag"),
+                    title: const Text("Tag types"),
+                    subtitle: const Text("Remove or create tag types"),
                     leading: const Icon(Icons.label),
                     onTap: () => context.push("/settings/booru/tag_types"),
+                ),
+                ListTile(
+                    title: const Text("Collections"),
+                    subtitle: const Text("Manage existing collections"),
+                    leading: const Icon(Icons.photo_library),
+                    onTap: () => context.push("/settings/booru/collections"),
                 ),
                 const SmallHeader("Other"),
                 ListTile(

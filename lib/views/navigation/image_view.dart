@@ -340,7 +340,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                         return ClipRRect(
                                                             borderRadius: const BorderRadius.all(Radius.circular(10)),
                                                             child: MouseRegion(
-                                                                cursor: MaterialStateMouseCursor.clickable,
+                                                                cursor: WidgetStateMouseCursor.clickable,
                                                                 child: GestureDetector(
                                                                     onTap: () => context.push("/view/$imageId"),
                                                                     child: BooruImageLoader(

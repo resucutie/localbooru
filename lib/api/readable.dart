@@ -175,6 +175,15 @@ class Booru {
             id: id
         );
     }
+    Future<List<BooruCollection>> getAllCollections() async {
+        final List<Map<String, dynamic>> collections = List<Map<String, dynamic>>.from((await getRawInfo())["collections"]);
+
+        return await Future.wait(
+            collections.map((map) async {
+                return (await getCollection("${map["id"]}"))!;
+            }).toList()
+        );
+    }
     Future<List<BooruCollection>> obtainMatchingCollection(ImageID imageID) async {
         final List<Map<String, dynamic>> collections = List<Map<String, dynamic>>.from((await getRawInfo())["collections"]);
 

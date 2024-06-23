@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/preset/index.dart';
+import 'package:localbooru/components/dialogs/confirm_dialogs.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:open_file/open_file.dart';
 import 'package:share_plus/share_plus.dart';
@@ -58,7 +59,7 @@ List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildConte
             child: Text("Delete image", style: TextStyle(color: Theme.of(context).colorScheme.error)),
             onTap: () async {
                 final res = await showDialog<bool>(context: context,
-                    builder: (context) => const DeleteImageDialogue()
+                    builder: (context) => const UnsavedChangesDialogue()
                 );
                 if(res == true) {
                     if(context.mounted && doulbeExitOnDelete) context.pop(); //second to close viewer
@@ -75,7 +76,7 @@ List<PopupMenuEntry> multipleImageManagementItems(List<BooruImage> images, {requ
             child: Text("Delete images", style: TextStyle(color: Theme.of(context).colorScheme.error)),
             onTap: () async {
                 final res = await showDialog<bool>(context: context,
-                    builder: (context) => const DeleteImageDialogue()
+                    builder: (context) => const UnsavedChangesDialogue()
                 );
                 if(res == true) {
                     for(final image in images) {
@@ -86,26 +87,6 @@ List<PopupMenuEntry> multipleImageManagementItems(List<BooruImage> images, {requ
             }
         ),
     ];
-}
-
-
-class DeleteImageDialogue extends StatelessWidget {
-    const DeleteImageDialogue({super.key});
-
-    @override
-    Widget build(BuildContext context) {
-        return AlertDialog(
-            title: const Text("Delete image"),
-            content: const Text("Are you sure that you want to delete this image? This action will be irreversible"),
-            actions: [
-                TextButton(onPressed: Navigator.of(context).pop, child: const Text("No")),
-                TextButton(
-                    child: const Text("Yes"), 
-                    onPressed: () => Navigator.of(context).pop(true)
-                ),
-            ],
-        );
-    }
 }
 
 List<PopupMenuEntry> urlItems(String url) {

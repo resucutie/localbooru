@@ -11,7 +11,7 @@ class PresetCollection {
 
     UniqueKey? uniqueKey;
 
-    static Future<PresetCollection> fromExistingPreset(BooruCollection collection) async {
+    static PresetCollection fromExistingPreset(BooruCollection collection) {
         return PresetCollection(
             id: collection.id,
             pages: collection.pages,

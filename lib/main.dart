@@ -23,6 +23,7 @@ import 'package:localbooru/views/navigation/tag_browse.dart';
 import 'package:localbooru/views/navigation/zoomed_view.dart';
 import 'package:localbooru/views/set_booru.dart';
 import 'package:localbooru/utils/platform_tools.dart';
+import 'package:localbooru/views/settings/booru_settings/collections.dart';
 import 'package:localbooru/views/settings/booru_settings/index.dart';
 import 'package:localbooru/views/settings/booru_settings/tag_types.dart';
 import 'package:localbooru/views/settings/index.dart';
@@ -70,8 +71,6 @@ void main() async {
 
         windowManager.waitUntilReadyToShow(windowOptions, () async {
             await windowManager.show();
-            await windowManager.focus();
-
         });
     }
 
@@ -234,6 +233,11 @@ final router = GoRouter(
                                                             builder: (context, state) => BooruLoader(
                                                                 builder: (context, booru) => TagTypesSettings(booru: booru),
                                                             ),
+                                                        ),
+                                                        GoRoute(path: "collections",
+                                                            builder: (context, state) => BooruLoader(
+                                                                builder: (context, booru) => CollectionsSettings(booru: booru),
+                                                            ),
                                                         )
                                                     ]
                                                 )
@@ -316,7 +320,7 @@ class _AppState extends State<App> {
                             darkTheme: theme["dark"],
                             themeMode: ThemeMode.values[themeModeIndex], 
                             routerConfig: router,
-                            debugShowCheckedModeBanner: true,
+                            debugShowCheckedModeBanner: false,
                         );
                     }
                 )
