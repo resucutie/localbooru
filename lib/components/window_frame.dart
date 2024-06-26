@@ -7,10 +7,10 @@ import 'package:window_manager/window_manager.dart';
 
 class WindowFrameAppBar extends StatelessWidget {
     final AppBar? appBar;
-    final String title;
+    final Widget? title;
     final Color? backgroundColor;
 
-    const WindowFrameAppBar({super.key, this.appBar, this.title = "LocalBooru", this.backgroundColor});
+    const WindowFrameAppBar({super.key, this.appBar, this.title = const Text("LocalBooru"), this.backgroundColor});
 
 
     @override
@@ -29,7 +29,7 @@ class WindowFrameAppBar extends StatelessWidget {
                         child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 6.00, horizontal: 16.00),
                             color: Colors.transparent,
-                            child: Text(title)
+                            child: title
                         ),
                     ),
                 ),
