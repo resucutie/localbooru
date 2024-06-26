@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/components/dialogs/textfield_dialogs.dart';
@@ -114,7 +115,7 @@ class DefaultDrawer extends StatelessWidget {
                         if(url != null) {
                             importImageFromURL(url)
                                 .then((preset) {
-                                    GoRouter.of(context).push("/manage_image", extra: [preset]);
+                                    GoRouter.of(context).push("/manage_image", extra: VirtualPresetCollection(pages: [preset]));
                                 })
                                 .onError((error, stack) {
                                     if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {

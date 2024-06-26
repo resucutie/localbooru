@@ -190,7 +190,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                         if(_selectedImages.length == 1) IconButton(
                                                             icon: const Icon(Icons.edit),
                                                             onPressed: () async {
-                                                                context.push("/manage_image", extra: [await PresetImage.fromExistingImage(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0]))]);
+                                                                context.push("/manage_image", extra: VirtualPresetCollection(pages: [await PresetImage.fromExistingImage(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0]))]));
                                                                 setState(() => _selectedImages = []);
                                                             },
                                                         ),

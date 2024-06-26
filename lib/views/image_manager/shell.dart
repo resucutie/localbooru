@@ -11,9 +11,9 @@ import 'package:localbooru/views/image_manager/general_collection_manager.dart';
 import 'package:path/path.dart' as p;
 
 class ImageManagerShell extends StatefulWidget {
-    const ImageManagerShell({super.key, this.defaultPresets});
+    const ImageManagerShell({super.key, this.virtualPresetCollection});
 
-    final List<PresetImage>? defaultPresets;
+    final VirtualPresetCollection? virtualPresetCollection;
 
     @override
     State<ImageManagerShell> createState() => _ImageManagerShellState();
@@ -22,9 +22,10 @@ class ImageManagerShell extends StatefulWidget {
 class _ImageManagerShellState extends State<ImageManagerShell> {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     
-    late List<PresetImage> presets;
+    late VirtualPresetCollection preset;
     bool hasError = true;
     bool isSaving = false;
+    bool saveCollection = false;
     int savedImages = 0;
     int imagePage = 0;
 
@@ -34,10 +35,8 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
     void initState() {
         super.initState();
 
-        presets = (widget.defaultPresets ?? [PresetImage()]).map((preset) {
-            preset.key = UniqueKey();
-            return preset;
-        }).toList();
+        preset = widget.virtualPresetCollection ?? VirtualPresetCollection(pages: [PresetImage()]);
+        if(preset.pages == null || preset.pages!.isEmpty) preset.pages = [PresetImage()];
     }
 
     void saveImages() async {
@@ -45,23 +44,25 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
         
         final booru = await getCurrentBooru();
         final listLength = await booru.getListLength();
-        final futureImageIDs = presets.asMap().keys.map((index) => "${index + listLength}").toList();
+        final futureImageIDs = preset.pages!.asMap().keys.map((index) => "${index + listLength}").toList();
         
-        for (final (index, preset) in presets.indexed) {
-            if(isCorelated && presets.length > 1) {
-                preset.relatedImages = futureImageIDs.where((e) => e != futureImageIDs[index]).toList();
+        for (final (index, imagePreset) in preset.pages!.indexed) {
+            if(isCorelated && preset.pages!.length > 1) {
+                imagePreset.relatedImages = futureImageIDs.where((e) => e != futureImageIDs[index]).toList();
             }
-            preset.replaceID = futureImageIDs[index];
+            imagePreset.replaceID = futureImageIDs[index];
 
-            await insertImage(preset);
+            await insertImage(imagePreset);
             setState(() => savedImages++);
         }
+
+        await insertCollection(PresetCollection.fromVirtualPresetCollection(preset));
         
         if(context.mounted) context.pop();
     }
 
-    String generateName(PresetImage preset) {
-        return preset.image != null ? p.basenameWithoutExtension(preset.image!.path) : "Image ${presets.indexOf(preset) + 1}";
+    String generateName(PresetImage imagePreset) {
+        return imagePreset.image != null ? p.basenameWithoutExtension(imagePreset.image!.path) : "Image ${preset.pages!.indexOf(imagePreset) + 1}";
     }
 
     @override
@@ -72,15 +73,15 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                 appBar: AppBar(
                     title: imagePage >= 0 ? ListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: Text("${presets[imagePage].replaceID != null ? "Edit" : "Add"} image", style: const TextStyle(fontSize: 20.0), overflow: TextOverflow.ellipsis),
-                        subtitle: Text(generateName(presets[imagePage]), style: const TextStyle(fontSize: 14.0), overflow: TextOverflow.ellipsis),
+                        title: Text("${preset.pages![imagePage].replaceID != null ? "Edit" : "Add"} image", style: const TextStyle(fontSize: 20.0), overflow: TextOverflow.ellipsis),
+                        subtitle: Text(generateName(preset.pages![imagePage]), style: const TextStyle(fontSize: 14.0), overflow: TextOverflow.ellipsis),
                     ) : const Text("Manage images"),
                     actions: [
                         IconButton(
                             icon: Badge(
-                                label: Text("${presets.length}"),
+                                label: Text("${preset.pages!.length}"),
                                 offset: const Offset(7, -7),
-                                isLabelVisible: presets.length > 1,
+                                isLabelVisible: preset.pages!.length > 1,
                                 child: const Icon(Icons.library_add)
                             ),
                             tooltip: "Add images in bulk",
@@ -95,7 +96,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                             onPressed: !isSaving && !hasError ? saveImages : null
                         ),
                     ],
-                    bottom: isSaving ? AppBarLinearProgressIndicator(value: savedImages / presets.length,) : null,
+                    bottom: isSaving ? AppBarLinearProgressIndicator(value: savedImages / preset.pages!.length,) : null,
                 ),
                 endDrawer: Drawer(
                     child: SingleChildScrollView(
@@ -117,8 +118,8 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                     },
                                 ),
                                 const Divider(),
-                                ...List.generate(presets.length, (index) => ListTile(
-                                    title: Text(generateName(presets[index])),
+                                ...List.generate(preset.pages!.length, (index) => ListTile(
+                                    title: Text(generateName(preset.pages![index])),
                                     leading: const Icon(Icons.image_outlined),
                                     textColor: imagePage == index ? Theme.of(context).colorScheme.primary : null,
                                     iconColor: imagePage == index ? Theme.of(context).colorScheme.primary : null,
@@ -126,11 +127,11 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                         setState(() => imagePage = index);
                                         _scaffoldKey.currentState!.closeEndDrawer();
                                     },
-                                    trailing: presets.length == 1 ? null : IconButton(
+                                    trailing: preset.pages!.length == 1 ? null : IconButton(
                                         tooltip: "Remove",
                                         icon: const Icon(Icons.close),
                                         onPressed: () {
-                                            presets.removeAt(index);
+                                            preset.pages!.removeAt(index);
                                             setState(() => imagePage = imagePage >= index ? imagePage - 1 : imagePage);
                                         },
                                     ),
@@ -142,11 +143,11 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                     onTap: () async {
                                         FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
                                         if (result != null) {
-                                            if(presets.first.image == null && result.files.length > 1) presets = [];
+                                            if(preset.pages!.first.image == null && result.files.length > 1) preset.pages = [];
                                             for (PlatformFile file in result.files) {
-                                                if(file.path != null) presets.add(PresetImage(image: File(file.path!), key: UniqueKey()));
+                                                if(file.path != null) preset.pages!.add(PresetImage(image: File(file.path!), key: UniqueKey()));
                                             }
-                                            setState(() => imagePage = presets.length - 1);
+                                            setState(() => imagePage = preset.pages!.length - 1);
                                             _scaffoldKey.currentState!.closeEndDrawer();
                                         }
                                     }
@@ -171,11 +172,15 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                             GeneralCollectionManagerScreen(
                                 corelated: isCorelated,
                                 onCorelatedChanged: (value) => setState(() => isCorelated = value),
+                                saveCollectionToggle: saveCollection,
+                                onSaveCollectionToggle: (value) => setState(() => saveCollection = value),
+                                collection: preset,
+                                onCollectionChange: (value) => preset = value,
                             ),
-                            for (final (index, preset) in presets.indexed) ImageManagerForm(
+                            for (final (index, imagePreset) in preset.pages!.indexed) ImageManagerForm(
                                 key: preset.key, // replace index by something else
-                                preset: preset,
-                                onChanged: (preset) => setState(() => presets[index] = preset),
+                                preset: imagePreset,
+                                onChanged: (imagePreset) => setState(() => preset.pages![index] = imagePreset),
                                 onErrorUpdate: (containsError) => setState(() => hasError = containsError),
                             )
                         ],

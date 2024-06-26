@@ -43,7 +43,7 @@ class ImageViewShell extends StatelessWidget {
                     IconButton(
                         icon: const Icon(Icons.edit),
                         tooltip: "Edit image",
-                        onPressed: () async => context.push("/manage_image", extra: [await PresetImage.fromExistingImage(image)])
+                        onPressed: () async => context.push("/manage_image", extra: VirtualPresetCollection(pages: [await PresetImage.fromExistingImage(image)]))
                     ),
                     BrowseScreenPopupMenuButton(image: image,)
                 ],

@@ -205,7 +205,7 @@ final router = GoRouter(
                                     builder: (context, state) {
                                         return ImageManagerShell(
                                             // shouldOpenRecents: true,
-                                            defaultPresets: state.extra as List<PresetImage>?,
+                                            virtualPresetCollection: state.extra as VirtualPresetCollection?,
                                         );
                                     }
                                 ),
@@ -359,9 +359,9 @@ class _AppState extends State<App> {
                     case SharedMediaType.file:
                     case SharedMediaType.image:
                     case SharedMediaType.video:
-                        routerContext.push("/manage_image", extra: [PresetImage(
+                        routerContext.push("/manage_image", extra: VirtualPresetCollection(pages: [PresetImage(
                             image: File(sharedMedia.path)
-                        )]);
+                        )]));
                         break;
                     case SharedMediaType.text:
                     case SharedMediaType.url:
@@ -369,7 +369,7 @@ class _AppState extends State<App> {
                         final uri = Uri.tryParse(text);
                         if(uri == null) return;
                         importImageFromURL(text).then((preset) {
-                            routerContext.push("/manage_image", extra: [preset]);
+                            routerContext.push("/manage_image", extra: VirtualPresetCollection(pages: [preset]));
                         })
                         .onError((error, stack) {
                             if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {

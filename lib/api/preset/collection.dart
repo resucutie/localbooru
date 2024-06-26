@@ -15,7 +15,7 @@ class PresetCollection extends Preset {
         );
     }
 
-    static PresetCollection fromPresetCollection(VirtualPresetCollection preset) {
+    static PresetCollection fromVirtualPresetCollection(VirtualPresetCollection preset) {
         return PresetCollection(
             id: preset.id,
             pages: preset.pages?.mapIndexed((index, presetImage) {
@@ -26,7 +26,7 @@ class PresetCollection extends Preset {
         );
     }
 }
-// presets are essentially a format that represents a BooruImage before it gets added
+
 class VirtualPresetCollection extends Preset {
     VirtualPresetCollection({this.id, this.name, this.pages, super.key});
 
@@ -34,7 +34,7 @@ class VirtualPresetCollection extends Preset {
     CollectionID? id;
     String? name;
 
-    static Future<VirtualPresetCollection> fromSaveablePresetCollection(PresetCollection preset) async {
+    static Future<VirtualPresetCollection> fromPresetCollection(PresetCollection preset) async {
         final booru = await getCurrentBooru();
         return VirtualPresetCollection(
             id: preset.id,

@@ -53,7 +53,7 @@ List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildConte
     return [
         PopupMenuItem(
             child: const Text("Edit image metadata"),
-            onTap: () async => context.push("/manage_image", extra: [await PresetImage.fromExistingImage(image)])
+            onTap: () async => context.push("/manage_image", extra: VirtualPresetCollection(pages: [await PresetImage.fromExistingImage(image)]))
         ),
         PopupMenuItem(
             child: Text("Delete image", style: TextStyle(color: Theme.of(context).colorScheme.error)),

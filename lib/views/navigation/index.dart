@@ -93,7 +93,7 @@ class _AddImageDropRegionState extends State<AddImageDropRegion> {
                         final fileExtension = insertedFormat.mimeTypes!.first.split("/")[1];
                         final draggedFile = await DefaultCacheManager().putFileStream("drag&Drop${file.fileName ?? ""}${file.fileSize}", file.getStream(), fileExtension: fileExtension);
                         presets.add(PresetImage(image: draggedFile));
-                        if(presets.length == event.session.items.length && context.mounted) GoRouter.of(context).push("/manage_image", extra: presets);
+                        if(presets.length == event.session.items.length && context.mounted) GoRouter.of(context).push("/manage_image", extra: VirtualPresetCollection(pages: presets));
                     }, onError: (error) {
                         debugPrint('Error reading value $error');
                     });
