@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/components/app_bar_linear_progress.dart';
+import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/views/image_manager/form.dart';
 import 'package:localbooru/views/image_manager/general_collection_manager.dart';
 import 'package:path/path.dart' as p;
@@ -51,7 +52,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
             if(isCorelated && preset.pages!.length > 1) {
                 imagePreset.relatedImages = futureImageIDs.where((e) => e != futureImageIDs[index]).toList();
             }
-            imagePreset.replaceID = futureImageIDs[index];
+            imagePreset.replaceID ??= futureImageIDs[index];
 
             await insertImage(imagePreset);
             setState(() => savedImages++);
@@ -149,6 +150,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                         icon: const Icon(Icons.close),
                                         onPressed: () {
                                             preset.pages!.removeAt(index);
+                                            errorOnPages.removeAt(index);
                                             setState(() => imagePage = imagePage >= index ? imagePage - 1 : imagePage);
                                         },
                                     ),
@@ -165,6 +167,25 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                             setState(() => imagePage = preset.pages!.length - 1);
                                             _scaffoldKey.currentState!.closeEndDrawer();
                                         }
+                                    }
+                                ),
+                                ListTile(
+                                    title: const Text("Edit existing image"),
+                                    leading: const Icon(Icons.edit),
+                                    onTap: () async {
+                                        final images = await openSelectionDialog(
+                                            context: context,
+                                            excludeImages: preset.pages!.where((imagePreset) => imagePreset.replaceID != null,).map((imagePreset) => imagePreset.replaceID!).toList()
+                                        );
+                                        if(images == null) return;
+                                        final booru = await getCurrentBooru();
+                                        preset.pages!.addAll(await Future.wait(images.map((id) async {
+                                            PresetImage image = await PresetImage.fromExistingImage((await booru.getImage(id))!);
+                                            image.key = UniqueKey();
+                                            return image;
+                                        })));
+                                        setState(() => imagePage = preset.pages!.length - 1);
+                                        _scaffoldKey.currentState!.closeEndDrawer();
                                     }
                                 ),
                             ],
@@ -193,7 +214,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                 onErrorChange: (value) => setState(() => errorOnPages[0] = value),
                             ),
                             for (final (index, imagePreset) in preset.pages!.indexed) ImageManagerForm(
-                                key: preset.key, // replace index by something else
+                                key: imagePreset.key, // replace index by something else
                                 preset: imagePreset,
                                 onChanged: (imagePreset) => setState(() => preset.pages![index] = imagePreset),
                                 onErrorUpdate: (containsError) => setState(() => errorOnPages[index + 1] = containsError),
@@ -202,7 +223,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                         ],
                     ),
                 ),
-                floatingActionButton: FloatingActionButton(onPressed: () => debugPrint("$errorOnPages"),),
+                // floatingActionButton: FloatingActionButton(onPressed: () => debugPrint("$errorOnPages"),),
             )
         );
     }
