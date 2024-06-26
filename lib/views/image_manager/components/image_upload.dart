@@ -8,9 +8,10 @@ import 'package:localbooru/components/video_view.dart';
 import 'package:mime/mime.dart';
 
 class ImageUploadForm extends StatelessWidget {
-    const ImageUploadForm({super.key, required this.onChanged, required this.validator, this.currentValue = "", this.orientation = Orientation.portrait});
+    const ImageUploadForm({super.key, required this.onChanged, this.onCompressed, required this.validator, this.currentValue = "", this.orientation = Orientation.portrait});
     
-    final ValueChanged<String> onChanged;
+    final ValueChanged<List<PlatformFile>> onChanged;
+    final ValueChanged<String>? onCompressed;
     final FormFieldValidator<String> validator;
     final String currentValue;
     final Orientation orientation;
@@ -42,10 +43,10 @@ class ImageUploadForm extends StatelessWidget {
                                             minimumSize: const Size(100, 100),
                                         ),
                                         onPressed: () async {
-                                            FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media);
+                                            FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
                                             if (result != null) {
-                                                state.didChange(result.files.single.path);
-                                                onChanged(result.files.single.path!);
+                                                state.didChange(result.files.first.path);
+                                                onChanged(result.files);
                                             }
                                         },
                                         child: Builder(builder: (context) {
@@ -72,7 +73,7 @@ class ImageUploadForm extends StatelessWidget {
                                     child: FileInfo(File(state.value),
                                         onCompressed: (compressed) {
                                             state.didChange(compressed.path);
-                                            onChanged(compressed.path);
+                                            if(onCompressed != null) onCompressed!(compressed.path);
                                         }
                                     ),
                                 ),

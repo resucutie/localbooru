@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:localbooru/api/preset/index.dart';
 
 class GeneralCollectionManagerScreen extends StatefulWidget {
-    const GeneralCollectionManagerScreen({super.key, this.onCorelatedChanged, this.corelated, this.saveCollectionToggle, this.onSaveCollectionToggle, required this.collection, this.onCollectionChange});
+    const GeneralCollectionManagerScreen({super.key, this.onCorelatedChanged, this.corelated, this.saveCollectionToggle, this.onSaveCollectionToggle, required this.collection, this.onErrorChange});
 
     final void Function(bool value)? onCorelatedChanged;
     final bool? corelated;
     final void Function(bool value)? onSaveCollectionToggle;
     final bool? saveCollectionToggle;
-    final void Function(VirtualPresetCollection value)? onCollectionChange;
+    final void Function(bool value)? onErrorChange;
     final VirtualPresetCollection collection;
 
     @override
@@ -21,28 +21,34 @@ class _GeneralCollectionManagerScreenState extends State<GeneralCollectionManage
         return ListView(
             children: [
                 if(widget.corelated != null) SwitchListTile(
-                    title: const Text("Enable corelated"),
+                    title: const Text("Make elements correlate with eachother"),
+                    subtitle: const Text("This will make each image relate to all other images that are being added"),
                     value: widget.corelated!,
                     onChanged: widget.onCorelatedChanged
                 ),
+                const Divider(),
                 if(widget.saveCollectionToggle != null) SwitchListTile(
                     title: const Text("Save as a collection"),
                     value: widget.saveCollectionToggle!,
-                    onChanged: widget.onSaveCollectionToggle
+                    onChanged: (value) {
+                        if(widget.onSaveCollectionToggle != null) widget.onSaveCollectionToggle!(value);
+                        widget.onErrorChange!(value ? widget.collection.name?.isEmpty ?? true : false);
+                    }
                 ),
-                if(widget.saveCollectionToggle ?? true) ...[
-                    TextFormField(
+                if(widget.saveCollectionToggle ?? true) Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: TextFormField(
                         decoration: const InputDecoration(
-                            labelText: "Name"
+                            labelText: "Name of collection"
                         ),
                         initialValue: widget.collection.name,
                         validator: (value) => value != null && value.isNotEmpty ? null : "Value is empty",
                         onChanged: (value) {
                             widget.collection.name = value;
+                            if(widget.onErrorChange != null) widget.onErrorChange!(value.isEmpty);
                         },
                     ),
-                    const SizedBox(height: 8,),
-                ],
+                ),
             ],
         );
     }

@@ -23,7 +23,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     
     late VirtualPresetCollection preset;
-    bool hasError = true;
+    List<bool> errorOnPages = [false];
     bool isSaving = false;
     bool saveCollection = false;
     int savedImages = 0;
@@ -37,6 +37,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
 
         preset = widget.virtualPresetCollection ?? VirtualPresetCollection(pages: [PresetImage()]);
         if(preset.pages == null || preset.pages!.isEmpty) preset.pages = [PresetImage()];
+        errorOnPages.addAll(List.generate(preset.pages!.length, (index) => preset.pages![index].image == null || preset.pages![index].tags == null));
     }
 
     void saveImages() async {
@@ -56,13 +57,24 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
             setState(() => savedImages++);
         }
 
-        await insertCollection(PresetCollection.fromVirtualPresetCollection(preset));
+        if(saveCollection) await insertCollection(PresetCollection.fromVirtualPresetCollection(preset));
         
         if(context.mounted) context.pop();
     }
 
     String generateName(PresetImage imagePreset) {
         return imagePreset.image != null ? p.basenameWithoutExtension(imagePreset.image!.path) : "Image ${preset.pages!.indexOf(imagePreset) + 1}";
+    }
+
+    bool hasError() => errorOnPages.any((element) => element,);
+
+    void addMultipleImages(List<PlatformFile> files) {
+        for (PlatformFile file in files) {
+            if(file.path != null) {
+                preset.pages!.add(PresetImage(image: File(file.path!), key: UniqueKey()));
+                errorOnPages.add(true);
+            }
+        }
     }
 
     @override
@@ -87,14 +99,19 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                             tooltip: "Add images in bulk",
                             onPressed: () => _scaffoldKey.currentState!.openEndDrawer(),
                         ),
-                        if(orientation == Orientation.portrait) IconButton(
+                        // Tooltip(
+                        //     message: hasError() ? "There's some errors to resolve" : null,
+                        //     child: ,
+                        // ),
+                        orientation == Orientation.portrait ? IconButton(
                             icon: const Icon(Icons.check),
-                            onPressed: !isSaving && !hasError ? saveImages : null
-                        ) else TextButton.icon(
+                            onPressed: !isSaving && !hasError() ? saveImages : null,
+                            tooltip: !hasError() ? "Done" : null,
+                        ) : TextButton.icon(
                             icon: const Icon(Icons.check),
                             label: const Text("Done"),
-                            onPressed: !isSaving && !hasError ? saveImages : null
-                        ),
+                            onPressed: !isSaving && !hasError() ? saveImages : null,
+                        )
                     ],
                     bottom: isSaving ? AppBarLinearProgressIndicator(value: savedImages / preset.pages!.length,) : null,
                 ),
@@ -143,10 +160,8 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                     onTap: () async {
                                         FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
                                         if (result != null) {
-                                            if(preset.pages!.first.image == null && result.files.length > 1) preset.pages = [];
-                                            for (PlatformFile file in result.files) {
-                                                if(file.path != null) preset.pages!.add(PresetImage(image: File(file.path!), key: UniqueKey()));
-                                            }
+                                            // if(preset.pages!.first.image == null && result.files.length > 1) preset.pages = [];
+                                            addMultipleImages(result.files);
                                             setState(() => imagePage = preset.pages!.length - 1);
                                             _scaffoldKey.currentState!.closeEndDrawer();
                                         }
@@ -175,17 +190,19 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                 saveCollectionToggle: saveCollection,
                                 onSaveCollectionToggle: (value) => setState(() => saveCollection = value),
                                 collection: preset,
-                                onCollectionChange: (value) => preset = value,
+                                onErrorChange: (value) => setState(() => errorOnPages[0] = value),
                             ),
                             for (final (index, imagePreset) in preset.pages!.indexed) ImageManagerForm(
                                 key: preset.key, // replace index by something else
                                 preset: imagePreset,
                                 onChanged: (imagePreset) => setState(() => preset.pages![index] = imagePreset),
-                                onErrorUpdate: (containsError) => setState(() => hasError = containsError),
+                                onErrorUpdate: (containsError) => setState(() => errorOnPages[index + 1] = containsError),
+                                onMultipleImagesAdded: addMultipleImages,
                             )
                         ],
                     ),
                 ),
+                floatingActionButton: FloatingActionButton(onPressed: () => debugPrint("$errorOnPages"),),
             )
         );
     }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
@@ -15,12 +16,13 @@ import 'package:localbooru/views/image_manager/components/tagfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageManagerForm extends StatefulWidget {
-    const ImageManagerForm({super.key, this.preset, required this.onChanged, this.onErrorUpdate});
+    const ImageManagerForm({super.key, this.preset, required this.onChanged, this.onMultipleImagesAdded, this.onErrorUpdate});
 
     final PresetImage? preset;
     // final bool shouldOpenRecents;
     final void Function(PresetImage preset) onChanged;
     final void Function(bool hasError)? onErrorUpdate;
+    final void Function(List<PlatformFile> files)? onMultipleImagesAdded;
 
     @override
     State<ImageManagerForm> createState() => _ImageManagerFormState();
@@ -83,28 +85,21 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
 
     void sendPreset() async {
         final validation = _formKey.currentState!.validate();
-        if(_formKey.currentState!.validate()) {
-            widget.onChanged(PresetImage(
-                image: File(loadedImage),
-                tags: {
-                    "generic": tagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
-                    "artist": artistTagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
-                    "character": characterTagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
-                    "copyright": copyrightTagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
-                    "species": speciesTagController.text.split(" ").where((e) => e.isNotEmpty).toList()
-                },
-                sources: urlList,
-                rating: rating,
-                replaceID: widget.preset?.replaceID,
-                relatedImages: relatedImages,
-                key: widget.preset?.key
-            ));
-
-            // if(context.mounted) {
-            //     context.pop();
-            //     if(true) context.push("/recent");
-            // }
-        }
+        widget.onChanged(PresetImage(
+            image: File(loadedImage),
+            tags: {
+                "generic": tagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
+                "artist": artistTagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
+                "character": characterTagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
+                "copyright": copyrightTagController.text.split(" ").where((e) => e.isNotEmpty).toList(),
+                "species": speciesTagController.text.split(" ").where((e) => e.isNotEmpty).toList()
+            },
+            sources: urlList,
+            rating: rating,
+            replaceID: widget.preset?.replaceID,
+            relatedImages: relatedImages,
+            key: widget.preset?.key
+        ));
         if(widget.onErrorUpdate != null) widget.onErrorUpdate!(!validation);
     }
 
@@ -168,9 +163,9 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
                     children: [
                         ImageUploadForm(
                             onChanged: (value) {
-                                setState(() => loadedImage = value);
-                                debugPrint("from ImageUploadForm");
+                                setState(() => loadedImage = value.first.path!);
                                 sendPreset();
+                                if(value.length > 1 && widget.onMultipleImagesAdded != null) widget.onMultipleImagesAdded!(value..removeAt(0));
                             },
                             validator: (value) {
                                 if (value == null || value.isEmpty) return 'Please select an image';
