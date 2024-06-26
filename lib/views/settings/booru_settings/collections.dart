@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/components/builders.dart';
+import 'package:localbooru/components/dialogs/confirm_dialogs.dart';
 import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/image_grid_display.dart';
@@ -18,6 +19,7 @@ class CollectionsSettings extends StatefulWidget {
 
 class _CollectionsSettingsState extends State<CollectionsSettings> {
     late List<PresetCollection> collectionPresets;
+    List<CollectionID> deleteCollections = [];
     bool hasLoaded = false;
 
     @override
@@ -33,6 +35,9 @@ class _CollectionsSettingsState extends State<CollectionsSettings> {
     Future<void> savePresets() async{
         for(final preset in collectionPresets) {
             await insertCollection(preset);
+        }
+        for(final id in deleteCollections) {
+            await removeCollection(id);
         }
     }
 
@@ -55,9 +60,16 @@ class _CollectionsSettingsState extends State<CollectionsSettings> {
                     },
                 );
                 return CollectionCard(
+                    key: UniqueKey(),
                     collection: collectionPresets[index - 1],
                     booru: widget.booru,
-                    onChanged: (collection) => setState(() => collectionPresets[index - 1] = collection),
+                    onChanged: (collection) => collectionPresets[index - 1] = collection,
+                    onDeletePressed: () {
+                        setState(() {
+                            collectionPresets.removeAt(index - 1);
+                            deleteCollections.add("${index - 1}");
+                        });
+                    },
                 );
             },
         ) : const Center(child: CircularProgressIndicator(),);
@@ -65,11 +77,12 @@ class _CollectionsSettingsState extends State<CollectionsSettings> {
 }
 
 class CollectionCard extends StatefulWidget {
-    const CollectionCard({super.key, required this.collection, required this.booru, this.onChanged});
+    const CollectionCard({super.key, required this.collection, required this.booru, this.onChanged, this.onDeletePressed});
 
     final PresetCollection collection;
     final Booru booru;
     final void Function(PresetCollection collection)? onChanged;
+    final void Function()? onDeletePressed;
 
     @override
     State<CollectionCard> createState() => _CollectionCardState();
@@ -193,7 +206,6 @@ class _CollectionCardState extends State<CollectionCard> {
                             sendChange();
                         },
                     ),
-                    // const SizedBox(height: 8,),
                     Card.filled(
                         clipBehavior: Clip.antiAlias,
                         child: ListTile(
@@ -212,7 +224,21 @@ class _CollectionCardState extends State<CollectionCard> {
                                 sendChange();
                             },
                         ),
-                    )
+                    ),
+                    const Divider(),
+                    ListTile(
+                        leading: const Icon(Icons.delete),
+                        // contentPadding: const EdgeInsets.all(4).copyWith(left: 16),
+                        title: const Text("Delete"),
+                        textColor: Theme.of(context).colorScheme.error,
+                        iconColor: Theme.of(context).colorScheme.error,
+                        onTap: () async {
+                            final imageList = await showDialog<bool>(context: context, builder: (context) => const DeleteImageDialogue(),);
+                            if(imageList == true) {
+                                if(widget.onDeletePressed != null) widget.onDeletePressed!();
+                            }
+                        },
+                    ),
                 ],
             ),
         );

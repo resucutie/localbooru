@@ -218,7 +218,7 @@ Future<BooruCollection> insertCollection(PresetCollection preset) async {
 Future removeCollection(CollectionID id, {bool notify = true}) async {
     final Booru booru = await getCurrentBooru();
     final collection = await booru.getCollection(id);
-    if(collection == null) throw "Image $id does not exist";
+    if(collection == null) throw "Collection $id does not exist";
 
     // remove file association
     var raw = await booru.getRawInfo();
