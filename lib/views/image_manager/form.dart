@@ -97,7 +97,7 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
                 rating: rating,
                 replaceID: widget.preset?.replaceID,
                 relatedImages: relatedImages,
-                uniqueKey: widget.preset?.uniqueKey
+                key: widget.preset?.key
             ));
 
             // if(context.mounted) {

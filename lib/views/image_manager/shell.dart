@@ -35,7 +35,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
         super.initState();
 
         presets = (widget.defaultPresets ?? [PresetImage()]).map((preset) {
-            preset.uniqueKey = UniqueKey();
+            preset.key = UniqueKey();
             return preset;
         }).toList();
     }
@@ -45,12 +45,13 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
         
         final booru = await getCurrentBooru();
         final listLength = await booru.getListLength();
-        final futureImageIDs = presets.asMap().keys.map((e) => "${e + listLength}").toList();
+        final futureImageIDs = presets.asMap().keys.map((index) => "${index + listLength}").toList();
         
         for (final (index, preset) in presets.indexed) {
             if(isCorelated && presets.length > 1) {
                 preset.relatedImages = futureImageIDs.where((e) => e != futureImageIDs[index]).toList();
             }
+            preset.replaceID = futureImageIDs[index];
 
             await insertImage(preset);
             setState(() => savedImages++);
@@ -143,7 +144,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                         if (result != null) {
                                             if(presets.first.image == null && result.files.length > 1) presets = [];
                                             for (PlatformFile file in result.files) {
-                                                if(file.path != null) presets.add(PresetImage(image: File(file.path!), uniqueKey: UniqueKey()));
+                                                if(file.path != null) presets.add(PresetImage(image: File(file.path!), key: UniqueKey()));
                                             }
                                             setState(() => imagePage = presets.length - 1);
                                             _scaffoldKey.currentState!.closeEndDrawer();
@@ -172,7 +173,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                 onCorelatedChanged: (value) => setState(() => isCorelated = value),
                             ),
                             for (final (index, preset) in presets.indexed) ImageManagerForm(
-                                key: preset.uniqueKey, // replace index by something else
+                                key: preset.key, // replace index by something else
                                 preset: preset,
                                 onChanged: (preset) => setState(() => presets[index] = preset),
                                 onErrorUpdate: (containsError) => setState(() => hasError = containsError),

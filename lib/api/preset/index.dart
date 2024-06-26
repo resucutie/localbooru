@@ -3,6 +3,7 @@ library preset;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/svg.dart';
@@ -25,3 +26,9 @@ part 'getter/index.dart';
 part 'getter/accurate.dart';
 
 final presetCache = DefaultCacheManager();
+
+abstract interface class Preset{
+    Preset({this.key});
+
+    Key? key;
+}

@@ -1,15 +1,11 @@
 part of preset;
 
+class PresetCollection extends Preset {
+    PresetCollection({this.id, this.name, this.pages, super.key});
 
-// presets are essentially a format that represents a BooruImage before it gets added
-class PresetCollection {
-    PresetCollection({this.id, this.pages, this.name, this.uniqueKey});
-
-    CollectionID? id;
     List<ImageID>? pages;
+    CollectionID? id;
     String? name;
-
-    UniqueKey? uniqueKey;
 
     static PresetCollection fromExistingPreset(BooruCollection collection) {
         return PresetCollection(
@@ -19,28 +15,35 @@ class PresetCollection {
         );
     }
 
-    // static Future<PresetImage> urlToPreset(String url, {bool? accurate}) async {
-    //     if(await File(url).exists()) return PresetImage(image: File(url));
-        
-    //     if(!isURL(url)) throw "Not a URL";
+    static PresetCollection fromPresetCollection(VirtualPresetCollection preset) {
+        return PresetCollection(
+            id: preset.id,
+            pages: preset.pages?.mapIndexed((index, presetImage) {
+                if(presetImage.replaceID == null) throw "PresetImage at $index does not contain an ID";
+                return presetImage.replaceID!;
+            }).toList(),
+            name: preset.name
+        );
+    }
+}
+// presets are essentially a format that represents a BooruImage before it gets added
+class VirtualPresetCollection extends Preset {
+    VirtualPresetCollection({this.id, this.name, this.pages, super.key});
 
-    //     Uri uri = Uri.parse(url);
+    List<PresetImage>? pages;
+    CollectionID? id;
+    String? name;
 
-    //     Websites? website;
-    //     if(accurate == true) website = await accurateGetWebsite(uri);
-    //     else website = getWebsiteByURL(uri);
-
-    //     final preset = switch (website) {
-    //         ServiceWebsites.danbooru1 => await danbooru1ToPreset(url),
-    //         ServiceWebsites.danbooru2 => await danbooru2ToPreset(url),
-    //         ServiceWebsites.e621 => await e621ToPreset(url),
-    //         ServiceWebsites.gelbooru020 || ServiceWebsites.gelbooru025 => await gelbooruToPreset(url),
-    //         ServiceWebsites.twitter => await twitterToPreset(url),
-    //         ServiceWebsites.furAffinity => await furaffinityToPreset(url),
-    //         ServiceWebsites.deviantArt => await deviantartToPreset(url),
-    //         // Websites.instagram => await instagramToPreset(url),
-    //         _ => await anyURLToPreset(url)
-    //     };
-    //     return preset;
-    // }
+    static Future<VirtualPresetCollection> fromSaveablePresetCollection(PresetCollection preset) async {
+        final booru = await getCurrentBooru();
+        return VirtualPresetCollection(
+            id: preset.id,
+            pages: preset.pages != null ? await Future.wait(preset.pages!.mapIndexed((index, id) async {
+                final image = await booru.getImage(id);
+                if(image == null) throw "Element at $index does not exist";
+                return PresetImage.fromExistingImage(image);
+            })) : null,
+            name: preset.name
+        );
+    }
 }

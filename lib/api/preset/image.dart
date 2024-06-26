@@ -2,8 +2,8 @@ part of preset;
 
 
 // presets are essentially a format that represents a BooruImage before it gets added
-class PresetImage {
-    PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages, this.uniqueKey});
+class PresetImage extends Preset{
+    PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages, super.key});
 
     File? image;
     Map<String, List<String>>? tags;
@@ -11,8 +11,6 @@ class PresetImage {
     Rating? rating;
     ImageID? replaceID;
     List<ImageID>? relatedImages;
-
-    UniqueKey? uniqueKey;
 
     static Future<PresetImage> fromExistingImage(BooruImage image) async {
         final Booru booru = await getCurrentBooru();
