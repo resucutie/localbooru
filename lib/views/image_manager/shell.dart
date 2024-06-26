@@ -7,6 +7,7 @@ import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/components/app_bar_linear_progress.dart';
 import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
+import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/image_manager/form.dart';
 import 'package:localbooru/views/image_manager/general_collection_manager.dart';
 import 'package:path/path.dart' as p;
@@ -118,77 +119,80 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                 ),
                 endDrawer: Drawer(
                     child: SingleChildScrollView(
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                                const Padding(
-                                    padding: EdgeInsets.all(16),
-                                    child: Text("Bulk Adding"),
-                                ),
-                                ListTile(
-                                    title: const Text("Manage images"),
-                                    textColor: imagePage == -1 ? Theme.of(context).colorScheme.primary : null,
-                                    iconColor: imagePage == -1 ? Theme.of(context).colorScheme.primary : null,
-                                    leading: const Icon(Icons.photo_library),
-                                    onTap: imagePage == -1 ? null : () {
-                                        setState(() => imagePage = -1);
-                                        _scaffoldKey.currentState!.closeEndDrawer();
-                                    },
-                                ),
-                                const Divider(),
-                                ...List.generate(preset.pages!.length, (index) => ListTile(
-                                    title: Text(generateName(preset.pages![index])),
-                                    leading: const Icon(Icons.image_outlined),
-                                    textColor: imagePage == index ? Theme.of(context).colorScheme.primary : null,
-                                    iconColor: imagePage == index ? Theme.of(context).colorScheme.primary : null,
-                                    onTap: imagePage == index ? null : () {
-                                        setState(() => imagePage = index);
-                                        _scaffoldKey.currentState!.closeEndDrawer();
-                                    },
-                                    trailing: preset.pages!.length == 1 ? null : IconButton(
-                                        tooltip: "Remove",
-                                        icon: const Icon(Icons.close),
-                                        onPressed: () {
-                                            preset.pages!.removeAt(index);
-                                            errorOnPages.removeAt(index);
-                                            setState(() => imagePage = imagePage >= index ? imagePage - 1 : imagePage);
+                        child: SafeArea(
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                    Padding(
+                                        padding: const EdgeInsets.all(16).copyWith(top: isMobile() ? 4 : 16),
+                                        child: const Text("Bulk Adding"),
+                                    ),
+                                    ListTile(
+                                        title: const Text("Manage images"),
+                                        textColor: imagePage == -1 ? Theme.of(context).colorScheme.primary : null,
+                                        iconColor: imagePage == -1 ? Theme.of(context).colorScheme.primary : null,
+                                        leading: const Icon(Icons.photo_library),
+                                        onTap: imagePage == -1 ? null : () {
+                                            setState(() => imagePage = -1);
+                                            _scaffoldKey.currentState!.closeEndDrawer();
                                         },
                                     ),
-                                )),
-                                const Divider(),
-                                ListTile(
-                                    title: const Text("Add image"),
-                                    leading: const Icon(Icons.add),
-                                    onTap: () async {
-                                        FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
-                                        if (result != null) {
-                                            // if(preset.pages!.first.image == null && result.files.length > 1) preset.pages = [];
-                                            addMultipleImages(result.files);
+                                    const Divider(),
+                                    ...List.generate(preset.pages!.length, (index) => ListTile(
+                                        title: Text(generateName(preset.pages![index])),
+                                        leading: const Icon(Icons.image_outlined),
+                                        textColor: imagePage == index ? Theme.of(context).colorScheme.primary : null,
+                                        iconColor: imagePage == index ? Theme.of(context).colorScheme.primary : null,
+                                        onTap: imagePage == index ? null : () {
+                                            setState(() => imagePage = index);
+                                            _scaffoldKey.currentState!.closeEndDrawer();
+                                        },
+                                        trailing: preset.pages!.length == 1 ? null : IconButton(
+                                            tooltip: "Remove",
+                                            icon: const Icon(Icons.close),
+                                            onPressed: () {
+                                                preset.pages!.removeAt(index);
+                                                errorOnPages.removeAt(index);
+                                                setState(() => imagePage = imagePage >= index ? imagePage - 1 : imagePage);
+                                            },
+                                        ),
+                                    )),
+                                    const Divider(),
+                                    ListTile(
+                                        title: const Text("Add image"),
+                                        leading: const Icon(Icons.add),
+                                        onTap: () async {
+                                            FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
+                                            if (result != null) {
+                                                // if(preset.pages!.first.image == null && result.files.length > 1) preset.pages = [];
+                                                addMultipleImages(result.files);
+                                                setState(() => imagePage = preset.pages!.length - 1);
+                                                _scaffoldKey.currentState!.closeEndDrawer();
+                                            }
+                                        }
+                                    ),
+                                    ListTile(
+                                        title: const Text("Edit existing image"),
+                                        leading: const Icon(Icons.edit),
+                                        onTap: () async {
+                                            final images = await openSelectionDialog(
+                                                context: context,
+                                                excludeImages: preset.pages!.where((imagePreset) => imagePreset.replaceID != null,).map((imagePreset) => imagePreset.replaceID!).toList()
+                                            );
+                                            if(images == null) return;
+                                            final booru = await getCurrentBooru();
+                                            preset.pages!.addAll(await Future.wait(images.map((id) async {
+                                                PresetImage image = await PresetImage.fromExistingImage((await booru.getImage(id))!);
+                                                image.key = UniqueKey();
+                                                errorOnPages.add(false);
+                                                return image;
+                                            })));
                                             setState(() => imagePage = preset.pages!.length - 1);
                                             _scaffoldKey.currentState!.closeEndDrawer();
                                         }
-                                    }
-                                ),
-                                ListTile(
-                                    title: const Text("Edit existing image"),
-                                    leading: const Icon(Icons.edit),
-                                    onTap: () async {
-                                        final images = await openSelectionDialog(
-                                            context: context,
-                                            excludeImages: preset.pages!.where((imagePreset) => imagePreset.replaceID != null,).map((imagePreset) => imagePreset.replaceID!).toList()
-                                        );
-                                        if(images == null) return;
-                                        final booru = await getCurrentBooru();
-                                        preset.pages!.addAll(await Future.wait(images.map((id) async {
-                                            PresetImage image = await PresetImage.fromExistingImage((await booru.getImage(id))!);
-                                            image.key = UniqueKey();
-                                            return image;
-                                        })));
-                                        setState(() => imagePage = preset.pages!.length - 1);
-                                        _scaffoldKey.currentState!.closeEndDrawer();
-                                    }
-                                ),
-                            ],
+                                    ),
+                                ],
+                            ),
                         ),
                     ),
                 ),

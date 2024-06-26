@@ -16,7 +16,7 @@ Map<String, dynamic> rebase(Map<String, dynamic> raw) {
         file["tags"] = (file["tags"] as String).split(" ")
             .where((tag) => !TagText(tag).isMetatag()) //remove any metatags on the tags
             .join(" ");
-        file["related"] = (file["related"] ?? []).where((e) => int.tryParse(e) != null && files.elementAtOrNull(int.parse(e) - 1) != null).toList();
+        file["related"] = (file["related"] ?? []).where((e) => int.tryParse(e) != null && files.elementAtOrNull(int.parse(e)) != null).toList();
 
         files[index] = file as dynamic;
     }
