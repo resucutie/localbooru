@@ -59,7 +59,7 @@ List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildConte
             child: Text("Delete image", style: TextStyle(color: Theme.of(context).colorScheme.error)),
             onTap: () async {
                 final res = await showDialog<bool>(context: context,
-                    builder: (context) => const UnsavedChangesDialogue()
+                    builder: (context) => const DeleteImageDialogue()
                 );
                 if(res == true) {
                     if(context.mounted && doulbeExitOnDelete) context.pop(); //second to close viewer
@@ -76,7 +76,7 @@ List<PopupMenuEntry> multipleImageManagementItems(List<BooruImage> images, {requ
             child: Text("Delete images", style: TextStyle(color: Theme.of(context).colorScheme.error)),
             onTap: () async {
                 final res = await showDialog<bool>(context: context,
-                    builder: (context) => const UnsavedChangesDialogue()
+                    builder: (context) => const DeleteImageDialogue()
                 );
                 if(res == true) {
                     for(final image in images) {
