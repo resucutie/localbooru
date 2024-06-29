@@ -81,6 +81,21 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                             ],
                                         ),
+                                        const SizedBox(height: 8),
+                                        Wrap(
+                                            direction: Axis.horizontal,
+                                            spacing: 8,
+                                            children: [
+                                                OutlinedButton.icon(
+                                                    onPressed: () => context.push("/collections"),
+                                                    label: const Text("Collections"),
+                                                    icon: const Icon(Icons.photo_library),
+                                                    style: orientation == Orientation.portrait ? OutlinedButton.styleFrom(
+                                                        minimumSize: const Size(0, 48)
+                                                    ) : null,
+                                                ),
+                                            ],
+                                        ),
                                         const SizedBox(height: 56),
                                         const ImageDisplay(),
                                         const SizedBox(height: 16),

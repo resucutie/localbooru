@@ -15,6 +15,8 @@ import 'package:localbooru/views/about.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:localbooru/views/lock.dart';
+import 'package:localbooru/views/navigation/collections/list.dart';
+import 'package:localbooru/views/navigation/collections/view.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
 import 'package:localbooru/views/navigation/index.dart';
@@ -187,6 +189,32 @@ final router = GoRouter(
                                                             id: id,
                                                             builder: (context, image) {
                                                                 return ImageViewShell(image: image, shouldShowImageOnPortrait: true, child: NotesView(id: int.parse(id)),);
+                                                            }
+                                                        ));
+                                                    },
+                                                )
+                                            ]
+                                        ),
+                                        GoRoute(path: "collections",
+                                            builder: (context, state) {
+                                                return BooruLoader(builder: (_, booru) => CollectionsListPage(booru: booru,));
+                                            },
+                                            routes: [
+                                                GoRoute(path: ":id",
+                                                    builder: (context, state) {
+                                                        final String? id = state.pathParameters["id"];
+                                                        if (id == null) return Text("Invalid ID $id");
+                                                        final String? index = state.uri.queryParameters["index"];
+
+                                                        return BooruLoader(builder: (_, booru) => FutureBuilder(
+                                                            future: booru.getCollection(id),
+                                                            builder: (context, snapshot) {
+                                                                if(!snapshot.hasData) return const Center(child: CircularProgressIndicator(),);
+                                                                return CollectionView(
+                                                                    booru: booru,
+                                                                    collection: snapshot.data!,
+                                                                    index: int.parse(index ?? "0"),
+                                                                );
                                                             }
                                                         ));
                                                     },

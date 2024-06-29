@@ -191,6 +191,12 @@ class Booru {
 
         return await Future.wait(foundCollections.map((collection) async => (await getCollection(collection["id"] as String))!));
     }
+
+    Future<List<BooruImage>> getImagesFromCollectionOnIndex(BooruCollection collection, {int index = 0, int? size}) async {
+        final List files = (await getRawInfo())["files"];
+        final obtainedList = collection.pages.map((id) => files[int.parse(id)]).toList();
+        return await getImagesFromIndex(obtainedList, index: index, size: size);
+    }
 }
 
 typedef ImageID = String;
