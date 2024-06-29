@@ -142,6 +142,16 @@ flutter:
     - assets/counter/squares/7.svg
     - assets/counter/squares/8.svg
     - assets/counter/squares/9.svg
+    - assets/counter/signs/0.png
+    - assets/counter/signs/1.png
+    - assets/counter/signs/2.png
+    - assets/counter/signs/3.png
+    - assets/counter/signs/4.png
+    - assets/counter/signs/5.png
+    - assets/counter/signs/6.png
+    - assets/counter/signs/7.png
+    - assets/counter/signs/8.png
+    - assets/counter/signs/9.png
     - assets/Screenshot_1009.webp
     
     - pubspec.yaml # reading itself
