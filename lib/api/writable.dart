@@ -65,14 +65,7 @@ Future<BooruImage> insertImage(PresetImage preset) async {
         copiedFile = await preset.image!.copy(p.join(booru.path, "files", p.basename(preset.image!.path)));
     }
 
-    // step 2: add to json
-    Map raw = await booru.getRawInfo();
-    List files = raw["files"];
-
-    // determine id
-    String id = preset.replaceID == null || int.parse(preset.replaceID!) > files.length ? "${files.length}" : preset.replaceID!;
-
-    // set up tags
+    // step 2: add tag types
     if(preset.tags == null) throw "Preset does not contain tags";
     Set<String> tagSet = {};
     for (MapEntry<String, List<String>> tagType in preset.tags!.entries) {
@@ -82,6 +75,14 @@ Future<BooruImage> insertImage(PresetImage preset) async {
             if(tagType.key != "generic") await addSpecificTags(tagType.value, type: tagType.key);
         }
     }
+
+    // step 3: adding to json
+    // obtain raw AFTER adding specific tags
+    Map raw = await booru.getRawInfo();
+    List files = raw["files"];
+
+    // determine id
+    String id = preset.replaceID == null || int.parse(preset.replaceID!) > files.length ? "${files.length}" : preset.replaceID!;
     
     // determine rating
     final String? ratingString = switch(preset.rating) {
@@ -156,9 +157,12 @@ Future<void> addSpecificTags(List<String> tags, {required String type}) async {
     raw["specificTags"][type] = specificTags;
 
     Map<String, List<String>> iLoveDartsTypeSystem = {};
-    for(String key in raw["specificTags"].keys) {
-        iLoveDartsTypeSystem[key] = List<String>.from(raw["specificTags"][key]);
+    for(MapEntry entry in raw["specificTags"].entries) {
+        iLoveDartsTypeSystem[entry.key] = List<String>.from(entry.value);
     }
+
+    debugPrint("before ${raw["specificTags"]} after $iLoveDartsTypeSystem");
+
     await writeSpecificTags(iLoveDartsTypeSystem);
 }
 
