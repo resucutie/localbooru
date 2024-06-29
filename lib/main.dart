@@ -13,7 +13,6 @@ import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/utils/update_checker.dart';
 import 'package:localbooru/views/about.dart';
 import 'package:localbooru/api/preset/index.dart';
-import 'package:localbooru/views/image_manager/form.dart';
 import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:localbooru/views/lock.dart';
 import 'package:localbooru/views/navigation/home.dart';

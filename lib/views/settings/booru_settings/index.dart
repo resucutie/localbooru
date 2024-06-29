@@ -90,7 +90,7 @@ class _BooruSettingsState extends State<BooruSettings> {
                 ListTile(
                     title: const Text("Syncing"),
                     subtitle: const Text("This program does not offer syncing capabilities out of the box, but if you want to sync your computer storage, we recommend using Syncthing"),
-                    leading: SvgPicture.asset("assets/syncthing.svg", width: 24, height: 24,),
+                    leading: SvgPicture.asset("assets/syncthing.svg", width: 24, height: 24, color: Theme.of(context).textTheme.labelSmall?.color,),
                     trailing: const Icon(Icons.open_in_new),
                     onTap: () => launchUrlString("https://syncthing.net/"),
                 ),
