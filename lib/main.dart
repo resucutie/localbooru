@@ -347,7 +347,7 @@ class _AppState extends State<App> {
                             darkTheme: theme["dark"],
                             themeMode: ThemeMode.values[themeModeIndex], 
                             routerConfig: router,
-                            debugShowCheckedModeBanner: false,
+                            debugShowCheckedModeBanner: true,
                         );
                     }
                 )

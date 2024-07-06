@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/preset/index.dart';
-import 'package:localbooru/components/multi_image.dart';
+import 'package:localbooru/components/multi_image_display.dart';
 
 class GeneralCollectionManagerScreen extends StatefulWidget {
     const GeneralCollectionManagerScreen({super.key, this.displayImages, this.onCorelatedChanged, this.corelated, this.saveCollectionToggle, this.onSaveCollectionToggle, required this.collection, this.onErrorChange});

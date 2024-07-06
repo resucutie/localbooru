@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/components/counter.dart';
-import 'package:localbooru/components/multi_image.dart';
+import 'package:localbooru/components/multi_image_display.dart';
 
 class TestPlaygroundScreen extends StatefulWidget {
     const TestPlaygroundScreen({super.key});
