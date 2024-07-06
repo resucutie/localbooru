@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/preset/index.dart';
+import 'package:localbooru/components/multi_image.dart';
 
 class GeneralCollectionManagerScreen extends StatefulWidget {
-    const GeneralCollectionManagerScreen({super.key, this.onCorelatedChanged, this.corelated, this.saveCollectionToggle, this.onSaveCollectionToggle, required this.collection, this.onErrorChange});
+    const GeneralCollectionManagerScreen({super.key, this.displayImages, this.onCorelatedChanged, this.corelated, this.saveCollectionToggle, this.onSaveCollectionToggle, required this.collection, this.onErrorChange});
 
+    final List<ImageProvider?>? displayImages;
     final void Function(bool value)? onCorelatedChanged;
     final bool? corelated;
     final void Function(bool value)? onSaveCollectionToggle;
@@ -20,6 +22,22 @@ class _GeneralCollectionManagerScreenState extends State<GeneralCollectionManage
     Widget build(BuildContext context) {
         return ListView(
             children: [
+                if(widget.displayImages != null) ...[
+                    // const SizedBox(height: 13,),
+                    Center(
+                        child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxHeight: 225),
+                                child: AspectRatio(
+                                    aspectRatio: 1,
+                                    child: MultipleImage(
+                                        images: widget.displayImages!,
+                                    ),
+                                ),
+                        ),
+                    ),
+                    const SizedBox(height: 16,)
+                ],
+
                 if(widget.corelated != null) SwitchListTile(
                     title: const Text("Make elements correlate with eachother"),
                     subtitle: const Text("This will make each image relate to all other images that are being added"),

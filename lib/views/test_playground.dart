@@ -1,7 +1,10 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/components/counter.dart';
+import 'package:localbooru/components/multi_image.dart';
 
 class TestPlaygroundScreen extends StatefulWidget {
     const TestPlaygroundScreen({super.key});
@@ -47,9 +50,10 @@ class _TestPlaygroundScreenState extends State<TestPlaygroundScreen> {
                     Center(
                         child: Wrap(
                             spacing: 8,
-                            // children: List.filled(5, Image.asset("assets/Screenshot_1009.webp", width: 64, fit: BoxFit.contain, filterQuality: FilterQuality.none,))
+                            children: List.filled(5, Image.asset("assets/Screenshot_1009.webp", width: 64, fit: BoxFit.contain, filterQuality: FilterQuality.none,))
                         )
                     ),
+                    // MultipleImage(images: List.filled(3, const AssetImage("assets/Screenshot_1009.webp"))),
                     const StyleCounter(number: 1234567890, display: "squares",),
                     const StyleCounter(number: 1234567890, display: "baba",),
                     const StyleCounter(number: 1234567890, display: "signs",),
@@ -99,6 +103,14 @@ class _TestPlaygroundScreenState extends State<TestPlaygroundScreen> {
                     )
                 ],
             )
+            // body: AspectRatio(
+            //     aspectRatio: 1,
+            //     child: FractionallySizedBox(
+            //         widthFactor: 0.5,
+            //         heightFactor: 0.5,
+            //         child: MultipleImage(images: List.filled(3, const AssetImage("assets/Screenshot_1009.webp")))
+            //     )
+            // ),
         );
     }
 }

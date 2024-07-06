@@ -89,7 +89,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                         contentPadding: EdgeInsets.zero,
                         title: Text("${preset.pages![imagePage].replaceID != null ? "Edit" : "Add"} image", style: const TextStyle(fontSize: 20.0), overflow: TextOverflow.ellipsis),
                         subtitle: Text(generateName(preset.pages![imagePage]), style: const TextStyle(fontSize: 14.0), overflow: TextOverflow.ellipsis),
-                    ) : const Text("Manage images"),
+                    ) : Text("${preset.pages!.length} images"),
                     actions: [
                         IconButton(
                             icon: Badge(
@@ -210,6 +210,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                         index: imagePage + 1,
                         children: [
                             GeneralCollectionManagerScreen(
+                                displayImages: List<ImageProvider?>.generate(3, (index) => preset.pages!.asMap().containsKey(index) && preset.pages![index].image != null ? FileImage(preset.pages![index].image!) : null,),
                                 corelated: isCorelated,
                                 onCorelatedChanged: (value) => setState(() => isCorelated = value),
                                 saveCollectionToggle: saveCollection,
