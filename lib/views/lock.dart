@@ -25,6 +25,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
     final LocalAuthentication auth = LocalAuthentication();
     
     bool isImportProgressDialogOpen = false;
+    bool hasAuthBeenAsked = false;
 
     @override
     void initState() {
@@ -32,6 +33,9 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
         WidgetsBinding.instance.addObserver(this);
         lockListener.addListener(updateUI);
         importListener.addListener(showImportSnackBar);
+        isAuthHideoutEnabled().then((hasAuth) {
+            if(hasAuth) lockListener.lock();
+        },);
     }
 
     void updateUI() {
@@ -117,9 +121,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
             }
         } else {
             await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
-            if(lockListener.isLocked) authToUnlock();
+            if(lockListener.isLocked && !hasAuthBeenAsked) authToUnlock();
         }
-
     }
 
     void authToUnlock() async {
@@ -127,7 +130,12 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
             final didAuthenticate = await auth.authenticate(
                 localizedReason: "Booru is currently locked"
             );
-            if(didAuthenticate) lockListener.unlock();
+            if(didAuthenticate) {
+                lockListener.unlock();
+                hasAuthBeenAsked = false;
+            } else {
+                hasAuthBeenAsked = true;
+            }
         } on PlatformException catch (error) {
             final String message = switch(error.code) {
                 auth_error.otherOperatingSystem => "This system shouldn't have any support for authentication lock",
@@ -141,30 +149,61 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
 
     @override
     Widget build(BuildContext context) {
-        return lockListener.isLocked ? Scaffold(
-            body: Center(
-                child: Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        
-                        children: [
-                            Icon(Icons.lock, size: 96, color: Theme.of(context).colorScheme.primary,),
-                            const SizedBox(height: 16,),
-                            const Text("LocalBooru won't display the contents due to the user having enabled authentication hideout. Please click on the button below and verify your identity to use this app",
-                                textAlign: TextAlign.center,
+        return IndexedStack(
+            index: lockListener.isLocked ? 0 : 1,
+            children: [
+                Scaffold(
+                    body: Center(
+                        child: Padding(
+                            padding: const EdgeInsets.all(32.0),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                
+                                children: [
+                                    Icon(Icons.lock, size: 96, color: Theme.of(context).colorScheme.primary,),
+                                    const SizedBox(height: 16,),
+                                    const Text("LocalBooru won't display the contents due to the user having enabled authentication hideout. Please click on the button below and verify your identity to use this app",
+                                        textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 64,),
+                                    FilledButton.icon(
+                                        label: Text(Random().nextInt(100) == 69 ? "unlok" : "Unlock"),
+                                        icon: const Icon(Icons.key),
+                                        onPressed: authToUnlock,
+                                    )
+                                ]
                             ),
-                            const SizedBox(height: 64,),
-                            FilledButton.icon(
-                                label: Text(Random().nextInt(100) == 69 ? "unlok" : "Unlock"),
-                                icon: const Icon(Icons.key),
-                                onPressed: authToUnlock,
-                            )
-                        ]
+                        ),
                     ),
                 ),
-            ),
-        ) : widget.child;
+                widget.child
+            ],
+        );
+        // return lockListener.isLocked ? Scaffold(
+        //     body: Center(
+        //         child: Padding(
+        //             padding: const EdgeInsets.all(32.0),
+        //             child: Column(
+        //                 crossAxisAlignment: CrossAxisAlignment.center,
+        //                 mainAxisAlignment: MainAxisAlignment.center,
+                        
+        //                 children: [
+        //                     Icon(Icons.lock, size: 96, color: Theme.of(context).colorScheme.primary,),
+        //                     const SizedBox(height: 16,),
+        //                     const Text("LocalBooru won't display the contents due to the user having enabled authentication hideout. Please click on the button below and verify your identity to use this app",
+        //                         textAlign: TextAlign.center,
+        //                     ),
+        //                     const SizedBox(height: 64,),
+        //                     FilledButton.icon(
+        //                         label: Text(Random().nextInt(100) == 69 ? "unlok" : "Unlock"),
+        //                         icon: const Icon(Icons.key),
+        //                         onPressed: authToUnlock,
+        //                     )
+        //                 ]
+        //             ),
+        //         ),
+        //     ),
+        // ) : widget.child;
     }
 }
