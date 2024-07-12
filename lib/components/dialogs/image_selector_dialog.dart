@@ -108,7 +108,6 @@ class _SelectDialogState extends State<SelectDialog> {
                                 return SearchableInformation(images: images, indexLength: indexLength);
                             },
                             selectionMode: true,
-                            tags: [tags, ...(widget.excludeImages ?? []).map((e) => "-id:$e")].join(" "),
                             selectedImages: imageIDs,
                             onSelect: (images) => setState(() => imageIDs = images),
                         ),

@@ -17,7 +17,6 @@ import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:localbooru/views/lock.dart';
 import 'package:localbooru/views/navigation/collections/list.dart';
-import 'package:localbooru/views/navigation/collections/view.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
 import 'package:localbooru/views/navigation/index.dart';
@@ -149,9 +148,14 @@ final router = GoRouter(
                                                         List<BooruImage> images = await booru.searchByTags(tags, index: index, size: indexSize);
                                                         return SearchableInformation(images: images, indexLength: indexLength);
                                                     },
-                                                    tags: tags,
+                                                    displayBackButton: false,
                                                     index: int.parse(index ?? "0"),
-                                                    onSearch: (tags, newIndex) => context.push("/search?tag=$tags&index=$newIndex"),
+                                                    onNextPage: (newIndex) => context.push("/search?tag=$tags&index=$newIndex"),
+                                                    headerDisplay: (context, orientation) => SearchBarOnGridList(
+                                                        onSearch: (tags) => context.push("/search?tag=$tags"),
+                                                        desktopDisplay: orientation == Orientation.landscape,
+                                                        initialText: tags,
+                                                    ),
                                                 );
                                             }
                                         ),
@@ -212,20 +216,60 @@ final router = GoRouter(
                                                         final String? id = state.pathParameters["id"];
                                                         if (id == null) return Text("Invalid ID $id");
                                                         final String? index = state.uri.queryParameters["index"];
+                                                        return GalleryViewer(
+                                                            searcher: (index) async {
+                                                                SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                                final Booru booru = await getCurrentBooru();
+                                                                final collection = (await booru.getCollection(id))!;
+                                                                int indexSize = prefs.getInt("page_size") ?? settingsDefaults["page_size"];
 
-                                                        return BooruLoader(builder: (_, booru) => FutureBuilder(
-                                                            future: booru.getCollection(id),
-                                                            builder: (context, snapshot) {
-                                                                if(!snapshot.hasData) return const Center(child: CircularProgressIndicator(),);
-                                                                return CollectionView(
-                                                                    booru: booru,
-                                                                    collection: snapshot.data!,
-                                                                    index: int.parse(index ?? "0"),
-                                                                );
-                                                            }
-                                                        ));
-                                                    },
-                                                )
+                                                                // getRange
+                                                                final int length = collection.pages.length;
+                                                                int from = length - (indexSize * (index + 1));
+                                                                int to = length - (indexSize * index);
+                                                                if(from < 0) from = 0;
+                                                                if(to < 0) to = length;
+                                                                final rangedPageList = collection.pages.getRange(from, to);
+                                                                
+                                                                final List<BooruImage> images = await Future.wait(rangedPageList.map((id) async => (await booru.getImage(id))!));
+                                                                return SearchableInformation(images: images, indexLength: (length / indexSize).ceil());
+                                                            },
+                                                            index: int.parse(index ?? "0"),
+                                                            onNextPage: ( newIndex) => context.push("/collections/$id/?index=$newIndex"),
+                                                            headerDisplay: (context, orientation) {
+                                                                return BooruLoader(builder: (_, booru) => FutureBuilder(
+                                                                    future: booru.getCollection(id),
+                                                                    builder: (context, snapshot) {
+                                                                        if(!snapshot.hasData) return const Text("Loading");
+                                                                        return ListTile(
+                                                                            title: Text(snapshot.data!.name, style: const TextStyle(fontSize: 20.0)),
+                                                                            subtitle: Text("ID ${snapshot.data!.id}", style: const TextStyle(fontSize: 14.0)),
+                                                                        );
+                                                                    }
+                                                                ));
+                                                            },
+                                                        );
+                                                    }
+                                                ),
+                                                // GoRoute(path: ":id",
+                                                //     builder: (context, state) {
+                                                //         final String? id = state.pathParameters["id"];
+                                                //         if (id == null) return Text("Invalid ID $id");
+                                                //         final String? index = state.uri.queryParameters["index"];
+
+                                                //         return BooruLoader(builder: (_, booru) => FutureBuilder(
+                                                //             future: booru.getCollection(id),
+                                                //             builder: (context, snapshot) {
+                                                //                 if(!snapshot.hasData) return const Center(child: CircularProgressIndicator(),);
+                                                //                 return CollectionView(
+                                                //                     booru: booru,
+                                                //                     collection: snapshot.data!,
+                                                //                     index: int.parse(index ?? "0"),
+                                                //                 );
+                                                //             }
+                                                //         ));
+                                                //     },
+                                                // )
                                             ]
                                         ),
                                     ]

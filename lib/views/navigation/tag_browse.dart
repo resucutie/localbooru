@@ -18,14 +18,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class GalleryViewer extends StatefulWidget {
-    const GalleryViewer({super.key, required this.searcher, this.tags = "", this.index = 0, this.selectionMode = false, this.onSelect, this.onSearch, this.selectedImages});
+    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true});
 
-    final String tags;
     final int index;
     final FutureOr<SearchableInformation> Function(int index) searcher;
+    final Widget Function(BuildContext context, Orientation orientation)? headerDisplay;
     final bool selectionMode;
+    final bool displayBackButton;
     final void Function(List<ImageID>)? onSelect;
-    final void Function(String tags, int newIndex)? onSearch;
+    final void Function(int newIndex)? onNextPage;
     final List<ImageID>? selectedImages;
 
     @override
@@ -34,8 +35,6 @@ class GalleryViewer extends StatefulWidget {
 
 class _GalleryViewerState extends State<GalleryViewer> {
     late Future<Map> _resultObtainFuture;
-
-    final SearchController _searchController = SearchController();
 
     final scrollToTop = GlobalKey();
     
@@ -47,7 +46,6 @@ class _GalleryViewerState extends State<GalleryViewer> {
     void initState() {
         super.initState();
         _currentIndex = widget.index;
-        _searchController.text = widget.tags;
         _selectedImages = widget.selectedImages ?? [];
         updateImages();
 
@@ -65,8 +63,6 @@ class _GalleryViewerState extends State<GalleryViewer> {
             _resultObtainFuture = _obtainResults();
         });
     }
-
-    void _onSearch ({int? newIndex}) => widget.onSearch!(widget.tags, newIndex ?? 0);
 
     void openContextMenu(Offset offset, BooruImage image) {
         final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
@@ -146,7 +142,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                     pinned: isDesktop(),
                                                     forceMaterialTransparency: orientation == Orientation.landscape,
                                                     titleSpacing: 0,
-                                                    automaticallyImplyLeading: false,
+                                                    automaticallyImplyLeading: widget.displayBackButton,
                                                     actions: orientation != Orientation.landscape ? actions : [Padding(
                                                         padding: const EdgeInsets.only(right: 8),
                                                         child: Wrap(
@@ -155,23 +151,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                             children: actions.map((e) => CircleAvatar(backgroundColor: Theme.of(context).colorScheme.surfaceVariant, child: e,)).toList(),
                                                         ),
                                                     )],
-                                                    title: Container(
-                                                        padding: orientation == Orientation.landscape ? const EdgeInsets.all(16.0) : null,
-                                                        constraints: orientation == Orientation.landscape ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
-                                                        child: SearchTag(
-                                                            onSearch: (_) => _onSearch(),
-                                                            controller: _searchController,
-                                                            actions: orientation == Orientation.portrait ? [] : [IconButton(onPressed: _onSearch, icon: const Icon(Icons.search))],
-                                                            leading: const Padding(
-                                                                padding: EdgeInsets.only(right: 12.0),
-                                                                child: BackButton(),
-                                                            ),
-                                                            padding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 2)),
-                                                            backgroundColor: orientation == Orientation.portrait ? Colors.transparent : null,
-                                                            elevation: orientation == Orientation.portrait ? 0 : null,
-                                                            hint: "Search",
-                                                        ),
-                                                    ),
+                                                    title: widget.headerDisplay != null ? widget.headerDisplay!(context, orientation) : null,
                                                 )
                                                 : SliverAppBar(
                                                     key: const ValueKey("elements selected"),
@@ -220,8 +200,8 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                 currentPage: _currentIndex,
                                                 pages: pages,
                                                 onSelect: (selectedPage) {
-                                                    if(widget.onSearch != null) {
-                                                        _onSearch(newIndex: selectedPage);
+                                                    if(widget.onNextPage != null) {
+                                                        widget.onNextPage!(selectedPage);
                                                     } else {
                                                         _currentIndex = selectedPage;
                                                         updateImages();
@@ -348,6 +328,49 @@ class _PageDisplayState extends State<PageDisplay> {
                         ),
                     ),
                 )
+            ),
+        );
+    }
+}
+
+class SearchBarOnGridList extends StatefulWidget {
+    const SearchBarOnGridList({super.key, required this.onSearch, required this.desktopDisplay, this.initialText = ""});
+
+    final void Function(String text) onSearch;
+    final bool desktopDisplay;
+    final String initialText;
+
+    @override
+    State<SearchBarOnGridList> createState() => _SearchBarOnGridListState();
+
+}
+
+class _SearchBarOnGridListState extends State<SearchBarOnGridList> {
+    final SearchController _searchController = SearchController();
+
+    @override
+    void initState() {
+        _searchController.text = widget.initialText;
+        super.initState();
+    }
+
+    @override
+    Widget build(BuildContext context) {
+        return Container(
+            padding: widget.desktopDisplay ? const EdgeInsets.all(16.0) : null,
+            constraints: widget.desktopDisplay ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
+            child: SearchTag(
+                onSearch: (text) => widget.onSearch(text),
+                controller: _searchController,
+                actions: !widget.desktopDisplay ? [] : [IconButton(onPressed: () => widget.onSearch(_searchController.text), icon: const Icon(Icons.search))],
+                leading: const Padding(
+                    padding: EdgeInsets.only(right: 12.0),
+                    child: BackButton(),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 2)),
+                backgroundColor: !widget.desktopDisplay ? Colors.transparent : null,
+                elevation: !widget.desktopDisplay ? 0 : null,
+                hint: "Search",
             ),
         );
     }
