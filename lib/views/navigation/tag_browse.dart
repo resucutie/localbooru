@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -17,14 +18,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class GalleryViewer extends StatefulWidget {
-    const GalleryViewer({super.key, required this.booru, this.tags = "", this.index = 0, this.routeNavigation = false, this.selectionMode = false, this.onSelect, this.selectedImages});
+    const GalleryViewer({super.key, required this.searcher, this.tags = "", this.index = 0, this.selectionMode = false, this.onSelect, this.onSearch, this.selectedImages});
 
-    final Booru booru;
     final String tags;
     final int index;
-    final bool routeNavigation;
+    final FutureOr<SearchableInformation> Function(int index) searcher;
     final bool selectionMode;
     final void Function(List<ImageID>)? onSelect;
+    final void Function(String tags, int newIndex)? onSearch;
     final List<ImageID>? selectedImages;
 
     @override
@@ -65,7 +66,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
         });
     }
 
-    void _onSearch () => context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
+    void _onSearch ({int? newIndex}) => widget.onSearch!(widget.tags, newIndex ?? 0);
 
     void openContextMenu(Offset offset, BooruImage image) {
         final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
@@ -102,17 +103,12 @@ class _GalleryViewerState extends State<GalleryViewer> {
     }
 
     Future<Map> _obtainResults() async {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        int indexSize = prefs.getInt("page_size") ?? settingsDefaults["page_size"];
+        final search = await widget.searcher(_currentIndex);
 
-        debugPrint(widget.tags);
-
-        int indexLength = await widget.booru.getIndexNumberLength(widget.tags, size: indexSize);
-        List<BooruImage> images = await widget.booru.searchByTags(widget.tags, index: _currentIndex, size: indexSize);
         return {
-            "images": images,
-            "indexLength": indexLength,
-            "sharedPrefs": prefs
+            "images": search.images,
+            "indexLength": search.indexLength,
+            "sharedPrefs": await SharedPreferences.getInstance()
         };
     }
 
@@ -144,39 +140,39 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                             duration: kThemeAnimationDuration,
                                             child: !isInSelection()
                                                 ? SliverAppBar(
-                                                        key: const ValueKey("normal"),
-                                                        floating: true,
-                                                        snap: true,
-                                                        pinned: isDesktop(),
-                                                        forceMaterialTransparency: orientation == Orientation.landscape,
-                                                        titleSpacing: 0,
-                                                        automaticallyImplyLeading: false,
-                                                        actions: orientation != Orientation.landscape ? actions : [Padding(
-                                                            padding: const EdgeInsets.only(right: 8),
-                                                            child: Wrap(
-                                                                direction: Axis.horizontal,
-                                                                spacing: 8,
-                                                                children: actions.map((e) => CircleAvatar(backgroundColor: Theme.of(context).colorScheme.surfaceVariant, child: e,)).toList(),
-                                                            ),
-                                                        )],
-                                                        title: Container(
-                                                            padding: orientation == Orientation.landscape ? const EdgeInsets.all(16.0) : null,
-                                                            constraints: orientation == Orientation.landscape ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
-                                                            child: SearchTag(
-                                                                onSearch: (_) => _onSearch(),
-                                                                controller: _searchController,
-                                                                actions: orientation == Orientation.portrait ? [] : [IconButton(onPressed: _onSearch, icon: const Icon(Icons.search))],
-                                                                leading: const Padding(
-                                                                    padding: EdgeInsets.only(right: 12.0),
-                                                                    child: BackButton(),
-                                                                ),
-                                                                padding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 2)),
-                                                                backgroundColor: orientation == Orientation.portrait ? Colors.transparent : null,
-                                                                elevation: orientation == Orientation.portrait ? 0 : null,
-                                                                hint: "Search",
-                                                            ),
+                                                    key: const ValueKey("normal"),
+                                                    floating: true,
+                                                    snap: true,
+                                                    pinned: isDesktop(),
+                                                    forceMaterialTransparency: orientation == Orientation.landscape,
+                                                    titleSpacing: 0,
+                                                    automaticallyImplyLeading: false,
+                                                    actions: orientation != Orientation.landscape ? actions : [Padding(
+                                                        padding: const EdgeInsets.only(right: 8),
+                                                        child: Wrap(
+                                                            direction: Axis.horizontal,
+                                                            spacing: 8,
+                                                            children: actions.map((e) => CircleAvatar(backgroundColor: Theme.of(context).colorScheme.surfaceVariant, child: e,)).toList(),
                                                         ),
-                                                    )
+                                                    )],
+                                                    title: Container(
+                                                        padding: orientation == Orientation.landscape ? const EdgeInsets.all(16.0) : null,
+                                                        constraints: orientation == Orientation.landscape ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
+                                                        child: SearchTag(
+                                                            onSearch: (_) => _onSearch(),
+                                                            controller: _searchController,
+                                                            actions: orientation == Orientation.portrait ? [] : [IconButton(onPressed: _onSearch, icon: const Icon(Icons.search))],
+                                                            leading: const Padding(
+                                                                padding: EdgeInsets.only(right: 12.0),
+                                                                child: BackButton(),
+                                                            ),
+                                                            padding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 2)),
+                                                            backgroundColor: orientation == Orientation.portrait ? Colors.transparent : null,
+                                                            elevation: orientation == Orientation.portrait ? 0 : null,
+                                                            hint: "Search",
+                                                        ),
+                                                    ),
+                                                )
                                                 : SliverAppBar(
                                                     key: const ValueKey("elements selected"),
                                                     floating: true,
@@ -224,8 +220,8 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                 currentPage: _currentIndex,
                                                 pages: pages,
                                                 onSelect: (selectedPage) {
-                                                    if(widget.routeNavigation) {
-                                                        context.push("/search?tag=${widget.tags}&index=$selectedPage");
+                                                    if(widget.onSearch != null) {
+                                                        _onSearch(newIndex: selectedPage);
                                                     } else {
                                                         _currentIndex = selectedPage;
                                                         updateImages();
@@ -355,4 +351,11 @@ class _PageDisplayState extends State<PageDisplay> {
             ),
         );
     }
+}
+
+class SearchableInformation {
+    SearchableInformation({required this.images, required this.indexLength});
+    
+    List<BooruImage> images;
+    int indexLength;
 }

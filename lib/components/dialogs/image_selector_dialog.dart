@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/tag_browse.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<List<ImageID>?> openSelectionDialog({required BuildContext context, List<ImageID>? selectedImages, List<ImageID>? excludeImages,}) async {
     final booru = await getCurrentBooru();
@@ -94,7 +96,17 @@ class _SelectDialogState extends State<SelectDialog> {
                         width: MediaQuery.of(context).size.width * (orientation == Orientation.landscape ? 0.6 : 1),
                         child: GalleryViewer(
                             key: ValueKey(tags),
-                            booru: widget.booru,
+                            searcher: (index) async {
+                                SharedPreferences prefs = await SharedPreferences.getInstance();
+                                final Booru booru = await getCurrentBooru();
+                                int indexSize = prefs.getInt("page_size") ?? settingsDefaults["page_size"];
+
+                                final finalTags = [tags, ...(widget.excludeImages ?? []).map((e) => "-id:$e")].join(" ");
+
+                                int indexLength = await booru.getIndexNumberLength(finalTags, size: indexSize);
+                                List<BooruImage> images = await booru.searchByTags(finalTags, index: index, size: indexSize);
+                                return SearchableInformation(images: images, indexLength: indexLength);
+                            },
                             selectionMode: true,
                             tags: [tags, ...(widget.excludeImages ?? []).map((e) => "-id:$e")].join(" "),
                             selectedImages: imageIDs,

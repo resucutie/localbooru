@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/components/drawer.dart';
@@ -138,13 +139,19 @@ final router = GoRouter(
                                             builder: (context, state) {
                                                 final String tags = state.uri.queryParameters["tag"] ?? "";
                                                 final String? index = state.uri.queryParameters["index"];
-                                                return BooruLoader(
-                                                    builder: (context, booru) => GalleryViewer(
-                                                        booru: booru,
-                                                        tags: tags,
-                                                        index: int.parse(index ?? "0"),
-                                                        routeNavigation: true,
-                                                    ),
+                                                return GalleryViewer(
+                                                    searcher: (index) async {
+                                                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                                                        final Booru booru = await getCurrentBooru();
+                                                        int indexSize = prefs.getInt("page_size") ?? settingsDefaults["page_size"];
+
+                                                        int indexLength = await booru.getIndexNumberLength(tags, size: indexSize);
+                                                        List<BooruImage> images = await booru.searchByTags(tags, index: index, size: indexSize);
+                                                        return SearchableInformation(images: images, indexLength: indexLength);
+                                                    },
+                                                    tags: tags,
+                                                    index: int.parse(index ?? "0"),
+                                                    onSearch: (tags, newIndex) => context.push("/search?tag=$tags&index=$newIndex"),
                                                 );
                                             }
                                         ),
