@@ -68,29 +68,37 @@ class DefaultDrawer extends StatelessWidget {
                         )
                     ),
                 ),
-                if(desktopView) ...[
-                    ListTile(
-                        textColor: assertSelected("home"),
-                        iconColor: assertSelected("home"),
-                        title: const Text("Home"),
-                        leading: const Icon(Icons.home),
-                        onTap: activeView != "home" ? () {
-                            Scaffold.of(context).closeDrawer();
-                            context.go("/home");
-                        } : null,
-                    ),
-                    ListTile(
-                        textColor: assertSelected("recent") ?? assertSelected("search"),
-                        iconColor: assertSelected("recent") ?? assertSelected("search"),
-                        title: const Text("Search"),
-                        leading: const Icon(Icons.search),
-                        onTap: activeView != "recent" && activeView != "search" ? () {
-                            Scaffold.of(context).closeDrawer();
-                            context.push("/recent");
-                        } : null,
-                    ),
-                    const Divider(),
-                ],
+                if(desktopView) ListTile(
+                    textColor: assertSelected("home"),
+                    iconColor: assertSelected("home"),
+                    title: const Text("Home"),
+                    leading: const Icon(Icons.home),
+                    onTap: activeView != "home" ? () {
+                        Scaffold.of(context).closeDrawer();
+                        context.go("/home");
+                    } : null,
+                ),
+                ListTile(
+                    textColor: assertSelected("recent") ?? assertSelected("search"),
+                    iconColor: assertSelected("recent") ?? assertSelected("search"),
+                    title: Text(desktopView ? "Search" : "Recents"),
+                    leading: Icon(desktopView ? Icons.search : Icons.history),
+                    onTap: activeView != "recent" && activeView != "search" ? () {
+                        Scaffold.of(context).closeDrawer();
+                        context.push("/recent");
+                    } : null,
+                ),
+                ListTile(
+                    textColor: assertSelected("collections"),
+                    iconColor: assertSelected("collections"),
+                    title: const Text("Collections"),
+                    leading: const Icon(Icons.photo_library),
+                    onTap: activeView != "collections" ? () {
+                        Scaffold.of(context).closeDrawer();
+                        context.push("/collections");
+                    } : null,
+                ),
+                const Divider(),
                 ListTile(
                     textColor: assertSelected("manage_image"),
                     iconColor: assertSelected("manage_image"),
