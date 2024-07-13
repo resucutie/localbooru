@@ -16,7 +16,7 @@ import 'package:localbooru/views/about.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:localbooru/views/lock.dart';
-import 'package:localbooru/views/navigation/collections/list.dart';
+import 'package:localbooru/views/navigation/collection_list.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
 import 'package:localbooru/views/navigation/index.dart';
