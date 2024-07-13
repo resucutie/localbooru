@@ -248,6 +248,7 @@ final router = GoRouter(
                                                                     }
                                                                 ));
                                                             },
+                                                            forceOrientation: Orientation.portrait,
                                                         );
                                                     }
                                                 ),

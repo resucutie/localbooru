@@ -18,13 +18,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class GalleryViewer extends StatefulWidget {
-    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true});
+    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true, this.forceOrientation});
 
     final int index;
     final FutureOr<SearchableInformation> Function(int index) searcher;
     final Widget Function(BuildContext context, Orientation orientation)? headerDisplay;
     final bool selectionMode;
     final bool displayBackButton;
+    final Orientation? forceOrientation;
     final void Function(List<ImageID>)? onSelect;
     final void Function(int newIndex)? onNextPage;
     final List<ImageID>? selectedImages;
@@ -128,7 +129,8 @@ class _GalleryViewerState extends State<GalleryViewer> {
                     SharedPreferences prefs = snapshot.data!["sharedPrefs"];
                 
                     return OrientationBuilder(
-                        builder: (context, orientation) {
+                        builder: (context, containerOrientation) {
+                            final Orientation orientation = widget.forceOrientation ?? containerOrientation;
                             return Scaffold(
                                 body: CustomScrollView(
                                     slivers: [
