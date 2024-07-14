@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
@@ -27,6 +26,16 @@ class _CollectionsListPageState extends State<CollectionsListPage> {
         return Scaffold(
             appBar: AppBar(
                 title: const Text("Collections"),
+                actions: [
+                    PopupMenuButton(
+                        itemBuilder: (context) => [
+                            PopupMenuItem(
+                                child: const Text("Manage collections"),
+                                onTap: () => context.push("/settings/booru/collections"),
+                            )
+                        ],
+                    )
+                ],
             ),
             body: FutureBuilder(
                 future: collectionFuture,

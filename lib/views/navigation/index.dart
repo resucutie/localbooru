@@ -2,8 +2,6 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:go_router/go_router.dart';
-import 'package:localbooru/api/index.dart';
-import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:super_clipboard/super_clipboard.dart';
