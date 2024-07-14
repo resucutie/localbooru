@@ -103,25 +103,27 @@ class _AddImageDropRegionState extends State<AddImageDropRegion> {
     }
 }
 
-class BrowseScreenPopupMenuButton extends StatelessWidget {
-    const BrowseScreenPopupMenuButton({super.key, this.image});
+// class BrowseScreenPopupMenuButton extends StatelessWidget {
+//     const BrowseScreenPopupMenuButton({super.key, this.image, this.collectionID});
 
-    final BooruImage? image;
+//     final BooruImage? image;
+//     final CollectionID? collectionID;
 
-    @override
-    Widget build(context) {
-        return PopupMenuButton(
-            // child: Icon(Icons.more_vert),
-            itemBuilder: (context) {
-                final List<PopupMenuEntry> filteredList = booruItems();
-                if(image != null) {
-                    filteredList.add(const PopupMenuDivider());
-                    filteredList.addAll(imageShareItems(image!));
-                    filteredList.add(const PopupMenuDivider());
-                    filteredList.addAll(imageManagementItems(image!, context: context));
-                };
-                return filteredList;
-            }
-        );
-    }
-}
+//     @override
+//     Widget build(context) {
+//         return PopupMenuButton(
+//             // child: Icon(Icons.more_vert),
+//             itemBuilder: (context) {
+//                 return [
+//                     ...booruItems(),
+//                     if(image != null) ...[
+//                         const PopupMenuDivider(),
+//                         ...imageShareItems(image!),
+//                         const PopupMenuDivider(),
+//                         ...imageManagementItems(image!, context: context)
+//                     ]
+//                 ];
+//             }
+//         );
+//     }
+// }

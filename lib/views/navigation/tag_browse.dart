@@ -13,18 +13,18 @@ import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/views/navigation/home.dart';
-import 'package:localbooru/views/navigation/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class GalleryViewer extends StatefulWidget {
-    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true, this.forceOrientation});
+    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true, this.forceOrientation, this.parentCollectionID});
 
     final int index;
     final FutureOr<SearchableInformation> Function(int index) searcher;
     final Widget Function(BuildContext context, Orientation orientation)? headerDisplay;
     final bool selectionMode;
     final bool displayBackButton;
+    final CollectionID? parentCollectionID;
     final Orientation? forceOrientation;
     final void Function(List<ImageID>)? onSelect;
     final void Function(int newIndex)? onNextPage;
@@ -117,9 +117,21 @@ class _GalleryViewerState extends State<GalleryViewer> {
             IconButton(
                 icon: const Icon(Icons.add),
                 tooltip: "Add image",
-                onPressed: () => context.push("/manage_image"),
+                onPressed: () {
+                    if(widget.parentCollectionID != null) context.push("/manage_image");
+                },
             ),
-            const BrowseScreenPopupMenuButton()
+            PopupMenuButton(
+                itemBuilder: (context) {
+                    return [
+                        ...booruItems(),
+                        if(widget.parentCollectionID != null) PopupMenuItem(
+                            child: Text("Open collection settings"),
+                            onTap: () => context.push("/settings/booru/collections?id=${widget.parentCollectionID}")
+                        )
+                    ];
+                }
+            )
         ];
         return FutureBuilder<Map>(
             future: _resultObtainFuture,
@@ -150,7 +162,10 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                         child: Wrap(
                                                             direction: Axis.horizontal,
                                                             spacing: 8,
-                                                            children: actions.map((e) => CircleAvatar(backgroundColor: Theme.of(context).colorScheme.surfaceVariant, child: e,)).toList(),
+                                                            children: actions.map((e) => CircleAvatar(
+                                                                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                                                                child: e,
+                                                            )).toList(),
                                                         ),
                                                     )],
                                                     title: widget.headerDisplay != null ? widget.headerDisplay!(context, orientation) : null,
@@ -162,7 +177,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                     pinned: true,
                                                     // forceElevated: true,
                                                     automaticallyImplyLeading: false,
-                                                    backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                                                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                                                     leading: CloseButton(onPressed: () => setState(() => _selectedImages = []),),
                                                     actions: [
                                                         if(_selectedImages.length == 1) IconButton(

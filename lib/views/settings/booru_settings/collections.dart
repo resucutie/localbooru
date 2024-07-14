@@ -9,9 +9,10 @@ import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/image_grid_display.dart';
 
 class CollectionsSettings extends StatefulWidget {
-    const CollectionsSettings({super.key, required this.booru});
+    const CollectionsSettings({super.key, required this.booru, this.jumpToCollection});
 
     final Booru booru;
+    final CollectionID? jumpToCollection;
 
     @override
     State<CollectionsSettings> createState() => _CollectionsSettingsState();
@@ -19,6 +20,7 @@ class CollectionsSettings extends StatefulWidget {
 
 class _CollectionsSettingsState extends State<CollectionsSettings> {
     late List<PresetCollection> collectionPresets;
+    late List<GlobalKey> valueKeys;
     List<CollectionID> deleteCollections = [];
     bool hasLoaded = false;
 
@@ -28,7 +30,12 @@ class _CollectionsSettingsState extends State<CollectionsSettings> {
 
         widget.booru.getAllCollections().then((collections) {
             collectionPresets = collections.map((collection) => PresetCollection.fromExistingPreset(collection)).toList();
+            valueKeys = List.generate(collections.length, (_) => GlobalKey(), growable: true);
             setState(() => hasLoaded = true);
+            if(widget.jumpToCollection != null) WidgetsBinding.instance.addPostFrameCallback((_) async {
+                await Future.delayed(const Duration(milliseconds: 100));
+                Scrollable.ensureVisible(valueKeys[int.parse(widget.jumpToCollection!)].currentContext!);
+            });
         });
     }
 
@@ -60,7 +67,10 @@ class _CollectionsSettingsState extends State<CollectionsSettings> {
                     },
                 );
                 return CollectionCard(
-                    key: UniqueKey(),
+                    key: (() {
+                        debugPrint("${collectionPresets[index - 1].id} ${valueKeys[int.parse("${collectionPresets[index - 1].id}")]}");
+                        return valueKeys[int.parse("${collectionPresets[index - 1].id}")];
+                    })(),
                     collection: collectionPresets[index - 1],
                     booru: widget.booru,
                     onChanged: (collection) => collectionPresets[index - 1] = collection,
@@ -70,6 +80,7 @@ class _CollectionsSettingsState extends State<CollectionsSettings> {
                             deleteCollections.add("${index - 1}");
                         });
                     },
+                    initiallyExpanded: collectionPresets[index - 1].id == widget.jumpToCollection,
                 );
             },
         ) : const Center(child: CircularProgressIndicator(),);
@@ -77,10 +88,11 @@ class _CollectionsSettingsState extends State<CollectionsSettings> {
 }
 
 class CollectionCard extends StatefulWidget {
-    const CollectionCard({super.key, required this.collection, required this.booru, this.onChanged, this.onDeletePressed});
+    const CollectionCard({super.key, required this.collection, required this.booru, this.onChanged, this.onDeletePressed, this.initiallyExpanded = false});
 
     final PresetCollection collection;
     final Booru booru;
+    final bool initiallyExpanded;
     final void Function(PresetCollection collection)? onChanged;
     final void Function()? onDeletePressed;
 
@@ -108,6 +120,7 @@ class _CollectionCardState extends State<CollectionCard> {
         return Card(
             clipBehavior: Clip.antiAlias,
             child: ExpansionTile(
+                initiallyExpanded: widget.initiallyExpanded,
                 title: Text(loadedCollection.name!),
                 childrenPadding: const EdgeInsets.all(16).copyWith(top: 0),
                 subtitle: Text("ID ${loadedCollection.id}"),

@@ -14,7 +14,6 @@ import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/api/preset/index.dart';
-import 'package:localbooru/views/navigation/index.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
@@ -45,7 +44,18 @@ class ImageViewShell extends StatelessWidget {
                         tooltip: "Edit image",
                         onPressed: () async => context.push("/manage_image", extra: VirtualPresetCollection(pages: [await PresetImage.fromExistingImage(image)]))
                     ),
-                    BrowseScreenPopupMenuButton(image: image,)
+                    PopupMenuButton(
+                        // child: Icon(Icons.more_vert),
+                        itemBuilder: (context) {
+                            return [
+                                ...booruItems(),
+                                const PopupMenuDivider(),
+                                ...imageShareItems(image),
+                                const PopupMenuDivider(),
+                                ...imageManagementItems(image, context: context)
+                            ];
+                        }
+                    )
                 ],
             ),
             body: ScrollConfiguration(

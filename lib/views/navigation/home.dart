@@ -3,12 +3,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
+import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/counter.dart';
 import 'package:localbooru/components/drawer.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
-import 'package:localbooru/views/navigation/index.dart';
 
 class HomePage extends StatefulWidget {
     const HomePage({super.key});
@@ -35,7 +35,13 @@ class _HomePageState extends State<HomePage> {
                         tooltip: "Add image",
                         onPressed: () => context.push("/manage_image")
                     ),
-                    const BrowseScreenPopupMenuButton()
+                    PopupMenuButton(
+                        itemBuilder: (context) {
+                            return [
+                                ...booruItems(),
+                            ];
+                        }
+                    )
                 ],
             ),
             drawer: MediaQuery.of(context).orientation == Orientation.portrait ? const Drawer(child: DefaultDrawer()) : null,

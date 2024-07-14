@@ -248,6 +248,7 @@ final router = GoRouter(
                                                                     }
                                                                 ));
                                                             },
+                                                            parentCollectionID: id,
                                                             forceOrientation: Orientation.portrait,
                                                         );
                                                     }
@@ -315,7 +316,7 @@ final router = GoRouter(
                                                         ),
                                                         GoRoute(path: "collections",
                                                             builder: (context, state) => BooruLoader(
-                                                                builder: (context, booru) => CollectionsSettings(booru: booru),
+                                                                builder: (context, booru) => CollectionsSettings(booru: booru, jumpToCollection: state.uri.queryParameters["id"],),
                                                             ),
                                                         )
                                                     ]
