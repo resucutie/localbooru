@@ -123,7 +123,7 @@ class _CollectionCardState extends State<CollectionCard> {
                 initiallyExpanded: widget.initiallyExpanded,
                 title: Text(loadedCollection.name!),
                 childrenPadding: const EdgeInsets.all(16).copyWith(top: 0),
-                subtitle: Text("ID ${loadedCollection.id}"),
+                subtitle: Text("Collection ID ${loadedCollection.id}"),
                 children: [
                     TextFormField(
                         decoration: const InputDecoration(

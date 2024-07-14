@@ -243,7 +243,7 @@ final router = GoRouter(
                                                                         if(!snapshot.hasData) return const Text("Loading");
                                                                         return ListTile(
                                                                             title: Text(snapshot.data!.name, style: const TextStyle(fontSize: 20.0)),
-                                                                            subtitle: Text("ID ${snapshot.data!.id}", style: const TextStyle(fontSize: 14.0)),
+                                                                            subtitle: Text("Collection ID ${snapshot.data!.id}", style: const TextStyle(fontSize: 14.0)),
                                                                         );
                                                                     }
                                                                 ));
