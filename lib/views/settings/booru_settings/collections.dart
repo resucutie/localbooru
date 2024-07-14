@@ -165,7 +165,7 @@ class _CollectionCardState extends State<CollectionCard> {
                                         clipBehavior: Clip.antiAlias,
                                         child: ListTile(
                                             title: Text(image.filename),
-                                            subtitle: Text("ID ${image.id}"),
+                                            subtitle: Text("ID ${image.id}${index == 0 ? " - Will become the cover" : ""}"),
                                             visualDensity: const VisualDensity(vertical: 0), // to expand
                                             contentPadding: const EdgeInsets.only(left: 9, right: 16),
                                             onTap: () {
