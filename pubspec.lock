@@ -172,10 +172,11 @@ packages:
   dynamic_color:
     dependency: "direct main"
     description:
-      name: dynamic_color
-      sha256: eae98052fa6e2826bdac3dd2e921c6ce2903be15c6b7f8b6d8a5d49b5086298d
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/dynamic_color"
+      ref: main
+      resolved-ref: "293eabfca19f13375829afad8886b3f371fb1933"
+      url: "https://github.com/hasali19/material-foundation-flutter-packages"
+    source: git
     version: "1.7.0"
   fake_async:
     dependency: transitive
