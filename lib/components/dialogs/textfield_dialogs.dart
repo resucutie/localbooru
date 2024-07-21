@@ -52,3 +52,51 @@ class _InsertURLDialogState extends State<InsertURLDialog> {
         );
     }
 }
+
+class AddCollectionDialog extends StatefulWidget {
+    const AddCollectionDialog({super.key});
+
+    @override
+    State<AddCollectionDialog> createState() => _AddCollectionDialogState();
+}
+class _AddCollectionDialogState extends State<AddCollectionDialog> {
+    TextEditingController controller = TextEditingController();
+
+    void send() {
+        Navigator.of(context).pop(controller.text);
+    }
+
+    bool allowedToSend() {
+        return controller.text.isNotEmpty;
+    }
+
+    @override
+    Widget build(context) {
+        return AlertDialog(
+            title: const Text("Create a new collection"),
+            content: Container(
+                constraints: const BoxConstraints(minWidth: 600),
+                child: TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                        hintText: "Name"
+                    ),
+                    onSubmitted: (_) {
+                        if(allowedToSend()) send();
+                    },
+                    onChanged: (_) => setState(() {}),
+                ),
+            ),
+            actions: [
+                TextButton(
+                    onPressed: Navigator.of(context).pop,
+                    child: const Text("Close")
+                ),
+                TextButton(
+                    onPressed: allowedToSend() ? send : null,
+                    child: const Text("Add")
+                )
+            ],
+        );
+    }
+}
