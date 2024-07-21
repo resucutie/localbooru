@@ -1,8 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/components/builders.dart';
+import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/dialogs/textfield_dialogs.dart';
 
 class CollectionsListPage extends StatefulWidget {
@@ -17,10 +19,29 @@ class CollectionsListPage extends StatefulWidget {
 class _CollectionsListPageState extends State<CollectionsListPage> {
     late Future<List<BooruCollection>> collectionFuture;
 
+    late LongPressDownDetails longTap;
+
     @override
     void initState() {
         super.initState();
         collectionFuture = widget.booru.getAllCollections();
+    }
+
+    void openContextMenu(Offset offset, BooruCollection collection) {
+        final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
+        showMenu(
+            context: context,
+            position: RelativeRect.fromRect(
+                Rect.fromLTWH(offset.dx, offset.dy, 10, 10),
+                Rect.fromLTWH(0, 0, overlay!.paintBounds.size.width, overlay.paintBounds.size.height),
+            ),
+            items: [
+                PopupMenuItem(
+                    child: const Text("Edit collection"),
+                    onTap: () => context.push("/settings/booru/collections?id=${collection.id}")
+                )
+            ]
+        );
     }
 
     @override
@@ -64,10 +85,15 @@ class _CollectionsListPageState extends State<CollectionsListPage> {
                         crossAxisSpacing: 8,
                         padding: const EdgeInsets.all(8),
                         children: snapshot.data!.map((collection) {
-                            return CollectionCard(
-                                collection: collection,
-                                booru: widget.booru,
-                                onPressed: () => context.push("/collections/${collection.id}"),
+                            return GestureDetector(
+                                onSecondaryTapDown: (tap) => openContextMenu(getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: context.findRenderObject()!), collection),
+                                onLongPressDown: (details) => longTap = details,
+                                onLongPress: () => openContextMenu(getOffsetRelativeToBox(offset: longTap.globalPosition, renderObject: context.findRenderObject()!), collection),
+                                child: CollectionCard(
+                                    collection: collection,
+                                    booru: widget.booru,
+                                    onPressed: () => context.push("/collections/${collection.id}"),
+                                ),
                             );
                         }).toList(),
                     );

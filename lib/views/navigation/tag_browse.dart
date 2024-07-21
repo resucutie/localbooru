@@ -17,19 +17,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class GalleryViewer extends StatefulWidget {
-    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true, this.forceOrientation, this.parentCollectionID, this.onAddPressed});
+    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true, this.forceOrientation, this.onAddPressed, this.additionalMenuOptions});
 
     final int index;
     final FutureOr<SearchableInformation> Function(int index) searcher;
     final Widget Function(BuildContext context, Orientation orientation)? headerDisplay;
     final bool selectionMode;
     final bool displayBackButton;
-    final CollectionID? parentCollectionID;
     final Orientation? forceOrientation;
     final void Function(List<ImageID>)? onSelect;
     final void Function(int newIndex)? onNextPage;
     final void Function()? onAddPressed;
     final List<ImageID>? selectedImages;
+    final List<PopupMenuEntry<dynamic>>? additionalMenuOptions;
 
     @override
     State<GalleryViewer> createState() => _GalleryViewerState();
@@ -88,8 +88,20 @@ class _GalleryViewerState extends State<GalleryViewer> {
         ),
         const PopupMenuDivider(),
         ...imageShareItems(image),
+        if(widget.additionalMenuOptions != null) ...[
+            const PopupMenuDivider(),
+            ...widget.additionalMenuOptions!
+        ],
         const PopupMenuDivider(),
         ...imageManagementItems(image, context: context),
+    ];
+
+    List<PopupMenuEntry> multipleContextMenuItems(List<BooruImage> images) => [
+        if(widget.additionalMenuOptions != null) ...[
+            ...widget.additionalMenuOptions!,
+            const PopupMenuDivider(),
+        ],
+        ...multipleImageManagementItems(images, context: context),
     ];
 
     void toggleImageSelection(ImageID imageID) {
@@ -124,10 +136,10 @@ class _GalleryViewerState extends State<GalleryViewer> {
                 itemBuilder: (context) {
                     return [
                         ...booruItems(),
-                        if(widget.parentCollectionID != null) PopupMenuItem(
-                            child: const Text("Open collection settings"),
-                            onTap: () => context.push("/settings/booru/collections?id=${widget.parentCollectionID}")
-                        )
+                        if(widget.additionalMenuOptions != null) ...[
+                            const PopupMenuDivider(),
+                            ...widget.additionalMenuOptions!
+                        ]
                     ];
                 }
             )
@@ -188,7 +200,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                         ),
                                                         PopupMenuButton(itemBuilder: (context) {
                                                             if(_selectedImages.length == 1) return singleContextMenuItems(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0]));
-                                                            else if(_selectedImages.length > 1) return multipleImageManagementItems(snapshot.data!["images"].where((element) => _selectedImages.contains(element.id)).toList(), context: context);
+                                                            else if(_selectedImages.length > 1) return multipleContextMenuItems(snapshot.data!["images"].where((element) => _selectedImages.contains(element.id)).toList());
                                                             return [];
                                                         }, onSelected: (value) => setState(() => _selectedImages = []))
                                                     ],

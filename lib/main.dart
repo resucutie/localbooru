@@ -249,7 +249,12 @@ final router = GoRouter(
                                                                     }
                                                                 ));
                                                             },
-                                                            parentCollectionID: id,
+                                                            additionalMenuOptions: [
+                                                                PopupMenuItem(
+                                                                    child: const Text("Edit collection"),
+                                                                    onTap: () => context.push("/settings/booru/collections?id=$id")
+                                                                )
+                                                            ],
                                                             forceOrientation: Orientation.portrait,
                                                             onAddPressed: () => context.push("/settings/booru/collections?id=$id"),
                                                         );
