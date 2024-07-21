@@ -30,7 +30,7 @@ class _CollectionsListPageState extends State<CollectionsListPage> {
                 title: const Text("Collections"),
                 actions: [
                     IconButton(
-                        icon: const Icon(Icons.library_add),
+                        icon: const Icon(Icons.add),
                         onPressed: () async {
                             final name = await showDialog<String>(
                                 context: context,

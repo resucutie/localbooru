@@ -156,6 +156,7 @@ final router = GoRouter(
                                                         desktopDisplay: orientation == Orientation.landscape,
                                                         initialText: tags,
                                                     ),
+                                                    onAddPressed: () => context.push("/manage_image"),
                                                 );
                                             }
                                         ),
@@ -235,7 +236,7 @@ final router = GoRouter(
                                                                 return SearchableInformation(images: images, indexLength: (length / indexSize).ceil());
                                                             },
                                                             index: int.parse(index ?? "0"),
-                                                            onNextPage: ( newIndex) => context.push("/collections/$id/?index=$newIndex"),
+                                                            onNextPage: (newIndex) => context.push("/collections/$id/?index=$newIndex"),
                                                             headerDisplay: (context, orientation) {
                                                                 return BooruLoader(builder: (_, booru) => FutureBuilder(
                                                                     future: booru.getCollection(id),
@@ -250,6 +251,7 @@ final router = GoRouter(
                                                             },
                                                             parentCollectionID: id,
                                                             forceOrientation: Orientation.portrait,
+                                                            onAddPressed: () => context.push("/settings/booru/collections?id=$id"),
                                                         );
                                                     }
                                                 ),

@@ -17,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class GalleryViewer extends StatefulWidget {
-    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true, this.forceOrientation, this.parentCollectionID});
+    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true, this.forceOrientation, this.parentCollectionID, this.onAddPressed});
 
     final int index;
     final FutureOr<SearchableInformation> Function(int index) searcher;
@@ -28,6 +28,7 @@ class GalleryViewer extends StatefulWidget {
     final Orientation? forceOrientation;
     final void Function(List<ImageID>)? onSelect;
     final void Function(int newIndex)? onNextPage;
+    final void Function()? onAddPressed;
     final List<ImageID>? selectedImages;
 
     @override
@@ -117,16 +118,14 @@ class _GalleryViewerState extends State<GalleryViewer> {
             IconButton(
                 icon: const Icon(Icons.add),
                 tooltip: "Add image",
-                onPressed: () {
-                    if(widget.parentCollectionID != null) context.push("/manage_image");
-                },
+                onPressed: widget.onAddPressed,
             ),
             PopupMenuButton(
                 itemBuilder: (context) {
                     return [
                         ...booruItems(),
                         if(widget.parentCollectionID != null) PopupMenuItem(
-                            child: Text("Open collection settings"),
+                            child: const Text("Open collection settings"),
                             onTap: () => context.push("/settings/booru/collections?id=${widget.parentCollectionID}")
                         )
                     ];
