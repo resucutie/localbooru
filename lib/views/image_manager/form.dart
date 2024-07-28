@@ -16,9 +16,10 @@ import 'package:localbooru/views/image_manager/components/tagfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageManagerForm extends StatefulWidget {
-    const ImageManagerForm({super.key, this.preset, required this.onChanged, this.onMultipleImagesAdded, this.onErrorUpdate});
+    const ImageManagerForm({super.key, this.preset, required this.onChanged, this.onMultipleImagesAdded, this.onErrorUpdate, this.showRelatedImagesCard = true});
 
     final PresetImage? preset;
+    final bool showRelatedImagesCard;
     // final bool shouldOpenRecents;
     final void Function(PresetImage preset) onChanged;
     final void Function(bool hasError)? onErrorUpdate;
@@ -280,28 +281,30 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
                                 return null;
                             },
                         ),
-
-                        const SmallHeader("Related images", padding: EdgeInsets.only(top: 16.0, bottom: 8)),
-                        RelatedImagesCard(
-                            relatedImages: relatedImages,
-                            onRemove: (imageID) {
-                                setState(() => relatedImages.remove(imageID));
-                                debugPrint("from RelatedImagesCard");
-                                sendPreset();
-                            },
-                            onAddButtonPress: () async {
-                                final imageList = await openSelectionDialog(
-                                    context: context,
-                                    selectedImages: relatedImages,
-                                    excludeImages: widget.preset?.replaceID != null ? [widget.preset!.replaceID!] : null
-                                );
-                                if(imageList == null) return;
-                                setState(() {
-                                    relatedImages = imageList;
-                                });
-                                sendPreset();
-                            },
-                        )
+                        if(widget.showRelatedImagesCard) ...[
+                            const SmallHeader("Related images", padding: EdgeInsets.only(top: 16.0, bottom: 8)),
+                            RelatedImagesCard(
+                                showBlockWarning: !widget.showRelatedImagesCard,
+                                relatedImages: relatedImages,
+                                onRemove: (imageID) {
+                                    setState(() => relatedImages.remove(imageID));
+                                    debugPrint("from RelatedImagesCard");
+                                    sendPreset();
+                                },
+                                onAddButtonPress: () async {
+                                    final imageList = await openSelectionDialog(
+                                        context: context,
+                                        selectedImages: relatedImages,
+                                        excludeImages: widget.preset?.replaceID != null ? [widget.preset!.replaceID!] : null
+                                    );
+                                    if(imageList == null) return;
+                                    setState(() {
+                                        relatedImages = imageList;
+                                    });
+                                    sendPreset();
+                                },
+                            )
+                        ]
                     ],
                 ),
             )

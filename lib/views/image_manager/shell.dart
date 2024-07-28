@@ -224,6 +224,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                 onChanged: (imagePreset) => setState(() => preset.pages![index] = imagePreset),
                                 onErrorUpdate: (containsError) => setState(() => errorOnPages[index + 1] = containsError),
                                 onMultipleImagesAdded: addMultipleImages,
+                                showRelatedImagesCard: !isCorelated,
                             )
                         ],
                     ),
