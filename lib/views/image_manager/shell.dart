@@ -135,7 +135,7 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                             onPressed: !isSaving && !hasError() ? saveImages : null,
                         )
                     ],
-                    bottom: isSaving ? AppBarLinearProgressIndicator(value: savedImages / preset.pages!.length,) : null,
+                    bottom: isSaving ? AppBarLinearProgressIndicator(value: savedImages != 0 ? savedImages / preset.pages!.length : null,) : null,
                 ),
                 endDrawer: Drawer(
                     child: SingleChildScrollView(
