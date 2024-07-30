@@ -93,12 +93,32 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                     actions: [
                         IconButton(
                             icon: Badge(
-                                label: Text("${preset.pages!.length}"),
-                                offset: const Offset(7, -7),
-                                isLabelVisible: preset.pages!.length > 1,
-                                child: const Icon(Icons.library_add)
+                                padding: EdgeInsets.zero,
+                                label: Wrap(
+                                    children: [
+                                        if(saveCollection) Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                                            decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Theme.of(context).colorScheme.onTertiaryContainer
+                                            ),
+                                            child: const Text("C"),
+                                        ),
+                                        if(preset.pages!.length > 1) Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                                            child: Text("${preset.pages!.length}"),
+                                        )
+                                    ],
+                                ),
+                                offset: Offset(preset.pages!.length > 1 && saveCollection ? 0 : 7, -7),
+                                isLabelVisible: preset.pages!.length > 1 || saveCollection,
+                                child: const Icon(Icons.library_add),
                             ),
-                            tooltip: "Add images in bulk",
+                            // icon: Icon(Icons.library_add),
+                            tooltip: preset.pages!.length > 1 || saveCollection
+                                // ignore: prefer_interpolation_to_compose_strings
+                                ? "${preset.pages!.length} images will be added" + (saveCollection ? " and put inside a new collection": "")
+                                : "Add images in bulk",
                             onPressed: () => _scaffoldKey.currentState!.openEndDrawer(),
                         ),
                         // Tooltip(

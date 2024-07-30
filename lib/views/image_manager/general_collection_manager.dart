@@ -26,13 +26,13 @@ class _GeneralCollectionManagerScreenState extends State<GeneralCollectionManage
                     // const SizedBox(height: 13,),
                     Center(
                         child: ConstrainedBox(
-                                constraints: const BoxConstraints(maxHeight: 225),
-                                child: AspectRatio(
-                                    aspectRatio: 1,
-                                    child: MultipleImage(
-                                        images: widget.displayImages!,
-                                    ),
+                            constraints: const BoxConstraints(maxHeight: 225),
+                            child: AspectRatio(
+                                aspectRatio: 1,
+                                child: MultipleImage(
+                                    images: widget.displayImages!,
                                 ),
+                            ),
                         ),
                     ),
                     const SizedBox(height: 16,)
@@ -40,13 +40,14 @@ class _GeneralCollectionManagerScreenState extends State<GeneralCollectionManage
 
                 if(widget.corelated != null) SwitchListTile(
                     title: const Text("Make elements correlate with eachother"),
-                    subtitle: const Text("This will make each image relate to all other images that are being added"),
+                    subtitle: const Text("This will make each image relate to the other images that will be added"),
                     value: widget.corelated!,
                     onChanged: widget.onCorelatedChanged
                 ),
                 const Divider(),
                 if(widget.saveCollectionToggle != null) SwitchListTile(
-                    title: const Text("Save as a collection"),
+                    title: const Text("Create a collection and put all images inside it"),
+                    subtitle: const Text("It will create a brand new collection and add all images to it"),
                     value: widget.saveCollectionToggle!,
                     onChanged: (value) {
                         if(widget.onSaveCollectionToggle != null) widget.onSaveCollectionToggle!(value);
