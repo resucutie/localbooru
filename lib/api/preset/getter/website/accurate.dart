@@ -5,7 +5,7 @@ Future<Websites?> accurateGetWebsite(Uri uri) async {
 
     // Stopwatch stopwatch = Stopwatch()..start();
 
-    possibleWebsites = await _webcrawl(uri) ?? await _determineByAPIFetch(uri);
+    possibleWebsites = await _determineWebsiteByWebcrawl(uri) ?? await _determineSPByAPIFetch(uri);
 
     // stopwatch.stop();
     // debugPrint("Found: $possibleWebsites. Took ${stopwatch.elapsed.inMilliseconds}ms\n");
@@ -13,7 +13,7 @@ Future<Websites?> accurateGetWebsite(Uri uri) async {
     return possibleWebsites;
 }
 
-Future<Websites?> _determineByAPIFetch(Uri uri) async {
+Future<Websites?> _determineSPByAPIFetch(Uri uri) async {
     Response res;
 
     res = await http.get(Uri.parse("${uri.origin}/posts.json"));
@@ -36,7 +36,7 @@ Future<Websites?> _determineByAPIFetch(Uri uri) async {
     return null;
 }
 
-Future<Websites?> _webcrawl(Uri uri) async {
+Future<Websites?> _determineWebsiteByWebcrawl(Uri uri) async {
     final webpage = await http.get(uri);
     final Document document = parse(webpage.body);
 

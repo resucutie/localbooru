@@ -13,17 +13,19 @@ import 'package:http/http.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:localbooru/utils/get_meta_property.dart';
+import 'package:localbooru/utils/listeners.dart';
 import 'package:mime/mime.dart';
 import 'package:string_validator/string_validator.dart';
 
 part 'image.dart';
 part 'collection.dart';
-part 'autodownload/image_boards.dart';
-part 'autodownload/generic.dart';
-part 'autodownload/art_directed.dart';
-part 'autodownload/other.dart';
+part 'autodownload/single/image_boards.dart';
+part 'autodownload/single/generic.dart';
+part 'autodownload/single/art_directed.dart';
+part 'autodownload/single/other.dart';
 part 'getter/index.dart';
-part 'getter/accurate.dart';
+part 'getter/website/accurate.dart';
+part 'getter/collection.dart';
 
 final presetCache = DefaultCacheManager();
 

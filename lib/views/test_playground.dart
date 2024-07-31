@@ -100,7 +100,7 @@ class _TestPlaygroundScreenState extends State<TestPlaygroundScreen> {
                             collection = await booru.getCollection(idCollection);
                             debugPrint("$collection");
                         },
-                    )
+                    ),
                 ],
             )
             // body: AspectRatio(

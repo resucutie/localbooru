@@ -1,4 +1,4 @@
-part of "../index.dart";
+part of "../../index.dart";
 
 // danbooru 2: if you add .json at the end of the post url, it'll return the JSON of that post
 Future<PresetImage> danbooru2ToPreset(String url) async {
