@@ -12,8 +12,8 @@ import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:html/parser.dart' show parse;
+import 'package:localbooru/utils/download_image.dart';
 import 'package:localbooru/utils/get_meta_property.dart';
-import 'package:localbooru/utils/listeners.dart';
 import 'package:mime/mime.dart';
 import 'package:string_validator/string_validator.dart';
 
@@ -26,8 +26,6 @@ part 'autodownload/single/other.dart';
 part 'getter/index.dart';
 part 'getter/website/accurate.dart';
 part 'getter/collection.dart';
-
-final presetCache = DefaultCacheManager();
 
 abstract interface class Preset{
     Preset({this.key});

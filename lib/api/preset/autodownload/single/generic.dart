@@ -5,10 +5,10 @@ Future<PresetImage> twitterToPreset(String url) async {
     Uri uri = Uri.parse(url);
     // final res = await http.get(Uri.parse(["https://d.fxtwitter.com", uri.path].join()));
 
-    final downloadedFileInfo = await presetCache.downloadFile(["https://d.fxtwitter.com", uri.path].join());
+    final downloadedFileInfo = await downloadFile(Uri.parse(["https://d.fxtwitter.com", uri.path].join()));
     
     return PresetImage(
-        image: downloadedFileInfo.file,
+        image: downloadedFileInfo,
         sources: [["https://x.com", uri.path].join("")],
         tags: {
             "artist": List<String>.from([uri.pathSegments[0].toLowerCase()]),
@@ -24,12 +24,12 @@ Future<PresetImage> instagramToPreset(String url) async {
 
     debugPrint(fxReq.body);
 
-    final downloadedFileInfo = await presetCache.downloadFile(["https://d.ddinstagram.com", uri.path].join());
+    final downloadedFileInfo = await downloadFile(Uri.parse(["https://d.ddinstagram.com", uri.path].join()));
 
-    debugPrint(downloadedFileInfo.file.path);
+    debugPrint(downloadedFileInfo.path);
     
     return PresetImage(
-        image: downloadedFileInfo.file,
+        image: downloadedFileInfo,
         sources: [["https://instagram.com", uri.path].join("")],
         tags: {
             "artist": title != null ? [title.substring(1)] : [],

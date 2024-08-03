@@ -14,10 +14,10 @@ Future<PresetImage> furaffinityToPreset(String url) async {
 
     final title = getMetaProperty(parse(websiteRes.body), property: "og:title");
 
-    final downloadedFileInfo = await presetCache.downloadFile(fileUrl);
+    final downloadedFileInfo = await downloadFile(Uri.parse(fileUrl));
     
     return PresetImage(
-        image: downloadedFileInfo.file,
+        image: downloadedFileInfo,
         sources: [["https://furaffinity.net", uri.path].join()],
         tags: {
             "artist": title != null ? [title.split(" ").last.toLowerCase()] : [],
@@ -30,10 +30,10 @@ Future<PresetImage> deviantartToPreset(String url) async {
     final res = await http.get(Uri.parse(["https://backend.deviantart.com/oembed?url=", url].join()));
     final json = jsonDecode(res.body);
 
-    final downloadedFileInfo = await presetCache.downloadFile(json["url"]);
+    final downloadedFileInfo = await downloadFile(Uri.parse(json["url"]));
     
     return PresetImage(
-        image: downloadedFileInfo.file,
+        image: downloadedFileInfo,
         sources: [url],
         tags: {
             "artist": [json["author_name"].toLowerCase()],

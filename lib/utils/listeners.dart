@@ -39,9 +39,14 @@ LockListener lockListener = LockListener();
 
 class ImportListener with ChangeNotifier {
     bool isImporting = false;
+    double progress = 0;
 
-    void updateImportStatus(bool status) {
-        isImporting = status;
+    void updateImportStatus({
+        bool? import,
+        double? progress
+    }) {
+        if(import != null) isImporting = import;
+        if(progress != null) this.progress = progress;
         notifyListeners();
     }
 }

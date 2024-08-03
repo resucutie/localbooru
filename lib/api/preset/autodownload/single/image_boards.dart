@@ -6,10 +6,10 @@ Future<PresetImage> danbooru2ToPreset(String url) async {
     final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final bodyRes = jsonDecode(res.body);
 
-    final downloadedFileInfo = await presetCache.downloadFile(bodyRes["file_url"]);
+    final downloadedFileInfo = await downloadFile(Uri.parse(bodyRes["file_url"]));
 
     return PresetImage(
-        image: downloadedFileInfo.file,
+        image: downloadedFileInfo,
         sources: [bodyRes["source"], [uri.origin, uri.path].join("")].whereType<String>().toList(),
         tags: {
             "generic": bodyRes["tag_string_general"].split(" "),
@@ -28,7 +28,7 @@ Future<PresetImage> danbooru1ToPreset(String url) async {
     final res = await http.get(Uri.parse([uri.origin, "post/index.json?tags=id:$postID"].join("/")));
     final post = jsonDecode(res.body)[0];
 
-    final downloadedFileInfo = await presetCache.downloadFile(post["file_url"]);
+    final downloadedFileInfo = await downloadFile(Uri.parse(post["file_url"]));
 
     final webpage = await http.get(uri);
     final document = parse(webpage.body);
@@ -50,7 +50,7 @@ Future<PresetImage> danbooru1ToPreset(String url) async {
     }
 
     return PresetImage(
-        image: downloadedFileInfo.file,
+        image: downloadedFileInfo,
         sources: [post["source"], [uri.origin, uri.path].join("")].whereType<String>().toList(),
         tags: {
             "generic": List<String>.from(tagList["generic"]!),
@@ -67,10 +67,10 @@ Future<PresetImage> e621ToPreset(String url) async {
     final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final postRes = jsonDecode(res.body)["post"];
 
-    final downloadedFileInfo = await presetCache.downloadFile(postRes["file"]["url"]);
+    final downloadedFileInfo = await downloadFile(Uri.parse(postRes["file"]["url"]));
 
     return PresetImage(
-        image: downloadedFileInfo.file,
+        image: downloadedFileInfo,
         sources: [...(postRes["sources"] ?? []).where((e) => !e.startsWith("-")), [uri.origin, uri.path].join("")],
         tags: {
             "generic": List<String>.from(postRes["tags"]["general"]),
@@ -145,10 +145,10 @@ Future<PresetImage> gelbooruToPreset(String url) async {
         imageURL = post["file_url"];
     }
 
-    final downloadedFileInfo = await presetCache.downloadFile(imageURL);
+    final downloadedFileInfo = await downloadFile(Uri.parse(imageURL));
 
     return PresetImage(
-        image: downloadedFileInfo.file,
+        image: downloadedFileInfo,
         sources: [post["source"], [uri.origin, uri.path].join("")].whereType<String>().toList(),
         tags: {
             "generic": List<String>.from(tagList["generic"]!),

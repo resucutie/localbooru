@@ -34,10 +34,10 @@ class _DownloadProgressDialogState extends State<DownloadProgressDialog> {
 Future<PresetImage> importImageFromURL(String url) async {
     final future = PresetImage.urlToPreset(url);
 
-    importListener.updateImportStatus(true);
+    importListener.updateImportStatus(import: true);
 
     return await future.whenComplete(() {
-        importListener.updateImportStatus(false);
+        importListener.updateImportStatus(import: false);
     });
 }
 
