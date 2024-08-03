@@ -7,10 +7,11 @@ import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/components/dialogs/textfield_dialogs.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
+import 'package:localbooru/utils/platform_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
-class DesktopHousing extends StatelessWidget {
+class DesktopHousing extends StatefulWidget {
     const DesktopHousing({super.key, required this.child, required this.routeUri, this.roundedCorners = false});
 
     final Widget child;
@@ -18,25 +19,58 @@ class DesktopHousing extends StatelessWidget {
     final bool roundedCorners;
 
     @override
+    State<DesktopHousing> createState() => _DesktopHousingState();
+}
+
+class _DesktopHousingState extends State<DesktopHousing> {
+    double _importProgress = 0;
+
+    @override
+    void initState() {
+        importListener.addListener(handleProgressDisplay);
+        super.initState();
+    }
+
+    @override
+    void dispose() {
+        importListener.removeListener(handleProgressDisplay);
+        super.dispose();
+    }
+
+    void handleProgressDisplay() {
+        if(isDesktop()) setState(() => _importProgress = importListener.progress);
+    }
+
+    @override
     Widget build(context) {
-        return Row(
+        return Stack(
             children: [
-                ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 270),
-                    child: DefaultDrawer(
-                        displayTitle: false,
-                        activeView: routeUri.pathSegments[0],
-                        desktopView: true,
-                    )
+                Row(
+                    children: [
+                        ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 270),
+                            child: DefaultDrawer(
+                                displayTitle: false,
+                                activeView: widget.routeUri.pathSegments[0],
+                                desktopView: true,
+                            )
+                        ),
+                        // const SizedBox(width: 4),
+                        Container(
+                            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 270, maxHeight: MediaQuery.of(context).size.height - 2),
+                            clipBehavior: widget.roundedCorners ? Clip.antiAlias : Clip.none,
+                            decoration: widget.roundedCorners ? const BoxDecoration(
+                                borderRadius: BorderRadius.only(topLeft: Radius.circular(28)),
+                            ) : null,
+                            child: widget.child
+                        ),
+                    ],
                 ),
-                // const SizedBox(width: 4),
-                Container(
-                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 270, maxHeight: MediaQuery.of(context).size.height - 2),
-                    clipBehavior: roundedCorners ? Clip.antiAlias : Clip.none,
-                    decoration: roundedCorners ? const BoxDecoration(
-                        borderRadius: BorderRadius.only(topLeft: Radius.circular(28))
-                    ) : null,
-                    child: child
+                if(importListener.isImporting && isDesktop()) Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: LinearProgressIndicator(value: _importProgress,)
                 ),
             ],
         );

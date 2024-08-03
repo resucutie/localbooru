@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:local_auth/error_codes.dart' as auth_error;
@@ -32,7 +31,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
         super.initState();
         WidgetsBinding.instance.addObserver(this);
         lockListener.addListener(updateUI);
-        importListener.addListener(showImportSnackBar);
+        importListener.addListener(updateImportSnackBar);
         isAuthHideoutEnabled().then((hasAuth) {
             if(hasAuth) lockListener.lock();
         },);
@@ -42,55 +41,28 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
         setState(() {});
     }
 
-    void showImportSnackBar() async {
+    bool _isImporting = false;
+    void updateImportSnackBar() {
         if(importListener.isImporting) {
-            if(lockListener.isLocked) {
+            if(!_isImporting && isMobile()) {
+                setState(() => _isImporting = true);
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     dismissDirection: DismissDirection.up,
-                    content: const Wrap(
-                        direction: Axis.horizontal,
-                        children: [
-                            Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                                child: Text("Importing image"),
-                            ),
-                            ProgressIndicatorTheme(
-                                data: ProgressIndicatorThemeData(linearTrackColor: Colors.transparent),
-                                child: LinearProgressIndicator(),
-                            ),
-                        ],
-                    ),
+                    content: const ImportSnackBarContents(),
+                    padding: EdgeInsets.zero,
+                    duration: const Duration(days: 365),
+                    showCloseIcon: true,
+                    behavior: SnackBarBehavior.floating,
                     margin: EdgeInsets.only(
                         bottom: MediaQuery.sizeOf(context).height - MediaQuery.viewPaddingOf(context).top - 60,
                         left: 15,
                         right: 15
                     ),
-                    padding: EdgeInsets.zero,
-                    duration: const Duration(days: 365),
-                    showCloseIcon: true,
-                    behavior: SnackBarBehavior.floating,
                 ));
-            } else {
-                debugPrint("setting isImportProgressDialogOpen as true");
-                // BuildContext? modalContext;
-                isImportProgressDialogOpen = true;
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (context) {
-                        // modalContext = context; //horror
-                        // debugPrint("second $context");
-                        return const DownloadProgressDialog();
-                    }
-                );
             }
         } else {
-            debugPrint("hi $isImportProgressDialogOpen");
-            if(isImportProgressDialogOpen) {
-                Navigator.of(context).pop();
-                isImportProgressDialogOpen = false;
-            }
             ScaffoldMessenger.of(context).removeCurrentSnackBar();
+            setState(() => _isImporting = false);
         }
     }
 
@@ -98,7 +70,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
     void dispose() {
         WidgetsBinding.instance.removeObserver(this);
         lockListener.removeListener(updateUI);
-        importListener.removeListener(showImportSnackBar);
+        importListener.removeListener(updateImportSnackBar);
         super.dispose();
     }
 
@@ -133,6 +105,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
             if(didAuthenticate) {
                 lockListener.unlock();
                 hasAuthBeenAsked = false;
+                if(context.mounted) ScaffoldMessenger.of(context).removeCurrentSnackBar();
             } else {
                 hasAuthBeenAsked = true;
             }
@@ -168,7 +141,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
                                     ),
                                     const SizedBox(height: 64,),
                                     FilledButton.icon(
-                                        label: Text(Random().nextInt(100) == 69 ? "unlok" : "Unlock"),
+                                        label: Text(Random().nextInt(200) == 69 ? "unlok" : "Unlock"),
                                         icon: const Icon(Icons.key),
                                         onPressed: authToUnlock,
                                     )
@@ -180,30 +153,49 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver{
                 widget.child
             ],
         );
-        // return lockListener.isLocked ? Scaffold(
-        //     body: Center(
-        //         child: Padding(
-        //             padding: const EdgeInsets.all(32.0),
-        //             child: Column(
-        //                 crossAxisAlignment: CrossAxisAlignment.center,
-        //                 mainAxisAlignment: MainAxisAlignment.center,
-                        
-        //                 children: [
-        //                     Icon(Icons.lock, size: 96, color: Theme.of(context).colorScheme.primary,),
-        //                     const SizedBox(height: 16,),
-        //                     const Text("LocalBooru won't display the contents due to the user having enabled authentication hideout. Please click on the button below and verify your identity to use this app",
-        //                         textAlign: TextAlign.center,
-        //                     ),
-        //                     const SizedBox(height: 64,),
-        //                     FilledButton.icon(
-        //                         label: Text(Random().nextInt(100) == 69 ? "unlok" : "Unlock"),
-        //                         icon: const Icon(Icons.key),
-        //                         onPressed: authToUnlock,
-        //                     )
-        //                 ]
-        //             ),
-        //         ),
-        //     ),
-        // ) : widget.child;
+    }
+}
+
+class ImportSnackBarContents extends StatefulWidget {
+  const ImportSnackBarContents({super.key});
+
+  @override
+  State<ImportSnackBarContents> createState() => _ImportSnackBarContentsState();
+}
+
+class _ImportSnackBarContentsState extends State<ImportSnackBarContents> {
+    double _progress = 0;
+
+    @override
+    void initState() {
+        super.initState();
+        importListener.addListener(updateProgress);
+    }
+
+    @override
+    void dispose() {
+        importListener.removeListener(updateProgress);
+        super.dispose();
+    }
+
+    void updateProgress() {
+        setState(() => _progress = importListener.progress);
+    }
+    
+    @override
+    Widget build(BuildContext context) {
+        return Wrap(
+            direction: Axis.horizontal,
+            children: [
+                ProgressIndicatorTheme(
+                    data: const ProgressIndicatorThemeData(linearTrackColor: Colors.transparent),
+                    child: LinearProgressIndicator(value: _progress, color: Theme.of(context).colorScheme.inversePrimary),
+                ),
+                const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    child: Text("Importing image"),
+                ),
+            ],
+        );
     }
 }
