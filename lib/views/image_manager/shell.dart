@@ -274,3 +274,8 @@ class VirtualPresetManageImageSendable extends ManageImageSendable {
     VirtualPresetManageImageSendable(this.preset);
     VirtualPresetCollection preset;
 }
+
+ManageImageSendable handleSendable(VirtualPreset preset) {
+    if(preset is VirtualPresetCollection) return VirtualPresetManageImageSendable(preset);
+    else return PresetManageImageSendable(preset as PresetImage);
+}

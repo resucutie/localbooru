@@ -456,7 +456,7 @@ class _AppState extends State<App> {
                         final uri = Uri.tryParse(text);
                         if(uri == null) return;
                         importImageFromURL(text).then((preset) {
-                            routerContext.push("/manage_image", extra: PresetManageImageSendable(preset));
+                            routerContext.push("/manage_image", extra: handleSendable(preset));
                         })
                         .onError((error, stack) {
                             if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {

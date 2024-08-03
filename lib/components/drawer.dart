@@ -158,7 +158,7 @@ class DefaultDrawer extends StatelessWidget {
                         if(url != null) {
                             importImageFromURL(url)
                                 .then((preset) {
-                                    GoRouter.of(context).push("/manage_image", extra: PresetManageImageSendable(preset));
+                                    GoRouter.of(context).push("/manage_image", extra: handleSendable(preset));
                                 })
                                 .onError((error, stack) {
                                     if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {

@@ -27,7 +27,7 @@ class PresetCollection extends Preset {
     }
 }
 
-class VirtualPresetCollection extends Preset {
+class VirtualPresetCollection extends VirtualPreset {
     VirtualPresetCollection({this.id, this.name, this.pages, super.key});
 
     List<PresetImage>? pages;

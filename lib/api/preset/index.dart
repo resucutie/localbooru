@@ -33,3 +33,7 @@ abstract interface class Preset{
 
     Key? key;
 }
+
+abstract interface class VirtualPreset extends Preset {
+    VirtualPreset({super.key});
+}

@@ -2,7 +2,7 @@ part of preset;
 
 
 // presets are essentially a format that represents a BooruImage before it gets added
-class PresetImage extends Preset{
+class PresetImage extends VirtualPreset{
     PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages, super.key});
 
     File? image;
