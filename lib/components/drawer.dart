@@ -8,6 +8,7 @@ import 'package:localbooru/components/dialogs/textfield_dialogs.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
+import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -66,7 +67,7 @@ class _DesktopHousingState extends State<DesktopHousing> {
                         ),
                     ],
                 ),
-                if(true) Positioned(
+                if(importListener.isImporting && isDesktop()) Positioned(
                     top: 0,
                     left: 0,
                     right: 0,
@@ -157,7 +158,7 @@ class DefaultDrawer extends StatelessWidget {
                         if(url != null) {
                             importImageFromURL(url)
                                 .then((preset) {
-                                    GoRouter.of(context).push("/manage_image", extra: VirtualPresetCollection(pages: [preset]));
+                                    GoRouter.of(context).push("/manage_image", extra: PresetManageImageSendable(preset));
                                 })
                                 .onError((error, stack) {
                                     if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {

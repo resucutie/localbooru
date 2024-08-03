@@ -12,6 +12,7 @@ import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/api/preset/index.dart';
+import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
@@ -194,7 +195,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                         if(_selectedImages.length == 1) IconButton(
                                                             icon: const Icon(Icons.edit),
                                                             onPressed: () async {
-                                                                context.push("/manage_image", extra: VirtualPresetCollection(pages: [await PresetImage.fromExistingImage(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0]))]));
+                                                                context.push("/manage_image", extra: PresetManageImageSendable(await PresetImage.fromExistingImage(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0]))));
                                                                 setState(() => _selectedImages = []);
                                                             },
                                                         ),

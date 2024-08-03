@@ -13,9 +13,9 @@ import 'package:localbooru/views/image_manager/general_collection_manager.dart';
 import 'package:path/path.dart' as p;
 
 class ImageManagerShell extends StatefulWidget {
-    const ImageManagerShell({super.key, this.virtualPresetCollection});
+    const ImageManagerShell({super.key, this.sendable});
 
-    final VirtualPresetCollection? virtualPresetCollection;
+    final ManageImageSendable? sendable;
 
     @override
     State<ImageManagerShell> createState() => _ImageManagerShellState();
@@ -36,8 +36,14 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
     @override
     void initState() {
         super.initState();
+        if(widget.sendable == null) preset = VirtualPresetCollection(pages: [PresetImage()]);
+        if(widget.sendable is PresetManageImageSendable) preset = VirtualPresetCollection(pages: [(widget.sendable as PresetManageImageSendable).preset]);
+        if(widget.sendable is PresetListManageImageSendable) preset = VirtualPresetCollection(pages: (widget.sendable as PresetListManageImageSendable).presets);
+        if(widget.sendable is VirtualPresetManageImageSendable) {
+            saveCollection = true;
+            preset = (widget.sendable as VirtualPresetManageImageSendable).preset;
+        }
 
-        preset = widget.virtualPresetCollection ?? VirtualPresetCollection(pages: [PresetImage()]);
         if(preset.pages == null || preset.pages!.isEmpty) preset.pages = [PresetImage()];
         errorOnPages.addAll(List.generate(preset.pages!.length, (index) => preset.pages![index].image == null || preset.pages![index].tags == null));
     }
@@ -253,4 +259,18 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
             )
         );
     }
+}
+
+abstract class ManageImageSendable {}
+class PresetManageImageSendable extends ManageImageSendable {
+    PresetManageImageSendable(this.preset);
+    PresetImage preset;
+}
+class PresetListManageImageSendable extends ManageImageSendable {
+    PresetListManageImageSendable(this.presets);
+    List<PresetImage> presets;
+}
+class VirtualPresetManageImageSendable extends ManageImageSendable {
+    VirtualPresetManageImageSendable(this.preset);
+    VirtualPresetCollection preset;
 }

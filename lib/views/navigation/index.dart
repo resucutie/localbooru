@@ -4,6 +4,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/api/preset/index.dart';
+import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
@@ -91,7 +92,7 @@ class _AddImageDropRegionState extends State<AddImageDropRegion> {
                         final fileExtension = insertedFormat.mimeTypes!.first.split("/")[1];
                         final draggedFile = await DefaultCacheManager().putFileStream("drag&Drop${file.fileName ?? ""}${file.fileSize}", file.getStream(), fileExtension: fileExtension);
                         presets.add(PresetImage(image: draggedFile));
-                        if(presets.length == event.session.items.length && context.mounted) GoRouter.of(context).push("/manage_image", extra: VirtualPresetCollection(pages: presets));
+                        if(presets.length == event.session.items.length && context.mounted) GoRouter.of(context).push("/manage_image", extra: PresetListManageImageSendable(presets));
                     }, onError: (error) {
                         debugPrint('Error reading value $error');
                     });
