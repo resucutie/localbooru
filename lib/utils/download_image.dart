@@ -5,20 +5,28 @@ import 'package:localbooru/utils/listeners.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-Future<File> downloadFile(Uri uri) async {
+typedef HandleChunk = Function(List<int> chunk, http.StreamedResponse response);
+
+int hasDownloaded = 0;
+Future<File> downloadFile(Uri uri, {HandleChunk? handleChunk}) async {
     final downloadDir = await getTemporaryDirectory();
     final file = File(p.join(downloadDir.path, uri.pathSegments.last));
     
     final request = http.Request("GET", uri);
     final response = await request.send();
     final sink = file.openWrite();
-    
-    int hasDownloaded = 0;
+
     await response.stream.map((chunk) {
-        hasDownloaded += chunk.length;
-        if(response.contentLength != null) importListener.updateImportStatus(progress: hasDownloaded/response.contentLength!);
+        if(handleChunk == null) {
+            hasDownloaded += chunk.length;
+            if(response.contentLength != null) importListener.updateImportStatus(progress: hasDownloaded/response.contentLength!);
+        } else {
+            handleChunk(chunk, response);
+        }
         return chunk;
     },).pipe(sink);
+
+    hasDownloaded = 0;
     
     return File(file.path); //makes it so it doesn't return _File
 }

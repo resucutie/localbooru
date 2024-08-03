@@ -101,6 +101,12 @@ class _TestPlaygroundScreenState extends State<TestPlaygroundScreen> {
                             debugPrint("$collection");
                         },
                     ),
+                    FilledButton(
+                        child: const Text("test write collection"),
+                        onPressed: () async {
+                            VirtualPresetCollection.urlToPreset("https://e926.net/pools/42095");
+                        },
+                    ),
                 ],
             )
             // body: AspectRatio(

@@ -1,8 +1,7 @@
 part of preset;
 
 // twitter: fxtwitter offers a url to give only the image. getting the artist is as easy as reading the first path segment
-Future<PresetImage> twitterToPreset(String url) async {
-    Uri uri = Uri.parse(url);
+Future<PresetImage> twitterToPresetImage(Uri uri) async {
     // final res = await http.get(Uri.parse(["https://d.fxtwitter.com", uri.path].join()));
 
     final downloadedFileInfo = await downloadFile(Uri.parse(["https://d.fxtwitter.com", uri.path].join()));
@@ -17,8 +16,7 @@ Future<PresetImage> twitterToPreset(String url) async {
 }
 
 // twitter: instafix offers a url to give only the image. getting the artist is as easy as reading the first path segment
-Future<PresetImage> instagramToPreset(String url) async {
-    Uri uri = Uri.parse(url);
+Future<PresetImage> instagramToPresetImage(Uri uri) async {
     final fxReq = http.Request("Get", Uri.parse(["https://ddinstagram.com", uri.path].join()))..followRedirects = false;
     final title = getMetaProperty(parse(fxReq.body), property: "twitter:title");
 

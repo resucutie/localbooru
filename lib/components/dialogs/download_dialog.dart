@@ -37,7 +37,7 @@ Future<PresetImage> importImageFromURL(String url) async {
     importListener.updateImportStatus(import: true);
 
     return await future.whenComplete(() {
-        importListener.updateImportStatus(import: false, progress: 0);
+        importListener.clear();
     });
 }
 

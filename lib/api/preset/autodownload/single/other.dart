@@ -1,7 +1,7 @@
 part of preset;
 
 // any: assumes that it returns an image
-Future<PresetImage> anyURLToPreset(String url) async {
+Future<PresetImage> anyURLToPresetImage(String url) async {
     final downloadedFileInfo = await downloadFile(Uri.parse(url));
 
     final mime = lookupMimeType(downloadedFileInfo.path)!;

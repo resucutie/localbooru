@@ -25,17 +25,6 @@ const String kExternalCachePath = 'externalCachePath';
 const String kExternalStoragePath = 'externalStoragePath';
 
 void main() {
-    // group("test", () {
-    //     setUp(() async {
-    //         PathProviderPlatform.instance = FakePathProviderPlatform();
-    //     });
-    //     test("download a file", () async {
-    //         final file = await downloadFile(Uri.parse("https://safebooru.org//samples/4619/sample_631e22a16c93c5b6fc9bd29fb18fe380091fd4df.jpg?5109590"));
-    //         expect(file is File, true);
-    //         expect(await file.length() == 0, false);
-    //     });
-    // });
-
     void updateFunc() {
         debugPrint("Progress: ${importListener.progress}");
     }
@@ -53,61 +42,61 @@ void main() {
             expect(res, isA<PresetImage>());
             expect(res.image, isA<File>());
             expect(await res.image!.length(), isNot(0));
-        });
+        }, tags: "danbooru1");
         test("moebooru", () async {
             final res = await PresetImage.urlToPreset(Posts.moebooru.toString(), accurate: true);
             expect(res, isA<PresetImage>());
             expect(res.image, isA<File>());
             expect(await res.image!.length(), isNot(0));
-        });
+        }, tags: "moebooru");
         test("danbooru2", () async {
             final res = await PresetImage.urlToPreset(Posts.danbooru2.toString(), accurate: true);
             expect(res, isA<PresetImage>());
             expect(res.image, isA<File>());
             expect(await res.image!.length(), isNot(0));
-        });
+        }, tags: "danbooru2");
         test("e621", () async {
             final res = await PresetImage.urlToPreset(Posts.e621.toString(), accurate: true);
             expect(res, isA<PresetImage>());
             expect(res.image, isA<File>());
             expect(await res.image!.length(), isNot(0));
-        });
+        }, tags: "e621");
         test("gelbooru 0.2.5", () async {
             final res = await PresetImage.urlToPreset(Posts.gelbooru025.toString(), accurate: true);
             expect(res, isA<PresetImage>());
             expect(res.image, isA<File>());
             expect(await res.image!.length(), isNot(0));
-        });
+        }, tags: "gelbooru025");
         test("gelbooru 0.2.0", () async {
             final res = await PresetImage.urlToPreset(Posts.gelbooru020.toString(), accurate: true);
             expect(res, isA<PresetImage>());
             expect(res.image, isA<File>());
             expect(await res.image!.length(), isNot(0));
-        });
+        }, tags: "gelbooru020");
         test("gelbooru 0.1", () async {
             final res = await PresetImage.urlToPreset(Posts.gelbooru01.toString(), accurate: true);
             expect(res, isA<PresetImage>());
             expect(res.image, isA<File>());
             expect(await res.image!.length(), isNot(0));
-        }, skip: "Not implemented");
+        }, tags: "gelbooru01", skip: "Not implemented");
         test("twitter", () async {
             final res = await PresetImage.urlToPreset(Posts.twitter.toString(), accurate: true);
             expect(res, isA<PresetImage>());
             expect(res.image, isA<File>());
             expect(await res.image!.length(), isNot(0));
-        });
+        }, tags: "twitter");
         test("furaffinity", () async {
             final res = await PresetImage.urlToPreset(Posts.furryaffinity.toString(), accurate: true);
             expect(res, isA<PresetImage>());
             expect(res.image, isA<File>());
             expect(await res.image!.length(), isNot(0));
-        });
+        }, tags: "furaffinity");
         test("instagram", () async {
             final res = await PresetImage.urlToPreset(Posts.instagram.toString(), accurate: true);
             expect(res, isA<PresetImage>());
             expect(res.image, isA<File>());
             expect(await res.image!.length(), isNot(0));
-        }, skip: "Not implemented");
+        }, tags: "instagram", skip: "Not implemented");
     });
 }
 

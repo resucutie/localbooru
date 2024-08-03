@@ -1,33 +1,35 @@
-@Tags(['import', 'identify', 'collections'])
+@Tags(['import', 'identify', 'multi'])
 library;
 
 import 'package:localbooru/api/preset/index.dart';
 import 'package:test/test.dart';
 
+import '../../shared.dart';
+
 void main() {
     group("check collections", () {
         test("danbooru1", () async {
-            final res = await determineIfCollection(Uri.parse("http://behoimi.org/pool/show/47"));
+            final res = await determineIfCollection(Collections.danbooru1);
             expect(res, true);
         });
         test("moebooru", () async {
-            final res = await determineIfCollection(Uri.parse("https://konachan.com/pool/show/542"));
+            final res = await determineIfCollection(Collections.moebooru);
             expect(res, true);
         });
         test("danbooru2", () async {
-            final res = await determineIfCollection(Uri.parse("https://danbooru.donmai.us/pools/14957"));
+            final res = await determineIfCollection(Collections.danbooru2);
             expect(res, true);
         });
         test("e621", () async {
-            final res = await determineIfCollection(Uri.parse("https://e926.net/pools/38721"));
+            final res = await determineIfCollection(Collections.e621);
             expect(res, true);
         });
         test("gelbooru 0.2.5", () async {
-            final res = await determineIfCollection(Uri.parse("https://gelbooru.com/index.php?page=pool&s=show&id=64318"));
+            final res = await determineIfCollection(Collections.gelbooru025);
             expect(res, true);
         });
         test("gelbooru 0.2.0", () async {
-            final res = await determineIfCollection(Uri.parse("https://safebooru.org/index.php?page=pool&s=show&id=694"));
+            final res = await determineIfCollection(Collections.gelbooru020);
             expect(res, true);
         });
     });

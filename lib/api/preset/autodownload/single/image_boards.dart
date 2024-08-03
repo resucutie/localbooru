@@ -1,8 +1,7 @@
 part of "../../index.dart";
 
 // danbooru 2: if you add .json at the end of the post url, it'll return the JSON of that post
-Future<PresetImage> danbooru2ToPreset(String url) async {
-    Uri uri = Uri.parse(url);
+Future<PresetImage> danbooru2ToPresetImage(Uri uri) async {
     final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final bodyRes = jsonDecode(res.body);
 
@@ -22,8 +21,7 @@ Future<PresetImage> danbooru2ToPreset(String url) async {
 
 // danbooru 1/moebooru: you can ask danbooru to do a search with the id: meta-tag. for obtaining the tag types, only webcrawling
 // as we cant obtain tag types in bulk, nor does post.json returns tag types in its response like danbooru 2
-Future<PresetImage> danbooru1ToPreset(String url) async {
-    Uri uri = Uri.parse(url);
+Future<PresetImage> danbooru1ToPresetImage(Uri uri) async {
     final postID = uri.pathSegments[2];
     final res = await http.get(Uri.parse([uri.origin, "post/index.json?tags=id:$postID"].join("/")));
     final post = jsonDecode(res.body)[0];
@@ -62,13 +60,12 @@ Future<PresetImage> danbooru1ToPreset(String url) async {
 }
 
 // e926/e621: same idea as danbooru 2, if you add .json at the end of the post url, it'll return the JSON of that post
-Future<PresetImage> e621ToPreset(String url) async {
-    Uri uri = Uri.parse(url);
+Future<PresetImage> e621ToPresetImage(Uri uri, {HandleChunk? handleChunk}) async {
     final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final postRes = jsonDecode(res.body)["post"];
-
-    final downloadedFileInfo = await downloadFile(Uri.parse(postRes["file"]["url"]));
-
+    
+    final downloadedFileInfo = await downloadFile(Uri.parse(postRes["file"]["url"]), handleChunk: handleChunk);
+    
     return PresetImage(
         image: downloadedFileInfo,
         sources: [...(postRes["sources"] ?? []).where((e) => !e.startsWith("-")), [uri.origin, uri.path].join("")],
@@ -94,8 +91,7 @@ final Map<int, String> gelbooruTagMap = {
 // gelbooru 2: for some reason everything works under index.php. we can filter for posts using the "s=post" and "id" query parameters.
 // it is a weird system of post filtering ngl. 0.2.5 has an api to return tag types in bulk. on the other hand 0.2.0 doesn't include
 // that api, and as such we need to webcrawl to obtain them
-Future<PresetImage> gelbooruToPreset(String url) async {
-    Uri uri = Uri.parse(url);
+Future<PresetImage> gelbooruToPresetImage(Uri uri) async {
     final String imageID = uri.queryParameters["id"]!;
 
     final res = await http.get(Uri.parse([uri.origin, "index.php?page=dapi&s=post&q=index&json=1&id=$imageID"].join("/")));

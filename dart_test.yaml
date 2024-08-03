@@ -1,8 +1,19 @@
 tags:
   import:
-  collections:
+  single:
+  multi:
   accurate:
   identify:
   download:
-  single:
   websites:
+
+  danbooru1:
+  moebooru:
+  danbooru2:
+  e621:
+  gelbooru025:
+  gelbooru020:
+  gelbooru01:
+  twitter:
+  furaffinity:
+  instagram:

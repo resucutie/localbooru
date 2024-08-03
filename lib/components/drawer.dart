@@ -66,7 +66,7 @@ class _DesktopHousingState extends State<DesktopHousing> {
                         ),
                     ],
                 ),
-                if(importListener.isImporting && isDesktop()) Positioned(
+                if(true) Positioned(
                     top: 0,
                     left: 0,
                     right: 0,
@@ -194,6 +194,12 @@ class DefaultDrawer extends StatelessWidget {
                         onTap: () {
                             Scaffold.of(context).closeDrawer();
                             context.push("/playground");
+                        },
+                    ),
+                    ListTile(
+                        title: const Text("progress bar collection import test"),
+                        onTap: () {
+                            VirtualPresetCollection.urlToPreset("https://e926.net/pools/42095");
                         },
                     ),
                     ListTile(

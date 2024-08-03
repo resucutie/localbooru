@@ -49,5 +49,12 @@ class ImportListener with ChangeNotifier {
         if(progress != null) this.progress = progress;
         notifyListeners();
     }
+
+    void clear() {
+        updateImportStatus(
+            import: false,
+            progress: 0,
+        );
+    }
 }
 ImportListener importListener = ImportListener();

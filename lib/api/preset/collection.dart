@@ -46,4 +46,21 @@ class VirtualPresetCollection extends Preset {
             name: preset.name
         );
     }
+
+    static Future<VirtualPresetCollection> urlToPreset(String url, {bool accurate = true}) async {        
+        if(!isURL(url)) throw "Not a URL";
+
+        Uri uri = Uri.parse(url);
+
+        Websites? website;
+        if(accurate == true) website = await accurateGetWebsite(uri);
+        else website = getWebsiteByURL(uri);
+
+        final VirtualPresetCollection preset = switch (website) {
+            ServiceWebsites.e621 => await e621ToCollectionPreset(uri),
+            // Websites.instagram => await instagramToSinglePreset(url),
+            _ => throw "Could not identify"
+        };
+        return preset;
+    }
 }

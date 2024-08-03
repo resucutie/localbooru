@@ -25,7 +25,7 @@ class PresetImage extends Preset{
         );
     }
 
-    static Future<PresetImage> urlToPreset(String url, {bool? accurate}) async {
+    static Future<PresetImage> urlToPreset(String url, {bool accurate = true}) async {
         if(await File(url).exists()) return PresetImage(image: File(url));
         
         if(!isURL(url)) throw "Not a URL";
@@ -33,19 +33,19 @@ class PresetImage extends Preset{
         Uri uri = Uri.parse(url);
 
         Websites? website;
-        if(accurate == true) website = await accurateGetWebsite(uri);
+        if(accurate) website = await accurateGetWebsite(uri);
         else website = getWebsiteByURL(uri);
 
         final preset = switch (website) {
-            ServiceWebsites.danbooru1 => await danbooru1ToPreset(url),
-            ServiceWebsites.danbooru2 => await danbooru2ToPreset(url),
-            ServiceWebsites.e621 => await e621ToPreset(url),
-            ServiceWebsites.gelbooru020 || ServiceWebsites.gelbooru025 => await gelbooruToPreset(url),
-            ServiceWebsites.twitter => await twitterToPreset(url),
-            ServiceWebsites.furAffinity => await furaffinityToPreset(url),
-            ServiceWebsites.deviantArt => await deviantartToPreset(url),
-            // Websites.instagram => await instagramToPreset(url),
-            _ => await anyURLToPreset(url)
+            ServiceWebsites.danbooru1 => await danbooru1ToPresetImage(uri),
+            ServiceWebsites.danbooru2 => await danbooru2ToPresetImage(uri),
+            ServiceWebsites.e621 => await e621ToPresetImage(uri),
+            ServiceWebsites.gelbooru020 || ServiceWebsites.gelbooru025 => await gelbooruToPresetImage(uri),
+            ServiceWebsites.twitter => await twitterToPresetImage(uri),
+            ServiceWebsites.furAffinity => await furaffinityToPresetImage(uri),
+            ServiceWebsites.deviantArt => await deviantartToPresetImage(url),
+            // Websites.instagram => await instagramToPresetImage(url),
+            _ => await anyURLToPresetImage(url)
         };
         return preset;
     }
