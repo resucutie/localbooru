@@ -54,7 +54,12 @@ class ImageUploadForm extends StatelessWidget {
                                                 return const Icon(Icons.add);
                                             } else {
                                                 if(lookupMimeType(state.value)!.startsWith("video/")) return IgnorePointer(child: VideoView(state.value),);
-                                                return Image.file(File(state.value));
+                                                return Image(
+                                                    image: ResizeImage(
+                                                        FileImage(File(state.value)),
+                                                        height: 400
+                                                    )
+                                                );
                                             }
                                         },),
                                     ),
