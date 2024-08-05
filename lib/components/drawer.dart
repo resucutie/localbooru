@@ -71,7 +71,7 @@ class _DesktopHousingState extends State<DesktopHousing> {
                     top: 0,
                     left: 0,
                     right: 0,
-                    child: LinearProgressIndicator(value: _importProgress,)
+                    child: LinearProgressIndicator(value: _importProgress == 0 ? null : _importProgress,)
                 ),
             ],
         );

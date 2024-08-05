@@ -1,5 +1,25 @@
+import 'package:flutter/material.dart';
+import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/utils/download_image.dart';
 import 'package:localbooru/utils/listeners.dart';
+
+Future<List<PresetImage>> multiImageDownloader<T>({
+    required List<T> postsToIterate,
+    required Future<PresetImage> Function(T post, HandleChunk handler) getter,
+    Duration? debounce
+}) async {
+    final completionist = MultiCompletionist(postsToIterate.length);
+
+    List<PresetImage> presets = [];
+
+    for(final (index, post) in postsToIterate.indexed) {
+        debugPrint("Adding post $post (${index + 1} of ${postsToIterate.length})");
+        presets.add(await getter(post, completionist.chunkHandler(index)));
+        if(debounce != null) await Future.delayed(debounce);
+    }
+
+    return presets;
+}
 
 class MultiCompletionist {
     MultiCompletionist(this.amount);

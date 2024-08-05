@@ -5,14 +5,11 @@ Future<VirtualPresetCollection> e621ToCollectionPreset(Uri uri) async {
     final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final json = jsonDecode(res.body);
 
-    final postList = List<int>.from(json["post_ids"]);
-
-    final completionist = MultiCompletionist(postList.length);
-
-    final presets = await Future.wait(
-        postList.mapIndexed((index, post) => e621ToPresetImage(Uri.parse([uri.origin, "posts", post].join("/")),
-            handleChunk: completionist.chunkHandler(index),
-        ))
+    final presets = await multiImageDownloader(
+        postsToIterate: List<int>.from(json["post_ids"]),
+        getter: (post, handler) {
+            return e621ToPresetImage(Uri.parse([uri.origin, "posts", post].join("/")), handleChunk: handler,);
+        },
     );
 
     return VirtualPresetCollection(
