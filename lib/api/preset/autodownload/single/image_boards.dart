@@ -1,11 +1,11 @@
 part of "../../index.dart";
 
 // danbooru 2: if you add .json at the end of the post url, it'll return the JSON of that post
-Future<PresetImage> danbooru2ToPresetImage(Uri uri) async {
+Future<PresetImage> danbooru2ToPresetImage(Uri uri, {HandleChunk? handleChunk}) async {
     final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final bodyRes = jsonDecode(res.body);
 
-    final downloadedFileInfo = await downloadFile(Uri.parse(bodyRes["file_url"]));
+    final downloadedFileInfo = await downloadFile(Uri.parse(bodyRes["file_url"]), handleChunk: handleChunk);
 
     return PresetImage(
         image: downloadedFileInfo,
@@ -21,12 +21,12 @@ Future<PresetImage> danbooru2ToPresetImage(Uri uri) async {
 
 // danbooru 1/moebooru: you can ask danbooru to do a search with the id: meta-tag. for obtaining the tag types, only webcrawling
 // as we cant obtain tag types in bulk, nor does post.json returns tag types in its response like danbooru 2
-Future<PresetImage> danbooru1ToPresetImage(Uri uri) async {
+Future<PresetImage> danbooru1ToPresetImage(Uri uri, {HandleChunk? handleChunk}) async {
     final postID = uri.pathSegments[2];
     final res = await http.get(Uri.parse([uri.origin, "post/index.json?tags=id:$postID"].join("/")));
     final post = jsonDecode(res.body)[0];
 
-    final downloadedFileInfo = await downloadFile(Uri.parse(post["file_url"]));
+    final downloadedFileInfo = await downloadFile(Uri.parse(post["file_url"]), handleChunk: handleChunk);
 
     final webpage = await http.get(uri);
     final document = parse(webpage.body);

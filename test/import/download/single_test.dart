@@ -26,7 +26,7 @@ const String kExternalStoragePath = 'externalStoragePath';
 
 void main() {
     void updateFunc() {
-        debugPrint("Progress: ${importListener.progress}");
+        debugPrint("Progress: ${importListener.progress.toStringAsFixed(3)}");
     }
 
     group("download", () {

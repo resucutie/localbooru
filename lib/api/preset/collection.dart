@@ -58,6 +58,8 @@ class VirtualPresetCollection extends VirtualPreset {
 
         final VirtualPresetCollection preset = switch (website) {
             ServiceWebsites.e621 => await e621ToCollectionPreset(uri),
+            ServiceWebsites.danbooru2 => await danbooru2ToCollectionPreset(uri),
+            ServiceWebsites.danbooru1 => await danbooru1ToCollectionPreset(uri),
             // Websites.instagram => await instagramToSinglePreset(url),
             _ => throw "Could not identify"
         };

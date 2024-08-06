@@ -26,7 +26,7 @@ const String kExternalStoragePath = 'externalStoragePath';
 
 void main() {
     void updateFunc() {
-        debugPrint("Progress: ${importListener.progress}");
+        debugPrint("Progress: ${importListener.progress.toStringAsFixed(3)}");
     }
 
     group("download", () {
@@ -41,8 +41,22 @@ void main() {
             final res = await VirtualPresetCollection.urlToPreset(Collections.e621.toString());
             expect(res, isA<VirtualPresetCollection>());
             expect(res.pages, isA<List<PresetImage>>());
-            // expect(await res.image!.length(), isNot(0));
         }, tags: "e621");
+        test("danbooru2", () async {
+            final res = await VirtualPresetCollection.urlToPreset(Collections.danbooru2.toString());
+            expect(res, isA<VirtualPresetCollection>());
+            expect(res.pages, isA<List<PresetImage>>());
+        }, tags: "danbooru2");
+        test("moebooru", () async {
+            final res = await VirtualPresetCollection.urlToPreset(Collections.moebooru.toString());
+            expect(res, isA<VirtualPresetCollection>());
+            expect(res.pages, isA<List<PresetImage>>());
+        }, tags: "moebooru");
+        test("danbooru1", () async {
+            final res = await VirtualPresetCollection.urlToPreset(Collections.danbooru1.toString());
+            expect(res, isA<VirtualPresetCollection>());
+            expect(res.pages, isA<List<PresetImage>>());
+        }, tags: "danbooru1");
     });
 }
 

@@ -13,11 +13,11 @@ class Posts {
 }
 
 class Collections {
-    static Uri danbooru1 = Uri.parse("http://behoimi.org/pool/show/47");
-    static Uri moebooru = Uri.parse("https://konachan.com/pool/show/542");
-    static Uri danbooru2 = Uri.parse("https://danbooru.donmai.us/pools/14957");
+    static Uri danbooru1 = Uri.parse("http://behoimi.org/pool/show/37");
+    static Uri moebooru = Uri.parse("https://konachan.com/pool/show/394");
+    static Uri danbooru2 = Uri.parse("https://danbooru.donmai.us/pools/23046");
     static Uri e621 = Uri.parse("https://e926.net/pools/42095");
     // static Uri e621 = Uri.parse("https://e926.net/pools/41798"); // this pool has a deleted post, can be useful
-    static Uri gelbooru025 = Uri.parse("https://gelbooru.com/index.php?page=pool&s=show&id=64318");
+    static Uri gelbooru025 = Uri.parse("https://gelbooru.com/index.php?page=pool&s=show&id=64104");
     static Uri gelbooru020 = Uri.parse("https://safebooru.org/index.php?page=pool&s=show&id=694");
 }
