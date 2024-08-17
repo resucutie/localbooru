@@ -17,10 +17,11 @@ Future<PresetImage> twitterToPresetImage(Uri uri) async {
 
 // twitter: instafix offers a url to give only the image. getting the artist is as easy as reading the first path segment
 Future<PresetImage> instagramToPresetImage(Uri uri) async {
-    final fxReq = http.Request("Get", Uri.parse(["https://ddinstagram.com", uri.path].join()))..followRedirects = false;
-    final title = getMetaProperty(parse(fxReq.body), property: "twitter:title");
+    final fxReq = Request("Get", Uri.parse(["https://ddinstagram.com", uri.path].join()))..followRedirects = false;
+    final response = await Response.fromStream(await lbHttp.send(fxReq));
+    final title = getMetaProperty(parse(response.body), property: "twitter:title");
 
-    debugPrint(fxReq.body);
+    debugPrint(response.body);
 
     final downloadedFileInfo = await downloadFile(Uri.parse(["https://d.ddinstagram.com", uri.path].join()));
 

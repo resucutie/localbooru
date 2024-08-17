@@ -3,7 +3,7 @@ part of preset;
 // danbooru2 and e621/e926 share the same api endpoints when it comes to pools
 // danbooru 2: if you add .json at the end of the post url, it'll return the JSON of that post
 Future<VirtualPresetCollection> _danbooru2LikeAPIs(Uri uri, Function(Uri uri, {HandleChunk handleChunk}) importer) async {
-    final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
+    final res = await lbHttp.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final json = jsonDecode(res.body);
 
     final presets = await multiImageDownloader(
@@ -24,7 +24,7 @@ Future<VirtualPresetCollection> e621ToCollectionPreset(Uri uri) => _danbooru2Lik
 // danbooru 1: /pool/show.xml?id=(id) returns all of the posts already parsed
 Future<VirtualPresetCollection> danbooru1ToCollectionPreset(Uri uri) async {
     final id = uri.pathSegments.last;
-    final res = await http.get(Uri.parse("${uri.origin}/pool/show.json?id=$id"));
+    final res = await lbHttp.get(Uri.parse("${uri.origin}/pool/show.json?id=$id"));
     final json = jsonDecode(res.body);
 
     final presets = await multiImageDownloader(

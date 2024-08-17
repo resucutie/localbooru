@@ -4,9 +4,9 @@ part of preset;
 // obtain its image. the url nor fxraffinity's embed gives any clue about the poster, but furryaffinity's website title, as well as its
 // embed title gives, so we just fetch those (and also bypasses the nsfw sign up wall)
 Future<PresetImage> furaffinityToPresetImage(Uri uri) async {
-    final fxReq = http.Request("Get", Uri.parse(["https://fxraffinity.net", uri.path, "?full"].join()))..followRedirects = false;
-    final res = await http.Response.fromStream(await http.Client().send(fxReq));
-    final websiteRes = await http.get(Uri.parse(["https://furaffinity.net", uri.path].join()));
+    final fxReq = Request("Get", Uri.parse(["https://fxraffinity.net", uri.path, "?full"].join()))..followRedirects = false;
+    final res = await Response.fromStream(await lbHttp.send(fxReq));
+    final websiteRes = await lbHttp.get(Uri.parse(["https://furaffinity.net", uri.path].join()));
 
     final fileUrl = getMetaProperty(parse(res.body), property: "og:image");
     if(fileUrl == null) throw "Could not grab image";
@@ -26,7 +26,7 @@ Future<PresetImage> furaffinityToPresetImage(Uri uri) async {
 
 // devianart: use their oEmbed API
 Future<PresetImage> deviantartToPresetImage(String url) async {
-    final res = await http.get(Uri.parse(["https://backend.deviantart.com/oembed?url=", url].join()));
+    final res = await lbHttp.get(Uri.parse(["https://backend.deviantart.com/oembed?url=", url].join()));
     final json = jsonDecode(res.body);
 
     final downloadedFileInfo = await downloadFile(Uri.parse(json["url"]));

@@ -1,8 +1,8 @@
 @Tags(['import', 'identify', 'multi'])
 library;
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:localbooru/api/preset/index.dart';
-import 'package:test/test.dart';
 
 import '../../shared.dart';
 

@@ -2,7 +2,7 @@ part of "../../index.dart";
 
 // danbooru 2: if you add .json at the end of the post url, it'll return the JSON of that post
 Future<PresetImage> danbooru2ToPresetImage(Uri uri, {HandleChunk? handleChunk}) async {
-    final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
+    final res = await lbHttp.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final bodyRes = jsonDecode(res.body);
 
     final downloadedFileInfo = await downloadFile(Uri.parse(bodyRes["file_url"]), handleChunk: handleChunk);
@@ -23,12 +23,12 @@ Future<PresetImage> danbooru2ToPresetImage(Uri uri, {HandleChunk? handleChunk}) 
 // as we cant obtain tag types in bulk, nor does post.json returns tag types in its response like danbooru 2
 Future<PresetImage> danbooru1ToPresetImage(Uri uri, {HandleChunk? handleChunk}) async {
     final postID = uri.pathSegments[2];
-    final res = await http.get(Uri.parse([uri.origin, "post/index.json?tags=id:$postID"].join("/")));
+    final res = await lbHttp.get(Uri.parse([uri.origin, "post/index.json?tags=id:$postID"].join("/")));
     final post = jsonDecode(res.body)[0];
 
     final downloadedFileInfo = await downloadFile(Uri.parse(post["file_url"]), handleChunk: handleChunk);
 
-    final webpage = await http.get(uri);
+    final webpage = await lbHttp.get(uri);
     final document = parse(webpage.body);
 
     final tagsElements = document.getElementsByClassName("tag-link");
@@ -61,7 +61,7 @@ Future<PresetImage> danbooru1ToPresetImage(Uri uri, {HandleChunk? handleChunk}) 
 
 // e926/e621: same idea as danbooru 2, if you add .json at the end of the post url, it'll return the JSON of that post
 Future<PresetImage> e621ToPresetImage(Uri uri, {HandleChunk? handleChunk}) async {
-    final res = await http.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
+    final res = await lbHttp.get(Uri.parse("${[uri.origin, uri.path].join("/")}.json"));
     final postRes = jsonDecode(res.body)["post"];
     
     final downloadedFileInfo = await downloadFile(Uri.parse(postRes["file"]["url"]), handleChunk: handleChunk);
@@ -94,7 +94,7 @@ final Map<int, String> gelbooruTagMap = {
 Future<PresetImage> gelbooruToPresetImage(Uri uri) async {
     final String imageID = uri.queryParameters["id"]!;
 
-    final res = await http.get(Uri.parse([uri.origin, "index.php?page=dapi&s=post&q=index&json=1&id=$imageID"].join("/")));
+    final res = await lbHttp.get(Uri.parse([uri.origin, "index.php?page=dapi&s=post&q=index&json=1&id=$imageID"].join("/")));
     final json = jsonDecode(res.body);
     final bool is020 = json is List;
     final Map<String, dynamic> post = !is020 ? json["post"][0] : json[0]; // api differences, first one 0.2.5, second 0.2.0
@@ -110,7 +110,7 @@ Future<PresetImage> gelbooruToPresetImage(Uri uri) async {
     String imageURL;
     if(is020) { // probably 0.2.0, grab html documents
         // sadly it doesn't have an api to obtain tag types, or i couldn't find one
-        final webpage = await http.get(Uri.parse([uri.origin, "index.php?page=post&s=view&id=$imageID"].join("/")));
+        final webpage = await lbHttp.get(Uri.parse([uri.origin, "index.php?page=post&s=view&id=$imageID"].join("/")));
         final document = parse(webpage.body);
 
         final tagsElements = document.getElementsByClassName("tag");
@@ -129,7 +129,7 @@ Future<PresetImage> gelbooruToPresetImage(Uri uri) async {
         imageURL = imageElement!.attributes["src"]!;
 
     } else { // probably 0.2.5, use their api instead
-        final tagTypesRes = await http.get(Uri.parse([uri.origin, "index.php?page=dapi&s=tag&q=index&json=1&names=$tags"].join("/")));
+        final tagTypesRes = await lbHttp.get(Uri.parse([uri.origin, "index.php?page=dapi&s=tag&q=index&json=1&names=$tags"].join("/")));
         
         final List<dynamic> tagTypes = jsonDecode(tagTypesRes.body)["tag"];
 

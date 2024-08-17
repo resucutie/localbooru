@@ -1,5 +1,6 @@
 library preset;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -7,11 +8,11 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:html/dom.dart';
-import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:html/parser.dart' show parse;
 import 'package:localbooru/api/preset/autodownload/multi/index.dart';
+import 'package:localbooru/utils/http_client.dart' show lbHttp;
 import 'package:localbooru/utils/download_image.dart';
 import 'package:localbooru/utils/get_meta_property.dart';
 import 'package:mime/mime.dart';

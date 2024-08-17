@@ -16,18 +16,18 @@ Future<Websites?> accurateGetWebsite(Uri uri) async {
 Future<Websites?> _determineSPByAPIFetch(Uri uri) async {
     Response res;
 
-    res = await http.get(Uri.parse("${uri.origin}/posts.json"));
+    res = await lbHttp.get(Uri.parse("${uri.origin}/posts.json"));
     if(res.statusCode == 200) {
-        res = await http.get(Uri.parse("${uri.origin}/status.json"));
+        res = await lbHttp.get(Uri.parse("${uri.origin}/status.json"));
         if(res.statusCode == 200) return ServiceWebsites.danbooru2; // e621 does not support /status.json, but supports almost all API endpoints
         else return ServiceWebsites.e621; // e621 does not support /status.json, but supports almost all API endpoints
     }
 
 
-    res = await http.get(Uri.parse("${uri.origin}/post/index.xml"));
+    res = await lbHttp.get(Uri.parse("${uri.origin}/post/index.xml"));
     if(res.statusCode == 200) return ServiceWebsites.danbooru1;
 
-    res = await http.get(Uri.parse("${uri.origin}/index.php?page=dapi&s=user&q=index"));
+    res = await lbHttp.get(Uri.parse("${uri.origin}/index.php?page=dapi&s=user&q=index"));
     if(res.statusCode == 200) {
         if(res.body.isEmpty) return ServiceWebsites.gelbooru020;
         else return ServiceWebsites.gelbooru025;
@@ -37,7 +37,7 @@ Future<Websites?> _determineSPByAPIFetch(Uri uri) async {
 }
 
 Future<Websites?> _determineWebsiteByWebcrawl(Uri uri) async {
-    final webpage = await http.get(uri);
+    final webpage = await lbHttp.get(uri);
     final Document document = parse(webpage.body);
 
     final head = document.head;
