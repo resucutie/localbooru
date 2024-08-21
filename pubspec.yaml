@@ -80,6 +80,7 @@ dependencies:
   test: ^1.25.2
   path_provider_platform_interface: ^2.1.2
   plugin_platform_interface: ^2.1.8
+  html_unescape: ^2.0.0
 dependency_overrides:
   media_kit_native_event_loop:
     git:

@@ -91,6 +91,7 @@ final Map<int, String> gelbooruTagMap = {
 // gelbooru 2: for some reason everything works under index.php. we can filter for posts using the "s=post" and "id" query parameters.
 // it is a weird system of post filtering ngl. 0.2.5 has an api to return tag types in bulk. on the other hand 0.2.0 doesn't include
 // that api, and as such we need to webcrawl to obtain them
+final gelbooruILoveYou = HtmlUnescape(); // ❤️ https://github.com/resucutie/localbooru/issues/15
 Future<PresetImage> gelbooruToPresetImage(Uri uri) async {
     final String imageID = uri.queryParameters["id"]!;
 
@@ -99,7 +100,7 @@ Future<PresetImage> gelbooruToPresetImage(Uri uri) async {
     final bool is020 = json is List;
     final Map<String, dynamic> post = !is020 ? json["post"][0] : json[0]; // api differences, first one 0.2.5, second 0.2.0
 
-    final String tags = post["tags"];
+    final String tags = gelbooruILoveYou.convert(post["tags"]);
 
     Map<String, List<String>> tagList = {
         "generic": [],
@@ -135,7 +136,7 @@ Future<PresetImage> gelbooruToPresetImage(Uri uri) async {
 
         for (var tag in tagTypes) {
             final type = gelbooruTagMap[tag["type"]];
-            if(type != null) tagList[type]!.add(tag["name"]);
+            if(type != null) tagList[type]!.add(gelbooruILoveYou.convert(tag["name"]));
         }
 
         imageURL = post["file_url"];

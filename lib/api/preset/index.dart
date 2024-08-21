@@ -17,6 +17,7 @@ import 'package:localbooru/utils/download_image.dart';
 import 'package:localbooru/utils/get_meta_property.dart';
 import 'package:mime/mime.dart';
 import 'package:string_validator/string_validator.dart';
+import 'package:html_unescape/html_unescape_small.dart';
 
 part 'image.dart';
 part 'collection.dart';
