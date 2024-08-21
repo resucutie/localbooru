@@ -146,7 +146,7 @@ Future<PresetImage> gelbooruToPresetImage(Uri uri) async {
 
     return PresetImage(
         image: downloadedFileInfo,
-        sources: [post["source"], [uri.origin, uri.path].join("")].whereType<String>().toList(),
+        sources: [post["source"], "${uri.origin}/index.php?page=post&s=view&id=$imageID"].whereType<String>().toList(),
         tags: {
             "generic": List<String>.from(tagList["generic"]!),
             "artist": List<String>.from(tagList["artist"]!),
