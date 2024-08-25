@@ -168,6 +168,10 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
                                 sendPreset();
                                 if(value.length > 1 && widget.onMultipleImagesAdded != null) widget.onMultipleImagesAdded!(value..removeAt(0));
                             },
+                            onCompressed: (value) {
+                                setState(() => loadedImage = value);
+                                sendPreset();
+                            },
                             validator: (value) {
                                 if (value == null || value.isEmpty) return 'Please select an image';
                                 return null;

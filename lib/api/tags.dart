@@ -63,7 +63,7 @@ class Metatag {
 
 Future<bool> wouldImageBeSelected({required List<String> inputTags, required Map file}) async {
     bool hasTagWithInclusion = await Future.wait(inputTags.where((t) => t.startsWith("+")).map((tagSearch) async {
-        debugPrint("File: ${file["id"]}; fileTags: ${file["tags"]}; searchTag: $tagSearch; doesItInclude: ${tagSearch.startsWith("+")}");
+        // debugPrint("File: ${file["id"]}; fileTags: ${file["tags"]}; searchTag: $tagSearch; doesItInclude: ${tagSearch.startsWith("+")}");
         return await doTagMatch(file: file, tag: TagText(tagSearch));
     })).then((results) => results.any((result) => result));
     if (hasTagWithInclusion) return true;

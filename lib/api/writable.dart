@@ -60,6 +60,7 @@ Future<BooruImage> insertImage(PresetImage preset) async {
     // step 1: copy image
     File copiedFile;
     if(p.dirname(preset.image!.path) == p.join(booru.path, "files")) {
+        debugPrint("here, ${p.dirname(preset.image!.path)} ${p.join(booru.path, "files")}");
         copiedFile = preset.image!;
     } else {
         copiedFile = await preset.image!.copy(p.join(booru.path, "files", p.basename(preset.image!.path)));
@@ -71,7 +72,6 @@ Future<BooruImage> insertImage(PresetImage preset) async {
     for (MapEntry<String, List<String>> tagType in preset.tags!.entries) {
         if(tagType.value.isNotEmpty) {
             tagSet.addAll(tagType.value); //you can add values to sets
-            debugPrint("${tagType.key} ${tagType.value.length} $tagSet");
             if(tagType.key != "generic") await addSpecificTags(tagType.value, type: tagType.key);
         }
     }
@@ -161,7 +161,7 @@ Future<void> addSpecificTags(List<String> tags, {required String type}) async {
         iLoveDartsTypeSystem[entry.key] = List<String>.from(entry.value);
     }
 
-    debugPrint("before ${raw["specificTags"]} after $iLoveDartsTypeSystem");
+    // debugPrint("before ${raw["specificTags"]} after $iLoveDartsTypeSystem");
 
     await writeSpecificTags(iLoveDartsTypeSystem);
 }
