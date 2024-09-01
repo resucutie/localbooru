@@ -449,6 +449,7 @@ class NotesView extends StatefulWidget {
 class _NotesViewState extends State<NotesView> {
     final controller = TextEditingController();
     Timer? _debounce;
+    late BooruImage image;
 
     @override
     void initState() {
@@ -458,8 +459,8 @@ class _NotesViewState extends State<NotesView> {
 
     void setText() async {
         final booru = await getCurrentBooru();
-        final image = await booru.getImage(widget.id.toString());
-        controller.text = image!.note ?? "";
+        image = (await booru.getImage(widget.id.toString()))!;
+        controller.text = image.note ?? "";
     }
     
     @override
@@ -481,9 +482,10 @@ class _NotesViewState extends State<NotesView> {
                         ),
                         onChanged: (value) {
                             if (_debounce?.isActive ?? false) _debounce?.cancel();
-                            _debounce = Timer(const Duration(seconds: 1), () {
-                                debugPrint("debounced");
-                                editNote(widget.id.toString(), value);
+                            _debounce = Timer(const Duration(seconds: 1), () async {
+                                final preset = await PresetImage.fromExistingImage(image);
+                                preset.note = value;
+                                await insertImage(preset);
                             });
                         },
                     ),

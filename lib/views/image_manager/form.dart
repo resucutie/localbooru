@@ -99,7 +99,8 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
             rating: rating,
             replaceID: widget.preset?.replaceID,
             relatedImages: relatedImages,
-            key: widget.preset?.key
+            key: widget.preset?.key,
+            note: widget.preset?.note
         ));
         if(widget.onErrorUpdate != null) widget.onErrorUpdate!(!validation);
     }

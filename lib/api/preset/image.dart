@@ -3,7 +3,7 @@ part of preset;
 
 // presets are essentially a format that represents a BooruImage before it gets added
 class PresetImage extends VirtualPreset{
-    PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages, super.key});
+    PresetImage({this.image, this.tags, this.sources, this.replaceID, this.rating, this.relatedImages, this.note, super.key});
 
     File? image;
     Map<String, List<String>>? tags;
@@ -11,6 +11,7 @@ class PresetImage extends VirtualPreset{
     Rating? rating;
     ImageID? replaceID;
     List<ImageID>? relatedImages;
+    String? note;
 
     static Future<PresetImage> fromExistingImage(BooruImage image) async {
         final Booru booru = await getCurrentBooru();
@@ -21,7 +22,8 @@ class PresetImage extends VirtualPreset{
             tags: await booru.separateTagsByType(image.tags.split(" ")),
             rating: image.rating,
             replaceID: image.id,
-            relatedImages: image.relatedImages
+            relatedImages: image.relatedImages,
+            note: image.note
         );
     }
 
