@@ -32,7 +32,7 @@ class _ListStringTextInputState extends State<ListStringTextInput> {
     }
 
     void _uploadChanges() {
-        _uploadChanges();
+        // _uploadChanges();
         widget.onChanged(_currentValue);
     }
 

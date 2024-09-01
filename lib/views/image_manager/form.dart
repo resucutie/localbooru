@@ -275,7 +275,6 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
                             addButton: const Text("Add source"),
                             onChanged: (list) {
                                 setState(() => urlList = list);
-                                debugPrint("from ListStringTextInput");
                                 sendPreset();
                             },
                             canBeEmpty: true,
