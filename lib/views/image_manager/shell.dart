@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -53,13 +54,18 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
         
         final booru = await getCurrentBooru();
         final listLength = await booru.getListLength();
-        final futureImageIDs = preset.pages!.asMap().keys.map((index) => "${index + listLength}").toList();
+
+        final List<ImageID> imaginaryIDs = preset.pages!.mapIndexed((index, preset) {
+            if(preset.replaceID != null) return preset.replaceID!;
+            return "${index + listLength}";
+        }).toList();
         
         for (final (index, imagePreset) in preset.pages!.indexed) {
             if(isCorelated && preset.pages!.length > 1) {
-                imagePreset.relatedImages = futureImageIDs.where((e) => e != futureImageIDs[index]).toList();
+                final selfID = imaginaryIDs[index];
+                imagePreset.relatedImages = imaginaryIDs.where((id) => id != selfID).toList();
             }
-            imagePreset.replaceID ??= futureImageIDs[index];
+            imagePreset.replaceID ??= imaginaryIDs[index];
 
             await insertImage(imagePreset);
             setState(() => savedImages++);

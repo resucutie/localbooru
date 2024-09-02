@@ -192,11 +192,14 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                     backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                                                     leading: CloseButton(onPressed: () => setState(() => _selectedImages = []),),
                                                     actions: [
-                                                        if(_selectedImages.length == 1) IconButton(
+                                                        IconButton(
                                                             icon: const Icon(Icons.edit),
                                                             onPressed: () async {
-                                                                context.push("/manage_image", extra: PresetManageImageSendable(await PresetImage.fromExistingImage(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0]))));
-                                                                setState(() => _selectedImages = []);
+                                                                final sendable = PresetListManageImageSendable(await Future.wait(_selectedImages.map((e) => PresetImage.fromExistingImage((snapshot.data!["images"] as List<BooruImage>).firstWhere((image) => image.id == e)))));
+                                                                if(context.mounted) {
+                                                                    context.push("/manage_image", extra: sendable);
+                                                                    setState(() => _selectedImages = []);
+                                                                }
                                                             },
                                                         ),
                                                         PopupMenuButton(itemBuilder: (context) {
