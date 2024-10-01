@@ -53,7 +53,7 @@ class ImageViewShell extends StatelessWidget {
                                 const PopupMenuDivider(),
                                 ...imageShareItems(image),
                                 const PopupMenuDivider(),
-                                ...imageManagementItems(image, context: context)
+                                ...imageManagementItems(image, context: context, doulbeExitOnDelete: true)
                             ];
                         }
                     )
