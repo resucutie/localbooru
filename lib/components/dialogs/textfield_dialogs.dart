@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 // import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/preset/index.dart';
+import 'package:localbooru/utils/platform_tools.dart';
 import 'package:string_validator/string_validator.dart';
 
 class InsertURLDialog extends StatefulWidget {
@@ -26,18 +27,31 @@ class _InsertURLDialogState extends State<InsertURLDialog> {
         final website = getWebsiteByURL(Uri.parse(controller.text));
         return AlertDialog(
             title: const Text("Import from service"),
-            content: Container(
-                constraints: const BoxConstraints(minWidth: 600),
-                child: TextField(
-                    controller: controller,
-                    decoration: InputDecoration(
-                        icon: website != null ? getWebsiteIcon(website) : null,
+            content: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                    Container(
+                        constraints: const BoxConstraints(minWidth: 600),
+                        child: TextField(
+                            controller: controller,
+                            decoration: InputDecoration(
+                                icon: website != null ? getWebsiteIcon(website) : null,
+                                hintText: "Link to import from"
+                            ),
+                            onSubmitted: (_) {
+                                if(allowedToSend()) importFromService();
+                            },
+                            onChanged: (_) => setState(() {}),
+                        ),
                     ),
-                    onSubmitted: (_) {
-                        if(allowedToSend()) importFromService();
-                    },
-                    onChanged: (_) => setState(() {}),
-                ),
+                    if(isMobile()) ...[
+                        const SizedBox(height: 16,),
+                        Text("Tip: Try sharing a link to LocalBooru", style: TextStyle(
+                            color: Theme.of(context).hintColor
+                        ),)
+                    ]
+                ],
             ),
             actions: [
                 TextButton(
