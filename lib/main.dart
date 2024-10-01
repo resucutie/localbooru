@@ -7,6 +7,7 @@ import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/components/drawer.dart';
+import 'package:localbooru/components/housings.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
@@ -126,7 +127,7 @@ final router = GoRouter(
                             builder: (context, state, child) => MediaQuery.of(context).orientation == Orientation.landscape ? SharedPreferencesBuilder(
                                 builder: (context, prefs) => DesktopHousing(routeUri: state.uri, roundedCorners: prefs.getBool("custom_frame") ?? settingsDefaults["custom_frame"], child: child,),
                                 loading: const SizedBox(height: 0,),
-                            ) : child,
+                            ) : MobileHousing(child: child),
                             routes: [
                                 ShellRoute( //main nav shell
                                     builder: (context, state, child) => AddImageDropRegion(child: child),
