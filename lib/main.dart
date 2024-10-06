@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/dialogs/download_dialog.dart';
-import 'package:localbooru/components/drawer.dart';
 import 'package:localbooru/components/housings.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
@@ -31,7 +30,6 @@ import 'package:localbooru/views/settings/booru_settings/tag_types.dart';
 import 'package:localbooru/views/settings/index.dart';
 import 'package:localbooru/views/settings/overall_settings.dart';
 import 'package:localbooru/views/test_playground.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/views/permissions.dart';
@@ -77,8 +75,6 @@ void main() async {
     }
 
     runApp(const App());
-
-    MediaKit.ensureInitialized();
 
     // if(isDesktop()) {
     //     doWhenWindowReady(() {

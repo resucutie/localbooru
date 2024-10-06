@@ -1,7 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
+import 'package:localbooru/utils/platform_tools.dart';
 import 'package:mime/mime.dart';
+import 'package:video_player/video_player.dart';
 
 class VideoView extends StatefulWidget {
   const VideoView(this.path, {Key? key}) : super(key: key);
@@ -13,30 +15,32 @@ class VideoView extends StatefulWidget {
 }
 
 class VideoViewState extends State<VideoView> {
-    late final player = Player();
+    late VideoPlayerController _controller;
 
-    late final controller = VideoController(player);
 
     @override
     void initState() {
         super.initState();
 
-        player.open(Media(widget.path), play: lookupMimeType(widget.path) == "image/gif");
-        player.setPlaylistMode(PlaylistMode.single);
+        _controller = VideoPlayerController.file(File(widget.path))
+            ..initialize()
+            .then((_) {
+                setState(() {});
+            });
     }
 
     @override
     void dispose() {
-        player.dispose();
+        _controller.dispose();
         super.dispose();
     }
 
     @override
     Widget build(BuildContext context) {
-        return SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.width,
-            child: Video(controller: controller, fill: Colors.transparent),
+        if(isDesktop()) return const Text("Support for video playback on Desktop was removed");
+        return AspectRatio(
+            aspectRatio: _controller.value.aspectRatio,
+            child: VideoPlayer(_controller),
         );
     }
 }
