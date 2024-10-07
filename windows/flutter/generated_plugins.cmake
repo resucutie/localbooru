@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
+  fvp
   irondash_engine_context
   local_auth_windows
   permission_handler_windows

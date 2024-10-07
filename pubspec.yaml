@@ -74,6 +74,7 @@ dependencies:
   path_provider_platform_interface: ^2.1.2
   plugin_platform_interface: ^2.1.8
   html_unescape: ^2.0.0
+  fvp: ^0.26.1
   video_player: ^2.9.2
 
 dev_dependencies:

@@ -37,6 +37,8 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'package:fvp/fvp.dart' as fvp;
+
 void main() async {
     // custom error screen because release just yeets the error messages in favor of a gray screen
     ErrorWidget.builder = (FlutterErrorDetails details) {
@@ -73,6 +75,8 @@ void main() async {
             await windowManager.show();
         });
     }
+
+    fvp.registerWith();
 
     runApp(const App());
 

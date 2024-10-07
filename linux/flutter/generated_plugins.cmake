@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
+  fvp
   irondash_engine_context
   screen_retriever
   super_native_extensions

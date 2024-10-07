@@ -280,6 +280,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  fvp:
+    dependency: "direct main"
+    description:
+      name: fvp
+      sha256: "040aa12beccd5bc60631259f27a481c4abc11a389aa4f57a47b643f58fe0b060"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.26.1"
   gif_view:
     dependency: "direct main"
     description:

@@ -26,6 +26,7 @@ class VideoViewState extends State<VideoView> {
             ..initialize()
             .then((_) {
                 setState(() {});
+                _controller.play();
             });
     }
 
@@ -37,10 +38,33 @@ class VideoViewState extends State<VideoView> {
 
     @override
     Widget build(BuildContext context) {
-        if(isDesktop()) return const Text("Support for video playback on Desktop was removed");
         return AspectRatio(
             aspectRatio: _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
+            child: Stack(
+                children: [
+                    VideoPlayer(_controller),
+                    PlayerControls(
+                        isPlaying: _controller.value.isPlaying,
+                        onPlayPause: _controller.value.isPlaying ? _controller.pause : _controller.play
+                    )
+                ],
+            ),
+        );
+    }
+}
+
+class PlayerControls extends StatelessWidget {
+    const PlayerControls({super.key, this.onPlayPause, this.isPlaying});
+
+    final void Function()? onPlayPause;
+    final bool? isPlaying;
+
+    @override
+    Widget build(BuildContext context) {
+        return Row(
+            children: [
+                ElevatedButton(onPressed: onPlayPause, child: isPlaying == false ? const Text("Play") : const Text("Pause"))
+            ],
         );
     }
 }
