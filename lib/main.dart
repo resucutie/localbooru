@@ -112,14 +112,16 @@ final router = GoRouter(
             routes: [
                 ShellRoute(
                     builder: (context, state, child) => SharedPreferencesBuilder(
-                        builder: (context, prefs) => Scaffold(
-                            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-                            appBar: prefs.getBool("custom_frame") ?? settingsDefaults["custom_frame"] ? const PreferredSize(
-                                preferredSize: Size.fromHeight(32),
-                                child: WindowFrameAppBar()
-                            ) : null,
-                            body: LockScreen(child: child),
-                        ),
+                        builder: (context, prefs) {
+                            return Scaffold(
+                                backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+                                appBar: prefs.getBool("custom_frame") ?? settingsDefaults["custom_frame"] ? const PreferredSize(
+                                    preferredSize: Size.fromHeight(32),
+                                    child: WindowFrameAppBar()
+                                ) : null,
+                                body: LockScreen(child: child),
+                            );
+                        },
                         loading: const SizedBox(height: 0,)
                     ),
                     routes: [
