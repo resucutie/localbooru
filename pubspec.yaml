@@ -76,6 +76,7 @@ dependencies:
   html_unescape: ^2.0.0
   fvp: ^0.26.1
   video_player: ^2.9.2
+  chewie: ^1.8.5
 
 dev_dependencies:
   flutter_test:
