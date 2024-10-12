@@ -42,7 +42,7 @@ dependencies:
   path: ^1.8.3
   shared_preferences: ^2.2.2
   url_launcher: ^6.2.4
-  share_plus: ^9.0.0
+  share_plus: ^10.0.3
   open_file: ^3.3.2
   dotted_border: ^2.1.0
   http: ^1.2.0
@@ -68,13 +68,13 @@ dependencies:
   local_auth: ^2.2.0
   device_info_plus: ^10.1.0
   flutter_windowmanager: ^0.2.0
-  window_manager: ^0.3.9
+  window_manager: ^0.4.2
   collection: ^1.18.0
   test: ^1.25.2
   path_provider_platform_interface: ^2.1.2
   plugin_platform_interface: ^2.1.8
   html_unescape: ^2.0.0
-  fvp: ^0.26.1
+  fvp: ^0.27.0
   video_player: ^2.9.2
   chewie: ^1.8.5
 
@@ -87,7 +87,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
