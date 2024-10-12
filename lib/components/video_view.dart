@@ -1,42 +1,58 @@
+import 'dart:io';
+
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
+import 'package:localbooru/utils/platform_tools.dart';
 import 'package:mime/mime.dart';
+import 'package:video_player/video_player.dart';
 
 class VideoView extends StatefulWidget {
-  const VideoView(this.path, {Key? key}) : super(key: key);
+  const VideoView(this.path, {super.key, this.showControls = true});
   
   final String path;
+  final bool showControls;
   
   @override
   State<VideoView> createState() => VideoViewState();
 }
 
 class VideoViewState extends State<VideoView> {
-    late final player = Player();
+    late VideoPlayerController _videoController;
+    late ChewieController _chewieController;
+    bool _isLoaded = false;
 
-    late final controller = VideoController(player);
 
     @override
     void initState() {
         super.initState();
 
-        player.open(Media(widget.path), play: lookupMimeType(widget.path) == "image/gif");
-        player.setPlaylistMode(PlaylistMode.single);
+        _videoController = VideoPlayerController.file(File(widget.path))
+            ..initialize().then((value) {        
+                _chewieController = ChewieController(
+                    videoPlayerController: _videoController,
+                    autoPlay: true,
+                    looping: true,
+                    allowFullScreen: false, // apparently full screen calls dispose()
+                    showControls: widget.showControls
+                );
+                setState(() {
+                    _isLoaded = true;
+                });
+            },);
     }
 
     @override
     void dispose() {
-        player.dispose();
+        _videoController.dispose();
+        _chewieController.dispose();
         super.dispose();
     }
 
     @override
     Widget build(BuildContext context) {
-        return SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.width,
-            child: Video(controller: controller, fill: Colors.transparent),
+        return AspectRatio(
+            aspectRatio: _videoController.value.aspectRatio,
+            child: _isLoaded ? Chewie(controller: _chewieController,) : const SizedBox(height: 0,)
         );
     }
 }

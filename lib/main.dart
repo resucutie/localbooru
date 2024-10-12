@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/dialogs/download_dialog.dart';
-import 'package:localbooru/components/drawer.dart';
 import 'package:localbooru/components/housings.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/utils/constants.dart';
@@ -31,13 +30,14 @@ import 'package:localbooru/views/settings/booru_settings/tag_types.dart';
 import 'package:localbooru/views/settings/index.dart';
 import 'package:localbooru/views/settings/overall_settings.dart';
 import 'package:localbooru/views/test_playground.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/views/permissions.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
+
+import 'package:fvp/fvp.dart' as fvp;
 
 void main() async {
     // custom error screen because release just yeets the error messages in favor of a gray screen
@@ -76,9 +76,9 @@ void main() async {
         });
     }
 
-    runApp(const App());
+    fvp.registerWith();
 
-    MediaKit.ensureInitialized();
+    runApp(const App());
 
     // if(isDesktop()) {
     //     doWhenWindowReady(() {
