@@ -21,11 +21,12 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ImageViewShell extends StatelessWidget {
-    const ImageViewShell({super.key, required this.image, required this.child, this.shouldShowImageOnPortrait = false});
+    const ImageViewShell({super.key, required this.image, required this.child, this.shouldShowImageOnPortrait = false, this.collections});
 
     final BooruImage image;
     final Widget child;
     final bool shouldShowImageOnPortrait;
+    final List<BooruCollection>? collections;
 
     @override
     Widget build(BuildContext context) {
@@ -58,6 +59,12 @@ class ImageViewShell extends StatelessWidget {
                         }
                     )
                 ],
+                bottom: collections != null ? PreferredSize(
+                    preferredSize: Size.fromHeight(40.0 * collections!.length),
+                    child: Column(
+                        children: collections!.map((collection) => CollectionSwitcher(collection: collection, image: image,)).toList(),
+                    )
+                ) : null,
             ),
             body: ScrollConfiguration(
                 behavior: const MaterialScrollBehavior().copyWith(
@@ -431,6 +438,82 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                             subtitle: FileInfo(widget.image.getImage())
                         )
                     )
+                ],
+            ),
+        );
+    }
+}
+
+class CollectionSwitcher extends StatefulWidget {
+    const CollectionSwitcher({super.key, required this.collection, required this.image});
+
+    final BooruCollection collection;
+    final BooruImage image;
+    
+    @override
+    State<CollectionSwitcher> createState() => _CollectionSwitcherState();
+}
+class _CollectionSwitcherState extends State<CollectionSwitcher> {
+    late int collectionPosition;
+
+    @override
+    void initState() {
+        super.initState();
+        collectionPosition = widget.collection.pages.indexOf(widget.image.id);
+    }
+
+    @override
+    Widget build(BuildContext context) {
+        return SizedBox(
+            height: 40,
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                    IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: collectionPosition > 0 ? () {
+                            context.push("/view/${widget.collection.pages[collectionPosition - 1]}");
+                        } : null
+                    ),
+                    Expanded(
+                        child: Center(
+                            child: TextButton(
+                                child: RichText(
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    text: TextSpan(
+                                        children: [
+                                            TextSpan(
+                                                text: widget.collection.name,
+                                                style: TextStyle(
+                                                    color: Theme.of(context).colorScheme.primary,
+                                                    // decoration: TextDecoration.underline
+                                                ),
+                                            ),
+                                            TextSpan(
+                                                text: " • ",
+                                                style: TextStyle(
+                                                    color: Theme.of(context).disabledColor,
+                                                ),
+                                                children: [
+                                                    TextSpan(
+                                                        text: "${collectionPosition + 1}/${widget.collection.pages.length}",
+                                                    ),
+                                                ]
+                                            ),
+                                        ]
+                                    ),
+                                ),
+                                onPressed: () => context.push("/collections/${widget.collection.id}"),
+                            ),
+                        )
+                    ),
+                    IconButton(
+                        icon: const Icon(Icons.arrow_forward),
+                        onPressed: (collectionPosition + 1) < widget.collection.pages.length ? () {
+                            context.push("/view/${widget.collection.pages[collectionPosition + 1]}");
+                        } : null
+                    ),
                 ],
             ),
         );

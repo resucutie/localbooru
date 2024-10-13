@@ -184,14 +184,33 @@ final router = GoRouter(
                                             builder: (context, state) {
                                                 final String? id = state.pathParameters["id"];
                                                 if (id == null) return Text("Invalid ID $id");
-                                                        
-                                                return BooruLoader( builder: (_, booru) => BooruImageLoader(
-                                                    booru: booru,
-                                                    id: id,
-                                                    builder: (context, image) {
-                                                        return ImageViewShell(image: image, shouldShowImageOnPortrait: true, child: ImageViewProprieties(image),);
-                                                    }
-                                                ));
+
+                                                future() async {
+                                                    final booru = await getCurrentBooru();
+                                                    final image = await booru.getImage(id);
+                                                    final collectionList = await booru.obtainMatchingCollection(id);
+                                                    return {
+                                                        'image': image,
+                                                        'collections': collectionList
+                                                    };
+                                                }
+
+                                                return FutureBuilder(
+                                                    future: future(),
+                                                    builder: (context, snapshot) {
+                                                        if(snapshot.hasData) {
+                                                            BooruImage image = snapshot.data!['image'] as BooruImage;
+                                                            List<BooruCollection> collections = snapshot.data!['collections'] as List<BooruCollection>;
+                                                            return ImageViewShell(
+                                                                image: image,
+                                                                shouldShowImageOnPortrait: true,
+                                                                collections: collections,
+                                                                child: ImageViewProprieties(image),
+                                                            );
+                                                        }
+                                                        return const Center(child: CircularProgressIndicator(),);
+                                                    },
+                                                );
                                             },
                                             routes: [
                                                 GoRoute(path: "note",
