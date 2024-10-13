@@ -18,7 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class GalleryViewer extends StatefulWidget {
-    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true, this.forceOrientation, this.onAddPressed, this.additionalMenuOptions});
+    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true, this.forceOrientation, this.actions, this.additionalMenuOptions});
 
     final int index;
     final FutureOr<SearchableInformation> Function(int index) searcher;
@@ -28,7 +28,7 @@ class GalleryViewer extends StatefulWidget {
     final Orientation? forceOrientation;
     final void Function(List<ImageID>)? onSelect;
     final void Function(int newIndex)? onNextPage;
-    final void Function()? onAddPressed;
+    final List<Widget>? actions;
     final List<ImageID>? selectedImages;
     final List<PopupMenuEntry<dynamic>>? additionalMenuOptions;
 
@@ -127,12 +127,8 @@ class _GalleryViewerState extends State<GalleryViewer> {
 
     @override
     Widget build(BuildContext context) {
-        final actions = [
-            IconButton(
-                icon: const Icon(Icons.add),
-                tooltip: "Add image",
-                onPressed: widget.onAddPressed,
-            ),
+        final List<Widget> actions = [
+            ...(widget.actions ?? []),
             PopupMenuButton(
                 itemBuilder: (context) {
                     return [

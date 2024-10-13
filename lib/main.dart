@@ -159,7 +159,13 @@ final router = GoRouter(
                                                         desktopDisplay: orientation == Orientation.landscape,
                                                         initialText: tags,
                                                     ),
-                                                    onAddPressed: () => context.push("/manage_image"),
+                                                    actions: [
+                                                        IconButton(
+                                                            icon: const Icon(Icons.add),
+                                                            tooltip: "Add image",
+                                                            onPressed: () => context.push("/manage_image"),
+                                                        ),
+                                                    ],
                                                 );
                                             }
                                         ),
@@ -278,7 +284,13 @@ final router = GoRouter(
                                                                 )
                                                             ],
                                                             forceOrientation: Orientation.portrait,
-                                                            onAddPressed: () => context.push("/settings/booru/collections?id=$id"),
+                                                            actions: [
+                                                                IconButton(
+                                                                    icon: const Icon(Icons.add_photo_alternate_outlined),
+                                                                    tooltip: "Add image",
+                                                                    onPressed: () => context.push("/settings/booru/collections?id=$id"),
+                                                                ),
+                                                            ],
                                                         );
                                                     }
                                                 ),
