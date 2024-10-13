@@ -30,57 +30,74 @@ class ImageViewShell extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
-        return Scaffold(
-            appBar: AppBar(
-                title: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text("Image", style: TextStyle(fontSize: 20.0)),
-                    subtitle: Text("ID ${image.id}", style: const TextStyle(fontSize: 14.0)),
-                ),
-                leading: BackButton(
-                    onPressed: context.pop,
-                ), 
-                actions: [
-                    IconButton(
-                        icon: const Icon(Icons.edit),
-                        tooltip: "Edit image",
-                        onPressed: () async => context.push("/manage_image", extra: PresetManageImageSendable(await PresetImage.fromExistingImage(image)))
-                    ),
-                    PopupMenuButton(
-                        // child: Icon(Icons.more_vert),
-                        itemBuilder: (context) {
-                            return [
-                                ...booruItems(),
-                                const PopupMenuDivider(),
-                                ...imageShareItems(image),
-                                const PopupMenuDivider(),
-                                ...imageManagementItems(image, context: context, doulbeExitOnDelete: true)
-                            ];
-                        }
-                    )
-                ],
-                bottom: collections != null ? PreferredSize(
-                    preferredSize: Size.fromHeight(40.0 * collections!.length),
-                    child: Column(
-                        children: collections!.map((collection) => CollectionSwitcher(collection: collection, image: image,)).toList(),
-                    )
-                ) : null,
+        final Widget appBarTitle = ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text("Image", style: TextStyle(fontSize: 20.0)),
+            subtitle: Text("ID ${image.id}", style: const TextStyle(fontSize: 14.0)),
+        );
+        final Widget appBarLeading = BackButton(
+            onPressed: context.pop,
+        );
+        final List<Widget> appBarActions = [
+            IconButton(
+                icon: const Icon(Icons.edit),
+                tooltip: "Edit image",
+                onPressed: () async => context.push("/manage_image", extra: PresetManageImageSendable(await PresetImage.fromExistingImage(image)))
             ),
-            body: ScrollConfiguration(
-                behavior: const MaterialScrollBehavior().copyWith(
-                    dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.trackpad, PointerDeviceKind.stylus},
-                ),
-                child: OrientationBuilder(
-                    builder: (context, orientation) {
-                        if(orientation == Orientation.portrait) {
-                            return ListView(
-                                children: [
+            PopupMenuButton(
+                // child: Icon(Icons.more_vert),
+                itemBuilder: (context) {
+                    return [
+                        ...booruItems(),
+                        const PopupMenuDivider(),
+                        ...imageShareItems(image),
+                        const PopupMenuDivider(),
+                        ...imageManagementItems(image, context: context, doulbeExitOnDelete: true)
+                    ];
+                }
+            )
+        ];
+        final PreferredSizeWidget? appBarBottom = (collections != null && collections!.isNotEmpty) ? PreferredSize(
+            preferredSize: Size.fromHeight(40.0 * collections!.length),
+            child: Column(
+                children: collections!.map((collection) => CollectionSwitcher(collection: collection, image: image,)).toList(),
+            )
+        ) : null;
+        return OrientationBuilder(
+            builder: (context, orientation) {
+                if(orientation == Orientation.portrait) {
+                    return CustomScrollView(
+                        slivers: [
+                            SliverAppBar(
+                                title: appBarTitle,
+                                leading: appBarLeading, 
+                                actions: appBarActions,
+                                bottom: appBarBottom,
+                                pinned: true,
+                                floating: appBarBottom != null,
+                                // snap: true,
+                            ),
+                            SliverList(
+                                delegate: SliverChildListDelegate([
                                     if(shouldShowImageOnPortrait) ImageViewDisplay(image),
                                     child
-                                ],
-                            );
-                        } else {
-                            return Row(
+                                ])
+                            )
+                        ],
+                    );
+                } else {
+                    return Scaffold(
+                        appBar: AppBar(
+                            title: appBarTitle,
+                            leading: appBarLeading, 
+                            actions: appBarActions,
+                            bottom: appBarBottom,
+                        ),
+                        body: ScrollConfiguration(
+                            behavior: const MaterialScrollBehavior().copyWith(
+                                dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.trackpad, PointerDeviceKind.stylus},
+                            ),
+                            child: Row(
                                 children: [
                                     Expanded(
                                         child: ImageViewDisplay(image)
@@ -100,11 +117,11 @@ class ImageViewShell extends StatelessWidget {
                                     )
                                     
                                 ],
-                            );
-                        }
-                    },
-                ),
-            ),
+                            )
+                        ),
+                    );
+                }
+            },
         );
     }
 }
