@@ -100,14 +100,14 @@ class _MobileHousingState extends State<MobileHousing> {
         return Stack(
             children: [
                 widget.child,
-                if(importListener.isImporting) SafeArea(
-                    child: Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
+                if(importListener.isImporting) Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: SafeArea(
                         child: LinearProgressIndicator(value: _importProgress == 0 ? null : _importProgress,)
-                    )
-                ),
+                    ),
+                )
                 // Positioned(
                 //     top: 0,
                 //     left: 0,
