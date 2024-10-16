@@ -82,6 +82,7 @@ class DefaultDrawer extends StatelessWidget {
                     leading: const Icon(Icons.link),
                     enabled: activeView != "manage_image",
                     onTap: () async {
+                        final router = GoRouter.of(context);
                         final url = await showDialog<String>(
                             context: context,
                             builder: (context) {
@@ -91,7 +92,7 @@ class DefaultDrawer extends StatelessWidget {
                         if(url != null) {
                             importImageFromURL(url)
                                 .then((preset) {
-                                    GoRouter.of(context).push("/manage_image", extra: handleSendable(preset));
+                                    router.push("/manage_image", extra: handleSendable(preset));
                                 })
                                 .onError((error, stack) {
                                     if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {
