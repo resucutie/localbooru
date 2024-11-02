@@ -49,11 +49,10 @@ class _GeneralCollectionManagerScreenState extends State<GeneralCollectionManage
                 if(widget.saveCollectionToggle != null) ExpansionTile(
                     title: Text("Collections"),
                     subtitle: Text("Create a collection with all images"),
-                    leading: Icon(Icons.photo_library),
+                    leading: Icon(Icons.photo_library, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     initiallyExpanded: true,
                     shape: RoundedRectangleBorder(side: BorderSide.none),
                     collapsedShape: RoundedRectangleBorder(side: BorderSide.none),
-
                     children: [
                         SwitchListTile(
                             title: const Text("Create a collection and put all images inside"),
