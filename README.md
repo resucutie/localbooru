@@ -9,6 +9,10 @@
 <p align="center">
     <img src="https://img.shields.io/github/issues/resucutie/localbooru?style=for-the-badge&color=673AB7"/>
     <img src="https://img.shields.io/github/issues-pr/resucutie/localbooru?style=for-the-badge&color=673AB7"/>
+</p>
+<p align="center">
+    <a href="https://en.liberapay.com/resucutie"><img src="https://img.shields.io/liberapay/receives/resucutie?style=for-the-badge&logo=liberapay"/></a>
+    <a href="https://github.com/sponsors/resucutie"><img src="https://img.shields.io/github/sponsors/resucutie?style=for-the-badge&logo=githubsponsors&color=EA4AAA"/></a>
     <a href="https://discord.gg/D5kdKePY52"><img src="https://img.shields.io/badge/check%20our%20discord%20server-673AB7?style=for-the-badge"/></a>
 </p>
 
