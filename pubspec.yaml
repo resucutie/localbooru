@@ -108,6 +108,7 @@ flutter:
     - assets/syncthing.svg
     - assets/github.svg
     - assets/discord.svg
+    - assets/liberapay.svg
 
     - assets/websites/danbooru.svg
     - assets/websites/danbooru-monochrome.svg
