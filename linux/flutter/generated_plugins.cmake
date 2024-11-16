@@ -7,7 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   fvp
   irondash_engine_context
   open_file_linux
-  screen_retriever
+  screen_retriever_linux
   super_native_extensions
   url_launcher_linux
   window_manager

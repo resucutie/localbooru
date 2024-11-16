@@ -8,7 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   irondash_engine_context
   local_auth_windows
   permission_handler_windows
-  screen_retriever
+  screen_retriever_windows
   share_plus
   super_native_extensions
   url_launcher_windows
