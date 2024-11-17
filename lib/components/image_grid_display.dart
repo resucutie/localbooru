@@ -119,8 +119,9 @@ class ImageGrid extends StatefulWidget {
 class _ImageGridState extends State<ImageGrid> {   
     late Future<File> imageThumbnail;
     
-    String? getType(String filename) {
+    String getType(String filename) {
         final mime = lookupMimeType(filename)!;
+		debugPrint(mime);
         if(mime.startsWith("video")) return "video";
         if(mime.startsWith("image/gif")) return "gif";
         return "image";
@@ -164,21 +165,22 @@ class _ImageGridState extends State<ImageGrid> {
                         )
                     ),
                 ),
-                if(getType(widget.image.filename) != "image") Positioned(
-                    child: Container(
-                        decoration: const BoxDecoration(
-                            color: Color.fromARGB(160, 0, 0, 0),
-                            borderRadius: BorderRadius.only(
-                                bottomRight: Radius.circular(8),
-                            )
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        child: Text(getType(widget.image.filename)!.toUpperCase(),
-                            style: const TextStyle(
-                                fontSize: 12
-                            ),
-                        ),
-                    ),
+                if(getType(widget.image.filename) != 'image') Positioned(
+					top: 4,
+					left: 8,
+					child: IgnorePointer(
+						child: ChoiceChip(
+							label: Text(getType(widget.image.filename)[0].toUpperCase() + getType(widget.image.filename).substring(1)), // resu stop being lazy
+							selected: true,
+							onSelected: (_) {},
+							showCheckmark: false,
+							avatar: Icon(switch(getType(widget.image.filename)) {
+								"video" => Icons.movie_outlined,
+								"gif" => Icons.gif,
+								_ => Icons.image_outlined
+							}),
+						),
+					),
                 ),
                 if(widget.selected || widget.showSelectionCheckbox) Positioned(
                     top: 8,
