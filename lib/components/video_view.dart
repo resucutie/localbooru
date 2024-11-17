@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoView extends StatefulWidget {
-  const VideoView(this.path, {super.key, this.showControls = true});
+  const VideoView(this.path, {super.key, this.showControls = true, this.soundOnStart = true, this.playOnStart = true});
   
   final String path;
   final bool showControls;
+  final bool soundOnStart;
+  final bool playOnStart;
   
   @override
   State<VideoView> createState() => VideoViewState();
@@ -28,11 +30,12 @@ class VideoViewState extends State<VideoView> {
             ..initialize().then((value) {        
                 _chewieController = ChewieController(
                     videoPlayerController: _videoController,
-                    autoPlay: true,
+                    autoPlay: widget.playOnStart,
                     looping: true,
                     allowFullScreen: false, // apparently full screen calls dispose()
                     showControls: widget.showControls
                 );
+				if(!widget.soundOnStart) _videoController.setVolume(0);
                 setState(() {
                     _isLoaded = true;
                 });

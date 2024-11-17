@@ -121,7 +121,6 @@ class _ImageGridState extends State<ImageGrid> {
     
     String getType(String filename) {
         final mime = lookupMimeType(filename)!;
-		debugPrint(mime);
         if(mime.startsWith("video")) return "video";
         if(mime.startsWith("image/gif")) return "gif";
         return "image";
