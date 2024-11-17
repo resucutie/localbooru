@@ -7,6 +7,7 @@
 #include "generated_plugin_registrant.h"
 
 #include <dynamic_color/dynamic_color_plugin_c_api.h>
+#include <fc_native_video_thumbnail/fc_native_video_thumbnail_plugin_c_api.h>
 #include <fvp/fvp_plugin_c_api.h>
 #include <irondash_engine_context/irondash_engine_context_plugin_c_api.h>
 #include <local_auth_windows/local_auth_plugin.h>
@@ -20,6 +21,8 @@
 void RegisterPlugins(flutter::PluginRegistry* registry) {
   DynamicColorPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("DynamicColorPluginCApi"));
+  FcNativeVideoThumbnailPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FcNativeVideoThumbnailPluginCApi"));
   FvpPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FvpPluginCApi"));
   IrondashEngineContextPluginCApiRegisterWithRegistrar(
