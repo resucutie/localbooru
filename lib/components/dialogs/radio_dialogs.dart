@@ -25,7 +25,7 @@ class RatingChooserDialog extends StatelessWidget {
                             spacing: 8,
                             children: [
                                 Icon(getRatingIcon(rating)),
-                                Text(rating == null ? "None" : rating.name.replaceFirstMapped(rating.name[0], (match) => rating.name[0].toUpperCase())),
+                                Text(getRatingText(rating)),
                             ],
                         ),
                         onChanged: (value) => Navigator.of(context).pop(value ?? "None"),
