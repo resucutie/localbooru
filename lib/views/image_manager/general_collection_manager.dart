@@ -39,35 +39,47 @@ class _GeneralCollectionManagerScreenState extends State<GeneralCollectionManage
                 ],
 
                 if(widget.corelated != null) SwitchListTile(
-                    title: const Text("Make elements correlate with eachother"),
-                    subtitle: const Text("This will make each image relate to the other images that will be added"),
+                    title: const Text("Relate all images together"),
+                    subtitle: const Text("Make each added image related to the others in the batch. Useful if you want to add alternative versions of an image"),
+                    secondary: Icon(Icons.hub_outlined),
                     value: widget.corelated!,
                     onChanged: widget.onCorelatedChanged
                 ),
-                const Divider(),
-                if(widget.saveCollectionToggle != null) SwitchListTile(
-                    title: const Text("Create a collection and put all images inside it"),
-                    subtitle: const Text("It will create a brand new collection and add all images to it"),
-                    value: widget.saveCollectionToggle!,
-                    onChanged: (value) {
-                        if(widget.onSaveCollectionToggle != null) widget.onSaveCollectionToggle!(value);
-                        widget.onErrorChange!(value ? widget.collection.name?.isEmpty ?? true : false);
-                    }
-                ),
-                if(widget.saveCollectionToggle ?? true) Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: TextFormField(
-                        decoration: const InputDecoration(
-                            labelText: "Name of collection"
+                // const Divider(),
+                if(widget.saveCollectionToggle != null) ExpansionTile(
+                    title: Text("Collections"),
+                    subtitle: Text("Create a collection with all images"),
+                    leading: Icon(Icons.photo_library, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    initiallyExpanded: true,
+                    shape: RoundedRectangleBorder(side: BorderSide.none),
+                    collapsedShape: RoundedRectangleBorder(side: BorderSide.none),
+                    children: [
+                        SwitchListTile(
+                            title: const Text("Create a collection and put all images inside"),
+                            subtitle: const Text("Creates a brand new collection and add all images to it"),
+                            value: widget.saveCollectionToggle!,
+                            onChanged: (value) {
+                                if(widget.onSaveCollectionToggle != null) widget.onSaveCollectionToggle!(value);
+                                widget.onErrorChange!(value ? widget.collection.name?.isEmpty ?? true : false);
+                            }
                         ),
-                        initialValue: widget.collection.name,
-                        validator: (value) => value != null && value.isNotEmpty ? null : "Value is empty",
-                        onChanged: (value) {
-                            widget.collection.name = value;
-                            if(widget.onErrorChange != null) widget.onErrorChange!(value.isEmpty);
-                        },
-                    ),
-                ),
+                        Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            child: TextFormField(
+                                decoration: const InputDecoration(
+                                    labelText: "Name of collection"
+                                ),
+                                enabled: widget.saveCollectionToggle ?? true,
+                                initialValue: widget.collection.name,
+                                validator: (value) => value != null && value.isNotEmpty ? null : "Value is empty",
+                                onChanged: (value) {
+                                    widget.collection.name = value;
+                                    if(widget.onErrorChange != null) widget.onErrorChange!(value.isEmpty);
+                                },
+                            ),
+                        ),
+                    ],
+                )
             ],
         );
     }
