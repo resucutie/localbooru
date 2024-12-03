@@ -53,7 +53,9 @@ class ImageUploadForm extends StatelessWidget {
                                             if(state.value.isEmpty) {
                                                 return const Icon(Icons.add);
                                             } else {
-                                                if(lookupMimeType(state.value)!.startsWith("video/")) return IgnorePointer(child: VideoView(state.value, showControls: false,),);
+                                                if(lookupMimeType(state.value)!.startsWith("video/")) return IgnorePointer(
+													child: VideoView(state.value, showControls: false, soundOnStart: false,),
+												);
                                                 return Image(
                                                     image: ResizeImage(
                                                         FileImage(File(state.value)),
