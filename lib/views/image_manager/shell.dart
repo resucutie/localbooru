@@ -7,7 +7,9 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/components/app_bar_linear_progress.dart';
+import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
+import 'package:localbooru/components/dialogs/textfield_dialogs.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/image_manager/form.dart';
 import 'package:localbooru/views/image_manager/general_collection_manager.dart';
@@ -219,6 +221,35 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                                 errorOnPages.add(false);
                                                 return image;
                                             })));
+                                            setState(() => imagePage = preset.pages!.length - 1);
+                                            _scaffoldKey.currentState!.closeEndDrawer();
+                                        }
+                                    ),
+									ListTile(
+                                        title: const Text("Import from external website"),
+                                        leading: const Icon(Icons.download),
+                                        onTap: () async {
+                                            final url = await showDialog<String>(
+                                                context: context,
+                                                builder: (context) {
+                                                    return const InsertURLDialog();
+                                                },
+                                            );
+                                            if(url == null) return;
+                                            final downloadedPreset = await importImageFromURL(url);
+                                            // final images = await openSelectionDialog(
+                                            //     context: context,
+                                            //     excludeImages: preset.pages!.where((imagePreset) => imagePreset.replaceID != null,).map((imagePreset) => imagePreset.replaceID!).toList()
+                                            // );
+                                            if(downloadedPreset is PresetImage) {
+                                                downloadedPreset.key = UniqueKey();
+                                                preset.pages!.add(downloadedPreset);
+                                                errorOnPages.add(false);
+                                            } else if (downloadedPreset is VirtualPresetCollection) {
+                                                final presets = downloadedPreset.pages;
+                                                if(presets == null) return;
+                                                preset.pages!.addAll(presets);
+                                            }
                                             setState(() => imagePage = preset.pages!.length - 1);
                                             _scaffoldKey.currentState!.closeEndDrawer();
                                         }
