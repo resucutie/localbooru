@@ -53,8 +53,12 @@ class _AboutScreenState extends State<AboutScreen>{
                                         icon: SvgPicture.asset("assets/discord.svg", width: 24, height: 24, color: Theme.of(context).hintColor),
                                         onPressed: () => launchUrlString("https://discord.gg/mYuUKunj"),
                                     ),
+                                    IconButton(
+                                        icon: SvgPicture.asset("assets/liberapay.svg", width: 24, height: 24, color: Theme.of(context).hintColor),
+                                        onPressed: () => launchUrlString("https://liberapay.com/resucutie"),
+                                    ),
                                 ],
-                            )
+                            ),
                         ]
                     )
                 ),
