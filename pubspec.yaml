@@ -81,6 +81,7 @@ dependencies:
   fvp: ^0.28.0
   video_player: ^2.9.2
   chewie: ^1.8.5
+  visibility_detector: ^0.4.0+2
 
 dev_dependencies:
   flutter_test:
