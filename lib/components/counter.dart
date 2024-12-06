@@ -1,18 +1,25 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-final Map<String, List<String>> displays = {
-    "baba": ["assets/counter/baba", "gif"], //AssetImage for images/gifs
-    "squares": ["assets/counter/squares", "svg"] //ExactAssetPicture for svg
+final Map<String, StyleCounterType> displays = {
+    "baba": const StyleCounterType(path: "assets/counter/baba", ext: "gif", preferredSize: 48), //AssetImage for images/gifs
+    "squares": const StyleCounterType(path: "assets/counter/squares", ext: "svg", preferredSize: 48), //ExactAssetPicture for svg
+    "signs": const StyleCounterType(path: "assets/counter/signs", ext: "png", preferredSize: 64), //AssetImage for images/gifs
 };
 
+class StyleCounterType {
+    const StyleCounterType({required this.path, required this.ext, this.preferredSize});
+
+    final String path;
+    final String ext;
+    final double? preferredSize;
+}
+
 class StyleCounter extends StatelessWidget {
-    const StyleCounter({super.key, required this.number, this.display = "squares", this.height = 48});
+    const StyleCounter({super.key, required this.number, this.display = "squares", this.height});
 
     final int number;
-    final double height;
+    final double? height;
     final String display;
 
     @override
@@ -23,9 +30,9 @@ class StyleCounter extends StatelessWidget {
             alignment: WrapAlignment.center,
             children: number.toString().trim().split("").map((e) {
                 final info = displays[display]!;
-                final file = "${info[0]}/$e.${info[1]}";
-                if(info[1] == "svg") return SvgPicture.asset(file,
-                    height: height,
+                final file = "${info.path}/$e.${info.ext}";
+                if(info.ext == "svg") return SvgPicture.asset(file,
+                    height: height ?? info.preferredSize,
                     fit: BoxFit.contain,
                     // color: Theme.of(context).colorScheme.primary,
                     theme: SvgTheme(
@@ -33,7 +40,7 @@ class StyleCounter extends StatelessWidget {
                     ),
                 );
                 return Image.asset(file,
-                    height: height,
+                    height: height ?? info.preferredSize,
                     fit: BoxFit.contain,
                     filterQuality: FilterQuality.none,
                 );

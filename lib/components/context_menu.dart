@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
-import 'package:localbooru/utils/get_website.dart';
+import 'package:localbooru/api/preset/index.dart';
+import 'package:localbooru/components/dialogs/confirm_dialogs.dart';
 import 'package:localbooru/utils/listeners.dart';
+import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:open_file/open_file.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:super_clipboard/super_clipboard.dart';
@@ -52,7 +54,7 @@ List<PopupMenuEntry> imageManagementItems(BooruImage image, {required BuildConte
     return [
         PopupMenuItem(
             child: const Text("Edit image metadata"),
-            onTap: () => context.push("/manage_image/internal/${image.id}")
+            onTap: () async => context.push("/manage_image", extra: PresetManageImageSendable(await PresetImage.fromExistingImage(image)))
         ),
         PopupMenuItem(
             child: Text("Delete image", style: TextStyle(color: Theme.of(context).colorScheme.error)),
@@ -86,26 +88,6 @@ List<PopupMenuEntry> multipleImageManagementItems(List<BooruImage> images, {requ
             }
         ),
     ];
-}
-
-
-class DeleteImageDialogue extends StatelessWidget {
-    const DeleteImageDialogue({super.key});
-
-    @override
-    Widget build(BuildContext context) {
-        return AlertDialog(
-            title: const Text("Delete image"),
-            content: const Text("Are you sure that you want to delete this image? This action will be irreversible"),
-            actions: [
-                TextButton(onPressed: Navigator.of(context).pop, child: const Text("No")),
-                TextButton(
-                    child: const Text("Yes"), 
-                    onPressed: () => Navigator.of(context).pop(true)
-                ),
-            ],
-        );
-    }
 }
 
 List<PopupMenuEntry> urlItems(String url) {
@@ -186,7 +168,7 @@ class ServiceActionsDialogue extends StatelessWidget {
             ].map((e) => SimpleDialogOption(
                 onPressed: () => Navigator.of(context).pop(e[0]),
                 child: ListTile(
-                    leading: getWebsiteIcon(Uri.parse(e[1])) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
+                    leading: getWebsiteIcon(getWebsiteByURL(Uri.parse(e[1]))!) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
                     title: Text(e[0]),
                 ),
             )).toList(),

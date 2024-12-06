@@ -1,10 +1,10 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:go_router/go_router.dart';
-import 'package:localbooru/api/index.dart';
-import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/views/image_manager/preset_api.dart';
+import 'package:localbooru/api/preset/index.dart';
+import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
@@ -78,48 +78,51 @@ class _AddImageDropRegionState extends State<AddImageDropRegion> {
             },
             onDropLeave: (p0) => setState(() => _isDragAndDrop = false),
             onPerformDrop: (event) async {
-                final item = event.session.items.first;
-                final reader = item.dataReader!;
-                debugPrint("got it, ${item.platformFormats}");
-                
-                final sentFormats = reader.getFormats(SuperFormats.all);
-                if(sentFormats.isEmpty) {ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown format dragged"))); return;}
-                final SimpleFileFormat insertedFormat = sentFormats[0] as SimpleFileFormat;
-                debugPrint("inserted format: $insertedFormat");
+                List<PresetImage> presets = [];
 
-                // late StreamSubscription ss;
-                reader.getFile(insertedFormat, (file) async {
+                for (final item in event.session.items) {
+                    final reader = item.dataReader!;
+                    
+                    final sentFormats = reader.getFormats(SuperFormats.all);
+                    if(sentFormats.isEmpty) {ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown format dragged"))); return;}
+                    final SimpleFileFormat insertedFormat = sentFormats[0] as SimpleFileFormat;
+                    debugPrint("inserted format: $insertedFormat");
+
+                    reader.getFile(insertedFormat, (file) async {
                         final fileExtension = insertedFormat.mimeTypes!.first.split("/")[1];
-                    final mmm = await cache.putFileStream("drag&Drop${file.fileName ?? ""}${file.fileSize}", file.getStream(), fileExtension: fileExtension);
-                    debugPrint(mmm.path);
-                    if(context.mounted) GoRouter.of(context).pushNamed("drag_path", pathParameters: {"path": mmm.path});
-                }, onError: (error) {
-                    debugPrint('Error reading value $error');
-                });
+                        final draggedFile = await DefaultCacheManager().putFileStream("drag&Drop${file.fileName ?? ""}${file.fileSize}", file.getStream(), fileExtension: fileExtension);
+                        presets.add(PresetImage(image: draggedFile));
+                        if(presets.length == event.session.items.length && context.mounted) GoRouter.of(context).push("/manage_image", extra: PresetListManageImageSendable(presets));
+                    }, onError: (error) {
+                        debugPrint('Error reading value $error');
+                    });
+                }
             },
         );
     }
 }
 
-class BrowseScreenPopupMenuButton extends StatelessWidget {
-    const BrowseScreenPopupMenuButton({super.key, this.image});
+// class BrowseScreenPopupMenuButton extends StatelessWidget {
+//     const BrowseScreenPopupMenuButton({super.key, this.image, this.collectionID});
 
-    final BooruImage? image;
+//     final BooruImage? image;
+//     final CollectionID? collectionID;
 
-    @override
-    Widget build(context) {
-        return PopupMenuButton(
-            // child: Icon(Icons.more_vert),
-            itemBuilder: (context) {
-                final List<PopupMenuEntry> filteredList = booruItems();
-                if(image != null) {
-                    filteredList.add(const PopupMenuDivider());
-                    filteredList.addAll(imageShareItems(image!));
-                    filteredList.add(const PopupMenuDivider());
-                    filteredList.addAll(imageManagementItems(image!, context: context));
-                };
-                return filteredList;
-            }
-        );
-    }
-}
+//     @override
+//     Widget build(context) {
+//         return PopupMenuButton(
+//             // child: Icon(Icons.more_vert),
+//             itemBuilder: (context) {
+//                 return [
+//                     ...booruItems(),
+//                     if(image != null) ...[
+//                         const PopupMenuDivider(),
+//                         ...imageShareItems(image!),
+//                         const PopupMenuDivider(),
+//                         ...imageManagementItems(image!, context: context)
+//                     ]
+//                 ];
+//             }
+//         );
+//     }
+// }

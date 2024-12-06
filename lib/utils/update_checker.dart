@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:yaml/yaml.dart';
 
 class VersionResponse {
     VersionResponse(this.release);
@@ -13,8 +14,7 @@ class VersionResponse {
     String get version => release["tag_name"];
 
     Future<bool> isCurrentLatest() async {
-        PackageInfo packageInfo = await PackageInfo.fromPlatform();
-        final currentVersion = packageInfo.version;
+        final currentVersion = loadYaml(await rootBundle.loadString("pubspec.yaml"))["version"];
         return version == currentVersion;
     }
 }

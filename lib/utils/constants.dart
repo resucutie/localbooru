@@ -16,10 +16,12 @@ final Map<String, dynamic> settingsDefaults = {
     "gif_video": false,
     "counter": "squares",
     "auth_lock": false,
+    "custom_frame": false,
 };
 
 final Map<String, dynamic> defaultFileInfoJson = {
     "files": [],
+    "collections": [],
     "specificTags": {
         "artist": [ // general tags
             "unknown_artist",

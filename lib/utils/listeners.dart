@@ -22,9 +22,39 @@ class CounterListener with ChangeNotifier {
 }
 CounterListener counterListener = CounterListener();
 
-class ForceLockScreenListener with ChangeNotifier {
-    void forceEnable() {
+class LockListener with ChangeNotifier {
+    bool isLocked = false;
+
+    void unlock() {
+        isLocked = false;
+        notifyListeners();
+    }
+
+    void lock() {
+        isLocked = true;
         notifyListeners();
     }
 }
-ForceLockScreenListener forceLockScreenListener = ForceLockScreenListener();
+LockListener lockListener = LockListener();
+
+class ImportListener with ChangeNotifier {
+    bool isImporting = false;
+    double progress = 0;
+
+    void updateImportStatus({
+        bool? import,
+        double? progress
+    }) {
+        if(import != null) isImporting = import;
+        if(progress != null) this.progress = progress;
+        notifyListeners();
+    }
+
+    void clear() {
+        updateImportStatus(
+            import: false,
+            progress: 0,
+        );
+    }
+}
+ImportListener importListener = ImportListener();

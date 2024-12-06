@@ -10,7 +10,8 @@
         android:label="LocalBooru"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:requestLegacyExternalStorage="true">
+        android:requestLegacyExternalStorage="true"
+        android:enableOnBackInvokedCallback="false"> <!-- disabled due to go router having issues with predictive back gestures https://github.com/flutter/flutter/issues/138614#issuecomment-1909155402 -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

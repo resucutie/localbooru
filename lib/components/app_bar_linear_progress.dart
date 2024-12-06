@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 const double _kMyLinearProgressIndicatorHeight = 6.0;
 
 class AppBarLinearProgressIndicator extends LinearProgressIndicator implements PreferredSizeWidget {
-    AppBarLinearProgressIndicator({
+    const AppBarLinearProgressIndicator({
         super.key,
         super.value,
         super.backgroundColor,
@@ -17,5 +17,5 @@ class AppBarLinearProgressIndicator extends LinearProgressIndicator implements P
     });
 
     @override
-    Size preferredSize = const Size(double.infinity, _kMyLinearProgressIndicatorHeight);
+    final Size preferredSize = const Size(double.infinity, _kMyLinearProgressIndicatorHeight);
 }

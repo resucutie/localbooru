@@ -81,7 +81,7 @@ class CounterChangerDialog extends StatelessWidget {
                 constraints: const BoxConstraints(minWidth: 460),
                 child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: {"squares": "resucutie", "baba": "resucutie"}.entries.map((counterType) => RadioListTile(
+                    children: {"squares": "resucutie", "baba": "resucutie", "signs": "themtipguy, resucutie"}.entries.map((counterType) => RadioListTile(
                         groupValue: counter,
                         value: counterType.key,
                         title: Wrap(

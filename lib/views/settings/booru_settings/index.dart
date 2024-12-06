@@ -39,12 +39,18 @@ class _BooruSettingsState extends State<BooruSettings> {
     Widget build(BuildContext context) {
         return ListView(
             children: [
-                const SmallHeader("Tag types"),
+                const SmallHeader("Elements"),
                 ListTile(
-                    title: const Text("Manage tag types"),
-                    subtitle: const Text("This is where you would set and unset tag types, in case you want, for example, make an artist tag a generic tag"),
+                    title: const Text("Tag types"),
+                    subtitle: const Text("Remove or create tag types"),
                     leading: const Icon(Icons.label),
                     onTap: () => context.push("/settings/booru/tag_types"),
+                ),
+                ListTile(
+                    title: const Text("Collections"),
+                    subtitle: const Text("Manage existing collections"),
+                    leading: const Icon(Icons.photo_library),
+                    onTap: () => context.push("/settings/booru/collections"),
                 ),
                 const SmallHeader("Other"),
                 ListTile(
@@ -84,7 +90,7 @@ class _BooruSettingsState extends State<BooruSettings> {
                 ListTile(
                     title: const Text("Syncing"),
                     subtitle: const Text("This program does not offer syncing capabilities out of the box, but if you want to sync your computer storage, we recommend using Syncthing"),
-                    leading: SvgPicture.asset("assets/syncthing.svg", width: 24, height: 24,),
+                    leading: SvgPicture.asset("assets/syncthing.svg", width: 24, height: 24, color: Theme.of(context).textTheme.labelSmall?.color,),
                     trailing: const Icon(Icons.open_in_new),
                     onTap: () => launchUrlString("https://syncthing.net/"),
                 ),

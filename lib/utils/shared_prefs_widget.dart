@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreferencesBuilder extends StatelessWidget {
-    const SharedPreferencesBuilder({super.key, required this.builder});
+    const SharedPreferencesBuilder({super.key, required this.builder, this.loading});
     
     final Widget Function(BuildContext context, SharedPreferences prefs) builder;
+    final Widget? loading;
 
     @override
     Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class SharedPreferencesBuilder extends StatelessWidget {
                 } else if(snapshot.hasError) {
                     throw snapshot.error!;
                 }
-                return const Center(child: CircularProgressIndicator());
+                return loading ?? const Center(child: CircularProgressIndicator());
             },
         );
     }

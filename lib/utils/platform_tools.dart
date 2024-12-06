@@ -2,14 +2,18 @@
 
 import 'dart:io';
 
-bool isDesktop () {
+bool isDesktop() {
     return Platform.isLinux || Platform.isMacOS || Platform.isWindows;
 }
 
-bool isMobile () {
+bool isMobile() {
     return Platform.isAndroid || Platform.isIOS;
 }
 
-bool isApple () {
+bool isApple() {
     return Platform.isMacOS || Platform.isIOS;
+}
+
+bool hasWindowFrameNavigation() {
+    return isDesktop();
 }

@@ -25,7 +25,7 @@ class SmallHeader extends StatelessWidget {
 
     final String title;
     final Color? color;
-    final EdgeInsets padding;
+    final EdgeInsetsGeometry padding;
 
     @override
     Widget build(BuildContext context) {
