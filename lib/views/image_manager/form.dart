@@ -251,13 +251,7 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
                         const SmallHeader("Rating", padding: EdgeInsets.only(top: 16.0)),
                         ListTile(
                             leading: Icon(getRatingIcon(rating)),
-                            title: Text(switch(rating) {
-                                Rating.safe => "Safe",
-                                Rating.questionable => "Questionable",
-                                Rating.explicit => "Explicit",
-                                Rating.illegal => "Illegal",
-                                _ => "None"
-                            }),
+                            title: Text(getRatingText(rating)),
                             onTap: () async {
                                 final choosenRating = await showDialog(
                                     context: context,
