@@ -340,13 +340,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                             child: ListTile(
                                 title: const SmallHeader("Rating", padding: EdgeInsets.zero,),
                                 leading: Icon(getRatingIcon(widget.image.rating!), color: Theme.of(context).colorScheme.primary),
-                                subtitle: Text(switch(widget.image.rating) {
-                                    Rating.safe => "Safe",
-                                    Rating.questionable => "Questionable",
-                                    Rating.explicit => "Explicit",
-                                    Rating.illegal => "Illegal",
-                                    _ => widget.image.rating!.name
-                                }),
+                                subtitle: Text(getRatingText(widget.image.rating)),
                             )
                         )
                     ],

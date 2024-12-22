@@ -131,3 +131,13 @@ IconData getRatingIcon(Rating? rating) {
         _ => Icons.clear
     };
 }
+
+String getRatingText(Rating? rating) {
+    return switch(rating) {
+        Rating.safe => "Safe",
+        Rating.questionable => "Questionable",
+        Rating.explicit => "Explicit",
+        Rating.illegal => "Borderline",
+        _ => "None"
+    };
+}

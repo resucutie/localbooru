@@ -96,11 +96,12 @@ Future<bool> doTagMatch({required Map file, required TagText tag}) async {
         final Metatag metatag = Metatag(tag);
         switch (metatag.selector) {
             case "rating":
-                return (metatag.value == "none" && file["rating"] == null)
-                    || ((metatag.value == "safe" || metatag.value == "s") && file["rating"] == "safe")
-                    || ((metatag.value == "questionable" || metatag.value == "q") && file["rating"] == "questionable")
-                    || ((metatag.value == "explicit" || metatag.value == "e") && file["rating"] == "explicit")
-                    || ((metatag.value == "illegal" || metatag.value == "i") && file["rating"] == "illegal");
+                return (metatag.value == "none" && file["rating"] == null) // none
+                    || ((metatag.value == "safe" || metatag.value == "s") && file["rating"] == "safe") // safe
+                    || ((metatag.value == "questionable" || metatag.value == "q") && file["rating"] == "questionable") // questionable
+                    || ((metatag.value == "explicit" || metatag.value == "e") && file["rating"] == "explicit") // explicit
+                    || ((metatag.value == "illegal" || metatag.value == "i") && file["rating"] == "illegal") // borderline (old name)
+                    || ((metatag.value == "borderline" || metatag.value == "b") && file["rating"] == "illegal"); // borderline (new name)
             case "id":
                 return rangeMatch(double.parse(file["id"]), metatag.value) || metatag.value == file["id"];
             case "type":

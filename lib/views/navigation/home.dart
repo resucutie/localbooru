@@ -220,7 +220,7 @@ final List<String> tagsToAddToSearch = [
     "rating:safe",
     "rating:questionable",
     "rating:explicit",
-    "rating:illegal",
+    "rating:borderline",
     "id:",
     "file:",
     "type:",
