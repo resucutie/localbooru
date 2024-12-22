@@ -54,7 +54,7 @@ class ImageUploadForm extends StatelessWidget {
                                                 return const Icon(Icons.add);
                                             } else {
                                                 if(lookupMimeType(state.value)!.startsWith("video/")) return IgnorePointer(
-													child: VideoView(state.value, showControls: false,),
+													child: VideoView(state.value, showControls: false, soundOnStart: false,),
 												);
                                                 return Image(
                                                     image: ResizeImage(
