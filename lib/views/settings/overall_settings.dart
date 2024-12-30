@@ -6,11 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:localbooru/components/counter.dart';
 import 'package:localbooru/components/headers.dart';
-import 'package:localbooru/components/radio_dialogs.dart';
+import 'package:localbooru/components/dialogs/radio_dialogs.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:local_auth/error_codes.dart' as auth_error;
 
 class OverallSettings extends StatefulWidget {
     const OverallSettings({super.key, required this.prefs});
@@ -24,6 +25,7 @@ class OverallSettings extends StatefulWidget {
 class _OverallSettingsState extends State<OverallSettings> {
     final _pageSizeValidator = GlobalKey<FormState>();
     final _pageSizeController = TextEditingController();
+    final LocalAuthentication auth = LocalAuthentication();
 
     late double _gridSizeSliderValue;
     late double _autotagAccuracy;
@@ -32,6 +34,7 @@ class _OverallSettingsState extends State<OverallSettings> {
     late bool _update;
     late bool _gifVideo;
     late bool _authLock;
+    late bool _customFrame;
     late String _theme;
     late String _counter;
 
@@ -61,6 +64,7 @@ class _OverallSettingsState extends State<OverallSettings> {
         _theme = widget.prefs.getString("theme") ?? settingsDefaults["theme"];
         _counter = widget.prefs.getString("counter") ?? settingsDefaults["counter"];
         _authLock = widget.prefs.getBool("auth_lock") ?? settingsDefaults["auth_lock"];
+        _customFrame = widget.prefs.getBool("custom_frame") ?? settingsDefaults["custom_frame"];
 
         LocalAuthentication().isDeviceSupported().then((value) => setState(() {
             isAuthLockOptionEnabled = value && isMobile();
@@ -219,6 +223,17 @@ class _OverallSettingsState extends State<OverallSettings> {
                         setState(() => _monetTheme = value);
                     }
                 ),
+                if(hasWindowFrameNavigation()) SwitchListTile(
+                    title: const Text("Custom window frame"),
+                    secondary: const Icon(Icons.web_asset),
+                    subtitle: const Text("Show a custom window frame"),
+                    value: _customFrame,
+                    onChanged: (value) {
+                        widget.prefs.setBool("custom_frame", value);
+                        setState(() => _customFrame = value);
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Restart the app to take effect")));
+                    }
+                ),
                 ListTile(
                     title: const Text("Counter"),
                     subtitle: Text(_counter),
@@ -242,9 +257,26 @@ class _OverallSettingsState extends State<OverallSettings> {
                     secondary: const Icon(Icons.fingerprint),
                     subtitle: const Text("Hide content under a lock screen whenever the app is put in background"),
                     value: _authLock,
-                    onChanged: (value) {
-                        widget.prefs.setBool("auth_lock", value);
-                        setState(() => _authLock = value);
+                    onChanged: (value) async {
+                        if(value) {
+                            try {
+                                final didAuthenticate = await auth.authenticate(
+                                    localizedReason: "Biometric check before enabling"
+                                );
+                                if(didAuthenticate) widget.prefs.setBool("auth_lock", true);
+                            } on PlatformException catch (error) {
+                                final String message = switch(error.code) {
+                                    auth_error.otherOperatingSystem => "This system shouldn't have any support for authentication lock",
+                                    auth_error.notAvailable || auth_error.notEnrolled || auth_error.passcodeNotSet => "You don't have any auth system avaiable",
+                                    auth_error.lockedOut => "You tried too many times. Please wait till your system allows",
+                                    _ => error.message!
+                                };
+                                if(context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+                            }
+                        } else {
+                            widget.prefs.setBool("auth_lock", false);
+                        }
+                        setState(() => _authLock = widget.prefs.getBool("auth_lock")!);
                     }
                 ),
                 const SmallHeader("Other"),

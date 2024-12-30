@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -10,21 +11,26 @@ import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
+import 'package:localbooru/api/preset/index.dart';
+import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:localbooru/views/navigation/home.dart';
-import 'package:localbooru/views/navigation/index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 class GalleryViewer extends StatefulWidget {
-    const GalleryViewer({super.key, required this.booru, this.tags = "", this.index = 0, this.routeNavigation = false, this.selectionMode = false, this.onSelect, this.selectedImages});
+    const GalleryViewer({super.key, required this.searcher, this.headerDisplay, this.index = 0, this.selectionMode = false, this.onSelect, this.onNextPage, this.selectedImages, this.displayBackButton = true, this.forceOrientation, this.actions, this.additionalMenuOptions});
 
-    final Booru booru;
-    final String tags;
     final int index;
-    final bool routeNavigation;
+    final FutureOr<SearchableInformation> Function(int index) searcher;
+    final Widget Function(BuildContext context, Orientation orientation)? headerDisplay;
     final bool selectionMode;
+    final bool displayBackButton;
+    final Orientation? forceOrientation;
     final void Function(List<ImageID>)? onSelect;
+    final void Function(int newIndex)? onNextPage;
+    final List<Widget>? actions;
     final List<ImageID>? selectedImages;
+    final List<PopupMenuEntry<dynamic>>? additionalMenuOptions;
 
     @override
     State<GalleryViewer> createState() => _GalleryViewerState();
@@ -32,8 +38,6 @@ class GalleryViewer extends StatefulWidget {
 
 class _GalleryViewerState extends State<GalleryViewer> {
     late Future<Map> _resultObtainFuture;
-
-    final SearchController _searchController = SearchController();
 
     final scrollToTop = GlobalKey();
     
@@ -45,7 +49,6 @@ class _GalleryViewerState extends State<GalleryViewer> {
     void initState() {
         super.initState();
         _currentIndex = widget.index;
-        _searchController.text = widget.tags;
         _selectedImages = widget.selectedImages ?? [];
         updateImages();
 
@@ -63,8 +66,6 @@ class _GalleryViewerState extends State<GalleryViewer> {
             _resultObtainFuture = _obtainResults();
         });
     }
-
-    void _onSearch () => context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
 
     void openContextMenu(Offset offset, BooruImage image) {
         final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
@@ -88,8 +89,20 @@ class _GalleryViewerState extends State<GalleryViewer> {
         ),
         const PopupMenuDivider(),
         ...imageShareItems(image),
+        if(widget.additionalMenuOptions != null) ...[
+            const PopupMenuDivider(),
+            ...widget.additionalMenuOptions!
+        ],
         const PopupMenuDivider(),
         ...imageManagementItems(image, context: context),
+    ];
+
+    List<PopupMenuEntry> multipleContextMenuItems(List<BooruImage> images) => [
+        if(widget.additionalMenuOptions != null) ...[
+            ...widget.additionalMenuOptions!,
+            const PopupMenuDivider(),
+        ],
+        ...multipleImageManagementItems(images, context: context),
     ];
 
     void toggleImageSelection(ImageID imageID) {
@@ -101,17 +114,12 @@ class _GalleryViewerState extends State<GalleryViewer> {
     }
 
     Future<Map> _obtainResults() async {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        int indexSize = prefs.getInt("page_size") ?? settingsDefaults["page_size"];
+        final search = await widget.searcher(_currentIndex);
 
-        debugPrint(widget.tags);
-
-        int indexLength = await widget.booru.getIndexNumberLength(widget.tags, size: indexSize);
-        List<BooruImage> images = await widget.booru.searchByTags(widget.tags, index: _currentIndex, size: indexSize);
         return {
-            "images": images,
-            "indexLength": indexLength,
-            "sharedPrefs": prefs
+            "images": search.images,
+            "indexLength": search.indexLength,
+            "sharedPrefs": await SharedPreferences.getInstance()
         };
     }
 
@@ -119,13 +127,19 @@ class _GalleryViewerState extends State<GalleryViewer> {
 
     @override
     Widget build(BuildContext context) {
-        final actions = [
-            IconButton(
-                icon: const Icon(Icons.add),
-                tooltip: "Add image",
-                onPressed: () => context.push("/manage_image"),
-            ),
-            const BrowseScreenPopupMenuButton()
+        final List<Widget> actions = [
+            ...(widget.actions ?? []),
+            PopupMenuButton(
+                itemBuilder: (context) {
+                    return [
+                        ...booruItems(),
+                        if(widget.additionalMenuOptions != null) ...[
+                            const PopupMenuDivider(),
+                            ...widget.additionalMenuOptions!
+                        ]
+                    ];
+                }
+            )
         ];
         return FutureBuilder<Map>(
             future: _resultObtainFuture,
@@ -135,7 +149,8 @@ class _GalleryViewerState extends State<GalleryViewer> {
                     SharedPreferences prefs = snapshot.data!["sharedPrefs"];
                 
                     return OrientationBuilder(
-                        builder: (context, orientation) {
+                        builder: (context, containerOrientation) {
+                            final Orientation orientation = widget.forceOrientation ?? containerOrientation;
                             return Scaffold(
                                 body: CustomScrollView(
                                     slivers: [
@@ -143,39 +158,26 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                             duration: kThemeAnimationDuration,
                                             child: !isInSelection()
                                                 ? SliverAppBar(
-                                                        key: const ValueKey("normal"),
-                                                        floating: true,
-                                                        snap: true,
-                                                        pinned: isDesktop(),
-                                                        forceMaterialTransparency: orientation == Orientation.landscape,
-                                                        titleSpacing: 0,
-                                                        automaticallyImplyLeading: false,
-                                                        actions: orientation != Orientation.landscape ? actions : [Padding(
-                                                            padding: const EdgeInsets.only(right: 8),
-                                                            child: Wrap(
-                                                                direction: Axis.horizontal,
-                                                                spacing: 8,
-                                                                children: actions.map((e) => CircleAvatar(backgroundColor: Theme.of(context).colorScheme.surfaceVariant, child: e,)).toList(),
-                                                            ),
-                                                        )],
-                                                        title: Container(
-                                                            padding: orientation == Orientation.landscape ? const EdgeInsets.all(16.0) : null,
-                                                            constraints: orientation == Orientation.landscape ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
-                                                            child: SearchTag(
-                                                                onSearch: (_) => _onSearch(),
-                                                                controller: _searchController,
-                                                                actions: orientation == Orientation.portrait ? [] : [IconButton(onPressed: _onSearch, icon: const Icon(Icons.search))],
-                                                                leading: const Padding(
-                                                                    padding: EdgeInsets.only(right: 12.0),
-                                                                    child: BackButton(),
-                                                                ),
-                                                                padding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 2)),
-                                                                backgroundColor: orientation == Orientation.portrait ? Colors.transparent : null,
-                                                                elevation: orientation == Orientation.portrait ? 0 : null,
-                                                                hint: "Search",
-                                                            ),
+                                                    key: const ValueKey("normal"),
+                                                    floating: true,
+                                                    snap: true,
+                                                    pinned: isDesktop(),
+                                                    forceMaterialTransparency: orientation == Orientation.landscape,
+                                                    titleSpacing: 0,
+                                                    automaticallyImplyLeading: widget.displayBackButton,
+                                                    actions: orientation != Orientation.landscape ? actions : [Padding(
+                                                        padding: const EdgeInsets.only(right: 8),
+                                                        child: Wrap(
+                                                            direction: Axis.horizontal,
+                                                            spacing: 8,
+                                                            children: actions.map((e) => CircleAvatar(
+                                                                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+                                                                child: e,
+                                                            )).toList(),
                                                         ),
-                                                    )
+                                                    )],
+                                                    title: widget.headerDisplay != null ? widget.headerDisplay!(context, orientation) : null,
+                                                )
                                                 : SliverAppBar(
                                                     key: const ValueKey("elements selected"),
                                                     floating: true,
@@ -183,19 +185,22 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                     pinned: true,
                                                     // forceElevated: true,
                                                     automaticallyImplyLeading: false,
-                                                    backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                                                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                                                     leading: CloseButton(onPressed: () => setState(() => _selectedImages = []),),
                                                     actions: [
-                                                        if(_selectedImages.length == 1) IconButton(
+                                                        IconButton(
                                                             icon: const Icon(Icons.edit),
-                                                            onPressed: () {
-                                                                context.push("/manage_image/internal/${_selectedImages[0]}");
-                                                                setState(() => _selectedImages = []);
+                                                            onPressed: () async {
+                                                                final sendable = PresetListManageImageSendable(await Future.wait(_selectedImages.map((e) => PresetImage.fromExistingImage((snapshot.data!["images"] as List<BooruImage>).firstWhere((image) => image.id == e)))));
+                                                                if(context.mounted) {
+                                                                    context.push("/manage_image", extra: sendable);
+                                                                    setState(() => _selectedImages = []);
+                                                                }
                                                             },
                                                         ),
                                                         PopupMenuButton(itemBuilder: (context) {
                                                             if(_selectedImages.length == 1) return singleContextMenuItems(snapshot.data!["images"].firstWhere((element) => element.id == _selectedImages[0]));
-                                                            else if(_selectedImages.length > 1) return multipleImageManagementItems(snapshot.data!["images"].where((element) => _selectedImages.contains(element.id)).toList(), context: context);
+                                                            else if(_selectedImages.length > 1) return multipleContextMenuItems(snapshot.data!["images"].where((element) => _selectedImages.contains(element.id)).toList());
                                                             return [];
                                                         }, onSelected: (value) => setState(() => _selectedImages = []))
                                                     ],
@@ -223,8 +228,8 @@ class _GalleryViewerState extends State<GalleryViewer> {
                                                 currentPage: _currentIndex,
                                                 pages: pages,
                                                 onSelect: (selectedPage) {
-                                                    if(widget.routeNavigation) {
-                                                        context.push("/search?tag=${widget.tags}&index=$selectedPage");
+                                                    if(widget.onNextPage != null) {
+                                                        widget.onNextPage!(selectedPage);
                                                     } else {
                                                         _currentIndex = selectedPage;
                                                         updateImages();
@@ -356,106 +361,52 @@ class _PageDisplayState extends State<PageDisplay> {
     }
 }
 
-Future<List<ImageID>?> openSelectionDialog({required BuildContext context, List<ImageID>? selectedImages, List<ImageID>? excludeImages,}) async {
-    final booru = await getCurrentBooru();
+class SearchBarOnGridList extends StatefulWidget {
+    const SearchBarOnGridList({super.key, required this.onSearch, required this.desktopDisplay, this.initialText = ""});
 
-    if(!context.mounted) return null;
-
-    final res = await showDialog<List<ImageID>>(
-        context: context,
-        builder: (context) => SelectDialog(booru: booru, selectedImages: selectedImages, excludeImages: excludeImages,)
-    );
-    return res;
-}
-
-class SelectDialog extends StatefulWidget {
-    const SelectDialog({super.key, required this.booru, this.selectedImages, this.excludeImages});
-
-    final Booru booru;
-    final List<ImageID>? selectedImages;
-    final List<ImageID>? excludeImages;
+    final void Function(String text) onSearch;
+    final bool desktopDisplay;
+    final String initialText;
 
     @override
-    State<SelectDialog> createState() => _SelectDialogState();
+    State<SearchBarOnGridList> createState() => _SearchBarOnGridListState();
+
 }
-class _SelectDialogState extends State<SelectDialog> {
-    final SearchController controller = SearchController();
 
-    List<ImageID> imageIDs = [];
-
-    String tags = "";
+class _SearchBarOnGridListState extends State<SearchBarOnGridList> {
+    final SearchController _searchController = SearchController();
 
     @override
     void initState() {
+        _searchController.text = widget.initialText;
         super.initState();
-        imageIDs = widget.selectedImages ?? [];
-    }
-
-    void onSearch() {
-        setState(() {
-            tags = controller.text;
-        });
-        debugPrint(tags);
     }
 
     @override
-    Widget build(context) {
-        return OrientationBuilder(
-            builder: (context, orientation) {
-                return AlertDialog(
-                    // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    elevation: 0,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 24)),
-                    titlePadding: const EdgeInsets.all(16).subtract(const EdgeInsets.only(bottom: 8)),
-                    clipBehavior: Clip.antiAlias,
-                    titleTextStyle: const TextStyle(
-                        fontSize: 18
-                    ),
-                    title: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                            // Padding(
-                            //     padding: const EdgeInsets.all(16.0),
-                            //     child: Text("Selected: ${imageIDs.length}"),
-                            // ),
-                            Container(
-                                constraints: const BoxConstraints(maxHeight: 44),
-                                child: SearchTag(
-                                    controller: controller,
-                                    onSearch: (value) => onSearch(),
-                                    hint: imageIDs.isNotEmpty ? "Selected: ${imageIDs.length}" : "Select elements",
-                                    leading: const Padding(
-                                        padding: EdgeInsets.only(right: 12.0, left: 8),
-                                        child: Icon(Icons.search),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                                ),
-                            ),
-                        ],
-                    ),
-                    actions: [
-                        TextButton(
-                            onPressed: Navigator.of(context).pop,
-                            child: const Text("Cancel"),
-                        ),
-                        TextButton(
-                            child: const Text("Select"),
-                            onPressed: () => Navigator.of(context).pop(imageIDs),
-                        )
-                    ],
-                    content: SizedBox(
-                        width: MediaQuery.of(context).size.width * (orientation == Orientation.landscape ? 0.6 : 1),
-                        child: GalleryViewer(
-                            key: ValueKey(tags),
-                            booru: widget.booru,
-                            selectionMode: true,
-                            tags: [tags, ...(widget.excludeImages ?? []).map((e) => "-id:$e")].join(" "),
-                            selectedImages: imageIDs,
-                            onSelect: (images) => setState(() => imageIDs = images),
-                        ),
-                    ),
-                );
-            }
+    Widget build(BuildContext context) {
+        return Container(
+            padding: widget.desktopDisplay ? const EdgeInsets.all(16.0) : null,
+            constraints: widget.desktopDisplay ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
+            child: SearchTag(
+                onSearch: (text) => widget.onSearch(text),
+                controller: _searchController,
+                actions: !widget.desktopDisplay ? [] : [IconButton(onPressed: () => widget.onSearch(_searchController.text), icon: const Icon(Icons.search))],
+                leading: const Padding(
+                    padding: EdgeInsets.only(right: 12.0),
+                    child: BackButton(),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8).add(const EdgeInsets.only(bottom: 2)),
+                backgroundColor: !widget.desktopDisplay ? Colors.transparent : null,
+                elevation: !widget.desktopDisplay ? 0 : null,
+                hint: "Search",
+            ),
         );
     }
+}
+
+class SearchableInformation {
+    SearchableInformation({required this.images, required this.indexLength});
+    
+    List<BooruImage> images;
+    int indexLength;
 }

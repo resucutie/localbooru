@@ -1,45 +1,15 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:localbooru/api/preset/index.dart';
+import 'package:localbooru/components/dialogs/download_dialog.dart';
+import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
+import 'package:localbooru/components/dialogs/textfield_dialogs.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
-import 'package:localbooru/utils/platform_tools.dart';
-import 'package:localbooru/views/image_manager/peripherals.dart';
-import 'package:localbooru/views/navigation/tag_browse.dart';
+import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class DesktopHousing extends StatelessWidget {
-    const DesktopHousing({super.key, required this.child, required this.routeUri});
-
-    final Widget child;
-    final Uri routeUri;
-
-    @override
-    Widget build(context) {
-        return Row(
-            children: [
-                ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 270),
-                    child: DefaultDrawer(
-                        displayTitle: false,
-                        activeView: routeUri.pathSegments[0],
-                        desktopView: true,
-                    )
-                ),
-                // const SizedBox(width: 4),
-                Container(
-                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 270, maxHeight: MediaQuery.of(context).size.height - 2),
-                    clipBehavior: isDesktop() ? Clip.antiAlias : Clip.none,
-                    decoration: isDesktop() ? const BoxDecoration(
-                        borderRadius: BorderRadius.only(topLeft: Radius.circular(28))
-                    ) : null,
-                    child: child
-                ),
-            ],
-        );
-    }
-}
+import 'package:window_manager/window_manager.dart';
 
 class DefaultDrawer extends StatelessWidget {
     const DefaultDrawer({super.key, this.activeView, this.displayTitle = true, this.desktopView = false});
@@ -66,29 +36,37 @@ class DefaultDrawer extends StatelessWidget {
                         )
                     ),
                 ),
-                if(desktopView) ...[
-                    ListTile(
-                        textColor: assertSelected("home"),
-                        iconColor: assertSelected("home"),
-                        title: const Text("Home"),
-                        leading: const Icon(Icons.home),
-                        onTap: activeView != "home" ? () {
-                            Scaffold.of(context).closeDrawer();
-                            context.go("/home");
-                        } : null,
-                    ),
-                    ListTile(
-                        textColor: assertSelected("recent") ?? assertSelected("search"),
-                        iconColor: assertSelected("recent") ?? assertSelected("search"),
-                        title: const Text("Search"),
-                        leading: const Icon(Icons.search),
-                        onTap: activeView != "recent" && activeView != "search" ? () {
-                            Scaffold.of(context).closeDrawer();
-                            context.push("/recent");
-                        } : null,
-                    ),
-                    const Divider(),
-                ],
+                if(desktopView) ListTile(
+                    textColor: assertSelected("home"),
+                    iconColor: assertSelected("home"),
+                    title: const Text("Home"),
+                    leading: const Icon(Icons.home),
+                    onTap: activeView != "home" ? () {
+                        Scaffold.of(context).closeDrawer();
+                        context.go("/home");
+                    } : null,
+                ),
+                ListTile(
+                    textColor: assertSelected("recent") ?? assertSelected("search"),
+                    iconColor: assertSelected("recent") ?? assertSelected("search"),
+                    title: Text(desktopView ? "Search" : "Recents"),
+                    leading: Icon(desktopView ? Icons.search : Icons.history),
+                    onTap: activeView != "recent" && activeView != "search" ? () {
+                        Scaffold.of(context).closeDrawer();
+                        context.push("/recent");
+                    } : null,
+                ),
+                ListTile(
+                    textColor: assertSelected("collections"),
+                    iconColor: assertSelected("collections"),
+                    title: const Text("Collections"),
+                    leading: const Icon(Icons.photo_library),
+                    onTap: activeView != "collections" ? () {
+                        Scaffold.of(context).closeDrawer();
+                        context.push("/collections");
+                    } : null,
+                ),
+                const Divider(),
                 ListTile(
                     textColor: assertSelected("manage_image"),
                     iconColor: assertSelected("manage_image"),
@@ -103,14 +81,31 @@ class DefaultDrawer extends StatelessWidget {
                     title: const Text("Import from service"),
                     leading: const Icon(Icons.link),
                     enabled: activeView != "manage_image",
-                    onTap: () {
-                        Scaffold.of(context).closeDrawer();
-                        showDialog(
+                    onTap: () async {
+                        final router = GoRouter.of(context);
+                        final url = await showDialog<String>(
                             context: context,
                             builder: (context) {
                                 return const InsertURLDialog();
                             },
                         );
+                        if(url != null) {
+                            importImageFromURL(url)
+                                .then((preset) {
+                                    router.push("/manage_image", extra: handleSendable(preset));
+                                })
+                                .onError((error, stack) {
+                                    if(error.toString() == "Unknown file type" || error.toString() == "Not a URL") {
+                                        Future.delayed(const Duration(milliseconds: 1)).then((value) {
+                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Unknown service or invalid image URL inserted")));
+                                        });
+                                    } else {
+                                        throw error!;
+                                    }
+                                }).whenComplete(() {
+                                    Scaffold.of(context).closeDrawer();
+                                });
+                        }
                     },
                 ),
                 ListTile(
@@ -137,6 +132,12 @@ class DefaultDrawer extends StatelessWidget {
                         },
                     ),
                     ListTile(
+                        title: const Text("progress bar collection import test"),
+                        onTap: () {
+                            VirtualPresetCollection.urlToPreset("https://e926.net/pools/42095");
+                        },
+                    ),
+                    ListTile(
                         title: const Text("Go to permissions screen"),
                         onTap: () {
                             Scaffold.of(context).closeDrawer();
@@ -147,7 +148,7 @@ class DefaultDrawer extends StatelessWidget {
                         title: const Text("Go to biometric lock screen"),
                         onTap: () {
                             Scaffold.of(context).closeDrawer();
-                            forceLockScreenListener.forceEnable();
+                            lockListener.lock();
                         },
                     ),
                     ListTile(
@@ -170,15 +171,17 @@ class DefaultDrawer extends StatelessWidget {
                     ListTile(
                         title: const Text("Desktop size"),
                         onTap: () {
-                            appWindow.size = const Size(1280, 720);
+                            windowManager.setSize(const Size(1280, 720));
+                            // appWindow.size = const Size(1280, 720);
                         },
                     ),
                     ListTile(
                         title: const Text("Phone size"),
                         onTap: () {
-                            appWindow.size = const Size(320, 840);
+                            windowManager.setSize(const Size(320, 840));
+                            // appWindow.size = const Size(320, 840);
                         },
-                    ),
+                    )
                 ]
             ],
         );

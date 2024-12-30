@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:yaml/yaml.dart';
 
@@ -29,14 +28,13 @@ class _AboutScreenState extends State<AboutScreen>{
                             const Text("LocalBooru", style: TextStyle(
                                 fontSize: 36
                             )),
-                            FutureBuilder<Map<String, dynamic>>(
-                                future: (() async => {"yaml": await rootBundle.loadString("pubspec.yaml"), "packageInfo": await PackageInfo.fromPlatform()})(),
+                            FutureBuilder<String>(
+                                future: rootBundle.loadString("pubspec.yaml"),
                                 builder: (context, snapshot) {
                                     String version = "Unknown";
                                     if (snapshot.hasData) {
-                                        var yaml = loadYaml(snapshot.data!["yaml"]);
-                                        PackageInfo packageInfo = snapshot.data!["packageInfo"];
-                                        version = "${packageInfo.version} \"${yaml["localbooru_codename"]}\"";
+                                        var yaml = loadYaml(snapshot.data!);
+                                        version = "${yaml["version"]} \"${yaml["localbooru_codename"]}\"";
                                     }
                             
                                     return Text(version, style: const TextStyle(fontSize: 14),);
@@ -55,8 +53,12 @@ class _AboutScreenState extends State<AboutScreen>{
                                         icon: SvgPicture.asset("assets/discord.svg", width: 24, height: 24, color: Theme.of(context).hintColor),
                                         onPressed: () => launchUrlString("https://discord.gg/mYuUKunj"),
                                     ),
+                                    IconButton(
+                                        icon: SvgPicture.asset("assets/liberapay.svg", width: 24, height: 24, color: Theme.of(context).hintColor),
+                                        onPressed: () => launchUrlString("https://liberapay.com/resucutie"),
+                                    ),
                                 ],
-                            )
+                            ),
                         ]
                     )
                 ),

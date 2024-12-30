@@ -16,8 +16,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.5.3
-localbooru_codename: "Volpeon"
+version: 1.6.0
+localbooru_codename: "Kuroodod"
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
@@ -41,47 +41,47 @@ dependencies:
   go_router: ^14.1.2
   path: ^1.8.3
   shared_preferences: ^2.2.2
-  bitsdojo_window: ^0.1.6
   url_launcher: ^6.2.4
-  share_plus: ^9.0.0
+  share_plus: ^10.0.3
   open_file: ^3.3.2
   dotted_border: ^2.1.0
   http: ^1.2.0
   titlebar_buttons: ^1.0.0
-  path_provider: ^2.1.2
+  path_provider: ^2.1.4
   dynamic_color: ^1.6.9
   package_info_plus: ^8.0.0
-  super_clipboard: ^0.8.15
+  super_clipboard: ^0.9.0-dev.4
   flutter_svg: ^1.1.6
   flutter_cache_manager: ^3.3.1
   html: ^0.15.4
-  receive_sharing_intent: ^1.6.7
+  #receive_sharing_intent: ^1.6.7  
+  receive_sharing_intent: # use a temporary repo, remove later
+    git:
+      url: https://github.com/ad-angelo/receive_sharing_intent
+      ref: master
   mime: ^1.0.5
   yaml: ^3.1.2
-  media_kit: ^1.1.10
-  media_kit_video:
-    git:
-      url: https://github.com/media-kit/media-kit/
-      ref: main
-      path: ./media_kit_video
-  media_kit_libs_video: ^1.0.4
   string_validator: ^1.0.2
   gif_view: ^0.4.3
   image_compression: ^1.0.5
   vector_math: ^2.1.4
   photo_view: ^0.15.0
-  ffmpeg_cli: ^0.3.0
-  super_drag_and_drop: ^0.8.15
+  super_drag_and_drop: ^0.9.0-dev.4
   sliver_tools: ^0.2.12
   local_auth: ^2.2.0
-  device_info_plus: ^10.1.0
+  device_info_plus: ^11.1.1
   flutter_windowmanager: ^0.2.0
-dependency_overrides:
-  media_kit_native_event_loop:
-    git:
-      url: https://github.com/media-kit/media-kit/
-      ref: main
-      path: ./media_kit_native_event_loop
+  window_manager: ^0.4.2
+  collection: ^1.18.0
+  test: ^1.25.2
+  path_provider_platform_interface: ^2.1.2
+  plugin_platform_interface: ^2.1.8
+  html_unescape: ^2.0.0
+  fvp: ^0.28.0
+  video_player: ^2.9.2
+  chewie: ^1.8.5
+  visibility_detector: ^0.4.0+2
+  fc_native_video_thumbnail: ^0.16.1
 
 dev_dependencies:
   flutter_test:
@@ -92,7 +92,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -113,6 +113,7 @@ flutter:
     - assets/syncthing.svg
     - assets/github.svg
     - assets/discord.svg
+    - assets/liberapay.svg
 
     - assets/websites/danbooru.svg
     - assets/websites/danbooru-monochrome.svg
@@ -141,6 +142,16 @@ flutter:
     - assets/counter/squares/7.svg
     - assets/counter/squares/8.svg
     - assets/counter/squares/9.svg
+    - assets/counter/signs/0.png
+    - assets/counter/signs/1.png
+    - assets/counter/signs/2.png
+    - assets/counter/signs/3.png
+    - assets/counter/signs/4.png
+    - assets/counter/signs/5.png
+    - assets/counter/signs/6.png
+    - assets/counter/signs/7.png
+    - assets/counter/signs/8.png
+    - assets/counter/signs/9.png
     - assets/Screenshot_1009.webp
     
     - pubspec.yaml # reading itself

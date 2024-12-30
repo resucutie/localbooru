@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'dart:math' as m;
+
+final _rndSec = m.Random.secure();
 
 String formatSize(int bytes) {
     const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
@@ -26,7 +29,6 @@ bool rangeMatch(double num, String pattern) {
         return from <= num && to >= num;
     } else if(pattern[0] == ">") {
         final min = pattern.substring(1);
-        print("${double.tryParse(min) == null && double.tryParse(min.substring(1)) == null}");
         if(double.tryParse(min) == null && double.tryParse(min.substring(1)) == null) return false;
         if(min[0] == "=") return double.parse(min.substring(1)) >= num;
         return double.parse(min) > num;
@@ -55,3 +57,18 @@ class Throttler {
         });
     }
 }
+
+String getRandomString(int len) {
+    var values = List<int>.generate(len, (i) =>  _rndSec.nextInt(255));
+    return base64UrlEncode(values);
+}
+
+// int? titleBarHeight;
+// Future<int> getSystemTitleBarHeight() async {
+//     if(titleBarHeight == null ) {
+//         await windowManager.setTitleBarStyle(TitleBarStyle.normal);
+//         titleBarHeight = await windowManager.getTitleBarHeight();
+//         await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+//     }
+//     return titleBarHeight!;
+// }

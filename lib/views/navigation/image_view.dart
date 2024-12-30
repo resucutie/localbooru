@@ -12,57 +12,92 @@ import 'package:localbooru/components/image_grid_display.dart';
 import 'package:localbooru/components/tag.dart';
 import 'package:localbooru/components/video_view.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/utils/get_website.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
-import 'package:localbooru/views/navigation/index.dart';
+import 'package:localbooru/api/preset/index.dart';
+import 'package:localbooru/views/image_manager/shell.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ImageViewShell extends StatelessWidget {
-    const ImageViewShell({super.key, required this.image, required this.child, this.shouldShowImageOnPortrait = false});
+    const ImageViewShell({super.key, required this.image, required this.child, this.shouldShowImageOnPortrait = false, this.collections});
 
     final BooruImage image;
     final Widget child;
     final bool shouldShowImageOnPortrait;
+    final List<BooruCollection>? collections;
 
     @override
     Widget build(BuildContext context) {
-        return Scaffold(
-            appBar: AppBar(
-                title: ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text("Image", style: TextStyle(fontSize: 20.0)),
-                    subtitle: Text("ID ${image.id}", style: const TextStyle(fontSize: 14.0)),
-                ),
-                leading: BackButton(
-                    onPressed: context.pop,
-                ), 
-                actions: [
-                    IconButton(
-                        icon: const Icon(Icons.edit),
-                        tooltip: "Edit image",
-                        onPressed: () => context.push("/manage_image/internal/${image.id}")
-                    ),
-                    BrowseScreenPopupMenuButton(image: image,)
-                ],
+        final Widget appBarTitle = ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text("Image", style: TextStyle(fontSize: 20.0)),
+            subtitle: Text("ID ${image.id}", style: const TextStyle(fontSize: 14.0)),
+        );
+        final Widget appBarLeading = BackButton(
+            onPressed: context.pop,
+        );
+        final List<Widget> appBarActions = [
+            IconButton(
+                icon: const Icon(Icons.edit),
+                tooltip: "Edit image",
+                onPressed: () async => context.push("/manage_image", extra: PresetManageImageSendable(await PresetImage.fromExistingImage(image)))
             ),
-            body: ScrollConfiguration(
-                behavior: const MaterialScrollBehavior().copyWith(
-                    dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.trackpad, PointerDeviceKind.stylus},
-                ),
-                child: OrientationBuilder(
-                    builder: (context, orientation) {
-                        if(orientation == Orientation.portrait) {
-                            return ListView(
-                                children: [
+            PopupMenuButton(
+                // child: Icon(Icons.more_vert),
+                itemBuilder: (context) {
+                    return [
+                        ...booruItems(),
+                        const PopupMenuDivider(),
+                        ...imageShareItems(image),
+                        const PopupMenuDivider(),
+                        ...imageManagementItems(image, context: context, doulbeExitOnDelete: true)
+                    ];
+                }
+            )
+        ];
+        final PreferredSizeWidget? appBarBottom = (collections != null && collections!.isNotEmpty) ? PreferredSize(
+            preferredSize: Size.fromHeight(40.0 * collections!.length),
+            child: Column(
+                children: collections!.map((collection) => CollectionSwitcher(collection: collection, image: image,)).toList(),
+            )
+        ) : null;
+        return OrientationBuilder(
+            builder: (context, orientation) {
+                if(orientation == Orientation.portrait) {
+                    return CustomScrollView(
+                        slivers: [
+                            SliverAppBar(
+                                title: appBarTitle,
+                                leading: appBarLeading, 
+                                actions: appBarActions,
+                                bottom: appBarBottom,
+                                pinned: true,
+                                floating: appBarBottom != null,
+                                // snap: true,
+                            ),
+                            SliverList(
+                                delegate: SliverChildListDelegate([
                                     if(shouldShowImageOnPortrait) ImageViewDisplay(image),
                                     child
-                                ],
-                            );
-                        } else {
-                            return Row(
+                                ])
+                            )
+                        ],
+                    );
+                } else {
+                    return Scaffold(
+                        appBar: AppBar(
+                            title: appBarTitle,
+                            leading: appBarLeading, 
+                            actions: appBarActions,
+                            bottom: appBarBottom,
+                        ),
+                        body: ScrollConfiguration(
+                            behavior: const MaterialScrollBehavior().copyWith(
+                                dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.trackpad, PointerDeviceKind.stylus},
+                            ),
+                            child: Row(
                                 children: [
                                     Expanded(
                                         child: ImageViewDisplay(image)
@@ -82,11 +117,11 @@ class ImageViewShell extends StatelessWidget {
                                     )
                                     
                                 ],
-                            );
-                        }
-                    },
-                ),
-            ),
+                            )
+                        ),
+                    );
+                }
+            },
         );
     }
 }
@@ -305,13 +340,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                             child: ListTile(
                                 title: const SmallHeader("Rating", padding: EdgeInsets.zero,),
                                 leading: Icon(getRatingIcon(widget.image.rating!), color: Theme.of(context).colorScheme.primary),
-                                subtitle: Text(switch(widget.image.rating) {
-                                    Rating.safe => "Safe",
-                                    Rating.questionable => "Questionable",
-                                    Rating.explicit => "Explicit",
-                                    Rating.illegal => "Illegal",
-                                    _ => widget.image.rating!.name
-                                }),
+                                subtitle: Text(getRatingText(widget.image.rating)),
                             )
                         )
                     ],
@@ -340,7 +369,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                         return ClipRRect(
                                                             borderRadius: const BorderRadius.all(Radius.circular(10)),
                                                             child: MouseRegion(
-                                                                cursor: MaterialStateMouseCursor.clickable,
+                                                                cursor: WidgetStateMouseCursor.clickable,
                                                                 child: GestureDetector(
                                                                     onTap: () => context.push("/view/$imageId"),
                                                                     child: BooruImageLoader(
@@ -375,6 +404,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                     context: context,
                                     tiles: widget.image.sources.map((url) {
                                         final uri = Uri.parse(url);
+                                        final website = getWebsiteByURL(uri);
                                         return MouseRegion(
                                             cursor: SystemMouseCursors.click,
                                             child: GestureDetector(
@@ -382,9 +412,9 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                 onLongPressDown: (details) => longPress = details,
                                                 onSecondaryTapDown: (tap) => openContextMenu(offset: getOffsetRelativeToBox(offset: tap.globalPosition, renderObject: ro), url: url),
                                                 child: ListTile(
-                                                    leading: getWebsiteIcon(uri) ?? Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
+                                                    leading: website != null ? getWebsiteIcon(website) : Icon(Icons.question_mark, color: Theme.of(context).colorScheme.primary),
                                                     onTap: () => launchUrlString(url),
-                                                    title: SmallHeader(getWebsiteFormalType(uri) ?? uri.host, padding: EdgeInsets.zero,),
+                                                    title: SmallHeader(website != null ? getWebsiteName(website) : uri.host, padding: EdgeInsets.zero,),
                                                     subtitle: Text(url)
                                                 ),
                                             )
@@ -425,6 +455,82 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
     }
 }
 
+class CollectionSwitcher extends StatefulWidget {
+    const CollectionSwitcher({super.key, required this.collection, required this.image});
+
+    final BooruCollection collection;
+    final BooruImage image;
+    
+    @override
+    State<CollectionSwitcher> createState() => _CollectionSwitcherState();
+}
+class _CollectionSwitcherState extends State<CollectionSwitcher> {
+    late int collectionPosition;
+
+    @override
+    void initState() {
+        super.initState();
+        collectionPosition = widget.collection.pages.indexOf(widget.image.id);
+    }
+
+    @override
+    Widget build(BuildContext context) {
+        return SizedBox(
+            height: 40,
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                    IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: collectionPosition > 0 ? () {
+                            context.push("/view/${widget.collection.pages[collectionPosition - 1]}");
+                        } : null
+                    ),
+                    Expanded(
+                        child: Center(
+                            child: TextButton(
+                                child: RichText(
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    text: TextSpan(
+                                        children: [
+                                            TextSpan(
+                                                text: widget.collection.name,
+                                                style: TextStyle(
+                                                    color: Theme.of(context).colorScheme.primary,
+                                                    // decoration: TextDecoration.underline
+                                                ),
+                                            ),
+                                            TextSpan(
+                                                text: " • ",
+                                                style: TextStyle(
+                                                    color: Theme.of(context).disabledColor,
+                                                ),
+                                                children: [
+                                                    TextSpan(
+                                                        text: "${collectionPosition + 1}/${widget.collection.pages.length}",
+                                                    ),
+                                                ]
+                                            ),
+                                        ]
+                                    ),
+                                ),
+                                onPressed: () => context.push("/collections/${widget.collection.id}"),
+                            ),
+                        )
+                    ),
+                    IconButton(
+                        icon: const Icon(Icons.arrow_forward),
+                        onPressed: (collectionPosition + 1) < widget.collection.pages.length ? () {
+                            context.push("/view/${widget.collection.pages[collectionPosition + 1]}");
+                        } : null
+                    ),
+                ],
+            ),
+        );
+    }
+}
+
 class NotesView extends StatefulWidget {
     const NotesView({super.key, required this.id});
 
@@ -437,6 +543,7 @@ class NotesView extends StatefulWidget {
 class _NotesViewState extends State<NotesView> {
     final controller = TextEditingController();
     Timer? _debounce;
+    late BooruImage image;
 
     @override
     void initState() {
@@ -446,8 +553,8 @@ class _NotesViewState extends State<NotesView> {
 
     void setText() async {
         final booru = await getCurrentBooru();
-        final image = await booru.getImage(widget.id.toString());
-        controller.text = image!.note ?? "";
+        image = (await booru.getImage(widget.id.toString()))!;
+        controller.text = image.note ?? "";
     }
     
     @override
@@ -469,9 +576,10 @@ class _NotesViewState extends State<NotesView> {
                         ),
                         onChanged: (value) {
                             if (_debounce?.isActive ?? false) _debounce?.cancel();
-                            _debounce = Timer(const Duration(seconds: 1), () {
-                                debugPrint("debounced");
-                                editNote(widget.id.toString(), value);
+                            _debounce = Timer(const Duration(seconds: 1), () async {
+                                final preset = await PresetImage.fromExistingImage(image);
+                                preset.note = value;
+                                await insertImage(preset);
                             });
                         },
                     ),

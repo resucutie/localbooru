@@ -2,7 +2,9 @@ library localbooru_api;
 
 import 'dart:io';
 import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/misc.dart';

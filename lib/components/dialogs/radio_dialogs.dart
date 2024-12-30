@@ -25,7 +25,7 @@ class RatingChooserDialog extends StatelessWidget {
                             spacing: 8,
                             children: [
                                 Icon(getRatingIcon(rating)),
-                                Text(rating == null ? "None" : rating.name.replaceFirstMapped(rating.name[0], (match) => rating.name[0].toUpperCase())),
+                                Text(getRatingText(rating)),
                             ],
                         ),
                         onChanged: (value) => Navigator.of(context).pop(value ?? "None"),
@@ -81,7 +81,7 @@ class CounterChangerDialog extends StatelessWidget {
                 constraints: const BoxConstraints(minWidth: 460),
                 child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: {"squares": "resucutie", "baba": "resucutie"}.entries.map((counterType) => RadioListTile(
+                    children: {"squares": "resucutie", "baba": "resucutie", "signs": "themtipguy, resucutie"}.entries.map((counterType) => RadioListTile(
                         groupValue: counter,
                         value: counterType.key,
                         title: Wrap(

@@ -3,12 +3,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/builders.dart';
+import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/counter.dart';
 import 'package:localbooru/components/drawer.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
-import 'package:localbooru/views/navigation/index.dart';
 
 class HomePage extends StatefulWidget {
     const HomePage({super.key});
@@ -35,7 +35,13 @@ class _HomePageState extends State<HomePage> {
                         tooltip: "Add image",
                         onPressed: () => context.push("/manage_image")
                     ),
-                    const BrowseScreenPopupMenuButton()
+                    PopupMenuButton(
+                        itemBuilder: (context) {
+                            return [
+                                ...booruItems(),
+                            ];
+                        }
+                    )
                 ],
             ),
             drawer: MediaQuery.of(context).orientation == Orientation.portrait ? const Drawer(child: DefaultDrawer()) : null,
@@ -78,6 +84,21 @@ class _HomePageState extends State<HomePage> {
                                                         onPressed: _onSearch,
                                                     icon: const Icon(Icons.search),
                                                     // color: Theme.of(context).colorScheme.primary,
+                                                ),
+                                            ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Wrap(
+                                            direction: Axis.horizontal,
+                                            spacing: 8,
+                                            children: [
+                                                OutlinedButton.icon(
+                                                    onPressed: () => context.push("/collections"),
+                                                    label: const Text("Collections"),
+                                                    icon: const Icon(Icons.photo_library),
+                                                    style: orientation == Orientation.portrait ? OutlinedButton.styleFrom(
+                                                        minimumSize: const Size(0, 48)
+                                                    ) : null,
                                                 ),
                                             ],
                                         ),
@@ -138,7 +159,7 @@ class _SearchTagState extends State<SearchTag> {
             builder: (context, controller) => SearchBar(
                 controller: controller,
                 hintText: widget.hint,
-                padding: MaterialStatePropertyAll(widget.padding),
+                padding: WidgetStatePropertyAll(widget.padding),
                 onSubmitted: widget.onSearch,
                 onTap: controller.openView,
                 onChanged: (_) => controller.openView(),
@@ -148,9 +169,9 @@ class _SearchTagState extends State<SearchTag> {
                     if(widget.actions == null) SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
                     else ...widget.actions!
                 ],
-                elevation: MaterialStatePropertyAll(widget.elevation),
-                shadowColor: widget.showShadow ? null : const MaterialStatePropertyAll(Colors.transparent),
-                backgroundColor: MaterialStatePropertyAll<Color?>(widget.backgroundColor),
+                elevation: WidgetStatePropertyAll(widget.elevation),
+                shadowColor: widget.showShadow ? null : const WidgetStatePropertyAll(Colors.transparent),
+                backgroundColor: WidgetStatePropertyAll<Color?>(widget.backgroundColor),
             ),
             suggestionsBuilder: (context, controller) async {
                 Booru booru = await getCurrentBooru();
@@ -199,7 +220,7 @@ final List<String> tagsToAddToSearch = [
     "rating:safe",
     "rating:questionable",
     "rating:explicit",
-    "rating:illegal",
+    "rating:borderline",
     "id:",
     "file:",
     "type:",
