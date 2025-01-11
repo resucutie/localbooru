@@ -37,128 +37,131 @@ class _TestPlaygroundScreenState extends State<TestPlaygroundScreen> {
         debugPrint("End of test");
     }
 
-    // @override
-    // Widget build(context) {
-    //     return Scaffold(
-    //         appBar: AppBar(
-    //             title: const Text("Playground"),
-    //         ),
-    //         body: Column(
-    //             crossAxisAlignment: CrossAxisAlignment.center,
-    //             mainAxisAlignment: MainAxisAlignment.center,
-    //             children: [
-    //                 Center(
-    //                     child: Wrap(
-    //                         spacing: 8,
-    //                         children: List.filled(5, Image.asset("assets/Screenshot_1009.webp", width: 64, fit: BoxFit.contain, filterQuality: FilterQuality.none,))
-    //                     )
-    //                 ),
-    //                 // MultipleImage(images: List.filled(3, const AssetImage("assets/Screenshot_1009.webp"))),
-    //                 const StyleCounter(number: 1234567890, display: "squares",),
-    //                 const StyleCounter(number: 1234567890, display: "baba",),
-    //                 const StyleCounter(number: 1234567890, display: "signs",),
-    //                 FilledButton(
-    //                     onPressed: testAccurateIdentification,
-    //                     child: const Text("test webcrawing"),
-    //                 ),
-    //                 FilledButton(
-    //                     child: const Text("test read collection"),
-    //                     onPressed: () async {
-    //                         final booru = await getCurrentBooru();
-    //                         final collection = await booru.getCollection("0");
-    //                         debugPrint("${collection?.name} ${collection?.id} ${collection?.pages}");
+    // image playground
+    @override
+    Widget build(context) {
+        return Scaffold(
+            appBar: AppBar(
+                title: const Text("Playground"),
+            ),
+            body: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                    Center(
+                        child: Wrap(
+                            spacing: 8,
+                            children: List.filled(5, Image.asset("assets/Screenshot_1009.webp", width: 64, fit: BoxFit.contain, filterQuality: FilterQuality.none,))
+                        )
+                    ),
+                    // MultipleImage(images: List.filled(3, const AssetImage("assets/Screenshot_1009.webp"))),
+                    const StyleCounter(number: 1234567890, display: "squares",),
+                    const StyleCounter(number: 1234567890, display: "baba",),
+                    const StyleCounter(number: 1234567890, display: "signs",),
+                    const StyleCounter(number: 1234567890, display: "image-goobers"),
+                    // FilledButton(
+                    //     onPressed: testAccurateIdentification,
+                    //     child: const Text("test webcrawing"),
+                    // ),
+                    // FilledButton(
+                    //     child: const Text("test read collection"),
+                    //     onPressed: () async {
+                    //         final booru = await getCurrentBooru();
+                    //         final collection = await booru.getCollection("0");
+                    //         debugPrint("${collection?.name} ${collection?.id} ${collection?.pages}");
 
-    //                         final foundCollection = await booru.obtainMatchingCollection("1");
-    //                         debugPrint("${foundCollection.map((e) => e.name)}");
-    //                     },
-    //                 ),
-    //                 FilledButton(
-    //                     child: const Text("test write collection"),
-    //                     onPressed: () async {
-    //                         final booru = await getCurrentBooru();
+                    //         final foundCollection = await booru.obtainMatchingCollection("1");
+                    //         debugPrint("${foundCollection.map((e) => e.name)}");
+                    //     },
+                    // ),
+                    // FilledButton(
+                    //     child: const Text("test write collection"),
+                    //     onPressed: () async {
+                    //         final booru = await getCurrentBooru();
                             
-    //                         // creation
-    //                         final extracted = await insertCollection(PresetCollection(
-    //                             name: "Created collection",
-    //                             pages: ["0", "1"]
-    //                         ));
-    //                         final idCollection = extracted.id;
-    //                         BooruCollection? collection = await booru.getCollection(idCollection);
-    //                         debugPrint("${collection?.pages}");
+                    //         // creation
+                    //         final extracted = await insertCollection(PresetCollection(
+                    //             name: "Created collection",
+                    //             pages: ["0", "1"]
+                    //         ));
+                    //         final idCollection = extracted.id;
+                    //         BooruCollection? collection = await booru.getCollection(idCollection);
+                    //         debugPrint("${collection?.pages}");
 
-    //                         // override
-    //                         await insertCollection(PresetCollection(
-    //                             id: idCollection,
-    //                             name: "Created collection",
-    //                             pages: ["1", "3"]
-    //                         ));
-    //                         collection = await booru.getCollection(idCollection);
-    //                         debugPrint("${collection?.pages}");
+                    //         // override
+                    //         await insertCollection(PresetCollection(
+                    //             id: idCollection,
+                    //             name: "Created collection",
+                    //             pages: ["1", "3"]
+                    //         ));
+                    //         collection = await booru.getCollection(idCollection);
+                    //         debugPrint("${collection?.pages}");
 
-    //                         // deletion
-    //                         await removeCollection(idCollection);
-    //                         collection = await booru.getCollection(idCollection);
-    //                         debugPrint("$collection");
-    //                     },
-    //                 ),
-    //                 FilledButton(
-    //                     child: const Text("test write collection"),
-    //                     onPressed: () async {
-    //                         VirtualPresetCollection.urlToPreset("https://e926.net/pools/42095");
-    //                     },
-    //                 ),
-    //             ],
-    //         )
-    //         // body: AspectRatio(
-    //         //     aspectRatio: 1,
-    //         //     child: FractionallySizedBox(
-    //         //         widthFactor: 0.5,
-    //         //         heightFactor: 0.5,
-    //         //         child: MultipleImage(images: List.filled(3, const AssetImage("assets/Screenshot_1009.webp")))
-    //         //     )
-    //         // ),
-    //     );
-    // }
+                    //         // deletion
+                    //         await removeCollection(idCollection);
+                    //         collection = await booru.getCollection(idCollection);
+                    //         debugPrint("$collection");
+                    //     },
+                    // ),
+                    // FilledButton(
+                    //     child: const Text("test write collection"),
+                    //     onPressed: () async {
+                    //         VirtualPresetCollection.urlToPreset("https://e926.net/pools/42095");
+                    //     },
+                    // ),
+                ],
+            )
+            // body: AspectRatio(
+            //     aspectRatio: 1,
+            //     child: FractionallySizedBox(
+            //         widthFactor: 0.5,
+            //         heightFactor: 0.5,
+            //         child: MultipleImage(images: List.filled(3, const AssetImage("assets/Screenshot_1009.webp")))
+            //     )
+            // ),
+        );
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            pinned: true, // Keeps the AppBar at the top
-            floating: false,
-            expandedHeight: 200.0,
-            flexibleSpace: FlexibleSpaceBar(
-              // Title stays pinned and visible
-              title: Text('Title Stays'),
-              centerTitle: true,
-            ),
-            // The bottom widget, which disappears first
-            bottom: PreferredSize(
-              preferredSize: Size.fromHeight(80), // Height of bottom widget
-              child: Container(
-                color: Colors.orangeAccent,
-                height: 80,
-                child: Center(
-                  child: Text(
-                    'Bottom Widget',
-                    style: TextStyle(color: Colors.white, fontSize: 24),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => ListTile(
-                title: Text('Item #$index'),
-              ),
-              childCount: 30,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+    // some sliver test idk
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: CustomScrollView(
+//         slivers: [
+//           SliverAppBar(
+//             pinned: true, // Keeps the AppBar at the top
+//             floating: false,
+//             expandedHeight: 200.0,
+//             flexibleSpace: FlexibleSpaceBar(
+//               // Title stays pinned and visible
+//               title: Text('Title Stays'),
+//               centerTitle: true,
+//             ),
+//             // The bottom widget, which disappears first
+//             bottom: PreferredSize(
+//               preferredSize: Size.fromHeight(80), // Height of bottom widget
+//               child: Container(
+//                 color: Colors.orangeAccent,
+//                 height: 80,
+//                 child: Center(
+//                   child: Text(
+//                     'Bottom Widget',
+//                     style: TextStyle(color: Colors.white, fontSize: 24),
+//                   ),
+//                 ),
+//               ),
+//             ),
+//           ),
+//           SliverList(
+//             delegate: SliverChildBuilderDelegate(
+//               (context, index) => ListTile(
+//                 title: Text('Item #$index'),
+//               ),
+//               childCount: 30,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
 }

@@ -4,15 +4,17 @@ import 'package:flutter_svg/flutter_svg.dart';
 final Map<String, StyleCounterType> displays = {
     "baba": const StyleCounterType(path: "assets/counter/baba", ext: "gif", preferredSize: 48), //AssetImage for images/gifs
     "squares": const StyleCounterType(path: "assets/counter/squares", ext: "svg", preferredSize: 48), //ExactAssetPicture for svg
-    "signs": const StyleCounterType(path: "assets/counter/signs", ext: "png", preferredSize: 64), //AssetImage for images/gifs
+    "image-goobers": const StyleCounterType(path: "assets/counter/image-goobers", ext: "png", preferredSize: 81, filterQuality: FilterQuality.high), //AssetImage for images/gifs
+    "signs": const StyleCounterType(path: "assets/counter/signs", ext: "png", preferredSize: 57), //AssetImage for images/gifs
 };
 
 class StyleCounterType {
-    const StyleCounterType({required this.path, required this.ext, this.preferredSize});
+    const StyleCounterType({required this.path, required this.ext, this.preferredSize, this.filterQuality = FilterQuality.none});
 
     final String path;
     final String ext;
     final double? preferredSize;
+    final FilterQuality filterQuality;
 }
 
 class StyleCounter extends StatelessWidget {
@@ -31,8 +33,9 @@ class StyleCounter extends StatelessWidget {
             children: number.toString().trim().split("").map((e) {
                 final info = displays[display]!;
                 final file = "${info.path}/$e.${info.ext}";
+                final finalHeight = height ?? info.preferredSize;
                 if(info.ext == "svg") return SvgPicture.asset(file,
-                    height: height ?? info.preferredSize,
+                    height: finalHeight,
                     fit: BoxFit.contain,
                     // color: Theme.of(context).colorScheme.primary,
                     theme: SvgTheme(
@@ -40,9 +43,9 @@ class StyleCounter extends StatelessWidget {
                     ),
                 );
                 return Image.asset(file,
-                    height: height ?? info.preferredSize,
+                    height: finalHeight,
                     fit: BoxFit.contain,
-                    filterQuality: FilterQuality.none,
+                    filterQuality: info.filterQuality,
                 );
             }).toList()
         );
