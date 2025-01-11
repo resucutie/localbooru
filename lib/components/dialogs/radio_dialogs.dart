@@ -67,6 +67,12 @@ class ThemeChangerDialog extends StatelessWidget {
     }
 }
 
+final Map<String, String> avaiableCounters = {
+    "squares": "resucutie",
+    "baba": "resucutie",
+    "image-goobers": "endercatcore",
+    "signs": "themtipguy, resucutie",
+};
 class CounterChangerDialog extends StatelessWidget {
     const CounterChangerDialog({super.key, required this.counter});
 
@@ -81,7 +87,7 @@ class CounterChangerDialog extends StatelessWidget {
                 constraints: const BoxConstraints(minWidth: 460),
                 child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: {"squares": "resucutie", "baba": "resucutie", "signs": "themtipguy, resucutie"}.entries.map((counterType) => RadioListTile(
+                    children: avaiableCounters.entries.map((counterType) => RadioListTile(
                         groupValue: counter,
                         value: counterType.key,
                         title: Wrap(

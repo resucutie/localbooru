@@ -306,9 +306,9 @@ class _ImageDisplayState extends State<ImageDisplay> {
                 future: _futureNumber,
                 builder: (context, snapshot) {
                     if(snapshot.hasData) {
-                        // final String counterType = prefs.getString("counter") ?? settingsDefaults["counter"];
-                        final String counterType = "image-goobers"; // hardcoded
-                        return StyleCounter(number: /*snapshot.data!*/ 29674, display: counterType,);
+                        final String counterType = prefs.getString("counter") ?? settingsDefaults["counter"];
+                        // final String counterType = "image-goobers"; // hardcoded
+                        return StyleCounter(number: snapshot.data!, display: counterType,);
                     }
                     if(snapshot.hasError) throw snapshot.error!;
                     return const CircularProgressIndicator();
