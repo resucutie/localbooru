@@ -16,7 +16,7 @@ import 'package:localbooru/views/image_manager/components/tagfield.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageManagerForm extends StatefulWidget {
-    const ImageManagerForm({super.key, this.preset, required this.onChanged, this.onMultipleImagesAdded, this.onErrorUpdate, this.showRelatedImagesCard = true});
+    const ImageManagerForm({super.key, this.preset, required this.onChanged, this.onMultipleImagesAdded, this.onErrorUpdate, this.showRelatedImagesCard = true, this.updateNotifier});
 
     final PresetImage? preset;
     final bool showRelatedImagesCard;
@@ -24,6 +24,7 @@ class ImageManagerForm extends StatefulWidget {
     final void Function(PresetImage preset) onChanged;
     final void Function(bool hasError)? onErrorUpdate;
     final void Function(List<PlatformFile> files)? onMultipleImagesAdded;
+    final ChangeNotifier? updateNotifier;
 
     @override
     State<ImageManagerForm> createState() => _ImageManagerFormState();
@@ -56,32 +57,39 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
         super.initState();
         isEditing = widget.preset?.replaceID != null;
         
-        if(widget.preset != null) {
-            final preset = widget.preset!;
-            if(preset.image != null) loadedImage = preset.image!.path;
-            if(preset.sources != null) urlList = preset.sources!;
-            rating = preset.rating;
-            if(preset.relatedImages != null) relatedImages = preset.relatedImages ?? [];
-
-            if(preset.tags != null) {
-                tagController.text = preset.tags!["generic"]?.join(" ") ?? "";
-                artistTagController.text = preset.tags!["artist"]?.join(" ") ?? "";
-                characterTagController.text = preset.tags!["character"]?.join(" ") ?? "";
-                copyrightTagController.text = preset.tags!["copyright"]?.join(" ") ?? "";
-                speciesTagController.text = preset.tags!["species"]?.join(" ") ?? "";
-            }
-        }
+        if(widget.preset != null) updateInformation(widget.preset!);
+        if(widget.updateNotifier != null) widget.updateNotifier!.addListener(updateListenable);
     }
 
     @override
     void dispose() {
-        super.dispose();
-
         tagController.dispose();
         artistTagController.dispose();
         characterTagController.dispose();
         copyrightTagController.dispose();
         speciesTagController.dispose();
+        if(widget.updateNotifier != null) {
+            widget.updateNotifier!.removeListener(updateListenable);
+        }
+
+        super.dispose();
+    }
+
+    void updateListenable() {if(widget.preset != null) updateInformation(widget.preset!);}
+
+    void updateInformation(PresetImage preset) {
+        if(preset.image != null) loadedImage = preset.image!.path;
+        if(preset.sources != null) urlList = preset.sources!;
+        rating = preset.rating;
+        if(preset.relatedImages != null) relatedImages = preset.relatedImages ?? [];
+
+        if(preset.tags != null) {
+            tagController.text = preset.tags!["generic"]?.join(" ") ?? "";
+            artistTagController.text = preset.tags!["artist"]?.join(" ") ?? "";
+            characterTagController.text = preset.tags!["character"]?.join(" ") ?? "";
+            copyrightTagController.text = preset.tags!["copyright"]?.join(" ") ?? "";
+            speciesTagController.text = preset.tags!["species"]?.join(" ") ?? "";
+        }
     }
 
     void sendPreset() async {
