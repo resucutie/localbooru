@@ -54,7 +54,7 @@ class _TestPlaygroundScreenState extends State<TestPlaygroundScreen> {
                             children: List.filled(5, Image.asset("assets/Screenshot_1009.webp", width: 64, fit: BoxFit.contain, filterQuality: FilterQuality.none,))
                         )
                     ),
-                    // MultipleImage(images: List.filled(3, const AssetImage("assets/Screenshot_1009.webp"))),
+                    MultipleImage(images: List.filled(3, const AssetImage("assets/Screenshot_1009.webp"))),
                     const StyleCounter(number: 1234567890, display: "squares",),
                     const StyleCounter(number: 1234567890, display: "baba",),
                     const StyleCounter(number: 1234567890, display: "signs",),
