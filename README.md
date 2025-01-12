@@ -18,9 +18,11 @@
 
 
 ## Targetted platforms
+- Windows
 - Android
 - Linux
-- Windows
+  - [AUR](https://aur.archlinux.org/packages/localbooru) (`localbooru`) ![AUR](https://img.shields.io/aur/version/localbooru)
+  - [NUR](https://github.com/ixhbinphoenix/nur-packages) (`nur.repos.ixhbinphoenix.localbooru-bin`)
 
 ### Planned platforms
 - macOS
@@ -35,7 +37,10 @@ After doing that, go and download the setup wizard file over at [Releases](https
 Download `localbooru-macos.zip` over at [Releases](https://github.com/resucutie/localbooru/releases/latest), extract its file contents and grab the LocalBooru.app file -->
 
 ### Linux
-There are prebuilt .deb and .rpm packages over at [Releases](https://github.com/resucutie/localbooru/releases/latest), but you can download the binaries if you want. Flatpak support is planned as of writing
+There are prebuilt .deb and .rpm packages over at [Releases](https://github.com/resucutie/localbooru/releases/latest), but you can download the binaries if you want. Flatpak support is planned as of writing  
+
+The package is avaiable on the [AUR](https://aur.archlinux.org/packages/localbooru) and on the NUR (`nur.repos.ixhbinphoenix.localbooru-bin`)
+
 
 ### Android
 Download `localbooru-android.apk` over at [Releases](https://github.com/resucutie/localbooru/releases/latest) and install it by opening the file
