@@ -167,7 +167,7 @@ Future<PresetImage> philomenaToPresetImage(Uri uri, {HandleChunk? handleChunk}) 
         scheme: "https",
         host: uri.host,
         pathSegments: ["api", "v1", "json", "search", "tags"],
-        queryParameters: {"q": querySearch}
+        queryParameters: {"q": querySearch, "per_page": "50"}
     ));
     final tagJson = List<Map<String, dynamic>>.from(jsonDecode(tageRes.body)["tags"]);
 
@@ -184,12 +184,14 @@ Future<PresetImage> philomenaToPresetImage(Uri uri, {HandleChunk? handleChunk}) 
         String tagName;
         String? tagCategory = tag["category"];
 
-        if(TagText(tag["name"]).isMetatag()) {
-            final metatag = Metatag(tag["name"]);
+        final tagText = TagText(tag["name"]);
+
+        if(tagText.isMetatag()) {
+            final metatag = Metatag(tagText);
             tagIdentifier = metatag.selector;
             tagName = metatag.value;
         } else {
-            tagName = tag["name"];
+            tagName = tagText.text;
         }
         if(tagCategory == "spoiler") tagName = tagName.replaceAll("spoiler:", "");
 
@@ -206,7 +208,7 @@ Future<PresetImage> philomenaToPresetImage(Uri uri, {HandleChunk? handleChunk}) 
             continue;
         }
         final String category = switch(tagCategory) {
-            "character" || "oc" => "character",
+            "character" || "oc" => tagName == "oc only" ? "generic" : "character",
             "origin" => //looking at the tag name because apparently generator:stable diffusion does not have a namespace property
                    tagIdentifier == "artist"
                 || tagIdentifier == "editor"
