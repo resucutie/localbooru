@@ -39,10 +39,11 @@ class PresetImage extends VirtualPreset{
         else website = getWebsiteByURL(uri);
 
         final preset = switch (website) {
-            ServiceWebsites.danbooru1 => await danbooru1ToPresetImage(uri),
-            ServiceWebsites.danbooru2 => await danbooru2ToPresetImage(uri),
-            ServiceWebsites.e621 => await e621ToPresetImage(uri),
-            ServiceWebsites.gelbooru020 || ServiceWebsites.gelbooru025 => await gelbooruToPresetImage(uri),
+            BooruWebsites.danbooru1 => await danbooru1ToPresetImage(uri),
+            BooruWebsites.danbooru2 => await danbooru2ToPresetImage(uri),
+            BooruWebsites.e621 => await e621ToPresetImage(uri),
+            BooruWebsites.gelbooru020 || BooruWebsites.gelbooru025 => await gelbooruToPresetImage(uri),
+            BooruWebsites.philomena => await philomenaToPresetImage(uri),
             ServiceWebsites.twitter => await twitterToPresetImage(uri),
             ServiceWebsites.furAffinity => await furaffinityToPresetImage(uri),
             ServiceWebsites.deviantArt => await deviantartToPresetImage(url),
