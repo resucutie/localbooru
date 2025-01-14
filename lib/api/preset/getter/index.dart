@@ -46,6 +46,7 @@ String getWebsiteName(Websites websites) {
         BooruWebsites.danbooru2 => "Danbooru",
         BooruWebsites.e621 => "e621",
         BooruWebsites.gelbooru025 || BooruWebsites.gelbooru020 || BooruWebsites.gelbooru01 => "Gelbooru",
+        BooruWebsites.philomena => "Philomena",
         ServiceWebsites.twitter => "Twitter",
         ServiceWebsites.furAffinity => "FurAffinity",
         ServiceWebsites.deviantArt => "DeviantArt",
@@ -63,6 +64,7 @@ Widget? getWebsiteIcon(Websites website, {Color? color}) {
         BooruWebsites.e621 => SvgPicture.asset("assets/websites/e621.svg", width: 24, height: 24, color: color,),
         BooruWebsites.gelbooru01 || BooruWebsites.gelbooru020 || BooruWebsites.gelbooru025
             => SvgPicture.asset("assets/websites/gelbooru.svg", width: 24, height: 24, color: color ?? Colors.blue,),
+        BooruWebsites.philomena => SvgPicture.asset("assets/websites/derpibooru.svg", width: 24, height: 24, color: color,),
         ServiceWebsites.twitter => SvgPicture.asset("assets/websites/twitter.svg", width: 24, height: 24, color: color,),
         ServiceWebsites.furAffinity => Icon(Icons.pets, color: color,),
         ServiceWebsites.deviantArt => SvgPicture.asset("assets/websites/deviantart.svg", width: 24, height: 24, color: color,),
