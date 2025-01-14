@@ -44,6 +44,7 @@ Future<Websites?> _determineWebsiteByWebcrawl(Uri uri) async {
 
     if(head!.querySelector("meta[content=\"Frost Dragon Art LLC\"]") != null) return ServiceWebsites.furAffinity;
     if(head.querySelector("meta[content=\"philomena\"]") != null) return BooruWebsites.philomena;
+    if(head.querySelector("meta[content=\"booru-on-rails\"]") != null) return BooruWebsites.booruOnRails;
     if(head.querySelector("meta[content=\"DeviantArt\"]") != null) return ServiceWebsites.deviantArt;
     if(head.querySelector("link[href^=\"https://abs.twimg.com/responsive-web/client-web/\"]") != null) return ServiceWebsites.twitter;
     return null;

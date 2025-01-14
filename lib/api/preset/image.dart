@@ -43,7 +43,7 @@ class PresetImage extends VirtualPreset{
             BooruWebsites.danbooru2 => await danbooru2ToPresetImage(uri),
             BooruWebsites.e621 => await e621ToPresetImage(uri),
             BooruWebsites.gelbooru020 || BooruWebsites.gelbooru025 => await gelbooruToPresetImage(uri),
-            BooruWebsites.philomena => await philomenaToPresetImage(uri),
+            BooruWebsites.philomena || BooruWebsites.booruOnRails => await philomenaToPresetImage(uri, useBooruOnRails: website == BooruWebsites.booruOnRails),
             ServiceWebsites.twitter => await twitterToPresetImage(uri),
             ServiceWebsites.furAffinity => await furaffinityToPresetImage(uri),
             ServiceWebsites.deviantArt => await deviantartToPresetImage(url),

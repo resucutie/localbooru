@@ -8,7 +8,8 @@ enum BooruWebsites implements Websites {
     gelbooru020,
     gelbooru025,
     gelbooru01,
-    philomena
+    philomena,
+    booruOnRails
 }
 enum ServiceWebsites implements Websites {
     twitter,
@@ -29,8 +30,8 @@ Websites? getWebsiteByURL(Uri uri) {
     if( uri.host.endsWith("derpibooru.org")
         || uri.host.endsWith("ponerpics.org")
         || uri.host.endsWith("ponybooru.org")
-        // || uri.host.endsWith("twibooru.org") // booru-on-rails
     ) return BooruWebsites.philomena;
+    if(uri.host.endsWith("twibooru.org")) return BooruWebsites.booruOnRails;
     if( uri.host == "twitter.com" || uri.host == "x.com" ||
         uri.host.endsWith("fixupx.com") || uri.host.endsWith("fivx.com") || uri.host.endsWith("fxtwitter.com") || uri.host.endsWith("vxtwitter.com")
     ) return ServiceWebsites.twitter;
@@ -47,6 +48,7 @@ String getWebsiteName(Websites websites) {
         BooruWebsites.e621 => "e621",
         BooruWebsites.gelbooru025 || BooruWebsites.gelbooru020 || BooruWebsites.gelbooru01 => "Gelbooru",
         BooruWebsites.philomena => "Philomena",
+        BooruWebsites.booruOnRails => "Booru on Rails",
         ServiceWebsites.twitter => "Twitter",
         ServiceWebsites.furAffinity => "FurAffinity",
         ServiceWebsites.deviantArt => "DeviantArt",
@@ -64,7 +66,7 @@ Widget? getWebsiteIcon(Websites website, {Color? color}) {
         BooruWebsites.e621 => SvgPicture.asset("assets/websites/e621.svg", width: 24, height: 24, color: color,),
         BooruWebsites.gelbooru01 || BooruWebsites.gelbooru020 || BooruWebsites.gelbooru025
             => SvgPicture.asset("assets/websites/gelbooru.svg", width: 24, height: 24, color: color ?? Colors.blue,),
-        BooruWebsites.philomena => SvgPicture.asset("assets/websites/derpibooru.svg", width: 24, height: 24, color: color,),
+        BooruWebsites.philomena || BooruWebsites.booruOnRails => SvgPicture.asset("assets/websites/derpibooru.svg", width: 24, height: 24, color: color,),
         ServiceWebsites.twitter => SvgPicture.asset("assets/websites/twitter.svg", width: 24, height: 24, color: color,),
         ServiceWebsites.furAffinity => Icon(Icons.pets, color: color,),
         ServiceWebsites.deviantArt => SvgPicture.asset("assets/websites/deviantart.svg", width: 24, height: 24, color: color,),

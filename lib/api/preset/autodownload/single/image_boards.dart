@@ -156,18 +156,27 @@ Future<PresetImage> gelbooruToPresetImage(Uri uri) async {
     );
 }
 
-Future<PresetImage> philomenaToPresetImage(Uri uri, {HandleChunk? handleChunk}) async {
+// booru_on_rails and philomena have almost to identical APIs
+Future<PresetImage> philomenaToPresetImage(Uri uri, {HandleChunk? handleChunk, bool useBooruOnRails = false}) async {
+    const philomenaAPIPath = ["v1", "json"];
+    const booruOnRailsAPIPath = ["v3"];
     final imageID = uri.pathSegments[1];
-    final imageRes = await lbHttp.get(Uri.parse([uri.origin, "api", "v1", "json", "images", imageID].join("/")));
-    final imageJson = jsonDecode(imageRes.body)["image"];
+    final imageRes = await lbHttp.get(Uri.parse([
+        uri.origin,
+        "api",
+        ...(useBooruOnRails ? booruOnRailsAPIPath : philomenaAPIPath),
+        useBooruOnRails ? "posts" : "images",
+        imageID
+    ].join("/")));
+    final imageJson = jsonDecode(imageRes.body)[useBooruOnRails ? "post" : "image"];
 
     final tagIDs = List<int>.from(imageJson["tag_ids"]);
     final querySearch = tagIDs.map<String>((id) => "id:$id").join(" || "); // "||" = OR operator
     final tageRes = await lbHttp.get(Uri(
         scheme: "https",
         host: uri.host,
-        pathSegments: ["api", "v1", "json", "search", "tags"],
-        queryParameters: {"q": querySearch, "per_page": "50"}
+        pathSegments: ["api", ...(useBooruOnRails ? booruOnRailsAPIPath : philomenaAPIPath), "search", "tags"],
+        queryParameters: {"q": querySearch, "per_page": "${tagIDs.length}"}
     ));
     final tagJson = List<Map<String, dynamic>>.from(jsonDecode(tageRes.body)["tags"]);
 
