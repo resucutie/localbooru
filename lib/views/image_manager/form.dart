@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
@@ -23,7 +22,7 @@ class ImageManagerForm extends StatefulWidget {
     // final bool shouldOpenRecents;
     final void Function(PresetImage preset) onChanged;
     final void Function(bool hasError)? onErrorUpdate;
-    final void Function(List<PlatformFile> files)? onMultipleImagesAdded;
+    final void Function(List<File> files)? onMultipleImagesAdded;
 
     @override
     State<ImageManagerForm> createState() => _ImageManagerFormState();
@@ -165,7 +164,7 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
                     children: [
                         ImageUploadForm(
                             onChanged: (value) {
-                                setState(() => loadedImage = value.first.path!);
+                                setState(() => loadedImage = value.first.path);
                                 sendPreset();
                                 if(value.length > 1 && widget.onMultipleImagesAdded != null) widget.onMultipleImagesAdded!(value..removeAt(0));
                             },

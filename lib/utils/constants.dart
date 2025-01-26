@@ -101,24 +101,30 @@ class SpecificTagsIcons {
 class SuperFormats {
     static const List<SimpleFileFormat> imageStaticOnly = [Formats.png, Formats.jpeg, Formats.bmp, Formats.webp];
     static const List<SimpleFileFormat> image = [...imageStaticOnly, Formats.gif];
-    static const List<SimpleFileFormat> video = [Formats.mp4, Formats.webm, Formats.mpeg, Formats.mov, Formats.mkv];
+    static const List<SimpleFileFormat> video = [Formats.mp4, Formats.webm, Formats.mpeg, Formats.mov, Formats.mkv, Formats.m4a];
     static const List<SimpleFileFormat> all = [...image, ...video];
 
+    static const _lookupTable = {
+        "png": Formats.png,
+        "jpeg": Formats.jpeg,
+        "jpg": Formats.jpeg,
+        "bmp": Formats.bmp,
+        "webp": Formats.webp,
+        "gif": Formats.gif,
+        "mp4": Formats.mp4,
+        "webm": Formats.webm,
+        "mpeg": Formats.mpeg,
+        "mov": Formats.mov,
+        "mkv": Formats.mkv,
+    };
+
     static SimpleFileFormat? getFormatFromFileExtension(String extension) {
-        if(extension.startsWith(".")) extension = extension.substring(1);
-        return switch(extension) {
-            "png" => Formats.png,
-            "jpeg" || "jpg" => Formats.jpeg,
-            "bmp" => Formats.bmp,
-            "webp" => Formats.webp,
-            "gif" => Formats.gif,
-            "mp4" => Formats.mp4,
-            "webm" => Formats.webm,
-            "mpeg" => Formats.mpeg,
-            "mov" => Formats.mov,
-            "mkv" => Formats.mkv,
-            _ => null
-        };
+        String extensionCopy = extension;
+        if(extensionCopy.startsWith(".")) extensionCopy = extensionCopy.substring(1);
+        return _lookupTable[extensionCopy];
+    }
+    static String? getFileExtensionFromFormat(SimpleFileFormat format) {
+        return _lookupTable.entries.firstWhere((e) => e.value == format,).key;
     }
 }
 
