@@ -145,11 +145,37 @@ class SearchTag extends StatefulWidget {
 class _SearchTagState extends State<SearchTag> {
     SearchController _controller = SearchController();
 
+    Map<String, List<String>>? tagsAndTypes;
+
     @override
     void initState() {
         super.initState();
 
         if(widget.controller != null) _controller = widget.controller!;
+
+        booruUpdateListener.addListener(cacheTags);
+    }
+    
+    @override
+    void dispose() {
+        booruUpdateListener.removeListener(cacheTags);
+        super.dispose();
+    }
+
+    Future<void> cacheTags() async {
+        Booru booru = await getCurrentBooru();
+        final tags = await booru.getAllTags();
+
+
+        tagsAndTypes = await booru.separateTagsByType(tags);
+        tagsAndTypes!["metatag"] = tagsToAddToSearch;
+        refreshSuggestions();
+    }
+
+    void refreshSuggestions() {
+        final previousText = _controller.text;
+        _controller.text = '\u200B$previousText'; // This will trigger updateSuggestions and call `suggestionsBuilder`.
+        _controller.text = previousText;
     }
 
     @override
@@ -174,18 +200,21 @@ class _SearchTagState extends State<SearchTag> {
                 backgroundColor: WidgetStatePropertyAll<Color?>(widget.backgroundColor),
             ),
             suggestionsBuilder: (context, controller) async {
-                Booru booru = await getCurrentBooru();
-                List<String> tags = await booru.getAllTags();
-                final currentTags = List<String>.from(controller.text.split(" "));
+                if(tagsAndTypes == null) await cacheTags();
+                final tagsOnSearch = List<String>.from(controller.text.split(" "));
 
-                final filteredTags = List<String>.from(tags)..addAll(tagsToAddToSearch)..retainWhere((s){
-                    return currentTags.last.isEmpty || s.contains(TagText(currentTags.last).text);
-                });
+                // final filteredTags = Map<String, List<String>>.from(tagsAndTypes!)..retainWhere((s){
+                //     return tagsOnSearch.last.isEmpty || s.contains(TagText(tagsOnSearch.last).text);
+                // });
 
-                final specialTags = await booru.separateTagsByType(filteredTags);
+                final filteredTags = tagsAndTypes!.map((type, tags) {
+                    return MapEntry(type, tags.where((tag) {
+                        return tagsOnSearch.last.isEmpty || tag.contains(TagText(tagsOnSearch.last).text);
+                    },));
+                },);
 
-                return specialTags.entries.map((type) => type.value.map((tag) {
-                    final isMetatag = tag.contains(":") && tag.split(":").first.isNotEmpty;
+                return filteredTags.entries.map((type) => type.value.map((tag) {
+                    final isMetatag = type.key == "metatag";
                     final color = !isMetatag ? SpecificTagsColors.getColor(type.key) : null;
                     return ListTile(
                         leading: Icon(!isMetatag ? SpecificTagsIcons.getIcon(type.key) : Icons.lightbulb, color: color,),
@@ -196,9 +225,7 @@ class _SearchTagState extends State<SearchTag> {
                             ),
                         ),
                         onTap: () {
-                            List endResult = List.from(currentTags);
-                            endResult.removeLast();
-                            endResult.add(tag);
+                            final endResult = List.from(tagsOnSearch)..removeLast()..add(tag);
                             setState(() {
                                 if(isMetatag) controller.text = endResult.join(" ");
                                 else controller.text = "${endResult.join(" ")} ";
@@ -215,7 +242,7 @@ class _SearchTagState extends State<SearchTag> {
         );
     }
 }
-final List<String> tagsToAddToSearch = [
+const List<String> tagsToAddToSearch = [
     "rating:none",
     "rating:safe",
     "rating:questionable",
@@ -223,7 +250,6 @@ final List<String> tagsToAddToSearch = [
     "rating:borderline",
     "id:",
     "file:",
-    "type:",
     "type:static",
     "type:animated",
     "source:",
