@@ -109,13 +109,18 @@ class Booru {
     }
 
 
-    Future<List<String>> getAllTags() async {
+    Future<List<BooruTagCounterDisplay>> getAllTags() async {
         final List files = (await getRawInfo())["files"];
-        List<String> allTags = List<String>.empty(growable: true);
+        List<BooruTagCounterDisplay> allTags = List<BooruTagCounterDisplay>.empty(growable: true);
         for (var file in files) {
             List<String> fileTags = file["tags"].split(" ");
             for (String tag in fileTags) {
-                if(allTags.isEmpty || !allTags.contains(tag)) allTags.add(tag);
+                final tagInstance = allTags.indexWhere((element) => element.tag == tag,);
+                if(tagInstance < 0) {
+                    allTags.add(BooruTagCounterDisplay(tag: tag, callQuantity: 1));
+                } else {
+                    allTags[tagInstance].callQuantity++;
+                }
             }
         }
         
@@ -131,7 +136,7 @@ class Booru {
     Future<List<String>> getAllTagsFromType(String type) async {
         final Map specificTags = Map.from((await getRawInfo())["specificTags"]);
         if (type == "generic") {
-            final allTags = await getAllTags();
+            final allTags = (await getAllTags()).map((e) => e.tag,).toList();
             final allSpecificTags = specificTags.values.expand((i) => i).toList();
             allTags.removeWhere((element) => allSpecificTags.contains(element));
             return allTags;
@@ -221,3 +226,10 @@ class BooruCollection {
 }
 
 enum Rating {safe, questionable, explicit, illegal}
+
+class BooruTagCounterDisplay {
+    BooruTagCounterDisplay({required this.tag, required this.callQuantity});
+
+    String tag;
+    int callQuantity;
+}
