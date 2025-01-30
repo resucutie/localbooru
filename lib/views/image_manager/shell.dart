@@ -11,6 +11,7 @@ import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/components/dialogs/textfield_dialogs.dart';
 import 'package:localbooru/utils/platform_tools.dart';
+import 'package:localbooru/views/image_manager/components/image_upload.dart';
 import 'package:localbooru/views/image_manager/form.dart';
 import 'package:localbooru/views/image_manager/general_collection_manager.dart';
 import 'package:path/path.dart' as p;
@@ -84,12 +85,10 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
 
     bool hasError() => errorOnPages.any((element) => element,);
 
-    void addMultipleImages(List<PlatformFile> files) {
-        for (PlatformFile file in files) {
-            if(file.path != null) {
-                preset.pages!.add(PresetImage(image: File(file.path!), key: UniqueKey()));
-                errorOnPages.add(true);
-            }
+    void addMultipleImages(List<File> files) {
+        for (final file in files) {
+            preset.pages!.add(PresetImage(image: file, key: UniqueKey()));
+            errorOnPages.add(true);
         }
     }
 
@@ -196,10 +195,10 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                         title: const Text("Add image"),
                                         leading: const Icon(Icons.add),
                                         onTap: () async {
-                                            FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
-                                            if (result != null) {
+                                            final files = await selectFileModal(context: context);
+                                            if (files != null) {
                                                 // if(preset.pages!.first.image == null && result.files.length > 1) preset.pages = [];
-                                                addMultipleImages(result.files);
+                                                addMultipleImages(files);
                                                 setState(() => imagePage = preset.pages!.length - 1);
                                                 _scaffoldKey.currentState!.closeEndDrawer();
                                             }
