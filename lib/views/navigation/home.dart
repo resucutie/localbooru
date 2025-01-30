@@ -145,7 +145,7 @@ class SearchTag extends StatefulWidget {
 class _SearchTagState extends State<SearchTag> {
     SearchController _controller = SearchController();
 
-    Map<String, List<BooruTagCounterDisplay>>? tagsAndTypes;
+    Map<String, List<BooruTagCounterDisplay>> tagsAndTypes = {};
 
     @override
     void initState() {
@@ -164,19 +164,21 @@ class _SearchTagState extends State<SearchTag> {
 
     Future<void> cacheTags() async {
         Booru booru = await getCurrentBooru();
-        final tags = await booru.getAllTags();
+        final Map<String, BooruTagCounterDisplay> tags = {}; //transform it in tag for better matching, so we can avoid spamming firstWhere 
+        for(final tag in await booru.getAllTags()) {
+            tags[tag.tag] = tag;
+        }
 
 
-        final categorizedTags = await booru.separateTagsByType(tags.map((e) => e.tag,).toList());
-        tagsAndTypes = categorizedTags.map((key, value) {
-            final retValue = value
-                .map((e) => tags.firstWhere((element) => element.tag == e))
-                .toList()
-                ..sort((a, b) => b.callQuantity.compareTo(a.callQuantity),)
-                ;
-            return MapEntry(key, retValue);
-        }); // write this map better
-        tagsAndTypes!["metatag"] = tagsToAddToSearch;
+        final categorizedTags = await booru.separateTagsByType(tags.values.map((e) => e.tag,).toList());
+        for(final type in categorizedTags.entries) {
+            if(tagsAndTypes[type.key] == null) tagsAndTypes[type.key] = [];
+            for(final tagString in type.value) {
+                tagsAndTypes[type.key]!.add(tags[tagString]!);
+            }
+            tagsAndTypes[type.key]!.sort((a, b) => b.callQuantity.compareTo(a.callQuantity),);
+        }
+        tagsAndTypes["metatag"] = tagsToAddToSearch;
         refreshSuggestions();
     }
 
@@ -208,14 +210,14 @@ class _SearchTagState extends State<SearchTag> {
                 backgroundColor: WidgetStatePropertyAll<Color?>(widget.backgroundColor),
             ),
             suggestionsBuilder: (context, controller) async {
-                if(tagsAndTypes == null) await cacheTags();
+                if(tagsAndTypes.isEmpty) await cacheTags();
                 final tagsOnSearch = List<String>.from(controller.text.split(" "));
 
                 // final filteredTags = Map<String, List<String>>.from(tagsAndTypes!)..retainWhere((s){
                 //     return tagsOnSearch.last.isEmpty || s.contains(TagText(tagsOnSearch.last).text);
                 // });
 
-                final filteredTags = tagsAndTypes!.map((type, tags) {
+                final filteredTags = tagsAndTypes.map((type, tags) {
                     return MapEntry(type, tags.where((tag) {
                         return tagsOnSearch.last.isEmpty || tag.tag.contains(TagText(tagsOnSearch.last).text);
                     },));
