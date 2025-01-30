@@ -236,7 +236,7 @@ class _SearchTagState extends State<SearchTag> {
                         ),
                         trailing: tag.callQuantity > 0 ? Text("${tag.callQuantity}") : null,
                         onTap: () {
-                            final endResult = List.from(tagsOnSearch)..removeLast()..add(tag);
+                            final endResult = List<String>.from(tagsOnSearch)..removeLast()..add(tag.tag);
                             setState(() {
                                 if(isMetatag) controller.text = endResult.join(" ");
                                 else controller.text = "${endResult.join(" ")} ";
