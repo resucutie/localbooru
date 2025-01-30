@@ -20,10 +20,18 @@ class _TagFieldState extends State<TagField> {
     late TextEditingController controller;
     GlobalKey textboxKey = GlobalKey();
 
+    late List<String> allTags;
+
     @override
     void initState() {
         super.initState();
         controller = widget.controller ?? TextEditingController();
+        cacheTags();
+    }
+
+    void cacheTags() async {
+        Booru currentBooru = await getCurrentBooru();
+        allTags = await currentBooru.getAllTagsFromType(widget.type);
     }
 
     bool spawnAtBottom() {
@@ -47,8 +55,8 @@ class _TagFieldState extends State<TagField> {
                     restOfList.removeLast();
                     String tag = tagList.last;
 
-                    Booru currentBooru = await getCurrentBooru();
-                    List<String> allTags = await currentBooru.getAllTagsFromType(widget.type);
+                    // Booru currentBooru = await getCurrentBooru();
+                    // List<String> allTags = await currentBooru.getAllTagsFromType(widget.type);
 
                     List<String> matches = List.from(allTags);
 
