@@ -45,18 +45,6 @@ jobs:
         with:
           channel: 'stable'
           flutter-version: '3.27.3'
-      - name: Use pub version of media_kit_video
-        uses: fjogeleit/yaml-update-action@main
-        with:
-          valueFile: 'pubspec.yaml'
-          commitChange: false
-          changes: |
-            {
-              "pubspec.yaml": {
-                "dependencies.media_kit_video": "^1.2.4",
-                "dependency_overrides": {}
-              }
-            }
       - name: Install project dependencies
         run: flutter pub get
       - name: Enable windows building
