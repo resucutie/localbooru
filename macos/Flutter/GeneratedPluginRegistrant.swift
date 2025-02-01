@@ -6,7 +6,7 @@ import FlutterMacOS
 import Foundation
 
 import device_info_plus
-import dynamic_color
+import dynamic_system_colors
 import fc_native_video_thumbnail
 import fvp
 import irondash_engine_context

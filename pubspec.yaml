@@ -48,7 +48,6 @@ dependencies:
   http: ^1.2.0
   titlebar_buttons: ^1.0.0
   path_provider: ^2.1.4
-  dynamic_color: ^1.6.9
   package_info_plus: ^8.0.0
   super_clipboard: ^0.9.0-dev.4
   flutter_svg: ^1.1.6
@@ -82,6 +81,7 @@ dependencies:
   chewie: ^1.8.5
   visibility_detector: ^0.4.0+2
   fc_native_video_thumbnail: ^0.16.1
+  dynamic_system_colors: ^1.8.0
 
 dev_dependencies:
   flutter_test:
