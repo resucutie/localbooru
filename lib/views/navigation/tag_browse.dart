@@ -264,7 +264,7 @@ class SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
             child: Container(
                 padding: const EdgeInsets.all(8.0),
                 constraints: const BoxConstraints(maxWidth: 1080),
-                child: SearchTag(
+                child: SearchTagBox(
                     onSearch: onSearch,
                     controller: searchController,
                     isFullScreen: false,
@@ -387,7 +387,7 @@ class _SearchBarOnGridListState extends State<SearchBarOnGridList> {
         return Container(
             padding: widget.desktopDisplay ? const EdgeInsets.all(16.0) : null,
             constraints: widget.desktopDisplay ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
-            child: SearchTag(
+            child: SearchTagBox(
                 onSearch: (text) => widget.onSearch(text),
                 controller: _searchController,
                 actions: !widget.desktopDisplay ? [] : [IconButton(onPressed: () => widget.onSearch(_searchController.text), icon: const Icon(Icons.search))],

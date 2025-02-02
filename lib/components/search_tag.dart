@@ -3,8 +3,8 @@ import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/tags/index.dart';
 import 'package:localbooru/utils/constants.dart';
 
-class SearchTag extends StatefulWidget {
-    const SearchTag({super.key, this.hint, required this.onSearch, this.controller, this.isFullScreen, this.actions, this.showShadow = false, this.leading = const Icon(Icons.search), this.padding = const EdgeInsets.only(left: 16.0, right: 10.0), this.backgroundColor, this.elevation});
+class SearchTagBox extends StatefulWidget {
+    const SearchTagBox({super.key, this.hint, required this.onSearch, this.controller, this.isFullScreen, this.actions, this.showShadow = false, this.leading = const Icon(Icons.search), this.padding = const EdgeInsets.only(left: 16.0, right: 10.0), this.backgroundColor, this.elevation});
 
     final String? hint;
     final Function(String value) onSearch;
@@ -18,10 +18,10 @@ class SearchTag extends StatefulWidget {
     final double? elevation;
 
     @override
-    State<SearchTag> createState() => _SearchTagState();
+    State<SearchTagBox> createState() => _SearchTagBoxState();
 }
 
-class _SearchTagState extends State<SearchTag> {
+class _SearchTagBoxState extends State<SearchTagBox> {
     SearchController _controller = SearchController();
 
     @override
@@ -58,7 +58,10 @@ class _SearchTagState extends State<SearchTag> {
                 final currentTags = List<String>.from(controller.text.split(" "));
 
                 final filteredTags = List<String>.from(tags)..addAll(tagsToAddToSearch)..retainWhere((s){
-                    return currentTags.last.isEmpty || s.contains(TagText(currentTags.last).text);
+                    if((List<String>.from(currentTags)..removeLast()).contains(s)) return false;
+                    if(currentTags.last.isEmpty) return true;
+                    final nomModifierLastTagInserted = SearchTag.obtainModifier(currentTags.last) == Modifier.filterModifier ? currentTags.last : currentTags.last.substring(1);
+                    return s.contains(nomModifierLastTagInserted);
                 });
 
                 final specialTags = await booru.separateTagsByType(filteredTags);

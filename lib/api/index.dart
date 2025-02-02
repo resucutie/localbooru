@@ -8,9 +8,6 @@ import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/api/tags/index.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
-import 'package:localbooru/utils/misc.dart';
-import 'package:mime/mime.dart';
-import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 

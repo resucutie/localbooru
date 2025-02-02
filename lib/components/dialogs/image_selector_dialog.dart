@@ -69,7 +69,7 @@ class _SelectDialogState extends State<SelectDialog> {
                             // ),
                             Container(
                                 constraints: const BoxConstraints(maxHeight: 44),
-                                child: SearchTag(
+                                child: SearchTagBox(
                                     controller: controller,
                                     onSearch: (value) => onSearch(),
                                     hint: imageIDs.isNotEmpty ? "Selected: ${imageIDs.length}" : "Select elements",

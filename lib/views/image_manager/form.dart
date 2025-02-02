@@ -145,7 +145,7 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
             
             //check for metatags
             for(final tag in splitValue) {
-                if(TagText(tag).isMetatag()) return "Metatags cannot be added";
+                if(Metatag.isMetatag(tag)) return "Metatags cannot be added";
             }
         }
 

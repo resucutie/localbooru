@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage> {
                                         const SizedBox(height: 64),
                                         const LocalBooruHeader(),
                                         const SizedBox(height: 32),
-                                        SearchTag(
+                                        SearchTagBox(
                                             onSearch: (_) => _onSearch(),
                                             controller: _searchController,
                                             hint: "Type a tag",
