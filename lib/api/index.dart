@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/preset/index.dart';
+import 'package:localbooru/api/tags/index.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/misc.dart';
@@ -16,7 +17,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 part 'readable.dart';
 part 'writable.dart';
-part 'tags.dart';
 
 Booru? currentBooru;
 

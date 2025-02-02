@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/api/tags/index.dart';
 import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/dialogs/radio_dialogs.dart';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/api/tags/index.dart';
 import 'package:localbooru/utils/constants.dart';
 
 class SearchTag extends StatefulWidget {

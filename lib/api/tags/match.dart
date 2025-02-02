@@ -1,65 +1,4 @@
-part of localbooru_api;
-
-typedef AccuracyTagList = Map<String, double>;
-
-Future<AccuracyTagList> autoTag(File file) async {
-    //fetch it
-    http.MultipartRequest req = http.MultipartRequest("POST", Uri.parse("https://autotagger.donmai.us/evaluate"));
-    req.headers['Content-Type'] = 'application/json; charset=UTF-8';
-    req.files.add(http.MultipartFile.fromBytes("file", await file.readAsBytes(), filename: p.basename(file.path)));
-    req.fields["format"] = "json";
-    http.Response response = await http.Response.fromStream(await req.send());
-
-    // process it
-    final AccuracyTagList tags = AccuracyTagList.from(jsonDecode(response.body)[0]["tags"])..removeWhere((tag, _) => TagText(tag).isMetatag());
-    return tags;
-}
-
-AccuracyTagList filterAccurateResults(AccuracyTagList tags, double filterPercentage) {
-    return AccuracyTagList.from(tags)..removeWhere((tag, accuracy) => accuracy < filterPercentage);
-}
-
-final List<String> selectors = ["+", "-"];
-
-class TagText {
-    const TagText(this.rawText);
-
-    final String rawText;
-
-    String get text {
-        if(obtainSelector() != null) {
-            return rawText.substring(1);
-        } else {
-            return rawText;
-        }
-    }
-
-    String? obtainSelector(){
-        final String firstElement = rawText[0];
-        if(selectors.contains(firstElement)) return firstElement;
-        return null;
-    }
-
-    bool isMetatag() {
-        final split = text.split(":");
-        return split.length == 2 && split.first.isNotEmpty && split.last.isNotEmpty;
-    }
-}
-
-class Metatag {
-    Metatag(this.rawTag) {
-        if(!rawTag.isMetatag()) throw "${rawTag.text} is not a metatag";
-
-        final List<String> split = rawTag.text.split(":");
-        selector = split[0];
-        value = split[1];
-    }
-    
-    final TagText rawTag;
-
-    late String selector;
-    late String value;
-}
+part of tag_manager;
 
 Future<bool> wouldImageBeSelected({required List<String> inputTags, required Map file}) async {
     bool hasTagWithInclusion = await Future.wait(inputTags.where((t) => t.startsWith("+")).map((tagSearch) async {
@@ -119,7 +58,6 @@ Future<bool> doTagMatch({required Map file, required TagText tag}) async {
             case "collection":
                 final booru = await getCurrentBooru();
                 final obtainedCollections = await booru.obtainMatchingCollection(file["id"]);
-                debugPrint("${file["id"]} $obtainedCollections");
                 return obtainedCollections.any((collection) => rangeMatch(double.parse(collection.id), metatag.value) || collection.id == metatag.value);
             default:
                 return false;
