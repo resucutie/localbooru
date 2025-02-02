@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/search_tag.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/tag_browse.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
