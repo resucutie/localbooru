@@ -122,6 +122,16 @@ flutter:
     - assets/websites/twitter.svg
     - assets/websites/deviantart.svg
 
+    - assets/counter/image-goobers/0.png
+    - assets/counter/image-goobers/1.png
+    - assets/counter/image-goobers/2.png
+    - assets/counter/image-goobers/3.png
+    - assets/counter/image-goobers/4.png
+    - assets/counter/image-goobers/5.png
+    - assets/counter/image-goobers/6.png
+    - assets/counter/image-goobers/7.png
+    - assets/counter/image-goobers/8.png
+    - assets/counter/image-goobers/9.png
     - assets/counter/baba/0.gif
     - assets/counter/baba/1.gif
     - assets/counter/baba/2.gif
