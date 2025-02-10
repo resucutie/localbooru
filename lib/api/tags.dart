@@ -42,7 +42,9 @@ class TagText {
 
     bool isMetatag() {
         final split = text.split(":");
-        return split.length == 2 && split.first.isNotEmpty && split.last.isNotEmpty;
+        return split.length == 2 // has only two
+            && split.first.isNotEmpty && split.last.isNotEmpty // there is something before and after ":"
+            && split.first.substring(split.first.length - 1) != " " && split.last[0] != " "; //avoid cases like "my little pony: friendship is magic"
     }
 }
 

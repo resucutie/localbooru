@@ -121,6 +121,7 @@ flutter:
     - assets/websites/gelbooru.svg
     - assets/websites/twitter.svg
     - assets/websites/deviantart.svg
+    - assets/websites/derpibooru.svg
 
     - assets/counter/image-goobers/0.png
     - assets/counter/image-goobers/1.png

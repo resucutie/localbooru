@@ -155,3 +155,91 @@ Future<PresetImage> gelbooruToPresetImage(Uri uri) async {
         }
     );
 }
+
+// booru_on_rails and philomena have almost to identical APIs
+Future<PresetImage> philomenaToPresetImage(Uri uri, {HandleChunk? handleChunk, bool useBooruOnRails = false}) async {
+    const philomenaAPIPath = ["v1", "json"];
+    const booruOnRailsAPIPath = ["v3"];
+    final imageID = uri.pathSegments[1];
+    final imageRes = await lbHttp.get(Uri.parse([
+        uri.origin,
+        "api",
+        ...(useBooruOnRails ? booruOnRailsAPIPath : philomenaAPIPath),
+        useBooruOnRails ? "posts" : "images",
+        imageID
+    ].join("/")));
+    final imageJson = jsonDecode(imageRes.body)[useBooruOnRails ? "post" : "image"];
+
+    final tagIDs = List<int>.from(imageJson["tag_ids"]);
+    final querySearch = tagIDs.map<String>((id) => "id:$id").join(" || "); // "||" = OR operator
+    final tageRes = await lbHttp.get(Uri(
+        scheme: "https",
+        host: uri.host,
+        pathSegments: ["api", ...(useBooruOnRails ? booruOnRailsAPIPath : philomenaAPIPath), "search", "tags"],
+        queryParameters: {"q": querySearch, "per_page": "${tagIDs.length}"}
+    ));
+    final tagJson = List<Map<String, dynamic>>.from(jsonDecode(tageRes.body)["tags"]);
+
+    final Map<String, List<String>> tagList = {
+        "generic": [],
+        "artist": [],
+        "character": [],
+        "copyright": [],
+        "species": [],
+    };
+    Rating? rating;
+    for (final tag in tagJson) {
+        String? tagIdentifier; // artist, editor, generator...
+        String tagName;
+        String? tagCategory = tag["category"];
+
+        final tagText = TagText(tag["name"]);
+
+        if(tagText.isMetatag()) {
+            final metatag = Metatag(tagText);
+            tagIdentifier = metatag.selector;
+            tagName = metatag.value;
+        } else {
+            tagName = tagText.text;
+        }
+        if(tagCategory == "spoiler") tagName = tagName.replaceAll("spoiler:", "");
+
+        if(tagName == "oc") continue; //skip if "oc"
+        
+        if(tagCategory == "rating") { // skip but sets the rating
+            rating = switch(tagName) {
+                "safe" || "semi-grimdark" => Rating.safe, // not exactly solid on semi-grimdark
+                "explicit" => Rating.explicit,
+                "suggestive" || "questionable" => Rating.questionable,
+                "grimdark" || "grotesque" => Rating.illegal, // not so sure about bodily waste, but "grotesque" abranges more than that
+                _ => null
+            };
+            continue;
+        }
+        final String category = switch(tagCategory) {
+            "character" || "oc" => tagName == "oc only" ? "generic" : "character",
+            "origin" => //looking at the tag name because apparently generator:stable diffusion does not have a namespace property
+                   tagIdentifier == "artist"
+                || tagIdentifier == "editor"
+                || tagIdentifier == "prompter" //prompter is the one who inserts the prompt to an ai generate an image. will not touch on the argument of "ai art is not art" (personally me (resu) dislikes ai art but dadaism is a thing, apparently people forgot about it) but since i have to be abrangent when it comes to acceptance i'll have to accept
+                || tagIdentifier == "photographer"
+                || tagIdentifier == "colorist"
+                || tagIdentifier == "author" //no idea whats this one about
+                ? "artist" : "generic",
+            "content-official" || "content-fanmade" => "copyright",
+            "species" => "species",
+            _ => "generic"
+        };
+        final String normalizedName = tagName.replaceAll(" ", "_").replaceAll(":", "");
+        tagList[category]!.add(normalizedName);
+    }
+    
+    final downloadedFileInfo = await downloadFile(Uri.parse(imageJson["view_url"]), handleChunk: handleChunk);
+    
+    return PresetImage(
+        image: downloadedFileInfo,
+        sources: [...(imageJson["source_urls"] ?? []), [uri.origin, uri.path].join("")],
+        tags: tagList,
+        rating: rating
+    );
+}
