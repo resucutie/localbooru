@@ -3,7 +3,7 @@ import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/components/multi_image_display.dart';
 
 class GeneralCollectionManagerScreen extends StatefulWidget {
-    const GeneralCollectionManagerScreen({super.key, this.displayImages, this.onCorelatedChanged, this.corelated, this.saveCollectionToggle, this.onSaveCollectionToggle, required this.collection, this.onErrorChange});
+    const GeneralCollectionManagerScreen({super.key, this.displayImages, this.onCorelatedChanged, this.corelated, this.saveCollectionToggle, this.onSaveCollectionToggle, required this.collection, this.onErrorChange, this.onMultiCompress, this.progressMultiCompress});
 
     final List<ImageProvider?>? displayImages;
     final void Function(bool value)? onCorelatedChanged;
@@ -11,6 +11,8 @@ class GeneralCollectionManagerScreen extends StatefulWidget {
     final void Function(bool value)? onSaveCollectionToggle;
     final bool? saveCollectionToggle;
     final void Function(bool value)? onErrorChange;
+    final void Function()? onMultiCompress;
+	final double? progressMultiCompress;
     final VirtualPresetCollection collection;
 
     @override
@@ -45,7 +47,14 @@ class _GeneralCollectionManagerScreenState extends State<GeneralCollectionManage
                     value: widget.corelated!,
                     onChanged: widget.onCorelatedChanged
                 ),
-                // const Divider(),
+				if(widget.onMultiCompress != null) ListTile(
+                    title: const Text("Compress all images"),
+                    subtitle: widget.progressMultiCompress != null ? LinearProgressIndicator(value: widget.progressMultiCompress,) : const Text("Compress all images all at once"),
+                    leading: Icon(Icons.compress),
+                    onTap: widget.onMultiCompress,
+                    enabled: widget.progressMultiCompress == null,
+                ),
+                const Divider(),
                 if(widget.saveCollectionToggle != null) ExpansionTile(
                     title: Text("Collections"),
                     subtitle: Text("Create a collection with all images"),

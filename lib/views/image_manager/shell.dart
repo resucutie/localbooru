@@ -10,6 +10,8 @@ import 'package:localbooru/components/app_bar_linear_progress.dart';
 import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/components/dialogs/textfield_dialogs.dart';
+import 'package:localbooru/utils/compressor.dart';
+import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/views/image_manager/form.dart';
 import 'package:localbooru/views/image_manager/general_collection_manager.dart';
@@ -32,9 +34,13 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
     bool isSaving = false;
     bool saveCollection = false;
     int savedImages = 0;
+    double? progressCompressedImages;
     int imagePage = 0;
 
     bool isCorelated = false;
+
+
+    AcessibleNotifyListenerNotifier updatePreset = AcessibleNotifyListenerNotifier();
 
     @override
     void initState() {
@@ -87,10 +93,23 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
     void addMultipleImages(List<PlatformFile> files) {
         for (PlatformFile file in files) {
             if(file.path != null) {
-                preset.pages!.add(PresetImage(image: File(file.path!), key: UniqueKey()));
+                preset.pages!.add(PresetImage(image: File(file.path!)));
                 errorOnPages.add(true);
             }
         }
+    }
+
+    void compressAllImages() async {
+        setState(() {progressCompressedImages = 0;});
+        final presetsToCompressLength = preset.pages!.where((image) => image.image != null,).length;
+        for (final (index, presetImage) in preset.pages!.indexed) {
+            if(presetImage.image == null) continue;
+            final file = await compress(presetImage.image!);
+            preset.pages![index].image = file;
+            setState(() {progressCompressedImages = index / presetsToCompressLength;});
+        }
+        updatePreset.update();
+        setState(() {progressCompressedImages = null;});
     }
 
     @override
@@ -217,7 +236,6 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                             final booru = await getCurrentBooru();
                                             preset.pages!.addAll(await Future.wait(images.map((id) async {
                                                 PresetImage image = await PresetImage.fromExistingImage((await booru.getImage(id))!);
-                                                image.key = UniqueKey();
                                                 errorOnPages.add(false);
                                                 return image;
                                             })));
@@ -242,7 +260,6 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                             //     excludeImages: preset.pages!.where((imagePreset) => imagePreset.replaceID != null,).map((imagePreset) => imagePreset.replaceID!).toList()
                                             // );
                                             if(downloadedPreset is PresetImage) {
-                                                downloadedPreset.key = UniqueKey();
                                                 preset.pages!.add(downloadedPreset);
                                                 errorOnPages.add(false);
                                             } else if (downloadedPreset is VirtualPresetCollection) {
@@ -280,10 +297,13 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
                                 onSaveCollectionToggle: (value) => setState(() => saveCollection = value),
                                 collection: preset,
                                 onErrorChange: (value) => setState(() => errorOnPages[0] = value),
+                                onMultiCompress: compressAllImages,
+                                progressMultiCompress: progressCompressedImages,
+                                // progressMultiCompress: 0.5,
                             ),
                             for (final (index, imagePreset) in preset.pages!.indexed) ImageManagerForm(
-                                key: imagePreset.key, // replace index by something else
                                 preset: imagePreset,
+                                updateNotifier: updatePreset,
                                 onChanged: (imagePreset) => setState(() => preset.pages![index] = imagePreset),
                                 onErrorUpdate: (containsError) => setState(() => errorOnPages[index + 1] = containsError),
                                 onMultipleImagesAdded: addMultipleImages,
