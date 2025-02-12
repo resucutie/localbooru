@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
     void _onSearch () {
         context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
     }
-    final SearchController _searchController = SearchController();
+    final SearchTagController _searchController = SearchTagController();
 
 
     @override

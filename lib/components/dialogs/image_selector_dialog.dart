@@ -28,7 +28,7 @@ class SelectDialog extends StatefulWidget {
     State<SelectDialog> createState() => _SelectDialogState();
 }
 class _SelectDialogState extends State<SelectDialog> {
-    final SearchController controller = SearchController();
+    final SearchTagController controller = SearchTagController();
 
     List<ImageID> imageIDs = [];
 

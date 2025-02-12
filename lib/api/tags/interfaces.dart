@@ -3,12 +3,19 @@ part of tag_manager;
 
 abstract class Tag {
     const Tag();
+
+    String getText();
 }
 
 class NormalTag extends Tag {
     const NormalTag(this.text);
 
     final String text;
+
+    @override
+    String getText() {
+        return text;
+    }
 }
 
 class Metatag extends Tag {
@@ -27,6 +34,11 @@ class Metatag extends Tag {
         final split = text.split(":");
         return split.length == 2 && split.first.isNotEmpty && split.last.isNotEmpty;
     }
+
+    @override
+    String getText() {
+        return "$selector:$value";
+    }
 }
 
 class SearchTag {
@@ -34,7 +46,7 @@ class SearchTag {
         _tag = tag;
     
     factory SearchTag.fromText(String rawText) {
-        final modifier = obtainModifier(rawText);
+        final modifier = SearchTag.obtainModifier(rawText);
         final nonModifierText = modifier == Modifier.filterModifier ? rawText : rawText.substring(1);
         return SearchTag(
             tag: !Metatag.isMetatag(nonModifierText) ? NormalTag(nonModifierText) : Metatag.fromText(nonModifierText),
@@ -46,7 +58,12 @@ class SearchTag {
 
     Tag get tag => _tag;
 
+    String getTextRepresentation() {
+        return "${modifierSelectors[modifier] ?? ""}${tag.getText()}";
+    }
+
     static Modifier obtainModifier(String rawText){
+        if(rawText.isEmpty) return Modifier.filterModifier;
         final String firstElement = rawText[0];
         final Modifier? foundModifier = modifierSelectors.entries.firstWhereOrNull((mapEntry) => mapEntry.value == firstElement,)?.key;
         if(foundModifier == null) return Modifier.filterModifier;
@@ -54,11 +71,17 @@ class SearchTag {
     }
 
     static Map<Modifier, String?> get modifierSelectors => _modifierSelectors;
+    static Map<Modifier, Color?> get modifierColors => _modifierColors;
 }
 
 enum Modifier {additionModifier, exclusionModifier, filterModifier}
-final Map<Modifier, String?> _modifierSelectors = {
+const Map<Modifier, String?> _modifierSelectors = {
     Modifier.additionModifier: "+",
     Modifier.exclusionModifier: "-",
     Modifier.filterModifier: null,
+};
+const Map<Modifier, Color?> _modifierColors = {
+    Modifier.filterModifier: null,
+    Modifier.additionModifier: Colors.green,
+    Modifier.exclusionModifier: Colors.red,
 };

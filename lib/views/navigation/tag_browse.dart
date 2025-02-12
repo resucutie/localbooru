@@ -254,7 +254,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
 class SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
     final double height;
     Function(String value) onSearch;
-    final SearchController searchController;
+    final SearchTagController searchController;
 
     SearchBarHeaderDelegate({required this.onSearch, required this.searchController, this.height = 56.0});
 
@@ -374,7 +374,7 @@ class SearchBarOnGridList extends StatefulWidget {
 }
 
 class _SearchBarOnGridListState extends State<SearchBarOnGridList> {
-    final SearchController _searchController = SearchController();
+    final SearchTagController _searchController = SearchTagController();
 
     @override
     void initState() {

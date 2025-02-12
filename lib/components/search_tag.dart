@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/tags/index.dart';
@@ -8,7 +9,7 @@ class SearchTagBox extends StatefulWidget {
 
     final String? hint;
     final Function(String value) onSearch;
-    final SearchController? controller;
+    final SearchTagController? controller;
     final bool? isFullScreen;
     final List<Widget>? actions;
     final bool showShadow;
@@ -22,7 +23,7 @@ class SearchTagBox extends StatefulWidget {
 }
 
 class _SearchTagBoxState extends State<SearchTagBox> {
-    SearchController _controller = SearchController();
+    SearchTagController _controller = SearchTagController();
 
     @override
     void initState() {
@@ -126,4 +127,56 @@ class SearchButton extends StatelessWidget {
             onPressed: onSearch != null ? () => onSearch!(controller.text) : null,
         );
     }
+}
+
+class SearchTagController extends SearchController {
+    // I copied some of the code straight from Flutter's implementation of buildTextSpan due to composing
+    @override
+    TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+        assert(!value.composing.isValid || !withComposing || value.isComposingRangeValid);
+        final bool composingRegionOutOfRange = !value.isComposingRangeValid || !withComposing;
+
+        final searchTags = text.split(" ").map((e) => SearchTag.fromText(e),).toList();
+
+        int wordIndex = 0;
+        final textSpans = searchTags.map((e) {
+            final TextStyle? styleWithModifier = style?.merge(TextStyle(color: SearchTag.modifierColors[e.modifier]));
+            final text = e.getTextRepresentation();
+
+            final bool isWordWithinComposingRange = !composingRegionOutOfRange
+                && (wordIndex + text.length) > value.composing.start
+                && wordIndex < value.composing.end;
+
+            if(isWordWithinComposingRange) {
+                final composingAdjusted = TextRange(start: value.composing.start - wordIndex, end: value.composing.end - wordIndex);
+                wordIndex += text.length + 1;
+                return TextSpan(
+                    style: styleWithModifier,
+                    children: <TextSpan>[
+                        TextSpan(text: composingAdjusted.textBefore(text)),
+                        TextSpan(
+                            style: getComposingStyle(styleWithModifier),
+                            text: composingAdjusted.textInside(text),
+                        ),
+                        TextSpan(text: composingAdjusted.textAfter(text)),
+                    ],
+                );
+            }
+            wordIndex += text.length + 1;
+            return TextSpan(
+                style: styleWithModifier,
+                text: text
+            );
+        },).expandIndexed((index, e) {
+            final bool hasSpaceOnLast = value.text.endsWith(" ");
+            if(!hasSpaceOnLast && index == searchTags.length) {
+                return [e];
+            }
+            return [e, TextSpan(text: " ")];
+        }).toList();
+
+        return TextSpan(style: style, children: textSpans);
+    }
+
+    TextStyle getComposingStyle(TextStyle? style) => style?.merge(const TextStyle(decoration: TextDecoration.underline)) ?? const TextStyle(decoration: TextDecoration.underline);
 }
