@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/api/tags/index.dart';
 import 'package:localbooru/utils/constants.dart';
+import 'package:localbooru/utils/listeners.dart';
 
 class SearchTagBox extends StatefulWidget {
     const SearchTagBox({super.key, this.hint, required this.onSearch, this.controller, this.isFullScreen, this.actions, this.showShadow = false, this.leading = const Icon(Icons.search), this.padding = const EdgeInsets.only(left: 16.0, right: 10.0), this.backgroundColor, this.elevation});
@@ -25,11 +26,41 @@ class SearchTagBox extends StatefulWidget {
 class _SearchTagBoxState extends State<SearchTagBox> {
     SearchTagController _controller = SearchTagController();
 
+    Map<String, List<BooruTagCounterDisplay<Tag>>> tagsAndTypes = {};
+
     @override
     void initState() {
         super.initState();
 
         if(widget.controller != null) _controller = widget.controller!;
+
+        booruUpdateListener.addListener(cacheTags);
+    }
+
+    Future<void> cacheTags() async {
+        Booru booru = await getCurrentBooru();
+        final Map<String, BooruTagCounterDisplay<Tag>> tags = {}; //transform it in tag for better matching, so we can avoid spamming firstWhere 
+        for(final tag in await booru.getAllTags()) {
+            tags[tag.tag.text] = tag;
+        }
+
+
+        final categorizedTags = await booru.separateTagsByType(tags.values.map((e) => e.tag.getText(),).toList());
+        for(final type in categorizedTags.entries) {
+            if(tagsAndTypes[type.key] == null) tagsAndTypes[type.key] = [];
+            for(final tagString in type.value) {
+                tagsAndTypes[type.key]!.add(tags[tagString]!);
+            }
+            tagsAndTypes[type.key]!.sort((a, b) => b.callQuantity.compareTo(a.callQuantity),);
+        }
+        tagsAndTypes["metatag"] = tagsToAddToSearch;
+        refreshSuggestions();
+    }
+
+    void refreshSuggestions() {
+        final previousText = _controller.text;
+        _controller.text = '\u200B$previousText'; // no good way to update the search
+        _controller.text = previousText;
     }
 
     @override
@@ -54,36 +85,36 @@ class _SearchTagBoxState extends State<SearchTagBox> {
                 backgroundColor: WidgetStatePropertyAll<Color?>(widget.backgroundColor),
             ),
             suggestionsBuilder: (context, controller) async {
-                Booru booru = await getCurrentBooru();
-                List<String> tags = await booru.getAllTags();
-                final currentTags = List<String>.from(controller.text.split(" "));
+                if(tagsAndTypes.isEmpty) await cacheTags();
+                final tagsOnSearch = List<String>.from(controller.text.split(" "));
 
-                final filteredTags = List<String>.from(tags)..addAll(tagsToAddToSearch)..retainWhere((s){
-                    if((List<String>.from(currentTags)..removeLast()).contains(s)) return false;
-                    if(currentTags.last.isEmpty) return true;
-                    final nomModifierLastTagInserted = SearchTag.obtainModifier(currentTags.last) == Modifier.filterModifier ? currentTags.last : currentTags.last.substring(1);
-                    return s.contains(nomModifierLastTagInserted);
-                });
+                // final filteredTags = Map<String, List<String>>.from(tagsAndTypes!)..retainWhere((s){
+                //     return tagsOnSearch.last.isEmpty || s.contains(TagText(tagsOnSearch.last).text);
+                // });
 
-                final specialTags = await booru.separateTagsByType(filteredTags);
+                final filteredTags = tagsAndTypes.map((type, tags) {
+                    return MapEntry(type, tags.where((display) {
+                        return tagsOnSearch.last.isEmpty
+                               || display.tag.getText().contains(SearchTag.fromText(tagsOnSearch.last).tag.getText());
+                    },));
+                },);
 
-                return specialTags.entries.map((type) => type.value.map((tag) {
-                    final isMetatag = tag.contains(":") && tag.split(":").first.isNotEmpty;
+                return filteredTags.entries.map((type) => type.value.map((display) {
+                    final isMetatag = display.tag is Metatag;
                     final color = !isMetatag ? SpecificTagsColors.getColor(type.key) : null;
                     return ListTile(
                         leading: Icon(!isMetatag ? SpecificTagsIcons.getIcon(type.key) : Icons.lightbulb, color: color,),
-                        title: Text(tag,
+                        title: Text(display.tag.getText(),
                             style: TextStyle(
                                 color: color,
                                 fontWeight: isMetatag ? FontWeight.bold : null
                             ),
                         ),
+                        trailing: display.callQuantity > 0 ? Text("${display.callQuantity}") : null,
                         onTap: () {
-                            List endResult = List.from(currentTags);
-                            endResult.removeLast();
-                            endResult.add(tag);
+                            final endResult = List<String>.from(tagsOnSearch)..removeLast()..add(display.tag.getText());
                             setState(() {
-                                if(isMetatag) controller.text = endResult.join(" ");
+                                if(isMetatag && (display.tag as Metatag).value.isEmpty) controller.text = endResult.join(" ");
                                 else controller.text = "${endResult.join(" ")} ";
                             });
                         },
@@ -98,19 +129,18 @@ class _SearchTagBoxState extends State<SearchTagBox> {
         );
     }
 }
-final List<String> tagsToAddToSearch = [
-    "rating:none",
-    "rating:safe",
-    "rating:questionable",
-    "rating:explicit",
-    "rating:borderline",
-    "id:",
-    "file:",
-    "type:",
-    "type:static",
-    "type:animated",
-    "source:",
-    "source:none",
+final List<BooruTagCounterDisplay<Tag>> tagsToAddToSearch = [
+    BooruTagCounterDisplay(tag: Metatag("rating", "none"), callQuantity: 0),
+    BooruTagCounterDisplay(tag: Metatag("rating", "safe"), callQuantity: 0),
+    BooruTagCounterDisplay(tag: Metatag("rating", "questionable"), callQuantity: 0),
+    BooruTagCounterDisplay(tag: Metatag("rating", "explicit"), callQuantity: 0),
+    BooruTagCounterDisplay(tag: Metatag("rating", "borderline"), callQuantity: 0),
+    BooruTagCounterDisplay(tag: Metatag("id", ""), callQuantity: 0),
+    BooruTagCounterDisplay(tag: Metatag("file", ""), callQuantity: 0),
+    BooruTagCounterDisplay(tag: Metatag("type", "static"), callQuantity: 0),
+    BooruTagCounterDisplay(tag: Metatag("type", "animated"), callQuantity: 0),
+    BooruTagCounterDisplay(tag: Metatag("source", ""), callQuantity: 0),
+    BooruTagCounterDisplay(tag: Metatag("source", "none"), callQuantity: 0),
 ];
 
 class SearchButton extends StatelessWidget {
@@ -141,7 +171,7 @@ class SearchTagController extends SearchController {
         int wordIndex = 0;
         final textSpans = searchTags.map((e) {
             final TextStyle? styleWithModifier = style?.merge(TextStyle(color: SearchTag.modifierColors[e.modifier]));
-            final text = e.getTextRepresentation();
+            final text = e.getText();
 
             final bool isWordWithinComposingRange = !composingRegionOutOfRange
                 && (wordIndex + text.length) > value.composing.start

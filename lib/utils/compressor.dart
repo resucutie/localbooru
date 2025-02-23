@@ -29,9 +29,9 @@ Future<File> getImageThumbnail(BooruImage image) async {
     debugPrint("Compressing $filename");
 
     final thumbnail = await createThumbnail(
-		input: image.getImage(),
-		outputPath: thumbnailFile.absolute.path
-	);
+        input: image.getImage(),
+        outputPath: thumbnailFile.absolute.path
+    );
     debugPrint("Obtained ${p.basename(thumbnailFile.path)}");
 
     return thumbnail;
@@ -43,20 +43,17 @@ Future<File> createThumbnail({required File input, required String outputPath}) 
     final mime = lookupMimeType(input.path);
     if(mime!.startsWith("video/") || mime == "image/gif") {
         final hadGenerated = await generateVideoThumbnail(
-			inputPath: input.path,
-			outputPath: outputPath
-		).catchError((error) {
-			debugPrint("meow");
-			throw error;
-		});
-		if(!hadGenerated) throw "Could not generate thumbnail from video";
-		outputFile = File(outputPath);
+            inputPath: input.path,
+            outputPath: outputPath
+        );
+        if(!hadGenerated) throw "Could not generate thumbnail from video";
+        outputFile = File(outputPath);
     } else if(mime.startsWith("image/")) {
-    	final compressedImage = await compressImage(ImageFile(
+        final compressedImage = await compressImage(ImageFile(
             filePath: input.path,
             rawBytes: await input.readAsBytes()
         ));
-		outputFile = await File(outputPath).writeAsBytes(compressedImage.rawBytes);
+        outputFile = await File(outputPath).writeAsBytes(compressedImage.rawBytes);
     } else {
         throw "Unknown file type";
     }
@@ -73,9 +70,9 @@ Future<bool> generateVideoThumbnail({required String inputPath, required String 
         destFile: outputPath,
         width: 10000,  // i will be impressed if i find a 10.000x10.000 video size
         height: 10000,
-		format: 'jpeg',
+        format: 'jpeg',
         quality: 30
-	);
+    );
     return thumbnailGenerated;
 }
 
