@@ -262,7 +262,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                 ),
                                             ),
                                             Wrap(children: List.from(tags["artist"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.artist, renderObject: ro, onTap: () => context.push("/search/?tag=$e"),);
+                                                return TagPill(e, color: SpecificTagsColors.artist, renderObject: ro, onTap: () => context.push("/search/?tag=$e"),);
                                             }).toList())
                                         ],
                                         if (tags["character"] != null && tags["character"]!.isNotEmpty) ...[
@@ -278,7 +278,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                 ),
                                             ),
                                             Wrap(children: List.from(tags["character"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.character, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
+                                                return TagPill(e, color: SpecificTagsColors.character, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
                                         ],
                                         if (tags["copyright"] != null && tags["copyright"]!.isNotEmpty) ...[
@@ -294,7 +294,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                 ),
                                             ),
                                             Wrap(children: List.from(tags["copyright"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.copyright, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
+                                                return TagPill(e, color: SpecificTagsColors.copyright, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
                                         ],
                                         if (tags["species"] != null && tags["species"]!.isNotEmpty) ...[
@@ -310,7 +310,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                 ),
                                             ),
                                             Wrap(children: List.from(tags["species"]!..sort()).map((e) {
-                                                return Tag(e, color: SpecificTagsColors.species, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
+                                                return TagPill(e, color: SpecificTagsColors.species, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
                                         ],
                                         const Padding(
@@ -325,7 +325,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                             ),
                                         ),
                                         Wrap(children: List.from(tags["generic"]!..sort()).map((e) {
-                                            return Tag(e, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
+                                            return TagPill(e, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                         }).toList())
                                     ],
                                 );

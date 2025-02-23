@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  dynamic_color
+  dynamic_system_colors
   fvp
   irondash_engine_context
   open_file_linux

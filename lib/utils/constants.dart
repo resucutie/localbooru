@@ -19,7 +19,7 @@ final Map<String, dynamic> settingsDefaults = {
     "custom_frame": false,
 };
 
-final Map<String, dynamic> defaultFileInfoJson = {
+const Map<String, dynamic> defaultFileInfoJson = {
     "files": [],
     "collections": [],
     "specificTags": {
@@ -58,15 +58,7 @@ final Map<String, dynamic> defaultFileInfoJson = {
     }
 };
 
-// final Map<String, Color> specificTagsColors = {
-//     "generic": Colors.blueAccent,
-//     "artist": Colors.yellowAccent,
-//     "character": Colors.greenAccent,
-//     "copyright": Colors.deepPurpleAccent,
-//     "species": Colors.pinkAccent,
-// };
-
-class SpecificTagsColors {
+abstract class SpecificTagsColors {
     static const generic = Colors.blueAccent;
     static const artist = Color.fromARGB(255, 193, 132, 0);
     static const character = Color.fromARGB(255, 73, 169, 122);
@@ -82,7 +74,7 @@ class SpecificTagsColors {
     }
 }
 
-class SpecificTagsIcons {
+abstract class SpecificTagsIcons {
     static const generic = Icons.sell;
     static const artist = Icons.palette;
     static const character = Icons.person;
@@ -98,7 +90,7 @@ class SpecificTagsIcons {
     }
 }
 
-class SuperFormats {
+abstract class SuperFormats {
     static const List<SimpleFileFormat> imageStaticOnly = [Formats.png, Formats.jpeg, Formats.bmp, Formats.webp];
     static const List<SimpleFileFormat> image = [...imageStaticOnly, Formats.gif];
     static const List<SimpleFileFormat> video = [Formats.mp4, Formats.webm, Formats.mpeg, Formats.mov, Formats.mkv, Formats.m4a];
