@@ -10,6 +10,7 @@ class Posts {
     static Uri furryaffinity = Uri.parse("https://www.furaffinity.net/view/53339919");
     static Uri deviantart = Uri.parse("http://fav.me/d2enxz7");
     static Uri instagram = Uri.parse("http://fav.me/d2enxz7");
+    static Uri philomena = Uri.parse("https://derpibooru.org/images/1932817");
 }
 
 class Collections {

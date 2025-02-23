@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+class AcessibleNotifyListenerNotifier with ChangeNotifier {
+    void update() {
+        notifyListeners();
+    }
+}
+
 class BooruUpdateListener with ChangeNotifier {
     void update() {
         notifyListeners();
@@ -8,19 +14,9 @@ class BooruUpdateListener with ChangeNotifier {
 }
 BooruUpdateListener booruUpdateListener = BooruUpdateListener();
 
-class ThemeListener with ChangeNotifier {
-    void update() {
-        notifyListeners();
-    }
-}
-ThemeListener themeListener = ThemeListener();
+AcessibleNotifyListenerNotifier themeListener = AcessibleNotifyListenerNotifier();
 
-class CounterListener with ChangeNotifier {
-    void update() {
-        notifyListeners();
-    }
-}
-CounterListener counterListener = CounterListener();
+AcessibleNotifyListenerNotifier counterListener = AcessibleNotifyListenerNotifier();
 
 class LockListener with ChangeNotifier {
     bool isLocked = false;

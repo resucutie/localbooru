@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  dynamic_color
+  dynamic_system_colors
   fc_native_video_thumbnail
   fvp
   irondash_engine_context
