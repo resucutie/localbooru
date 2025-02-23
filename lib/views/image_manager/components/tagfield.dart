@@ -20,7 +20,7 @@ class _TagFieldState extends State<TagField> {
     late TextEditingController controller;
     GlobalKey textboxKey = GlobalKey();
 
-    late List<String> allTags;
+    List<String>? allTags;
 
     @override
     void initState() {
@@ -29,9 +29,11 @@ class _TagFieldState extends State<TagField> {
         cacheTags();
     }
 
-    void cacheTags() async {
+    Future<void> cacheTags() async {
         Booru currentBooru = await getCurrentBooru();
-        allTags = await currentBooru.getAllTagsFromType(widget.type);
+        //todo: change behavior to support BooruTagCounterDisplay
+        allTags = (await currentBooru.getAllSavedTagsFromType(widget.type)).map((e) => e.tag.text,).toList();
+        debugPrint("$allTags");
     }
 
     bool spawnAtBottom() {
@@ -55,10 +57,9 @@ class _TagFieldState extends State<TagField> {
                     restOfList.removeLast();
                     String tag = tagList.last;
 
-                    // Booru currentBooru = await getCurrentBooru();
-                    // List<String> allTags = await currentBooru.getAllTagsFromType(widget.type);
+                    if(allTags == null) await cacheTags();
 
-                    List<String> matches = List.from(allTags);
+                    List<String> matches = List<String>.from(allTags!);
 
                     matches.retainWhere((s){
                         return s.contains(tag) && !restOfList.contains(s) && s != tag;

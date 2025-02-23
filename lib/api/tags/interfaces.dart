@@ -1,10 +1,11 @@
 part of tag_manager;
 
-
-abstract class Tag {
-    const Tag();
-
+abstract interface class WorksWithTags {
     String getText();
+}
+
+abstract class Tag implements WorksWithTags {
+    const Tag();
 }
 
 class NormalTag extends Tag {
@@ -18,7 +19,7 @@ class NormalTag extends Tag {
     }
 }
 
-class Metatag extends Tag {
+class Metatag extends Tag implements WorksWithTags {
     const Metatag(this.selector, this.value);
 
     factory Metatag.fromText(String rawText) {
@@ -41,7 +42,7 @@ class Metatag extends Tag {
     }
 }
 
-class SearchTag {
+class SearchTag implements WorksWithTags {
     const SearchTag({required Tag tag, required this.modifier}):
         _tag = tag;
     
@@ -58,7 +59,8 @@ class SearchTag {
 
     Tag get tag => _tag;
 
-    String getTextRepresentation() {
+    @override
+    String getText() {
         return "${modifierSelectors[modifier] ?? ""}${tag.getText()}";
     }
 
