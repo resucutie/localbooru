@@ -193,14 +193,14 @@ Future<PresetImage> philomenaToPresetImage(Uri uri, {HandleChunk? handleChunk, b
         String tagName;
         String? tagCategory = tag["category"];
 
-        final tagText = TagText(tag["name"]);
+        final serializedTag = SearchTag.fromText(tag["name"]);
 
-        if(tagText.isMetatag()) {
-            final metatag = Metatag(tagText);
+        if(serializedTag.tag is Metatag) {
+            final Metatag metatag = serializedTag.tag as Metatag; //i hate doing this
             tagIdentifier = metatag.selector;
             tagName = metatag.value;
         } else {
-            tagName = tagText.text;
+            tagName = (serializedTag.tag as NormalTag).text;
         }
         if(tagCategory == "spoiler") tagName = tagName.replaceAll("spoiler:", "");
 

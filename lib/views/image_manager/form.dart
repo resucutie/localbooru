@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/api/tags/index.dart';
 import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/components/headers.dart';
 import 'package:localbooru/components/dialogs/radio_dialogs.dart';
@@ -152,7 +153,7 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
             
             //check for metatags
             for(final tag in splitValue) {
-                if(TagText(tag).isMetatag()) return "Metatags cannot be added";
+                if(Metatag.isMetatag(tag)) return "Metatags cannot be added";
             }
         }
 
