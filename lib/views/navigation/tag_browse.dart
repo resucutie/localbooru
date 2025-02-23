@@ -8,12 +8,12 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/image_grid_display.dart';
+import 'package:localbooru/components/search_tag.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/views/image_manager/shell.dart';
-import 'package:localbooru/views/navigation/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
@@ -254,7 +254,7 @@ class _GalleryViewerState extends State<GalleryViewer> {
 class SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
     final double height;
     Function(String value) onSearch;
-    final SearchController searchController;
+    final SearchTagController searchController;
 
     SearchBarHeaderDelegate({required this.onSearch, required this.searchController, this.height = 56.0});
 
@@ -264,7 +264,7 @@ class SearchBarHeaderDelegate extends SliverPersistentHeaderDelegate {
             child: Container(
                 padding: const EdgeInsets.all(8.0),
                 constraints: const BoxConstraints(maxWidth: 1080),
-                child: SearchTag(
+                child: SearchTagBox(
                     onSearch: onSearch,
                     controller: searchController,
                     isFullScreen: false,
@@ -374,7 +374,7 @@ class SearchBarOnGridList extends StatefulWidget {
 }
 
 class _SearchBarOnGridListState extends State<SearchBarOnGridList> {
-    final SearchController _searchController = SearchController();
+    final SearchTagController _searchController = SearchTagController();
 
     @override
     void initState() {
@@ -387,7 +387,7 @@ class _SearchBarOnGridListState extends State<SearchBarOnGridList> {
         return Container(
             padding: widget.desktopDisplay ? const EdgeInsets.all(16.0) : null,
             constraints: widget.desktopDisplay ? const BoxConstraints(maxWidth: 560, maxHeight: 74) : null,
-            child: SearchTag(
+            child: SearchTagBox(
                 onSearch: (text) => widget.onSearch(text),
                 controller: _searchController,
                 actions: !widget.desktopDisplay ? [] : [IconButton(onPressed: () => widget.onSearch(_searchController.text), icon: const Icon(Icons.search))],

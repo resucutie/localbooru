@@ -6,6 +6,7 @@ import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/components/counter.dart';
 import 'package:localbooru/components/drawer.dart';
+import 'package:localbooru/components/search_tag.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
@@ -21,7 +22,7 @@ class _HomePageState extends State<HomePage> {
     void _onSearch () {
         context.push("/search?tag=${Uri.encodeComponent(_searchController.text)}");
     }
-    final SearchController _searchController = SearchController();
+    final SearchTagController _searchController = SearchTagController();
 
 
     @override
@@ -58,7 +59,7 @@ class _HomePageState extends State<HomePage> {
                                         const SizedBox(height: 64),
                                         const LocalBooruHeader(),
                                         const SizedBox(height: 32),
-                                        SearchTag(
+                                        SearchTagBox(
                                             onSearch: (_) => _onSearch(),
                                             controller: _searchController,
                                             hint: "Type a tag",
@@ -124,165 +125,6 @@ class _HomePageState extends State<HomePage> {
     }
 }
 
-class SearchTag extends StatefulWidget {
-    const SearchTag({super.key, this.hint, required this.onSearch, this.controller, this.isFullScreen, this.actions, this.showShadow = false, this.leading = const Icon(Icons.search), this.padding = const EdgeInsets.only(left: 16.0, right: 10.0), this.backgroundColor, this.elevation});
-
-    final String? hint;
-    final Function(String value) onSearch;
-    final SearchController? controller;
-    final bool? isFullScreen;
-    final List<Widget>? actions;
-    final bool showShadow;
-    final Widget? leading;
-    final EdgeInsetsGeometry? padding;
-    final Color? backgroundColor;
-    final double? elevation;
-
-    @override
-    State<SearchTag> createState() => _SearchTagState();
-}
-
-class _SearchTagState extends State<SearchTag> {
-    SearchController _controller = SearchController();
-
-    Map<String, List<BooruTagCounterDisplay>> tagsAndTypes = {};
-
-    @override
-    void initState() {
-        super.initState();
-
-        if(widget.controller != null) _controller = widget.controller!;
-
-        booruUpdateListener.addListener(cacheTags);
-    }
-    
-    @override
-    void dispose() {
-        booruUpdateListener.removeListener(cacheTags);
-        super.dispose();
-    }
-
-    Future<void> cacheTags() async {
-        Booru booru = await getCurrentBooru();
-        final Map<String, BooruTagCounterDisplay> tags = {}; //transform it in tag for better matching, so we can avoid spamming firstWhere 
-        for(final tag in await booru.getAllTags()) {
-            tags[tag.tag] = tag;
-        }
-
-
-        final categorizedTags = await booru.separateTagsByType(tags.values.map((e) => e.tag,).toList());
-        for(final type in categorizedTags.entries) {
-            if(tagsAndTypes[type.key] == null) tagsAndTypes[type.key] = [];
-            for(final tagString in type.value) {
-                tagsAndTypes[type.key]!.add(tags[tagString]!);
-            }
-            tagsAndTypes[type.key]!.sort((a, b) => b.callQuantity.compareTo(a.callQuantity),);
-        }
-        tagsAndTypes["metatag"] = tagsToAddToSearch;
-        refreshSuggestions();
-    }
-
-    void refreshSuggestions() {
-        final previousText = _controller.text;
-        _controller.text = '\u200B$previousText'; // no good way to update the search
-        _controller.text = previousText;
-    }
-
-    @override
-    Widget build(BuildContext context) {
-        return SearchAnchor(
-            searchController: _controller,
-            builder: (context, controller) => SearchBar(
-                controller: controller,
-                hintText: widget.hint,
-                padding: WidgetStatePropertyAll(widget.padding),
-                onSubmitted: widget.onSearch,
-                onTap: controller.openView,
-                onChanged: (_) => controller.openView(),
-                leading: widget.leading,
-                trailing: [
-                    // if(controller.text.isNotEmpty) IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
-                    if(widget.actions == null) SearchButton(controller: controller, onSearch: widget.onSearch, icon: const Icon(Icons.arrow_forward),)
-                    else ...widget.actions!
-                ],
-                elevation: WidgetStatePropertyAll(widget.elevation),
-                shadowColor: widget.showShadow ? null : const WidgetStatePropertyAll(Colors.transparent),
-                backgroundColor: WidgetStatePropertyAll<Color?>(widget.backgroundColor),
-            ),
-            suggestionsBuilder: (context, controller) async {
-                if(tagsAndTypes.isEmpty) await cacheTags();
-                final tagsOnSearch = List<String>.from(controller.text.split(" "));
-
-                // final filteredTags = Map<String, List<String>>.from(tagsAndTypes!)..retainWhere((s){
-                //     return tagsOnSearch.last.isEmpty || s.contains(TagText(tagsOnSearch.last).text);
-                // });
-
-                final filteredTags = tagsAndTypes.map((type, tags) {
-                    return MapEntry(type, tags.where((tag) {
-                        return tagsOnSearch.last.isEmpty || tag.tag.contains(TagText(tagsOnSearch.last).text);
-                    },));
-                },);
-
-                return filteredTags.entries.map((type) => type.value.map((tag) {
-                    final isMetatag = type.key == "metatag";
-                    final color = !isMetatag ? SpecificTagsColors.getColor(type.key) : null;
-                    return ListTile(
-                        leading: Icon(!isMetatag ? SpecificTagsIcons.getIcon(type.key) : Icons.lightbulb, color: color,),
-                        title: Text(tag.tag,
-                            style: TextStyle(
-                                color: color,
-                                fontWeight: isMetatag ? FontWeight.bold : null
-                            ),
-                        ),
-                        trailing: tag.callQuantity > 0 ? Text("${tag.callQuantity}") : null,
-                        onTap: () {
-                            final endResult = List<String>.from(tagsOnSearch)..removeLast()..add(tag.tag);
-                            setState(() {
-                                if(isMetatag) controller.text = endResult.join(" ");
-                                else controller.text = "${endResult.join(" ")} ";
-                            });
-                        },
-                    );
-                })).expand((i) => i);
-            },
-            viewTrailing: [
-                IconButton(onPressed: _controller.clear, icon: const Icon(Icons.close)),
-                SearchButton(controller: _controller, onSearch: widget.onSearch)
-            ],
-            isFullScreen: widget.isFullScreen,
-        );
-    }
-}
-final List<BooruTagCounterDisplay> tagsToAddToSearch = [
-    BooruTagCounterDisplay(tag: "rating:none", callQuantity: 0),
-    BooruTagCounterDisplay(tag: "rating:safe", callQuantity: 0),
-    BooruTagCounterDisplay(tag: "rating:questionable", callQuantity: 0),
-    BooruTagCounterDisplay(tag: "rating:explicit", callQuantity: 0),
-    BooruTagCounterDisplay(tag: "rating:borderline", callQuantity: 0),
-    BooruTagCounterDisplay(tag: "id:", callQuantity: 0),
-    BooruTagCounterDisplay(tag: "file:", callQuantity: 0),
-    BooruTagCounterDisplay(tag: "type:static", callQuantity: 0),
-    BooruTagCounterDisplay(tag: "type:animated", callQuantity: 0),
-    BooruTagCounterDisplay(tag: "source:", callQuantity: 0),
-    BooruTagCounterDisplay(tag: "source:none", callQuantity: 0),
-];
-
-class SearchButton extends StatelessWidget {
-    const SearchButton({super.key, required this.controller, this.onSearch, this.icon = const Icon(Icons.search)});
-
-    final SearchController controller;
-    final Widget icon;
-    final Function(String)? onSearch;
-    
-    @override
-    Widget build(context) {
-        return IconButton(
-            icon: icon,
-            onPressed: onSearch != null ? () => onSearch!(controller.text) : null,
-        );
-    }
-}
-
 class LocalBooruHeader extends StatelessWidget {
     const LocalBooruHeader({super.key});
     
@@ -342,8 +184,10 @@ class _ImageDisplayState extends State<ImageDisplay> {
             builder: (context, prefs) => FutureBuilder(
                 future: _futureNumber,
                 builder: (context, snapshot) {
-                     if(snapshot.hasData) {
-                        return StyleCounter(number: snapshot.data!, display: prefs.getString("counter") ?? settingsDefaults["counter"],);
+                    if(snapshot.hasData) {
+                        final String counterType = prefs.getString("counter") ?? settingsDefaults["counter"];
+                        // final String counterType = "image-goobers"; // hardcoded
+                        return StyleCounter(number: snapshot.data!, display: counterType,);
                     }
                     if(snapshot.hasError) throw snapshot.error!;
                     return const CircularProgressIndicator();

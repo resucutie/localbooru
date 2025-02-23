@@ -13,7 +13,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.24.5'
+          flutter-version: '3.27.3'
       - name: Install compiler dependencies
         run: sudo apt-get update && sudo apt-get install -y clang ninja-build libgtk-3-dev libmpv-dev mpv
       - name: Install project dependencies
@@ -44,19 +44,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.24.5'
-      - name: Use pub version of media_kit_video
-        uses: fjogeleit/yaml-update-action@main
-        with:
-          valueFile: 'pubspec.yaml'
-          commitChange: false
-          changes: |
-            {
-              "pubspec.yaml": {
-                "dependencies.media_kit_video": "^1.2.4",
-                "dependency_overrides": {}
-              }
-            }
+          flutter-version: '3.27.3'
       - name: Install project dependencies
         run: flutter pub get
       - name: Enable windows building
@@ -84,7 +72,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.24.5'
+          flutter-version: '3.27.3'
       - name: Install project dependencies
         run: flutter pub get
       - name: Enable macOS building
@@ -103,7 +91,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: "temurin"
           java-version: 17
@@ -111,7 +99,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.24.5'
+          flutter-version: '3.27.3'
       - name: Install project dependencies
         run: flutter pub get
       - name: Build artifacts
@@ -125,6 +113,7 @@ jobs:
           keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
           keyAlias: ${{ secrets.KEYSTORE_KEY_ALIAS }}
           keyPassword: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+          buildToolsVersion: 35.0.0
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

@@ -97,6 +97,13 @@ void main() {
             expect(res.image, isA<File>());
             expect(await res.image!.length(), isNot(0));
         }, tags: "instagram", skip: "Not implemented");
+        test("philomena", () async {
+            // final res = await PresetImage.urlToPreset(Posts.philomena.toString(), accurate: true);
+            final res = await philomenaToPresetImage(Posts.philomena);
+            expect(res, isA<PresetImage>());
+            expect(res.image, isA<File>());
+            expect(await res.image!.length(), isNot(0));
+        }, tags: "philomena");
     });
 }
 

@@ -2,9 +2,10 @@ part of preset;
 
 // twitter: fxtwitter offers a url to give only the image. getting the artist is as easy as reading the first path segment
 Future<PresetImage> twitterToPresetImage(Uri uri) async {
-    // final res = await http.get(Uri.parse(["https://d.fxtwitter.com", uri.path].join()));
+    // final res = await lbHttp.get(Uri.parse(["https://d.fxtwitter.com", uri.path].join()));
 
     final downloadedFileInfo = await downloadFile(Uri.parse(["https://d.fxtwitter.com", uri.path].join()));
+    debugPrint(downloadedFileInfo.path);
     
     return PresetImage(
         image: downloadedFileInfo,
