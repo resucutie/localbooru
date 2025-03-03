@@ -3,13 +3,10 @@ import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:localbooru/utils/misc.dart';
-import 'package:path/path.dart' as p;
+import 'package:localbooru/utils/clipboard_extractor.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/video_view.dart';
-import 'package:localbooru/utils/constants.dart';
 import 'package:mime/mime.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
 class ImageUploadForm extends StatelessWidget {
@@ -136,36 +133,6 @@ Future<List<File>?> selectFileModal({required BuildContext context}) async {
 Future<List<File>?> openFilePicker() async {
     FilePickerResult? pickerResult = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
     return pickerResult?.files.map((file) => File(file.path!)).toList();
-}
-Future<List<SimpleFileFormat>> obtainValidFileTypeOnClipboard(ClipboardReader reader) async {
-    return SuperFormats.all.where((format) => reader.canProvide(format),).toList();
-}
-Future<File> getImageFromClipboard({required ClipboardReader reader, required SimpleFileFormat fileType}) async {
-    final downloadDir = await getTemporaryDirectory();
-
-    final completer = Completer<File>();
-    final progress = reader.getFile(fileType, (clipboardFile) async {
-        String? name = clipboardFile.fileName;
-        if(name == null) {
-             final ext = SuperFormats.getFileExtensionFromFormat(fileType);
-             assert(ext != null, Exception("Could not obtain file extension"));
-             name = p.setExtension(getRandomString(20), ".$ext");
-        }
-        final file = File(p.join(downloadDir.path, name));
-
-        try {
-            final sink = file.openWrite();
-            await clipboardFile.getStream().map((event) { //convert to List<int>
-                return event.map((e) => e,).toList();
-            },).pipe(sink);
-            completer.complete(file);
-        } catch (e) {
-            completer.completeError(e);
-        }
-    }, onError: completer.completeError,);
-    if(progress == null) completer.completeError(FileSystemException("File on clipboard is empty"));
-
-    return await completer.future;
 }
 
 enum _PickerType {file, clipboard}
