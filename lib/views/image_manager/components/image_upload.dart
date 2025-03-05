@@ -1,16 +1,18 @@
+import 'dart:async';
 import 'dart:io';
-
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:localbooru/utils/clipboard_extractor.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/video_view.dart';
 import 'package:mime/mime.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 class ImageUploadForm extends StatelessWidget {
     const ImageUploadForm({super.key, required this.onChanged, this.onCompressed, required this.validator, this.currentValue = "", this.orientation = Orientation.portrait});
     
-    final ValueChanged<List<PlatformFile>> onChanged;
+    final ValueChanged<List<File>> onChanged;
     final ValueChanged<String>? onCompressed;
     final FormFieldValidator<String> validator;
     final String currentValue;
@@ -42,10 +44,10 @@ class ImageUploadForm extends StatelessWidget {
                                             minimumSize: const Size(100, 100),
                                         ),
                                         onPressed: () async {
-                                            FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
-                                            if (result != null) {
-                                                state.didChange(result.files.first.path);
-                                                onChanged(result.files);
+                                            final files = await selectFileModal(context: context);
+                                            if (files != null) {
+                                                state.didChange(files.first.path);
+                                                onChanged(files);
                                             }
                                         },
                                         child: Builder(builder: (context) {
@@ -92,3 +94,45 @@ class ImageUploadForm extends StatelessWidget {
         );
     }
 }
+
+// todo: move somewhere else
+Future<List<File>?> selectFileModal({required BuildContext context}) async {
+    final output = await showDialog<_PickerType>(context: context, builder: (context) {
+        return Dialog(
+            child: Container(
+                constraints: BoxConstraints(maxWidth: 500),
+                padding: EdgeInsets.all(16),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                        ListTile(
+                            title: Text("Select a file"),
+                            leading: Icon(Icons.insert_drive_file),
+                            onTap: () => Navigator.pop(context, _PickerType.file),
+                        ),
+                        ListTile(
+                            title: Text("Copy from clipboard"),
+                            leading: Icon(Icons.copy),
+                            onTap: () => Navigator.pop(context, _PickerType.clipboard),
+                        ),
+                    ],
+                ),
+            ),
+        );
+    },);
+    if(output == _PickerType.clipboard) {
+        final clipboard = SystemClipboard.instance;
+        if(clipboard == null) return null;
+        final reader = await clipboard.read();
+        final types = await obtainValidFileTypeOnClipboard(reader);
+        return await Future.wait(types.map((type) => getImageFromClipboard(reader: reader, fileType: type)));
+    }
+    if(output == _PickerType.file) return await openFilePicker();
+}
+
+Future<List<File>?> openFilePicker() async {
+    FilePickerResult? pickerResult = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
+    return pickerResult?.files.map((file) => File(file.path!)).toList();
+}
+
+enum _PickerType {file, clipboard}
