@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:fc_native_video_thumbnail/fc_native_video_thumbnail.dart';
 import 'package:flutter/material.dart';
-import 'package:image_compression/image_compression.dart' as imageCompression;
+import 'package:image_compression/image_compression.dart' as image_compression;
 import 'package:image_compression/image_compression_io.dart';
 import 'package:localbooru/api/index.dart';
 import 'package:mime/mime.dart';
@@ -98,9 +96,9 @@ Future<File> compress(File file) async {
 }
 
 Future<ImageFile> compressImage(ImageFile file, {int quality = 30}) {
-    return imageCompression.compressInQueue(imageCompression.ImageFileConfiguration(
+    return image_compression.compressInQueue(image_compression.ImageFileConfiguration(
         input: file,
-        config: imageCompression.Configuration(
+        config: image_compression.Configuration(
             jpgQuality: quality,
         )
     ));
