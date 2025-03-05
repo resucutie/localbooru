@@ -126,8 +126,7 @@ Future<List<File>?> selectFileModal({required BuildContext context}) async {
         final reader = await clipboard.read();
         final types = await obtainValidFileTypeOnClipboard(reader);
         return await Future.wait(types.map((type) => getImageFromClipboard(reader: reader, fileType: type)));
-    }
-    if(output == _PickerType.file) return await openFilePicker();
+    } else return await openFilePicker();
 }
 
 Future<List<File>?> openFilePicker() async {

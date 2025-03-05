@@ -5,7 +5,6 @@ import 'package:dynamic_system_colors/dynamic_system_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/routing.dart';
-import 'package:localbooru/utils/clipboard_extractor.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
@@ -18,7 +17,6 @@ import 'package:go_router/go_router.dart';
 import 'package:localbooru/views/permissions.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:super_clipboard/super_clipboard.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:fvp/fvp.dart' as fvp;
