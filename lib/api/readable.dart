@@ -83,12 +83,12 @@ class Booru {
     Future<List<BooruImage>> getRecentImages() async => await getImagesFromIndex((await getRawInfo())["files"]);
 
     Future<List> _doTagFiltering(String tags) async {
-        final List<String> tagList = tags.split(" ").where((s) => s.isNotEmpty).toList();
+        final List<SearchTag> tagList = tags.split(" ").where((s) => s.isNotEmpty).map((e) => SearchTag.fromText(e),).toList();
         final List files = (await getRawInfo())["files"];
         List filteredFiles = [];
         if(tagList.isEmpty) return files;
         for (final file in files) {
-            if(await wouldImageBeSelected(inputTags: tagList, file: file)) filteredFiles.add(file);
+            if(await wouldImageBeSelected(tags: tagList, file: file)) filteredFiles.add(file);
         }
 
         return filteredFiles;
@@ -109,23 +109,22 @@ class Booru {
     }
 
 
-
-    List<String> _allTags = List<String>.empty(growable: true);
-    Future<List<String>> getAllTags() async {
-        if(_allTags.isEmpty) {
-            final List files = (await getRawInfo())["files"];
-            List<String> allTags = List<String>.empty(growable: true);
-            for (var file in files) {
-                List<String> fileTags = file["tags"].split(" ");
-                for (String tag in fileTags) {
-                    if(allTags.isEmpty || !allTags.contains(tag)) allTags.add(tag);
+    Future<List<BooruTagCounterDisplay<NormalTag>>> getAllTags() async {
+        final List files = (await getRawInfo())["files"];
+        List<BooruTagCounterDisplay<NormalTag>> allTags = List<BooruTagCounterDisplay<NormalTag>>.empty(growable: true);
+        for (var file in files) {
+            List<String> fileTags = file["tags"].split(" ");
+            for (String tag in fileTags) {
+                final tagInstance = allTags.indexWhere((element) => element.tag.getText() == tag,);
+                if(tagInstance < 0) {
+                    allTags.add(BooruTagCounterDisplay(tag: NormalTag(tag), callQuantity: 1));
+                } else {
+                    allTags[tagInstance].callQuantity++;
                 }
             }
-
-            _allTags = allTags;
         }
         
-        return _allTags;
+        return allTags;
     }
 
 
@@ -134,15 +133,17 @@ class Booru {
         final Map<String, List> allSpecificTags = Map.from((await getRawInfo())["specificTags"]);
         return allSpecificTags.keys.firstWhere((type) => allSpecificTags[type]!.contains(tag), orElse: () => "generic");
     }
-    Future<List<String>> getAllTagsFromType(String type) async {
-        final Map specificTags = Map.from((await getRawInfo())["specificTags"]);
-        if (type == "generic") {
-            final allTags = await getAllTags();
-            final allSpecificTags = specificTags.values.expand((i) => i).toList();
-            allTags.removeWhere((element) => allSpecificTags.contains(element));
-            return allTags;
+    Future<List<BooruTagCounterDisplay<NormalTag>>> getAllSavedTagsFromType(String type) async {
+        final Map<String, List<String>> specificTags = Map<dynamic, List<dynamic>>.from(((await getRawInfo())["specificTags"]))
+            .map((key, value) => MapEntry(key, value.cast<String>()),);
+        final allTags = await getAllTags();
+
+        if(type == "generic") {
+            final anyTypedTag = specificTags.values.expand((e) => e).toList();
+            return allTags.where((element) => !anyTypedTag.contains(element.tag.text)).toList();
+        } else {
+            return allTags.where((element) => specificTags[type]!.contains(element.tag.text)).toList();
         }
-        return List<String>.from(specificTags[type] ?? []);
     }
     Future<Map<String, List<String>>> separateTagsByType(List<String> tags) async {
         List<String> genericList = List.from(tags);
@@ -227,3 +228,10 @@ class BooruCollection {
 }
 
 enum Rating {safe, questionable, explicit, illegal}
+
+class BooruTagCounterDisplay<T extends WorksWithTags> {
+    BooruTagCounterDisplay({required this.tag, required this.callQuantity});
+
+    T tag;
+    int callQuantity;
+}

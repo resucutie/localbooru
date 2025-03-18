@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.6.0
+version: 1.6.1
 localbooru_codename: "Kuroodod"
 
 environment:
@@ -39,30 +39,28 @@ dependencies:
   file_picker: ^8.0.3
   permission_handler: ^11.2.0
   go_router: ^14.1.2
-  path: ^1.8.3
+  path: ^1.9.0
   shared_preferences: ^2.2.2
   url_launcher: ^6.2.4
   share_plus: ^10.0.3
   open_file: ^3.3.2
   dotted_border: ^2.1.0
   http: ^1.2.0
-  titlebar_buttons: ^1.0.0
   path_provider: ^2.1.4
-  dynamic_color: ^1.6.9
   package_info_plus: ^8.0.0
   super_clipboard: ^0.9.0-dev.4
-  flutter_svg: ^1.1.6
+  flutter_svg: ^2.0.17
   flutter_cache_manager: ^3.3.1
   html: ^0.15.4
   #receive_sharing_intent: ^1.6.7  
   receive_sharing_intent: # use a temporary repo, remove later
     git:
-      url: https://github.com/ad-angelo/receive_sharing_intent
+      url: https://github.com/KasemJaffer/receive_sharing_intent
       ref: master
-  mime: ^1.0.5
+  mime: ^1.0.6
   yaml: ^3.1.2
   string_validator: ^1.0.2
-  gif_view: ^0.4.3
+  gif_view: ^1.0.0
   image_compression: ^1.0.5
   vector_math: ^2.1.4
   photo_view: ^0.15.0
@@ -72,16 +70,17 @@ dependencies:
   device_info_plus: ^11.1.1
   flutter_windowmanager: ^0.2.0
   window_manager: ^0.4.2
-  collection: ^1.18.0
-  test: ^1.25.2
+  collection: ^1.19.0
+  test: ^1.25.8
   path_provider_platform_interface: ^2.1.2
   plugin_platform_interface: ^2.1.8
   html_unescape: ^2.0.0
-  fvp: ^0.28.0
+  fvp: ^0.29.0
   video_player: ^2.9.2
   chewie: ^1.8.5
   visibility_detector: ^0.4.0+2
-  fc_native_video_thumbnail: ^0.16.1
+  fc_native_video_thumbnail: ^0.17.2
+  dynamic_system_colors: ^1.8.0
 
 dev_dependencies:
   flutter_test:
@@ -121,7 +120,18 @@ flutter:
     - assets/websites/gelbooru.svg
     - assets/websites/twitter.svg
     - assets/websites/deviantart.svg
+    - assets/websites/derpibooru.svg
 
+    - assets/counter/image-goobers/0.png
+    - assets/counter/image-goobers/1.png
+    - assets/counter/image-goobers/2.png
+    - assets/counter/image-goobers/3.png
+    - assets/counter/image-goobers/4.png
+    - assets/counter/image-goobers/5.png
+    - assets/counter/image-goobers/6.png
+    - assets/counter/image-goobers/7.png
+    - assets/counter/image-goobers/8.png
+    - assets/counter/image-goobers/9.png
     - assets/counter/baba/0.gif
     - assets/counter/baba/1.gif
     - assets/counter/baba/2.gif

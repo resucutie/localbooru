@@ -5,6 +5,7 @@ import 'package:localbooru/components/builders.dart';
 import 'package:localbooru/components/housings.dart';
 import 'package:localbooru/components/window_frame.dart';
 import 'package:localbooru/main.dart';
+import 'package:localbooru/shortcut_handler.dart';
 import 'package:localbooru/utils/constants.dart';
 import 'package:localbooru/utils/shared_prefs_widget.dart';
 import 'package:localbooru/views/about.dart';
@@ -13,7 +14,7 @@ import 'package:localbooru/views/lock.dart';
 import 'package:localbooru/views/navigation/collection_list.dart';
 import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/image_view.dart';
-import 'package:localbooru/views/navigation/index.dart';
+import 'package:localbooru/components/add_image_drop_region.dart';
 import 'package:localbooru/views/navigation/tag_browse.dart';
 import 'package:localbooru/views/navigation/zoomed_view.dart';
 import 'package:localbooru/views/permissions.dart';
@@ -62,7 +63,10 @@ final router = GoRouter(
                             ) : MobileHousing(child: child),
                             routes: [
                                 ShellRoute( //main nav shell
-                                    builder: (context, state, child) => AddImageDropRegion(child: child),
+                                    builder: (context, state, child) => ShortcutHandler(
+                                        child: AddImageDropRegion(child: child),
+                                        paste: (context) => OpenImageAtImageManagerPasteAction(context),
+                                    ),
                                     routes: [
                                         GoRoute(path: "home",
                                             builder: (context, state) => const HomePage(),

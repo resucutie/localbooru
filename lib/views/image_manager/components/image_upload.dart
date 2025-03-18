@@ -1,16 +1,18 @@
+import 'dart:async';
 import 'dart:io';
-
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:localbooru/utils/clipboard_extractor.dart';
 import 'package:localbooru/components/fileinfo.dart';
 import 'package:localbooru/components/video_view.dart';
 import 'package:mime/mime.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 class ImageUploadForm extends StatelessWidget {
     const ImageUploadForm({super.key, required this.onChanged, this.onCompressed, required this.validator, this.currentValue = "", this.orientation = Orientation.portrait});
     
-    final ValueChanged<List<PlatformFile>> onChanged;
+    final ValueChanged<List<File>> onChanged;
     final ValueChanged<String>? onCompressed;
     final FormFieldValidator<String> validator;
     final String currentValue;
@@ -20,7 +22,6 @@ class ImageUploadForm extends StatelessWidget {
     Widget build(BuildContext context) {
         return FormField<String>(
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            initialValue: currentValue,
             validator: validator,
             builder: (FormFieldState state) {
                 return Flex(
@@ -43,22 +44,22 @@ class ImageUploadForm extends StatelessWidget {
                                             minimumSize: const Size(100, 100),
                                         ),
                                         onPressed: () async {
-                                            FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
-                                            if (result != null) {
-                                                state.didChange(result.files.first.path);
-                                                onChanged(result.files);
+                                            final files = await selectFileModal(context: context);
+                                            if (files != null) {
+                                                state.didChange(files.first.path);
+                                                onChanged(files);
                                             }
                                         },
                                         child: Builder(builder: (context) {
-                                            if(state.value.isEmpty) {
+                                            if(currentValue.isEmpty) {
                                                 return const Icon(Icons.add);
                                             } else {
-                                                if(lookupMimeType(state.value)!.startsWith("video/")) return IgnorePointer(
-													child: VideoView(state.value, showControls: false, soundOnStart: false,),
+                                                if(lookupMimeType(currentValue)!.startsWith("video/")) return IgnorePointer(
+													child: VideoView(currentValue, showControls: false, soundOnStart: false,),
 												);
                                                 return Image(
                                                     image: ResizeImage(
-                                                        FileImage(File(state.value)),
+                                                        FileImage(File(currentValue)),
                                                         height: 400
                                                     )
                                                 );
@@ -68,7 +69,7 @@ class ImageUploadForm extends StatelessWidget {
                                 )
                             ),
                         ),
-                        if(!state.value.isEmpty) Padding(
+                        if(!currentValue.isEmpty) Padding(
                             padding: const EdgeInsets.all(8),
                             child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -77,10 +78,10 @@ class ImageUploadForm extends StatelessWidget {
                                         minHeight: 80,
                                         maxWidth: orientation == Orientation.landscape ? MediaQuery.of(context).size.width / 3 : double.infinity //bad code
                                     ),
-                                    child: FileInfo(File(state.value),
+                                    child: FileInfo(File(currentValue),
                                         onCompressed: (compressed) {
-                                            state.didChange(compressed.path);
                                             if(onCompressed != null) onCompressed!(compressed.path);
+                                            state.didChange(compressed.path);
                                         }
                                     ),
                                 ),
@@ -93,3 +94,44 @@ class ImageUploadForm extends StatelessWidget {
         );
     }
 }
+
+// todo: move somewhere else
+Future<List<File>?> selectFileModal({required BuildContext context}) async {
+    final output = await showDialog<_PickerType>(context: context, builder: (context) {
+        return Dialog(
+            child: Container(
+                constraints: BoxConstraints(maxWidth: 500),
+                padding: EdgeInsets.all(16),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                        ListTile(
+                            title: Text("Select a file"),
+                            leading: Icon(Icons.insert_drive_file),
+                            onTap: () => Navigator.pop(context, _PickerType.file),
+                        ),
+                        ListTile(
+                            title: Text("Copy from clipboard"),
+                            leading: Icon(Icons.copy),
+                            onTap: () => Navigator.pop(context, _PickerType.clipboard),
+                        ),
+                    ],
+                ),
+            ),
+        );
+    },);
+    if(output == _PickerType.clipboard) {
+        final clipboard = SystemClipboard.instance;
+        if(clipboard == null) return null;
+        final reader = await clipboard.read();
+        final types = await obtainValidFileTypeOnClipboard(reader);
+        return await Future.wait(types.map((type) => getImageFromClipboard(reader: reader, fileType: type)));
+    } else return await openFilePicker();
+}
+
+Future<List<File>?> openFilePicker() async {
+    FilePickerResult? pickerResult = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
+    return pickerResult?.files.map((file) => File(file.path!)).toList();
+}
+
+enum _PickerType {file, clipboard}

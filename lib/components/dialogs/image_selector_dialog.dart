@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:localbooru/api/index.dart';
+import 'package:localbooru/components/search_tag.dart';
 import 'package:localbooru/utils/constants.dart';
-import 'package:localbooru/views/navigation/home.dart';
 import 'package:localbooru/views/navigation/tag_browse.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,7 +28,7 @@ class SelectDialog extends StatefulWidget {
     State<SelectDialog> createState() => _SelectDialogState();
 }
 class _SelectDialogState extends State<SelectDialog> {
-    final SearchController controller = SearchController();
+    final SearchTagController controller = SearchTagController();
 
     List<ImageID> imageIDs = [];
 
@@ -69,7 +69,7 @@ class _SelectDialogState extends State<SelectDialog> {
                             // ),
                             Container(
                                 constraints: const BoxConstraints(maxHeight: 44),
-                                child: SearchTag(
+                                child: SearchTagBox(
                                     controller: controller,
                                     onSearch: (value) => onSearch(),
                                     hint: imageIDs.isNotEmpty ? "Selected: ${imageIDs.length}" : "Select elements",

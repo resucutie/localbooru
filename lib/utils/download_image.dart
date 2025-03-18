@@ -9,13 +9,24 @@ import 'package:path_provider/path_provider.dart';
 typedef HandleChunk = Function(List<int> chunk, http.StreamedResponse response);
 
 int hasDownloaded = 0;
-Future<File> downloadFile(Uri uri, {HandleChunk? handleChunk}) async {
+Future<File> downloadFile(Uri uri, {HandleChunk? handleChunk, bool followRedirects = true}) async {
+    http.Request request;
+    http.StreamedResponse response;
+    do { // lazy work for redirects; do-while because it'll run once if followRedirects = false
+        request = http.Request("GET", uri);
+        request.followRedirects = false;
+        response = await lbHttp.send(request);   
+        if(response.isRedirect) {
+            final String? newUrl = response.headers['location'];
+            if(newUrl != null) uri = Uri.parse(newUrl);
+            else throw "Redirect does not have 'location' header";
+        } else break;
+    } while (followRedirects);
+
     final downloadDir = await getTemporaryDirectory();
-    final file = File(p.join(downloadDir.path, uri.pathSegments.last));
-    
-    final request = http.Request("GET", uri);
-    final response = await lbHttp.send(request);
-    final sink = file.openWrite();
+    final name = uri.pathSegments.last;
+    final file = File(p.join(downloadDir.path, name));
+    IOSink sink = file.openWrite();
 
     await response.stream.map((chunk) {
         if(handleChunk == null) {

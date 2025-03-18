@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:localbooru/api/index.dart';
@@ -10,7 +9,11 @@ import 'package:localbooru/components/app_bar_linear_progress.dart';
 import 'package:localbooru/components/dialogs/download_dialog.dart';
 import 'package:localbooru/components/dialogs/image_selector_dialog.dart';
 import 'package:localbooru/components/dialogs/textfield_dialogs.dart';
+import 'package:localbooru/shortcut_handler.dart';
+import 'package:localbooru/utils/compressor.dart';
+import 'package:localbooru/utils/listeners.dart';
 import 'package:localbooru/utils/platform_tools.dart';
+import 'package:localbooru/views/image_manager/components/image_upload.dart';
 import 'package:localbooru/views/image_manager/form.dart';
 import 'package:localbooru/views/image_manager/general_collection_manager.dart';
 import 'package:path/path.dart' as p;
@@ -32,9 +35,13 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
     bool isSaving = false;
     bool saveCollection = false;
     int savedImages = 0;
+    double? progressCompressedImages;
     int imagePage = 0;
 
     bool isCorelated = false;
+
+
+    AcessibleNotifyListenerNotifier updatePreset = AcessibleNotifyListenerNotifier();
 
     @override
     void initState() {
@@ -84,216 +91,242 @@ class _ImageManagerShellState extends State<ImageManagerShell> {
 
     bool hasError() => errorOnPages.any((element) => element,);
 
-    void addMultipleImages(List<PlatformFile> files) {
-        for (PlatformFile file in files) {
-            if(file.path != null) {
-                preset.pages!.add(PresetImage(image: File(file.path!), key: UniqueKey()));
-                errorOnPages.add(true);
-            }
+    void addMultipleImages(List<File> files) {
+        for (final file in files) {
+            preset.pages!.add(PresetImage(image: file, key: UniqueKey()));
+            errorOnPages.add(true);
         }
+    }
+
+    void compressAllImages() async {
+        setState(() {progressCompressedImages = 0;});
+        final presetsToCompressLength = preset.pages!.where((image) => image.image != null,).length;
+        for (final (index, presetImage) in preset.pages!.indexed) {
+            if(presetImage.image == null) continue;
+            final file = await compress(presetImage.image!);
+            preset.pages![index].image = file;
+            setState(() {progressCompressedImages = index / presetsToCompressLength;});
+        }
+        updatePreset.update();
+        setState(() {progressCompressedImages = null;});
     }
 
     @override
     Widget build(BuildContext context) {
-        return OrientationBuilder(
-            builder: (context, orientation) => Scaffold(
-                key: _scaffoldKey,
-                appBar: AppBar(
-                    title: imagePage >= 0 ? ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text("${preset.pages![imagePage].replaceID != null ? "Edit" : "Add"} image", style: const TextStyle(fontSize: 20.0), overflow: TextOverflow.ellipsis),
-                        subtitle: Text(generateName(preset.pages![imagePage]), style: const TextStyle(fontSize: 14.0), overflow: TextOverflow.ellipsis),
-                    ) : Text("${preset.pages!.length} images"),
-                    actions: [
-                        IconButton(
-                            icon: Badge(
-                                padding: EdgeInsets.zero,
-                                label: Wrap(
-                                    children: [
-                                        if(saveCollection) Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                                            decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Theme.of(context).colorScheme.onTertiaryContainer
+        return ShortcutHandler(
+            paste: (context) => CallbackPasteImageAction((intent, clipboardImages) {
+                final isFirstEmptyAndIsSelectingFirst = preset.pages!.first.image == null && imagePage == 0;
+                List<File> images = clipboardImages;
+                if(isFirstEmptyAndIsSelectingFirst) {
+                    final firstFile = images.removeAt(0);
+                    preset.pages!.first.image = firstFile;
+                    updatePreset.update();
+                }
+                addMultipleImages(images);
+                setState(() => imagePage = preset.pages!.length - 1);
+                _scaffoldKey.currentState!.closeEndDrawer();
+            },),
+            child: OrientationBuilder(
+                builder: (context, orientation) => Scaffold(
+                    key: _scaffoldKey,
+                    appBar: AppBar(
+                        title: imagePage >= 0 ? ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text("${preset.pages![imagePage].replaceID != null ? "Edit" : "Add"} image", style: const TextStyle(fontSize: 20.0), overflow: TextOverflow.ellipsis),
+                            subtitle: Text(generateName(preset.pages![imagePage]), style: const TextStyle(fontSize: 14.0), overflow: TextOverflow.ellipsis),
+                        ) : Text("${preset.pages!.length} images"),
+                        actions: [
+                            IconButton(
+                                icon: Badge(
+                                    padding: EdgeInsets.zero,
+                                    label: Wrap(
+                                        children: [
+                                            if(saveCollection) Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                                decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: Theme.of(context).colorScheme.onTertiaryContainer
+                                                ),
+                                                child: const Text("C"),
                                             ),
-                                            child: const Text("C"),
-                                        ),
-                                        if(preset.pages!.length > 1) Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                                            child: Text("${preset.pages!.length}"),
-                                        )
-                                    ],
+                                            if(preset.pages!.length > 1) Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                                child: Text("${preset.pages!.length}"),
+                                            )
+                                        ],
+                                    ),
+                                    offset: Offset(preset.pages!.length > 1 && saveCollection ? 0 : 7, -7),
+                                    isLabelVisible: preset.pages!.length > 1 || saveCollection,
+                                    child: const Icon(Icons.library_add),
                                 ),
-                                offset: Offset(preset.pages!.length > 1 && saveCollection ? 0 : 7, -7),
-                                isLabelVisible: preset.pages!.length > 1 || saveCollection,
-                                child: const Icon(Icons.library_add),
+                                // icon: Icon(Icons.library_add),
+                                tooltip: preset.pages!.length > 1 || saveCollection
+                                    // ignore: prefer_interpolation_to_compose_strings
+                                    ? "${preset.pages!.length} images will be added" + (saveCollection ? " and put inside a new collection": "")
+                                    : "Add images in bulk",
+                                onPressed: () => _scaffoldKey.currentState!.openEndDrawer(),
                             ),
-                            // icon: Icon(Icons.library_add),
-                            tooltip: preset.pages!.length > 1 || saveCollection
-                                // ignore: prefer_interpolation_to_compose_strings
-                                ? "${preset.pages!.length} images will be added" + (saveCollection ? " and put inside a new collection": "")
-                                : "Add images in bulk",
-                            onPressed: () => _scaffoldKey.currentState!.openEndDrawer(),
-                        ),
-                        // Tooltip(
-                        //     message: hasError() ? "There's some errors to resolve" : null,
-                        //     child: ,
-                        // ),
-                        orientation == Orientation.portrait ? IconButton(
-                            icon: const Icon(Icons.check),
-                            onPressed: !isSaving && !hasError() ? saveImages : null,
-                            tooltip: !hasError() ? "Done" : null,
-                        ) : TextButton.icon(
-                            icon: const Icon(Icons.check),
-                            label: const Text("Done"),
-                            onPressed: !isSaving && !hasError() ? saveImages : null,
-                        )
-                    ],
-                    bottom: isSaving ? AppBarLinearProgressIndicator(value: savedImages != 0 ? savedImages / preset.pages!.length : null,) : null,
-                ),
-                endDrawer: Drawer(
-                    child: SingleChildScrollView(
-                        child: SafeArea(
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                    Padding(
-                                        padding: const EdgeInsets.all(16).copyWith(top: isMobile() ? 4 : 16),
-                                        child: const Text("Bulk Adding"),
-                                    ),
-                                    ListTile(
-                                        title: const Text("Manage images"),
-                                        textColor: imagePage == -1 ? Theme.of(context).colorScheme.primary : null,
-                                        iconColor: imagePage == -1 ? Theme.of(context).colorScheme.primary : null,
-                                        leading: const Icon(Icons.photo_library),
-                                        onTap: imagePage == -1 ? null : () {
-                                            setState(() => imagePage = -1);
-                                            _scaffoldKey.currentState!.closeEndDrawer();
-                                        },
-                                    ),
-                                    const Divider(),
-                                    ...List.generate(preset.pages!.length, (index) => ListTile(
-                                        title: Text(generateName(preset.pages![index])),
-                                        leading: const Icon(Icons.image_outlined),
-                                        textColor: imagePage == index ? Theme.of(context).colorScheme.primary : null,
-                                        iconColor: imagePage == index ? Theme.of(context).colorScheme.primary : null,
-                                        onTap: imagePage == index ? null : () {
-                                            setState(() => imagePage = index);
-                                            _scaffoldKey.currentState!.closeEndDrawer();
-                                        },
-                                        trailing: preset.pages!.length == 1 ? null : IconButton(
-                                            tooltip: "Remove",
-                                            icon: const Icon(Icons.close),
-                                            onPressed: () {
-                                                preset.pages!.removeAt(index);
-                                                errorOnPages.removeAt(index);
-                                                setState(() => imagePage = imagePage >= index ? imagePage - 1 : imagePage);
+                            // Tooltip(
+                            //     message: hasError() ? "There's some errors to resolve" : null,
+                            //     child: ,
+                            // ),
+                            orientation == Orientation.portrait ? IconButton(
+                                icon: const Icon(Icons.check),
+                                onPressed: !isSaving && !hasError() ? saveImages : null,
+                                tooltip: !hasError() ? "Done" : null,
+                            ) : TextButton.icon(
+                                icon: const Icon(Icons.check),
+                                label: const Text("Done"),
+                                onPressed: !isSaving && !hasError() ? saveImages : null,
+                            )
+                        ],
+                        bottom: isSaving ? AppBarLinearProgressIndicator(value: savedImages != 0 ? savedImages / preset.pages!.length : null,) : null,
+                    ),
+                    endDrawer: Drawer(
+                        child: SingleChildScrollView(
+                            child: SafeArea(
+                                child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                        Padding(
+                                            padding: const EdgeInsets.all(16).copyWith(top: isMobile() ? 4 : 16),
+                                            child: const Text("Bulk Adding"),
+                                        ),
+                                        ListTile(
+                                            title: const Text("Manage images"),
+                                            textColor: imagePage == -1 ? Theme.of(context).colorScheme.primary : null,
+                                            iconColor: imagePage == -1 ? Theme.of(context).colorScheme.primary : null,
+                                            leading: const Icon(Icons.photo_library),
+                                            onTap: imagePage == -1 ? null : () {
+                                                setState(() => imagePage = -1);
+                                                _scaffoldKey.currentState!.closeEndDrawer();
                                             },
                                         ),
-                                    )),
-                                    const Divider(),
-                                    ListTile(
-                                        title: const Text("Add image"),
-                                        leading: const Icon(Icons.add),
-                                        onTap: () async {
-                                            FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.media, allowMultiple: true);
-                                            if (result != null) {
-                                                // if(preset.pages!.first.image == null && result.files.length > 1) preset.pages = [];
-                                                addMultipleImages(result.files);
+                                        const Divider(),
+                                        ...List.generate(preset.pages!.length, (index) => ListTile(
+                                            title: Text(generateName(preset.pages![index])),
+                                            leading: const Icon(Icons.image_outlined),
+                                            textColor: imagePage == index ? Theme.of(context).colorScheme.primary : null,
+                                            iconColor: imagePage == index ? Theme.of(context).colorScheme.primary : null,
+                                            onTap: imagePage == index ? null : () {
+                                                setState(() => imagePage = index);
+                                                _scaffoldKey.currentState!.closeEndDrawer();
+                                            },
+                                            trailing: preset.pages!.length == 1 ? null : IconButton(
+                                                tooltip: "Remove",
+                                                icon: const Icon(Icons.close),
+                                                onPressed: () {
+                                                    preset.pages!.removeAt(index);
+                                                    errorOnPages.removeAt(index);
+                                                    setState(() => imagePage = imagePage >= index ? imagePage - 1 : imagePage);
+                                                },
+                                            ),
+                                        )),
+                                        const Divider(),
+                                        ListTile(
+                                            title: const Text("Add image"),
+                                            leading: const Icon(Icons.add),
+                                            onTap: () async {
+                                                final files = await selectFileModal(context: context);
+                                                if (files != null) {
+                                                    // if(preset.pages!.first.image == null && result.files.length > 1) preset.pages = [];
+                                                    addMultipleImages(files);
+                                                    setState(() => imagePage = preset.pages!.length - 1);
+                                                    _scaffoldKey.currentState!.closeEndDrawer();
+                                                }
+                                            }
+                                        ),
+                                        ListTile(
+                                            title: const Text("Edit existing image"),
+                                            leading: const Icon(Icons.edit),
+                                            onTap: () async {
+                                                final images = await openSelectionDialog(
+                                                    context: context,
+                                                    excludeImages: preset.pages!.where((imagePreset) => imagePreset.replaceID != null,).map((imagePreset) => imagePreset.replaceID!).toList()
+                                                );
+                                                if(images == null) return;
+                                                final booru = await getCurrentBooru();
+                                                preset.pages!.addAll(await Future.wait(images.map((id) async {
+                                                    PresetImage image = await PresetImage.fromExistingImage((await booru.getImage(id))!);
+                                                    errorOnPages.add(false);
+                                                    return image;
+                                                })));
                                                 setState(() => imagePage = preset.pages!.length - 1);
                                                 _scaffoldKey.currentState!.closeEndDrawer();
                                             }
-                                        }
-                                    ),
-                                    ListTile(
-                                        title: const Text("Edit existing image"),
-                                        leading: const Icon(Icons.edit),
-                                        onTap: () async {
-                                            final images = await openSelectionDialog(
-                                                context: context,
-                                                excludeImages: preset.pages!.where((imagePreset) => imagePreset.replaceID != null,).map((imagePreset) => imagePreset.replaceID!).toList()
-                                            );
-                                            if(images == null) return;
-                                            final booru = await getCurrentBooru();
-                                            preset.pages!.addAll(await Future.wait(images.map((id) async {
-                                                PresetImage image = await PresetImage.fromExistingImage((await booru.getImage(id))!);
-                                                image.key = UniqueKey();
-                                                errorOnPages.add(false);
-                                                return image;
-                                            })));
-                                            setState(() => imagePage = preset.pages!.length - 1);
-                                            _scaffoldKey.currentState!.closeEndDrawer();
-                                        }
-                                    ),
-									ListTile(
-                                        title: const Text("Import from external website"),
-                                        leading: const Icon(Icons.download),
-                                        onTap: () async {
-                                            final url = await showDialog<String>(
-                                                context: context,
-                                                builder: (context) {
-                                                    return const InsertURLDialog();
-                                                },
-                                            );
-                                            if(url == null) return;
-                                            final downloadedPreset = await importImageFromURL(url);
-                                            // final images = await openSelectionDialog(
-                                            //     context: context,
-                                            //     excludeImages: preset.pages!.where((imagePreset) => imagePreset.replaceID != null,).map((imagePreset) => imagePreset.replaceID!).toList()
-                                            // );
-                                            if(downloadedPreset is PresetImage) {
-                                                downloadedPreset.key = UniqueKey();
-                                                preset.pages!.add(downloadedPreset);
-                                                errorOnPages.add(false);
-                                            } else if (downloadedPreset is VirtualPresetCollection) {
-                                                final presets = downloadedPreset.pages;
-                                                if(presets == null) return;
-                                                preset.pages!.addAll(presets);
+                                        ),
+                                                ListTile(
+                                            title: const Text("Import from external website"),
+                                            leading: const Icon(Icons.download),
+                                            onTap: () async {
+                                                final url = await showDialog<String>(
+                                                    context: context,
+                                                    builder: (context) {
+                                                        return const InsertURLDialog();
+                                                    },
+                                                );
+                                                if(url == null) return;
+                                                final downloadedPreset = await importImageFromURL(url);
+                                                // final images = await openSelectionDialog(
+                                                //     context: context,
+                                                //     excludeImages: preset.pages!.where((imagePreset) => imagePreset.replaceID != null,).map((imagePreset) => imagePreset.replaceID!).toList()
+                                                // );
+                                                if(downloadedPreset is PresetImage) {
+                                                    preset.pages!.add(downloadedPreset);
+                                                    errorOnPages.add(false);
+                                                } else if (downloadedPreset is VirtualPresetCollection) {
+                                                    final presets = downloadedPreset.pages;
+                                                    if(presets == null) return;
+                                                    preset.pages!.addAll(presets);
+                                                }
+                                                setState(() => imagePage = preset.pages!.length - 1);
+                                                _scaffoldKey.currentState!.closeEndDrawer();
                                             }
-                                            setState(() => imagePage = preset.pages!.length - 1);
-                                            _scaffoldKey.currentState!.closeEndDrawer();
-                                        }
-                                    ),
-                                ],
+                                        ),
+                                    ],
+                                ),
                             ),
                         ),
                     ),
-                ),
-                body: PopScope(
-                    canPop: false,
-                    onPopInvoked: (didPop) {
-                        if(didPop) return;
-                        if(imagePage == 0) {
-                            context.pop();
-                        } else {
-                            setState(() => imagePage = 0);
-                        }
-                    },
-                    child: IndexedStack(
-                        index: imagePage + 1,
-                        children: [
-                            GeneralCollectionManagerScreen(
-                                displayImages: List<ImageProvider?>.generate(3, (index) => preset.pages!.asMap().containsKey(index) && preset.pages![index].image != null ? FileImage(preset.pages![index].image!) : null,),
-                                corelated: isCorelated,
-                                onCorelatedChanged: (value) => setState(() => isCorelated = value),
-                                saveCollectionToggle: saveCollection,
-                                onSaveCollectionToggle: (value) => setState(() => saveCollection = value),
-                                collection: preset,
-                                onErrorChange: (value) => setState(() => errorOnPages[0] = value),
-                            ),
-                            for (final (index, imagePreset) in preset.pages!.indexed) ImageManagerForm(
-                                key: imagePreset.key, // replace index by something else
-                                preset: imagePreset,
-                                onChanged: (imagePreset) => setState(() => preset.pages![index] = imagePreset),
-                                onErrorUpdate: (containsError) => setState(() => errorOnPages[index + 1] = containsError),
-                                onMultipleImagesAdded: addMultipleImages,
-                                showRelatedImagesCard: !isCorelated,
-                            )
-                        ],
+                    body: PopScope(
+                        canPop: false,
+                        onPopInvokedWithResult: (didPop, _) {
+                            if(didPop) return;
+                            if(imagePage == 0) {
+                                context.pop();
+                            } else {
+                                setState(() => imagePage = 0);
+                            }
+                        },
+                        child: IndexedStack(
+                            index: imagePage + 1,
+                            children: [
+                                GeneralCollectionManagerScreen(
+                                    displayImages: List<ImageProvider?>.generate(3, (index) => preset.pages!.asMap().containsKey(index) && preset.pages![index].image != null ? FileImage(preset.pages![index].image!) : null,),
+                                    corelated: isCorelated,
+                                    onCorelatedChanged: (value) => setState(() => isCorelated = value),
+                                    saveCollectionToggle: saveCollection,
+                                    onSaveCollectionToggle: (value) => setState(() => saveCollection = value),
+                                    collection: preset,
+                                    onErrorChange: (value) => setState(() => errorOnPages[0] = value),
+                                    onMultiCompress: compressAllImages,
+                                    progressMultiCompress: progressCompressedImages,
+                                    // progressMultiCompress: 0.5,
+                                ),
+                                for (final (index, imagePreset) in preset.pages!.indexed) ImageManagerForm(
+                                    preset: imagePreset,
+                                    updateNotifier: updatePreset,
+                                    onChanged: (imagePreset) => setState(() => preset.pages![index] = imagePreset),
+                                    onErrorUpdate: (containsError) => setState(() => errorOnPages[index + 1] = containsError),
+                                    onMultipleImagesAdded: addMultipleImages,
+                                    showRelatedImagesCard: !isCorelated,
+                                )
+                            ],
+                        ),
                     ),
-                ),
-                // floatingActionButton: FloatingActionButton(onPressed: () => debugPrint("$errorOnPages"),),
-            )
+                    // floatingActionButton: FloatingActionButton(onPressed: () => debugPrint("$errorOnPages"),),
+                )
+            ),
         );
     }
 }

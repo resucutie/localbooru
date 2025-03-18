@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:localbooru/components/context_menu.dart';
 import 'package:localbooru/utils/constants.dart';
 
-class Tag extends StatefulWidget {
-    const Tag(this.tag, {super.key, this.color = SpecificTagsColors.generic, this.renderObject, this.onTap});
+class TagPill extends StatefulWidget {
+    const TagPill(this.tag, {super.key, this.color = SpecificTagsColors.generic, this.renderObject, this.onTap});
 
     final String tag;
     final Color color;
@@ -12,9 +12,9 @@ class Tag extends StatefulWidget {
     final RenderObject? renderObject;
 
     @override
-    State<Tag> createState() => _TagState();
+    State<TagPill> createState() => _TagPillState();
 }
-class _TagState extends State<Tag> {
+class _TagPillState extends State<TagPill> {
     bool _isHovering = false;
     late LongPressDownDetails longPress;
 
