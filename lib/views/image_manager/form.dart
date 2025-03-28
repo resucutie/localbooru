@@ -114,12 +114,9 @@ class _ImageManagerFormState extends State<ImageManagerForm> {
     }
 
     void fetchTags() async {
-        final prefs = await SharedPreferences.getInstance();
         setState(() => isGeneratingTags = true);
         autoTag(File(loadedImage)).then((tags) async {
-            final moreAccurateTags = filterAccurateResults(tags, prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"]);
-
-            final separatedTags = await (await getCurrentBooru()).separateTagsByType(moreAccurateTags.keys.toList());
+            final separatedTags = await (await getCurrentBooru()).separateTagsByType(tags.keys.toList());
 
             if(separatedTags["generic"] != null) tagController.text = [tagController.text, ...separatedTags["generic"]!].where((e) => e.isNotEmpty).join(" ");
             if(separatedTags["artist"] != null) artistTagController.text = [artistTagController.text, ...separatedTags["artist"]!].where((e) => e.isNotEmpty).join(" ");

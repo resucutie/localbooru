@@ -10,7 +10,7 @@ final Map<String, dynamic> settingsDefaults = {
     "page_size": isDesktop() ? 54 : 32,
     "monet": Platform.isAndroid ? true : false,
     "theme": "system",
-    "autotag_accuracy": 0.15,
+    "autotag_accuracy": 0.3,
     "thumbnail_quality": 2.0,
     "update": true,
     "gif_video": false,
