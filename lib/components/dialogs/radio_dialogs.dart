@@ -110,3 +110,50 @@ class CounterChangerDialog extends StatelessWidget {
         );
     }
 }
+
+final Map<String, ModelDescription> avaiableModels = {
+    "danbooru": ModelDescription(name: "Danbooru", description: "A simpler model developed by Danbooru. Gives the fewest accurate results but it is hosted by Danbooru itself"),
+    "joint_tagger_project": ModelDescription(name: "Joint Tagger Project", description: "A model that works great with furry images - Uses a HuggingFace space"),
+};
+class ModelDescription {
+    const ModelDescription({required this.name, required this.description});
+    final String name;
+    final String description;
+}
+class ModelChangerDialog extends StatelessWidget {
+    const ModelChangerDialog({super.key, required this.model});
+
+    final String model;
+
+    @override
+    Widget build(BuildContext context) {
+        return AlertDialog(
+            icon: Icon(Icons.smart_toy),
+            title: const Text("Autotag Model"),
+            
+            contentPadding: const EdgeInsets.only(top: 16.0, bottom: 24.0),
+            content: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 460, maxWidth: 460),
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                        Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 24).copyWith(bottom: 16),
+                            child: Text("Note: all of the models below do not run locally and need to talk to external services to work properly"),
+                        ),
+                        ...avaiableModels.entries.map((counterType) => RadioListTile(
+                            groupValue: model,
+                            value: counterType.key,
+                            title: Text(counterType.value.name),
+                            subtitle: Text(counterType.value.description),
+                            onChanged: (value) => Navigator.of(context).pop(value),
+                        ))
+                    ],
+                ),
+            ),
+            actions: [
+                TextButton(onPressed: Navigator.of(context).pop, child: const Text("Close"))
+            ],
+        );
+    }
+}

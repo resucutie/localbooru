@@ -11,6 +11,7 @@ final Map<String, dynamic> settingsDefaults = {
     "monet": Platform.isAndroid ? true : false,
     "theme": "system",
     "autotag_accuracy": 0.3,
+    "autotag_model": "danbooru", // options: "danbooru", "joint_tagger_project"
     "thumbnail_quality": 2.0,
     "update": true,
     "gif_video": false,

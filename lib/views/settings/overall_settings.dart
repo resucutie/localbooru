@@ -74,12 +74,20 @@ class _OverallSettingsState extends State<OverallSettings> {
     Future<void> onChangeTheme() async {
         final choosenTheme = await showDialog<String>(
             context: context,
-            builder: (_) => ThemeChangerDialog(theme: widget.prefs.getString("theme") ?? settingsDefaults["theme"])
+            builder: (_) => ThemeChangerDialog(theme: _theme)
         );
         if(choosenTheme == null) return;
         widget.prefs.setString("theme", choosenTheme);
         themeListener.update();
         setState(() => _theme = choosenTheme);
+    }
+    Future<void> onChangeAutotagModel() async {
+        final choosenModel = await showDialog<String>(
+            context: context,
+            builder: (_) => ModelChangerDialog(model: widget.prefs.getString("autotag_model") ?? settingsDefaults["autotag_model"])
+        );
+        if(choosenModel == null) return;
+        widget.prefs.setString("autotag_model", choosenModel);
     }
 
     Future<void> onChangeCounter() async {
@@ -192,7 +200,7 @@ class _OverallSettingsState extends State<OverallSettings> {
                         ],
                     ),
                     leading: const Icon(CupertinoIcons.sparkles),
-                    subtitle: const Text("How accurate should be the results of the autotagger"),
+                    subtitle: const Text("How accurate should be the results of the autotagger. We recommend 0.3 to avoid innacurate results"),
                     extremeTips: const [Text("Less accurate"), Text("More accurate")],
                     //TODO: Make this slider go in an exponential curve
                     value: _autotagAccuracy,
@@ -203,6 +211,12 @@ class _OverallSettingsState extends State<OverallSettings> {
                         setState(() => _autotagAccuracy = value);
                         widget.prefs.setDouble("autotag_accuracy", value);
                     },
+                ),
+                ListTile(
+                    title: const Text("Autotag model"),
+                    subtitle: const Text("Choose which model should be used for the autotagger"),
+                    leading: const Icon(Icons.smart_toy),
+                    onTap: onChangeAutotagModel,
                 ),
                 
                 const SmallHeader("Appearence"),
