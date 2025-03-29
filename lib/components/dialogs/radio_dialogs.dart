@@ -114,6 +114,7 @@ class CounterChangerDialog extends StatelessWidget {
 final Map<String, ModelDescription> avaiableModels = {
     "danbooru": ModelDescription(name: "Danbooru", description: "A simpler model developed by Danbooru. Gives the fewest accurate results but it is hosted by Danbooru itself"),
     "joint_tagger_project": ModelDescription(name: "Joint Tagger Project", description: "A model that works great with furry images - Uses a HuggingFace space"),
+    "z3d_e621_convnext": ModelDescription(name: "Z3D-E621-Convnext", description: "A model that works very well with categorizing pokemon images - Uses a HuggingFace space"),
 };
 class ModelDescription {
     const ModelDescription({required this.name, required this.description});

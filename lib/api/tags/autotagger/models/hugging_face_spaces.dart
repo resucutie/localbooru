@@ -1,6 +1,6 @@
 part of tag_manager;
 
-abstract class HuggingFaceSpacesAutotagger extends ModelInterface with TagFilter {
+abstract class HuggingFaceSpacesAutotagger extends ModelInterface {
     HuggingFaceSpacesAutotagger(super.file);
 
     String get HF_SPACE;
@@ -43,7 +43,21 @@ abstract class HuggingFaceSpacesAutotagger extends ModelInterface with TagFilter
     }
 }
 
-class JointTaggerProjectAutotagger extends HuggingFaceSpacesAutotagger {
+mixin HuggingFaceWithConfidenceReturn on ModelInterface {
+    AccuracyTagList convertConfidence(List<Map<String, dynamic>> resultWithConfidences) {
+        AccuracyTagList returnedTags = {};
+        for (final tag in resultWithConfidences) {
+            final String name = tag["label"];
+            if(Metatag.isMetatag(name)) continue;
+
+            returnedTags[name.replaceAll(" ", "_")] = tag["confidence"];
+        }
+        
+        return returnedTags;
+    }
+}
+
+class JointTaggerProjectAutotagger extends HuggingFaceSpacesAutotagger with TagFilter, HuggingFaceWithConfidenceReturn {
   JointTaggerProjectAutotagger(super.file);
 
     @override
@@ -62,13 +76,30 @@ class JointTaggerProjectAutotagger extends HuggingFaceSpacesAutotagger {
 
         final resultSummary = await returnEvent(eventId);
         
-        final List<Map<String, dynamic>> resultWithConfidences = List<Map<String, dynamic>>.from(resultSummary["confidences"]);
+        return convertConfidence(List<Map<String, dynamic>>.from(resultSummary["confidences"]));
+    }
+}
 
-        AccuracyTagList returnedTags = {};
-        for (final tag in resultWithConfidences) {
-            returnedTags[(tag["label"] as String).replaceAll(" ", "_")] = tag["confidence"];
-        }
+class Z3DE621ConvnextAutotagger extends HuggingFaceSpacesAutotagger with TagFilter, HuggingFaceWithConfidenceReturn {
+  Z3DE621ConvnextAutotagger(super.file);
+
+    @override
+    String get HF_SPACE => 'https://fancyfeast-z3d-e621-convnext-space.hf.space';
+    @override
+    String get HF_PREDICT_ENDPOINT => 'predict';
+
+    @override
+    Future<AccuracyTagList> execute() async {
+        final url = await uploadFile();
+
+        final eventId = await createEvent([
+            {"path": url}
+        ]);
+
+        final resultSummary = await returnEvent(eventId);
+
+        final AccuracyTagList tags = convertConfidence(List<Map<String, dynamic>>.from(resultSummary["confidences"]));
         
-        return returnedTags;
+        return flterAccurateResults(tags);
     }
 }
