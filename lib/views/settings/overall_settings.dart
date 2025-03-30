@@ -25,10 +25,14 @@ class OverallSettings extends StatefulWidget {
 class _OverallSettingsState extends State<OverallSettings> {
     final _pageSizeValidator = GlobalKey<FormState>();
     final _pageSizeController = TextEditingController();
+
+    final _autotaggerCustomUrlController = TextEditingController();
+
     final LocalAuthentication auth = LocalAuthentication();
 
     late double _gridSizeSliderValue;
     late double _autotagAccuracy;
+    late String? _autotagCustomUrl;
     late double _thumbnailQuality;
     late bool _monetTheme;
     late bool _update;
@@ -56,6 +60,8 @@ class _OverallSettingsState extends State<OverallSettings> {
         super.initState();
         _gridSizeSliderValue = (widget.prefs.getInt("grid_size") ?? settingsDefaults["grid_size"]).toDouble();
         _autotagAccuracy = widget.prefs.getDouble("autotag_accuracy") ?? settingsDefaults["autotag_accuracy"];
+        _autotagCustomUrl = widget.prefs.getString("autotag_custom_url") ?? settingsDefaults["autotag_custom_url"];
+        if(_autotagCustomUrl != null) _autotaggerCustomUrlController.text = _autotagCustomUrl!;
         _thumbnailQuality = widget.prefs.getDouble("thumbnail_quality") ?? settingsDefaults["thumbnail_quality"];
         _pageSizeController.text = (widget.prefs.getInt("page_size") ?? settingsDefaults["page_size"]).toString();
         _monetTheme = widget.prefs.getBool("monet") ?? settingsDefaults["monet"];
@@ -155,7 +161,8 @@ class _OverallSettingsState extends State<OverallSettings> {
                                     inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9]+')),],
                                     onChanged: (value) {
                                         _pageSizeValidator.currentState!.validate();
-                                        if(value.isEmpty || int.parse(value) > 100) return;
+                                        // i removed the 100 cap because :3
+                                        if(value.isEmpty) return;
                                         setState(() {});
                                         widget.prefs.setInt("page_size", int.parse(value));
                                     },
@@ -213,10 +220,47 @@ class _OverallSettingsState extends State<OverallSettings> {
                     },
                 ),
                 ListTile(
-                    title: const Text("Autotag model"),
+                    title: Row(
+                        children: [
+                            const Text("Page size"),
+                            if(isSettingModified("page_size")) IconButton(
+                                onPressed: () => resetProp("page_size", modifier: (v) => _pageSizeController.text = v.toString()),
+                                icon: const Icon(Icons.restart_alt)
+                            )
+                        ],
+                    ),
                     subtitle: const Text("Choose which model should be used for the autotagger"),
                     leading: const Icon(Icons.smart_toy),
                     onTap: onChangeAutotagModel,
+                ),
+                SwitchListTile(
+                    title: const Text("Custom tagger server"),
+                    secondary: const Icon(Icons.dns),
+                    value: _autotagCustomUrl != null,
+                    onChanged: (option) {
+                        debugPrint(_autotagCustomUrl);
+                        if(option) {
+                            setState(() => _autotagCustomUrl = "");
+                            _autotaggerCustomUrlController.text = _autotagCustomUrl!;
+                        } else {
+                            setState(() => _autotagCustomUrl = null);
+                            _autotaggerCustomUrlController.text = "";
+                            widget.prefs.remove("autotag_custom_url");
+                        }
+                    },
+                    subtitle: Wrap(
+                        children: [
+                            const Text("If you selfhosted your own models and want to use them with LocalBooru, you may try to use a custom tagging server."),
+                            if(_autotagCustomUrl != null) TextField(
+                                controller: _autotaggerCustomUrlController,
+                                onChanged: (value) {
+                                    _pageSizeValidator.currentState!.validate();
+                                    setState(() => _autotagCustomUrl = value);
+                                    widget.prefs.setString("autotag_custom_url", value);
+                                },
+                            ),
+                        ],
+                    )
                 ),
                 
                 const SmallHeader("Appearence"),

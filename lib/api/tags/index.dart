@@ -17,7 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 part 'autotagger/index.dart';
 part 'autotagger/models/index.dart';
-part 'autotagger/models/hugging_face_spaces.dart';
+part 'autotagger/models/gradio.dart';
 part 'autotagger/models/danbooru_autotagger.dart';
 part 'interfaces.dart';
 part 'match.dart';

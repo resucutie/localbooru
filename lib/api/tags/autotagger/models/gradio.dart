@@ -1,13 +1,12 @@
 part of tag_manager;
 
-abstract class HuggingFaceSpacesAutotagger extends ModelInterface {
-    HuggingFaceSpacesAutotagger(super.file);
+abstract class GradioAutotagger extends ModelInterface with CanCustomTaggingServer {
+    GradioAutotagger(super.file);
 
-    String get HF_SPACE;
-    String get HF_PREDICT_ENDPOINT;
+    String get GRADIO_PROCESS_ENDPOINT;
 
     Future<String> uploadFile() async {
-        http.MultipartRequest req = http.MultipartRequest("POST", Uri.parse("$HF_SPACE/upload"));
+        http.MultipartRequest req = http.MultipartRequest("POST", host.replace(path: "upload"));
         req.headers['Content-Type'] = 'multipart/form-data';
         req.files.add(http.MultipartFile.fromBytes("files", await file.readAsBytes(), filename: p.basename(file.path)));
         req.fields["format"] = "json";
@@ -19,7 +18,8 @@ abstract class HuggingFaceSpacesAutotagger extends ModelInterface {
     }
 
     Future<String> createEvent(List<dynamic> data) async {
-        final eventResponse = await lbHttp.post(Uri.parse("$HF_SPACE/call/$HF_PREDICT_ENDPOINT"), 
+        debugPrint(host.toString());
+        final eventResponse = await lbHttp.post(host.replace(path: "call/$GRADIO_PROCESS_ENDPOINT"), 
             headers: {"Content-Type": "application/json"},
             body: JsonEncoder().convert({
                 "data": data
@@ -31,7 +31,7 @@ abstract class HuggingFaceSpacesAutotagger extends ModelInterface {
     }
 
     Future<Map<String, dynamic>> returnEvent(String eventId) async {
-        final resultResponse = await lbHttp.get(Uri.parse("$HF_SPACE/call/$HF_PREDICT_ENDPOINT/$eventId"));
+        final resultResponse = await lbHttp.get(host.replace(path: "call/$GRADIO_PROCESS_ENDPOINT/$eventId"));
         
         final match = RegExp(r'event:\s*complete\s*[\r\n]+data:\s*(.*)').firstMatch(resultResponse.body);
         if(match == null) throw "Invalid response";
@@ -43,7 +43,7 @@ abstract class HuggingFaceSpacesAutotagger extends ModelInterface {
     }
 }
 
-mixin HuggingFaceWithConfidenceReturn on ModelInterface {
+mixin GradioWithConfidenceReturn on ModelInterface {
     AccuracyTagList convertConfidence(List<Map<String, dynamic>> resultWithConfidences) {
         AccuracyTagList returnedTags = {};
         for (final tag in resultWithConfidences) {
@@ -57,13 +57,13 @@ mixin HuggingFaceWithConfidenceReturn on ModelInterface {
     }
 }
 
-class JointTaggerProjectAutotagger extends HuggingFaceSpacesAutotagger with TagFilter, HuggingFaceWithConfidenceReturn {
+class JointTaggerProjectAutotagger extends GradioAutotagger with TagFilter, GradioWithConfidenceReturn {
   JointTaggerProjectAutotagger(super.file);
 
     @override
-    String get HF_SPACE => 'https://redrocket-jointtaggerproject-inference.hf.space';
+    Uri get DEFAULT_SERVER_HOST => Uri(scheme: "https", host: "jointtag.enzomtp.party"); // resources donated by enzomtpYT (https://github.com/enzomtpYT)
     @override
-    String get HF_PREDICT_ENDPOINT => 'run_classifier';
+    String get GRADIO_PROCESS_ENDPOINT => 'run_classifier';
 
     @override
     Future<AccuracyTagList> execute() async {
@@ -80,13 +80,13 @@ class JointTaggerProjectAutotagger extends HuggingFaceSpacesAutotagger with TagF
     }
 }
 
-class Z3DE621ConvnextAutotagger extends HuggingFaceSpacesAutotagger with TagFilter, HuggingFaceWithConfidenceReturn {
+class Z3DE621ConvnextAutotagger extends GradioAutotagger with TagFilter, GradioWithConfidenceReturn {
   Z3DE621ConvnextAutotagger(super.file);
 
     @override
-    String get HF_SPACE => 'https://fancyfeast-z3d-e621-convnext-space.hf.space';
+    Uri get DEFAULT_SERVER_HOST => Uri(scheme: "https", host: "z3d.enzomtp.party"); // resources donated by enzomtpYT (https://github.com/enzomtpYT)
     @override
-    String get HF_PREDICT_ENDPOINT => 'predict';
+    String get GRADIO_PROCESS_ENDPOINT => 'predict';
 
     @override
     Future<AccuracyTagList> execute() async {

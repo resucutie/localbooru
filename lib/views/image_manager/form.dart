@@ -13,7 +13,6 @@ import 'package:localbooru/views/image_manager/components/list_string_text_input
 import 'package:localbooru/api/preset/index.dart';
 import 'package:localbooru/views/image_manager/components/related_images.dart';
 import 'package:localbooru/views/image_manager/components/tagfield.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageManagerForm extends StatefulWidget {
     const ImageManagerForm({super.key, this.preset, required this.onChanged, this.onMultipleImagesAdded, this.onErrorUpdate, this.showRelatedImagesCard = true, this.updateNotifier});

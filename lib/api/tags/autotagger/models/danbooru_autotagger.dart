@@ -1,11 +1,14 @@
 part of tag_manager;
 
-class DanbooruAutotagger extends ModelInterface with TagFilter {
+class DanbooruAutotagger extends ModelInterface with TagFilter, CanCustomTaggingServer {
     DanbooruAutotagger(super.file);
 
     @override
+    Uri get DEFAULT_SERVER_HOST => Uri(host: "https://autotagger.donmai.us");
+
+    @override
     Future<AccuracyTagList> execute() async {
-        http.MultipartRequest req = http.MultipartRequest("POST", Uri.parse("https://autotagger.donmai.us/evaluate"));
+        http.MultipartRequest req = http.MultipartRequest("POST", host.replace(path: "evaluate"));
         req.headers['Content-Type'] = 'application/json; charset=UTF-8';
         req.files.add(http.MultipartFile.fromBytes("file", await file.readAsBytes(), filename: p.basename(file.path)));
         req.fields["format"] = "json";
