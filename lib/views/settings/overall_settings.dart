@@ -94,6 +94,7 @@ class _OverallSettingsState extends State<OverallSettings> {
         );
         if(choosenModel == null) return;
         widget.prefs.setString("autotag_model", choosenModel);
+        setState(() { });
     }
 
     Future<void> onChangeCounter() async {
@@ -209,7 +210,6 @@ class _OverallSettingsState extends State<OverallSettings> {
                     leading: const Icon(CupertinoIcons.sparkles),
                     subtitle: const Text("How accurate should be the results of the autotagger. We recommend 0.3 to avoid innacurate results"),
                     extremeTips: const [Text("Less accurate"), Text("More accurate")],
-                    //TODO: Make this slider go in an exponential curve
                     value: _autotagAccuracy,
                     min: 0,
                     max: 1,
@@ -222,9 +222,9 @@ class _OverallSettingsState extends State<OverallSettings> {
                 ListTile(
                     title: Row(
                         children: [
-                            const Text("Page size"),
-                            if(isSettingModified("page_size")) IconButton(
-                                onPressed: () => resetProp("page_size", modifier: (v) => _pageSizeController.text = v.toString()),
+                            const Text("Autotag AI model"),
+                            if(isSettingModified("autotag_model")) IconButton(
+                                onPressed: () => resetProp("autotag_model"),
                                 icon: const Icon(Icons.restart_alt)
                             )
                         ],

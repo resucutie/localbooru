@@ -4,7 +4,7 @@ class DanbooruAutotagger extends ModelInterface with TagFilter, CanCustomTagging
     DanbooruAutotagger(super.file);
 
     @override
-    Uri get DEFAULT_SERVER_HOST => Uri(host: "https://autotagger.donmai.us");
+    Uri get DEFAULT_SERVER_HOST => Uri(scheme: "https", host: "autotagger.donmai.us");
 
     @override
     Future<AccuracyTagList> execute() async {
