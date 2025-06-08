@@ -17,6 +17,7 @@ final Map<String, dynamic> settingsDefaults = {
     "counter": "squares",
     "auth_lock": false,
     "custom_frame": false,
+    "tag_vertical" : false,
 };
 
 const Map<String, dynamic> defaultFileInfoJson = {

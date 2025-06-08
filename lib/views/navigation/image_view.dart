@@ -19,6 +19,7 @@ import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageViewShell extends StatelessWidget {
     const ImageViewShell({super.key, required this.image, required this.child, this.shouldShowImageOnPortrait = false, this.collections});
@@ -206,11 +207,24 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
 
     late RenderObject ro;
 
+    late Axis tagAxis;
+
     @override
     void initState() {
         super.initState();
         WidgetsBinding.instance.addPostFrameCallback((_) {
             ro = context.findRenderObject()!;
+        });
+        tagVertical();
+    }
+
+    void tagVertical(){
+        SharedPreferences.getInstance().then((prefs) {
+            bool? vertical = prefs.getBool("tag_vertical");
+            if(vertical == true) 
+                tagAxis = Axis.vertical;
+            else 
+                tagAxis =  Axis.horizontal;
         });
     }
 
@@ -262,7 +276,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                 ),
                                             ),
                                             Wrap(
-                                              direction: Axis.vertical,
+                                              direction: tagAxis,
                                               children: List.from(tags["artist"]!..sort()).map((e) {
                                                 return TagPill(e, color: SpecificTagsColors.artist, renderObject: ro, onTap: () => context.push("/search/?tag=$e"),);
                                             }).toList())
@@ -296,7 +310,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                 ),
                                             ),
                                             Wrap(
-                                              direction: Axis.vertical,
+                                              direction: tagAxis,
                                               children: List.from(tags["copyright"]!..sort()).map((e) {
                                                 return TagPill(e, color: SpecificTagsColors.copyright, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
@@ -314,7 +328,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                 ),
                                             ),
                                             Wrap(
-                                              direction: Axis.vertical,
+                                              direction: tagAxis,
                                               children: List.from(tags["species"]!..sort()).map((e) {
                                                 return TagPill(e, color: SpecificTagsColors.species, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
@@ -331,7 +345,7 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                             ),
                                         ),
                                         Wrap(
-                                          direction: Axis.vertical,
+                                          direction: tagAxis,
                                           children: List.from(tags["generic"]!..sort()).map((e) {
                                             return TagPill(e, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                         }).toList())

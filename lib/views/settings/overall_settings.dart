@@ -37,6 +37,7 @@ class _OverallSettingsState extends State<OverallSettings> {
     late bool _customFrame;
     late String _theme;
     late String _counter;
+    late bool _tagVertical;
 
     bool isAuthLockOptionEnabled = false;
 
@@ -65,6 +66,7 @@ class _OverallSettingsState extends State<OverallSettings> {
         _counter = widget.prefs.getString("counter") ?? settingsDefaults["counter"];
         _authLock = widget.prefs.getBool("auth_lock") ?? settingsDefaults["auth_lock"];
         _customFrame = widget.prefs.getBool("custom_frame") ?? settingsDefaults["custom_frame"];
+        _tagVertical = widget.prefs.getBool("tag_vertical") ?? settingsDefaults["tag_vertical"];
 
         LocalAuthentication().isDeviceSupported().then((value) => setState(() {
             isAuthLockOptionEnabled = value && isMobile();
@@ -204,7 +206,17 @@ class _OverallSettingsState extends State<OverallSettings> {
                         widget.prefs.setDouble("autotag_accuracy", value);
                     },
                 ),
-                
+                SwitchListTile(
+                    title: const Text("Tags vertical"),
+                    secondary: const Icon(Icons.reorder),
+                    subtitle: const Text("Put the tags in a vertical position"),
+                    value: _tagVertical,
+                    onChanged: (value) {
+                        widget.prefs.setBool("tag_vertical", value);
+                        setState(() => _tagVertical = value);
+                    }
+                ),
+
                 const SmallHeader("Appearence"),
                 ListTile(
                     title: const Text("Theme"),
