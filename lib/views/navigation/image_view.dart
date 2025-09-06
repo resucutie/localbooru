@@ -293,7 +293,9 @@ class _ImageViewProprietiesState extends State<ImageViewProprieties> {
                                                     ],
                                                 ),
                                             ),
-                                            Wrap(children: List.from(tags["character"]!..sort()).map((e) {
+                                            Wrap(
+                                              direction: tagAxis,
+                                              children: List.from(tags["character"]!..sort()).map((e) {
                                                 return TagPill(e, color: SpecificTagsColors.character, renderObject: ro, onTap: () => context.push("/search/?tag=$e"));
                                             }).toList())
                                         ],
