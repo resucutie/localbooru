@@ -85,44 +85,9 @@ jobs:
           name: localbooru-macos
           path: build/macos/Build/Products/*/LocalBooru.app
 
-  build-android:
-    runs-on: ubuntu-latest
-    environment: Production
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: 17
-      - name: Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version: '3.27.3'
-      - name: Install project dependencies
-        run: flutter pub get
-      - name: Build artifacts
-        run: flutter build apk --release
-      - name: Sign APK
-        uses: ilharp/sign-android-release@v1
-        id: sign_app
-        with:
-          releaseDir: build/app/outputs/apk/release
-          signingKey: ${{ secrets.KEYSTORE_FILE_BASE64 }}
-          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          keyAlias: ${{ secrets.KEYSTORE_KEY_ALIAS }}
-          keyPassword: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
-          buildToolsVersion: 35.0.0
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: localbooru-android
-          path: ${{steps.sign_app.outputs.signedFile}}
-  
   package:
     runs-on: ubuntu-latest
-    needs: [build-android, build-windows, build-linux]
+    needs: [build-windows, build-linux]
     steps:
       - uses: actions/download-artifact@v4
       - name: Create folder
@@ -144,7 +109,6 @@ jobs:
       #     dest: build/localbooru-macos.zip
       - name: Rename files
         run: |
-          mv localbooru-android/app-release-signed.apk build/localbooru-android.apk
           mv localbooru-linux-distro-specific-packages/*/localbooru-*-linux.deb build/localbooru-linux.deb
           mv localbooru-linux-distro-specific-packages/*/localbooru-*-linux.rpm build/localbooru-linux.rpm
           mv localbooru-windows-setup/*/localbooru-*-windows-setup.exe build/localbooru-windows-setup.exe
