@@ -67,6 +67,7 @@ class _SearchTagBoxState extends State<SearchTagBox> {
     Widget build(BuildContext context) {
         return SearchAnchor(
             searchController: _controller,
+            viewOnSubmitted: widget.onSearch,
             builder: (context, controller) => SearchBar(
                 controller: controller,
                 hintText: widget.hint,

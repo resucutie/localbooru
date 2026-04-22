@@ -1,3 +1,4 @@
 {
-    "editor.detectIndentation": false
+    "editor.detectIndentation": false,
+    "cmake.sourceDirectory": "D:/Учёба/Программирование/Тренировка/localbooru/linux"
 }
