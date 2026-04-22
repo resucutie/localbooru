@@ -69,11 +69,12 @@ Future<bool> checkIfFileRespectsTag({required Map file, required Tag tag}) async
                 return false;
         }
     } else {
-        return file["tags"].toLowerCase().contains(_spaceMatch((tag as NormalTag).text));
+        final searchTag = (tag as NormalTag).text.toLowerCase();
+        final fileTags = file["tags"]
+            .toString()
+            .split(" ")
+            .where((tag) => tag.isNotEmpty)
+            .map((tag) => tag.toLowerCase());
+        return fileTags.contains(searchTag);
     }
-}
-
-//this was made so that it wouldn't ignore if there was a space on the tag that was being searched for
-RegExp _spaceMatch(String match) {
-    return RegExp(r"(?<!\\)" + RegExp.escape(match) + r"(?=\W|$)", caseSensitive: false);
 }
