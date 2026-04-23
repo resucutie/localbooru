@@ -21,6 +21,7 @@ class _TagFieldState extends State<TagField> {
     final FocusNode _focusNode = FocusNode();
     late TextEditingController controller;
     GlobalKey textboxKey = GlobalKey();
+    String _lastTypedText = "";
 
     List<BooruTagCounterDisplay<NormalTag>> allTags = [];
 
@@ -28,7 +29,15 @@ class _TagFieldState extends State<TagField> {
     void initState() {
         super.initState();
         controller = widget.controller ?? TextEditingController();
+        _lastTypedText = controller.text;
         cacheTags();
+    }
+
+    @override
+    void dispose() {
+        _focusNode.dispose();
+        if(widget.controller == null) controller.dispose();
+        super.dispose();
     }
 
     Future<void> cacheTags() async {
@@ -44,6 +53,29 @@ class _TagFieldState extends State<TagField> {
         return textboxPosY <= (MediaQuery.of(context).size.height / 2);
     }
 
+    String _buildCompletedText(String selectedTag, [String? sourceText]) {
+        final currentText = sourceText ?? controller.text;
+        final tagList = currentText.split(" ");
+        if(tagList.isEmpty) return "$selectedTag ";
+
+        final restOfList = List<String>.from(tagList)..removeLast();
+        final completedTags = [
+            ...restOfList.where((tag) => tag.isNotEmpty),
+            selectedTag,
+        ];
+        return "${completedTags.join(" ")} ";
+    }
+
+    void _applyAutocompleteOption(BooruTagCounterDisplay<NormalTag> option) {
+        final completedText = _buildCompletedText(option.tag.text, _lastTypedText);
+        controller.value = TextEditingValue(
+            text: completedText,
+            selection: TextSelection.collapsed(offset: completedText.length),
+        );
+        _lastTypedText = completedText;
+        widget.onChanged?.call(completedText);
+    }
+
     @override
     Widget build(context) {
         return LayoutBuilder(
@@ -52,6 +84,7 @@ class _TagFieldState extends State<TagField> {
                     textEditingController: controller,
                     focusNode: _focusNode,
                     optionsBuilder: (textEditingValue) async {
+                        _lastTypedText = textEditingValue.text;
                         if (textEditingValue.text == '') {
                             return const Iterable<BooruTagCounterDisplay<NormalTag>>.empty();
                         } else {
@@ -70,6 +103,7 @@ class _TagFieldState extends State<TagField> {
                             return matches;
                         }
                     },
+                    onSelected: _applyAutocompleteOption,
                     optionsViewBuilder: (context, onSelected, options) {
                         return Align(
                             alignment: spawnAtBottom() ? Alignment.topLeft : Alignment.bottomLeft,
@@ -109,22 +143,31 @@ class _TagFieldState extends State<TagField> {
                     displayStringForOption: (option) => "${option.tag.text} ",
                     optionsViewOpenDirection: spawnAtBottom() ? OptionsViewOpenDirection.down : OptionsViewOpenDirection.up,
                     fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
-                        return TextFormField(
-                            key: textboxKey,
-                            controller: textController,
-                            focusNode: focusNode,
-                            decoration: widget.decoration,
-                            keyboardType: TextInputType.text,
-                            minLines: 1,
-                            maxLines: 6,
-                            inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\n')),],
-                            validator: widget.validator,
-                            style: widget.style,
-                            onFieldSubmitted: (value) {
-                                debugPrint(value);
-                                onFieldSubmitted();
+                        return Shortcuts(
+                            shortcuts: const <ShortcutActivator, Intent>{
+                                SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(SelectionChangedCause.keyboard),
+                                SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(SelectionChangedCause.keyboard),
                             },
-                            onChanged: widget.onChanged,
+                            child: TextFormField(
+                                key: textboxKey,
+                                controller: textController,
+                                focusNode: focusNode,
+                                decoration: widget.decoration,
+                                keyboardType: TextInputType.text,
+                                minLines: 1,
+                                maxLines: 6,
+                                inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\n')),],
+                                validator: widget.validator,
+                                style: widget.style,
+                                onFieldSubmitted: (value) {
+                                    debugPrint(value);
+                                    onFieldSubmitted();
+                                },
+                                onChanged: (value) {
+                                    _lastTypedText = value;
+                                    widget.onChanged?.call(value);
+                                },
+                            ),
                         );
                     },
                 );
