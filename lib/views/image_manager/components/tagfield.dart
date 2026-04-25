@@ -145,7 +145,7 @@ class _TagFieldState extends State<TagField> {
                     fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
                         return Shortcuts(
                             shortcuts: const <ShortcutActivator, Intent>{
-                                SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent(SelectionChangedCause.keyboard),
+                                SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
                                 SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(SelectionChangedCause.keyboard),
                             },
                             child: TextFormField(
