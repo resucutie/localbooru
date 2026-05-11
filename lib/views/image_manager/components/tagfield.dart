@@ -140,34 +140,28 @@ class _TagFieldState extends State<TagField> {
                             ),
                         );
                     },
-                    displayStringForOption: (option) => "${option.tag.text} ",
+                    displayStringForOption: (_) => _lastTypedText,
                     optionsViewOpenDirection: spawnAtBottom() ? OptionsViewOpenDirection.down : OptionsViewOpenDirection.up,
                     fieldViewBuilder: (context, textController, focusNode, onFieldSubmitted) {
-                        return Shortcuts(
-                            shortcuts: const <ShortcutActivator, Intent>{
-                                SingleActivator(LogicalKeyboardKey.keyC, control: true): CopySelectionTextIntent.copy,
-                                SingleActivator(LogicalKeyboardKey.keyV, control: true): PasteTextIntent(SelectionChangedCause.keyboard),
+                        return TextFormField(
+                            key: textboxKey,
+                            controller: textController,
+                            focusNode: focusNode,
+                            decoration: widget.decoration,
+                            keyboardType: TextInputType.text,
+                            minLines: 1,
+                            maxLines: 6,
+                            inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\n')),],
+                            validator: widget.validator,
+                            style: widget.style,
+                            onFieldSubmitted: (value) {
+                                debugPrint(value);
+                                onFieldSubmitted();
                             },
-                            child: TextFormField(
-                                key: textboxKey,
-                                controller: textController,
-                                focusNode: focusNode,
-                                decoration: widget.decoration,
-                                keyboardType: TextInputType.text,
-                                minLines: 1,
-                                maxLines: 6,
-                                inputFormatters: [FilteringTextInputFormatter.deny(RegExp(r'\n')),],
-                                validator: widget.validator,
-                                style: widget.style,
-                                onFieldSubmitted: (value) {
-                                    debugPrint(value);
-                                    onFieldSubmitted();
-                                },
-                                onChanged: (value) {
-                                    _lastTypedText = value;
-                                    widget.onChanged?.call(value);
-                                },
-                            ),
+                            onChanged: (value) {
+                                _lastTypedText = value;
+                                widget.onChanged?.call(value);
+                            },
                         );
                     },
                 );
